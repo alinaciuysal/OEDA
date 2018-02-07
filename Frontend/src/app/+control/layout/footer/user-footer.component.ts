@@ -14,7 +14,7 @@ export class UserFooterComponent implements OnInit {
   value: string;
 
   ngOnInit() {
-    this.sessionExpires = this.user.sessionExpiresDate()
+    this.sessionExpires = this.user.sessionExpiresDate();
     this.value = this.user.getAuthToken().map(t => t.value).getOrElse(() => "")
   }
 

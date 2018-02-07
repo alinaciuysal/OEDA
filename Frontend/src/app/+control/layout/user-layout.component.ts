@@ -1,6 +1,5 @@
 import {Component} from '@angular/core';
 import {JWTToken, UserService} from "../../shared/modules/auth/user.service";
-import {LayoutService} from "../../shared/modules/helper/layout.service";
 
 @Component({
   selector: 'user-layout',

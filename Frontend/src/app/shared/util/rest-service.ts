@@ -40,8 +40,8 @@ export class RESTService {
       .map((res: Response) => res.json())
       .catch((error: any) => {
         // @todo add reroute if login failed
-        this.notify.error("Server Error", "Action did not work")
-        this.log.error("GET@" + url, error)
+        this.notify.error("Server Error", "Action did not work");
+        this.log.error("GET@" + url, error);
         return Observable.throw(error || 'Server error')
       })
   }
@@ -52,9 +52,9 @@ export class RESTService {
       .map((res: Response) => Try(() => res.json()).getOrElse(() => {
       }))
       .catch((error: any) => {
-        this.notify.error("Server Error", "Action did not work")
-        error.object = object // add post object to error
-        this.log.error("POST@" + url, error)
+        this.notify.error("Server Error", "Action did not work");
+        error.object = object; // add post object to error
+        this.log.error("POST@" + url, error);
         return Observable.throw(error || 'Server error')
       })
   }
@@ -62,9 +62,9 @@ export class RESTService {
   public doPUTRequest<T>(url: string, object: any): Observable<T> {
     return this.authHttp.put(this.baseURL + url, this.createCleanJSON(object), this.requestOptions)
       .catch((error: any) => {
-        this.notify.error("Server Error", "Action did not work")
-        error.object = object // add post object to error
-        this.log.error("PUT@" + url, error)
+        this.notify.error("Server Error", "Action did not work");
+        error.object = object; // add post object to error
+        this.log.error("PUT@" + url, error);
         return Observable.throw(error || 'Server error')
       })
   }

@@ -1,11 +1,11 @@
-import {Component, Injectable, OnInit, ElementRef} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {LayoutService} from "../../../shared/modules/helper/layout.service";
 import {TempStorageService} from "../../../shared/modules/helper/temp-storage-service";
 import {OEDAApiService, Target} from "../../../shared/modules/api/oeda-api.service";
 import {ActivatedRoute, Params, Router} from "@angular/router";
 import {UUID} from "angular2-uuid";
 import {NotificationsService} from "angular2-notifications/dist";
-import * as _ from "lodash";
+import * as _ from "lodash.clonedeep";
 import {isNullOrUndefined} from "util";
 
 @Component({
@@ -41,7 +41,7 @@ export class EditTargetsComponent implements OnInit {
         this.api.loadTargetById(params['id']).subscribe(
           (data) => {
             this.target = data;
-            this.originalTarget = _.cloneDeep(this.target);
+            this.originalTarget = _(this.target);
             this.assureObjectContract();
           }
         )
@@ -49,7 +49,7 @@ export class EditTargetsComponent implements OnInit {
         ctrl.pageTitle = "Create Target System";
         ctrl.saveButtonLabel = "Save Target System";
         this.target = this.createTarget();
-        this.originalTarget = _.cloneDeep(this.target);
+        this.originalTarget = _(this.target);
 
         // retrieve config json object via the api provided at localhost:5000/api/config/crowdnav
         this.api.getConfigFromAPI("/crowdnav").subscribe((config) => {
@@ -367,18 +367,7 @@ export class EditTargetsComponent implements OnInit {
   }
 
   revertChanges() {
-    this.target = _.cloneDeep(this.originalTarget)
-  }
-
-  traverse_json_object(o) {
-    const type = typeof o;
-    if (type === "object") {
-      for (const key in o) {
-        this.traverse_json_object(o[key]);
-      }
-    } else {
-      console.log(o);
-    }
+    this.target = _(this.originalTarget);
   }
 
   configDropdownChanged(selected_configuration_name: any) {

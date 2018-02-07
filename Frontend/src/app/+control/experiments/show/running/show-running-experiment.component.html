@@ -292,7 +292,7 @@
               <div class="col-md-3">
                 <div class="card-title">
                   <select class="form-control" (change)="incoming_data_type_changed($event.target.value)">
-                    <option *ngFor="let i of targetSystem.incomingDataTypes" [ngValue]="i.name" [disabled]="is_data_type_disabled(i)">
+                    <option *ngFor="let i of targetSystem.incomingDataTypes" [ngValue]="i" [disabled]="is_data_type_disabled(i.name)">
                       {{i.name}}
                     </option>
                   </select>

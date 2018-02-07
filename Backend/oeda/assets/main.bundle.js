@@ -20,8 +20,8 @@ function webpackAsyncContext(req) {
 	return __webpack_require__.e(ids[1]).then(function() {
 		return __webpack_require__(ids[0]);
 	});
-};
-webpackAsyncContext.keys = function webpackAsyncContextKeys() {
+}
+        webpackAsyncContext.keys = function webpackAsyncContextKeys() {
 	return Object.keys(map);
 };
 webpackAsyncContext.id = "../../../../../src/$$_gendir lazy recursive";
@@ -1585,14 +1585,14 @@ var map = {
 };
 function webpackContext(req) {
 	return __webpack_require__(webpackContextResolve(req));
-};
-function webpackContextResolve(req) {
+}
+        function webpackContextResolve(req) {
 	var id = map[req];
 	if(!(id + 1)) // check for number or string
 		throw new Error("Cannot find module '" + req + "'.");
 	return id;
-};
-webpackContext.keys = function webpackContextKeys() {
+}
+        webpackContext.keys = function webpackContextKeys() {
 	return Object.keys(map);
 };
 webpackContext.resolve = webpackContextResolve;

@@ -1,11 +1,11 @@
-import {OnInit, Component, EventEmitter} from "@angular/core";
+import {OnInit, Component} from "@angular/core";
 import {NotificationsService} from "angular2-notifications";
-import {ActivatedRoute, Router} from "@angular/router";
+import {Router} from "@angular/router";
 import {LayoutService} from "../../../shared/modules/helper/layout.service";
 import {OEDAApiService, Experiment, Target, ExecutionStrategy} from "../../../shared/modules/api/oeda-api.service";
 import * as _ from "lodash.clonedeep";
 import {UUID} from "angular2-uuid";
-import {isNullOrUndefined, isNumber} from "util";
+import {isNullOrUndefined} from "util";
 import {TempStorageService} from "../../../shared/modules/helper/temp-storage-service";
 
 

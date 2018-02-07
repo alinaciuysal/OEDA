@@ -313,7 +313,7 @@ module.exports = function(list, options) {
 			}
 		}
 	};
-}
+};
 
 function addStylesToDom(styles, options) {
 	for(var i = 0; i < styles.length; i++) {

@@ -5,7 +5,7 @@ import {NotificationsService} from "angular2-notifications";
 @Injectable()
 export class CustomErrorHandler implements ErrorHandler {
 
-  constructor(private log: LoggerService, private notify: NotificationsService) {
+  constructor(private log: LoggerService) {
   }
 
   // handles exceptions in angular2 and forwards them to eventq

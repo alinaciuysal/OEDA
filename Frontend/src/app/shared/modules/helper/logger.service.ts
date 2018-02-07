@@ -8,12 +8,12 @@ export class LoggerService {
   /** the current log level defined by the environment */
   level = environment.logLevel;
 
-  OFF = 0
-  ERROR = 1
-  WARN = 2
-  INFO = 3
-  DEBUG = 4
-  LOG = 5
+  OFF = 0;
+  ERROR = 1;
+  WARN = 2;
+  INFO = 3;
+  DEBUG = 4;
+  LOG = 5;
 
   isErrorEnabled = () => this.level >= this.ERROR;
   isWarnEnabled = () => this.level >= this.WARN;

@@ -1,4 +1,4 @@
-import {Component, Injectable, AfterViewInit} from '@angular/core';
+import {Component} from '@angular/core';
 import {NotificationsService} from "angular2-notifications";
 import {LayoutService} from "../../shared/modules/helper/layout.service";
 import {OEDAApiService} from "../../shared/modules/api/oeda-api.service";
@@ -30,7 +30,7 @@ export class ExperimentsComponent {
     if (!ctrl.is_db_configured ) {
         return;
     }
-    activatedRoute.params.subscribe(Event => {
+    activatedRoute.params.subscribe(() => {
       ctrl.fetch_experiments();
     });
   }

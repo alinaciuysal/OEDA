@@ -1,5 +1,4 @@
 import {Component, ViewContainerRef} from '@angular/core';
-import {environment} from "../environments/environment";
 import {NotificationsService} from "angular2-notifications/dist";
 
 
@@ -29,7 +28,7 @@ export class AppComponent {
 
   private viewContainerRef: ViewContainerRef;
 
-  public constructor(viewContainerRef: ViewContainerRef, notifiy: NotificationsService) {
+  public constructor(viewContainerRef: ViewContainerRef) {
     this.viewContainerRef = viewContainerRef;
   }
 }

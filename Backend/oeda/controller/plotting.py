@@ -16,7 +16,7 @@ class QQPlotController(Resource):
 
     availableScales = ["normal", "log"]
 
-    def get(self, experiment_id, stage_no, distribution, scale):
+    def get(self, experiment_id, stage_no, distribution, scale, incoming_data_type_name):
         try:
             if str(scale).lower() not in self.availableScales:
                 return {"error": "Provided scale is not supported"}, 404
@@ -32,13 +32,13 @@ class QQPlotController(Resource):
                     if len(entity['values']) == 0:
                         pass
                     for data_point in entity['values']:
-                        pts.append(data_point["payload"]["overhead"])
+                        pts.append(data_point["payload"][incoming_data_type_name])
             else:
                 data_points = db().get_data_points(experiment_id=experiment_id, stage_no=stage_no)
                 if data_points is None:
                     return {"error": "Data points cannot be retrieved for given experiment and/or stage"}, 404
                 for data_point in data_points:
-                    pts.append(data_point["payload"]["overhead"])
+                    pts.append(data_point["payload"][incoming_data_type_name])
 
             # create the qq plot based on the retrieved data against normal distribution
             array = np.asarray(pts)

@@ -148,7 +148,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
 
                     // polling using Timer (2 sec interval) for real-time data visualization
                     this.timer = Observable.timer(1000, 2000);
-                    this.subscription = this.timer.subscribe(t => {
+                    this.subscription = this.timer.subscribe(() => {
                       this.fetch_oeda_callback();
                     });
 
@@ -219,6 +219,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
               // TODO: after re-factoring, i.e. when we switch to using entityService.process_response_for_running_experiment, time to validate scatter plot data 8-times larger than this old version.
               // let is_successful_fetch = ctrl.entityService.process_response_for_running_experiment(response, ctrl.all_data, ctrl.first_render_of_page, ctrl.available_stages, ctrl.available_stages_for_qq_js, ctrl.timestamp);
               let is_successful_fetch = ctrl.process_response(response);
+              this.set_candidate_data_type();
               if (is_successful_fetch) {
                 ctrl.first_render_of_page = false;
                 ctrl.draw_all_plots();
@@ -230,7 +231,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
             }
             ctrl.apiService.loadAllDataPointsOfRunningExperiment(ctrl.experiment_id, ctrl.timestamp).subscribe(response => {
               ctrl.process_response(response);
-              // ctrl.entityService.process_response_for_running_experiment(response, ctrl.all_data, ctrl.first_render_of_page, ctrl.available_stages, ctrl.available_stages_for_qq_js, ctrl.timestamp);
+              this.set_candidate_data_type();
               ctrl.draw_all_plots();
             });
           }
@@ -255,7 +256,6 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
       ctrl.notify.error("Error", "Cannot retrieve data from DB, please try again");
       return;
     }
-    console.log("response process_response", response);
     if (ctrl.first_render_of_page) {
       // we can retrieve one or more stages at first render
       for (let index in response) {
@@ -266,17 +266,6 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
           new_entity.number = parsed_json_object['number'];
           new_entity.values = parsed_json_object['values'];
           new_entity.knobs = parsed_json_object['knobs'];
-          // we retrieve stages and data points in following format
-          // e.g. [ 0: {number: 1, values: ..., knobs: [...]}, 1: {number: 2, values: ..., knobs: [...] }...]
-          // tries to set the initially-selected incoming data type name by looking at the payload
-          for (let j = 0; j < this.targetSystem.incomingDataTypes.length; j++) {
-            const candidate_incoming_data_type_name = this.targetSystem.incomingDataTypes[j]["name"].toString();
-            // TODO: refactor using is_data_type_disabled fcn
-            if (new_entity.values[0]["payload"].hasOwnProperty(candidate_incoming_data_type_name)) {
-              this.incoming_data_type_name = candidate_incoming_data_type_name;
-              break;
-            }
-          }
 
           if (new_entity.values.length != 0) {
             ctrl.all_data.push(new_entity);
@@ -394,7 +383,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
   /** called when scale dropdown (Normal, Log) in main page is changed */
   scale_changed(scale: string) {
     this.scale = scale;
-    this.stage_changed();
+    this.draw_all_plots();
   }
 
   /** called when incoming data type of the target system is changed */
@@ -402,6 +391,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     if (!this.is_data_type_disabled(i)) {
       // set incoming_data_type name, so that subsequent polls would draw different plots for different data types
       this.incoming_data_type_name = i;
+      this.draw_all_plots();
     }
   }
 
@@ -410,17 +400,13 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
       so, it's reasonable to only look for the first entity (stage) in the controller's data structure to determine
       if we should disable selection of data type or not.
    */
-  is_data_type_disabled(incoming_data_type): boolean {
+  is_data_type_disabled(incoming_data_type_name): boolean {
     const first_stage = this.all_data[0];
     if (first_stage !== undefined) {
       if (first_stage.hasOwnProperty("values")) {
         const first_tuple = first_stage.values;
         const first_payload = first_tuple[0]["payload"];
-        if (first_payload.hasOwnProperty(incoming_data_type.name)) {
-          return false;
-        } else {
-          return true;
-        }
+        return !first_payload.hasOwnProperty(incoming_data_type_name);
       }
     }
     return true;
@@ -447,7 +433,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     document.getElementById("polling_off_button").setAttribute('class', 'btn btn-default');
     document.getElementById("polling_off_button").removeAttribute('disabled');
 
-    this.subscription = this.timer.subscribe(t => {
+    this.subscription = this.timer.subscribe(() => {
       this.fetch_oeda_callback();
     });
     this.notify.success("Success", "Polling enabled");
@@ -463,9 +449,9 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
   stopRunningExperiment(): void {
     alert("Do you really want to stop the running experiment?");
     this.experiment.status = "INTERRUPTED";
-    this.apiService.updateExperiment(this.experiment).subscribe(response => {
+    this.apiService.updateExperiment(this.experiment).subscribe(() => {
       this.targetSystem.status = "READY";
-      this.apiService.updateTarget(this.targetSystem).subscribe(response2 => {
+      this.apiService.updateTarget(this.targetSystem).subscribe(() => {
         this.subscription.unsubscribe();
         // set temp_storage so that experiments page will reflect the new status of it
         this.temp_storage.setNewValue(this.experiment);
@@ -480,6 +466,25 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     }, errorResp => {
       this.notify.error("Error", errorResp.message);
     });
+  }
+
+  /** tries to set the initially-selected incoming data type name by looking at the payload
+   *  we retrieve stages and data points in following format
+   *  e.g. [ 0: {number: 1, values: ..., knobs: [...]}, 1: {number: 2, values: ..., knobs: [...] }...]
+   *  this method should be called after checking whether it's the first render of page or not.
+   *  because, if it's not the first time, then user's selection of incoming data type (via dropdown UI) is important
+   *  but: before plotting, we must ensure that a proper & valid incoming data type is selected
+   */
+  private set_candidate_data_type(): void {
+    if(!this.incoming_data_type_name) {
+      for (let j = 0; j < this.targetSystem.incomingDataTypes.length; j++) {
+        const candidate_incoming_data_type_name = this.targetSystem.incomingDataTypes[j]["name"];
+        if (!this.is_data_type_disabled(candidate_incoming_data_type_name)) {
+          this.incoming_data_type_name = candidate_incoming_data_type_name;
+          break;
+        }
+      }
+    }
   }
 
   // helper function that filters out data above the given threshold

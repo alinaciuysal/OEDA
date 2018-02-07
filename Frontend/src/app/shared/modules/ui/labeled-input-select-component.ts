@@ -1,4 +1,4 @@
-import {OnInit, Component, Input, Output, EventEmitter} from "@angular/core";
+import {Component, Input, Output, EventEmitter} from "@angular/core";
 
 @Component({
   selector: 'labeled-input-select',
@@ -19,12 +19,12 @@ export class LabeledInputSelectComponent {
 
   @Input() onModelChange = (ev) => {
     this.modelChanged.emit(ev)
-  }
+  };
   @Output() modelChanged = new EventEmitter();
-  @Input() info = null
-  @Input() colSize = 6
-  @Input() name: any
-  @Input() model: any
-  @Input() key: string
+  @Input() info = null;
+  @Input() colSize = 6;
+  @Input() name: any;
+  @Input() model: any;
+  @Input() key: string;
   @Input() options = []
 }

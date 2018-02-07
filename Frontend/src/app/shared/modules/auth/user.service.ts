@@ -2,12 +2,11 @@ import {Injectable} from '@angular/core';
 import {Observable} from "rxjs/Rx";
 import {Http, Headers, Response} from "@angular/http";
 import {LoggerService} from "../helper/logger.service";
-import {JwtHelper, AuthHttp} from "angular2-jwt";
+import {JwtHelper} from "angular2-jwt";
 import {Router} from "@angular/router";
 import {Try, Option, None, Some} from "monapt";
 import {environment} from "../../../../environments/environment";
 import {NotificationsService} from "angular2-notifications/dist";
-import {RESTService} from "../../util/rest-service";
 
 @Injectable()
 export class UserService {
@@ -32,12 +31,10 @@ export class UserService {
   /** true if db is configured properly */
   is_db_configured(): any {
     const user_token_value = this.getAuthToken()["value"].user.db_configuration;
-    if (user_token_value.hasOwnProperty("host") &&
-            user_token_value.hasOwnProperty("port") &&
-            user_token_value.hasOwnProperty("type")) {
-      return true;
-    }
-    return false;
+    return user_token_value.hasOwnProperty("host") &&
+      user_token_value.hasOwnProperty("port") &&
+      user_token_value.hasOwnProperty("type");
+
   }
 
   tryTokenRenewal(): Observable<boolean> {

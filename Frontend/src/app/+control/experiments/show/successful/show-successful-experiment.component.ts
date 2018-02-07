@@ -1,4 +1,4 @@
-import {Component, OnInit, OnDestroy} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {NotificationsService} from "angular2-notifications";
 import {LayoutService} from "../../../../shared/modules/helper/layout.service";
@@ -63,7 +63,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     this.is_enough_data_for_plots = false;
     this.is_collapsed = true;
     this.first_render_of_page = true;
-    this.all_data = new Array<Entity>();
+    this.all_data = [];
     this.scale = "Normal";
 
     this.distribution = "Norm";
@@ -114,7 +114,6 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
                       this.available_stages.push(stages[j]);
                     }
                     stages.sort(this.entityService.sort_by('number', true, parseInt));
-                    console.log("avail", this.available_stages);
                     // prepare available stages for qq js that does not include all stages
                     this.available_stages_for_qq_js = this.available_stages.slice(1);
                     this.dataAvailable = true;
@@ -139,15 +138,6 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     const ctrl = this;
 
     if (stage_object !== undefined && stage_object.length !== 0) {
-      // before drawing plots, it tries to set the initially-selected incoming data type name by looking at the payload
-      for (let j = 0; j < ctrl.targetSystem.incomingDataTypes.length; j++) {
-        const candidate_incoming_data_type_name = this.targetSystem.incomingDataTypes[j]["name"].toString();
-        // TODO: refactor using is_data_type_disabled fcn
-        if (JSON.parse(this.all_data[0].toString()).values[0]["payload"].hasOwnProperty(candidate_incoming_data_type_name)) {
-          this.incoming_data_type_name = candidate_incoming_data_type_name;
-          break;
-        }
-      }
 
       // draw graphs for all_data
       if (ctrl.selected_stage.number === -1) {
@@ -242,13 +232,24 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
   /** called when theoretical distribution in QQ Plot's dropdown is changed */
   selectDistributionAndDrawQQPlot(distName) {
     this.distribution = distName;
-    this.plotService.retrieve_qq_plot_image(this.experiment_id, this.selected_stage, this.distribution, this.scale).subscribe(response => {
+    this.plotService.retrieve_qq_plot_image(this.experiment_id, this.selected_stage, this.distribution, this.scale, this.incoming_data_type_name).subscribe(response => {
       const imageSrc = 'data:image/jpg;base64,' + response;
       document.getElementById("qqPlot").setAttribute('src', imageSrc);
       this.is_qq_plot_rendered = true;
     }, err => {
       this.notify.error("Error", err.message);
     });
+  }
+
+  /** tries to set the initially-selected incoming data type name by looking at the payload */
+  private set_candidate_data_type(): void {
+    for (let j = 0; j < this.targetSystem.incomingDataTypes.length; j++) {
+      const candidate_incoming_data_type_name = this.targetSystem.incomingDataTypes[j]["name"].toString();
+      if (!this.is_data_type_disabled(candidate_incoming_data_type_name)) {
+        this.incoming_data_type_name = candidate_incoming_data_type_name;
+        break;
+      }
+    }
   }
 
   /** retrieves all_data from server */
@@ -261,6 +262,11 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
           return;
         }
         this.all_data = ctrl.entityService.process_response_for_successful_experiment(this.all_data, data);
+        if(this.first_render_of_page) {
+          this.set_candidate_data_type();
+          this.first_render_of_page = false;
+        }
+
         this.draw_all_plots(this.all_data);
       }
     );
@@ -280,18 +286,14 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
    so, it's reasonable to only look for the first entity (stage) in the controller's data structure to determine
    if we should disable selection of data type or not.
    */
-  is_data_type_disabled(incoming_data_type): boolean {
+  is_data_type_disabled(incoming_data_type_name): boolean {
     let first_stage = this.all_data[0];
     if (first_stage !== undefined) {
       first_stage = JSON.parse(first_stage.toString());
       if (first_stage.hasOwnProperty("values")) {
         const first_tuple = first_stage.values;
         const first_payload = first_tuple[0]["payload"];
-        if (first_payload.hasOwnProperty(incoming_data_type.name)) {
-          return false;
-        } else {
-          return true;
-        }
+        return !first_payload.hasOwnProperty(incoming_data_type_name);
       }
     }
     return true;

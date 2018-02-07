@@ -1,7 +1,7 @@
-import {NgModule, ModuleWithProviders, ErrorHandler, Injectable, Injector} from "@angular/core";
+import {NgModule, ModuleWithProviders, ErrorHandler, Injector} from "@angular/core";
 import {FormsModule} from '@angular/forms';
 import {AuthHttp, AuthConfig} from "angular2-jwt";
-import {Http, RequestOptions, HttpModule, XHRBackend, ConnectionBackend, RequestOptionsArgs} from "@angular/http";
+import {Http, RequestOptions, HttpModule, XHRBackend} from "@angular/http";
 import {CommonModule} from "@angular/common";
 import {AccordionModule} from "ngx-bootstrap/accordion";
 import {ProgressbarModule} from "ngx-bootstrap/progressbar";

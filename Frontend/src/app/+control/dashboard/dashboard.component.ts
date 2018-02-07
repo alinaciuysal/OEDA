@@ -1,5 +1,4 @@
-import {Component, Injectable, OnInit} from '@angular/core';
-import {NotificationsService} from "angular2-notifications";
+import {Component} from '@angular/core';
 import {LayoutService} from "../../shared/modules/helper/layout.service";
 
 @Component({

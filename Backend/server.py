@@ -86,7 +86,7 @@ api.add_resource(AllStageResultsWithExperimentIdController, '/api/experiment_res
 api.add_resource(StageController, '/api/stages/<string:experiment_id>')
 api.add_resource(RunningAllStageResultsWithExperimentIdController, '/api/running_experiment_results/<string:experiment_id>/<string:timestamp>')
 
-api.add_resource(QQPlotController, '/api/qqPlot/<string:experiment_id>/<string:stage_no>/<string:distribution>/<string:scale>')
+api.add_resource(QQPlotController, '/api/qqPlot/<string:experiment_id>/<string:stage_no>/<string:distribution>/<string:scale>/<string:incoming_data_type_name>')
 api.add_resource(OEDACallbackController, '/api/running_experiment_results/oeda_callback/<string:experiment_id>')
 api.add_resource(CrowdNavConfigController, '/api/config/crowdnav')
 

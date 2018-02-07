@@ -1,4 +1,4 @@
-import {Component, Injectable, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {LayoutService} from "../../shared/modules/helper/layout.service";
 import {TempStorageService} from "../../shared/modules/helper/temp-storage-service";
 import {OEDAApiService} from "../../shared/modules/api/oeda-api.service";

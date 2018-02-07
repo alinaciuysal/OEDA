@@ -85,7 +85,7 @@ class RTXDefinition:
         return state
 
     @staticmethod
-    def secondary_data_reducer(state, new_data, wf, incomingDataTypes):
+    def secondary_data_reducer(state, new_data, wf):
         return state
     # def secondary_data_reducer(state, new_data, wf, incomingDataTypes):
     #     for data_type in incomingDataTypes:

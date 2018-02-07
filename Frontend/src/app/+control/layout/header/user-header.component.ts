@@ -1,7 +1,6 @@
-import {Component, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import {UserService} from "../../../shared/modules/auth/user.service";
 import {LayoutService} from "../../../shared/modules/helper/layout.service";
-import {DataService} from "../../../shared/util/data-service";
 import {OEDAApiService} from "../../../shared/modules/api/oeda-api.service";
 
 @Component({

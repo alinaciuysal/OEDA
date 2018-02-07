@@ -1,11 +1,10 @@
-import {Component, Injectable, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {NotificationsService} from "angular2-notifications";
 import {LayoutService} from "../../shared/modules/helper/layout.service";
 import {Configuration, OEDAApiService, UserEntity} from "../../shared/modules/api/oeda-api.service";
-import * as _ from "lodash";
+import * as _ from "lodash.clonedeep";
 import {Router} from "@angular/router";
 import {UserService} from "../../shared/modules/auth/user.service";
-import {isNullOrUndefined} from "util";
 
 @Component({
   selector: 'control-configuration',
@@ -35,7 +34,7 @@ export class ConfigurationComponent implements OnInit {
       this.configuration.host = this.user.db_configuration["host"];
       this.configuration.port = this.user.db_configuration["port"];
       this.configuration.type = this.user.db_configuration["type"];
-      this.originalConfiguration = _.cloneDeep(this.configuration);
+      this.originalConfiguration = _(this.configuration);
     } else {
       this.notify.success("", "Default values for configuration are populated");
       this.configuration.host = "localhost";
@@ -44,11 +43,6 @@ export class ConfigurationComponent implements OnInit {
     }
   }
 
-  populate_default_values() {
-    this.configuration.host = "localhost";
-    this.configuration.port = 9200;
-    this.configuration.type = "elasticsearch";
-  }
   hasChanges(): boolean {
     return JSON.stringify(this.configuration) !== JSON.stringify(this.originalConfiguration)
   }
@@ -64,7 +58,7 @@ export class ConfigurationComponent implements OnInit {
       this.api.updateUser(this.user).subscribe(
         (success) => {
           console.log("success", success);
-          ctrl.originalConfiguration = _.cloneDeep(this.configuration);
+          ctrl.originalConfiguration = _(this.configuration);
           const parsed_json = JSON.parse(success['_body']);
           console.log("parsed_json", parsed_json);
           ctrl.notify.success("Success", parsed_json["message"]);
@@ -83,19 +77,17 @@ export class ConfigurationComponent implements OnInit {
   }
 
   hasErrors(): boolean {
-    if ( this.configuration.type.length === 0
-          || this.configuration.host == null
-          || this.configuration.host.length === 0
-          || this.configuration.port == null
-          || this.configuration.port < 1
-          || this.configuration.port > 65535) {
-      return true;
-    }
-    return false;
+    return this.configuration.type.length === 0
+      || this.configuration.host == null
+      || this.configuration.host.length === 0
+      || this.configuration.port == null
+      || this.configuration.port < 1
+      || this.configuration.port > 65535;
+
   }
 
   revertChanges() {
-    this.configuration = _.cloneDeep(this.originalConfiguration);
+    this.configuration = _(this.originalConfiguration);
   }
 
 

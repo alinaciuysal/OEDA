@@ -38,8 +38,8 @@ export class OEDAApiService extends RESTService {
     return this.doGETPublicRequest("/running_experiment_results/oeda_callback/" + experiment_id)
   }
 
-  public getQQPlot(experiment_id: string, stage_no: string, distribution: string, scale: string): Observable<any> {
-    return this.doGETPublicRequest("/qqPlot/" + experiment_id + "/" + stage_no + "/" + distribution + "/" + scale)
+  public getQQPlot(experiment_id: string, stage_no: string, distribution: string, scale: string, incoming_data_type_name: string): Observable<any> {
+    return this.doGETPublicRequest("/qqPlot/" + experiment_id + "/" + stage_no + "/" + distribution + "/" + scale + "/" + incoming_data_type_name);
   }
 
   public getConfigFromAPI(url: string): Observable<any> {
@@ -71,20 +71,8 @@ export class OEDAApiService extends RESTService {
     return this.doPUTPublicRequest("/targets/" + target.id, target)
   }
 
-  public loadConfiguration(): Observable<Configuration> {
-    return this.doGETPublicRequest("/configuration")
-  }
-
   public updateUser(user: UserEntity): Observable<any> {
     return this.doPOSTPublicRequest("/user/" + user.name, user);
-  }
-
-  public loadUserByName(user: UserEntity): Observable<any> {
-    return this.doGETPublicRequest("/user" + user.name);
-  }
-
-  public loadAllUsers(user: UserEntity): Observable<any> {
-    return this.doGETPublicRequest("/users" )
   }
 
   public registerUser(user: UserEntity): Observable<any> {

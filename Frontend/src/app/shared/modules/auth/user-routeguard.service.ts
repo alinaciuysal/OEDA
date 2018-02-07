@@ -12,7 +12,7 @@ import {NotificationsService} from "angular2-notifications/dist";
 @Injectable()
 export class UserRouteGuard implements CanActivate, CanLoad, CanActivateChild {
 
-  constructor(private router: Router, private logger: LoggerService, private userService: UserService, private notify: NotificationsService) {
+  constructor(private router: Router, private logger: LoggerService, private userService: UserService) {
   }
 
   doUserCheck(state: RouterStateSnapshot): Observable<boolean> {
@@ -27,12 +27,12 @@ export class UserRouteGuard implements CanActivate, CanLoad, CanActivateChild {
       } else {
         this.logger.debug("RouteGuard - User auth expired - try to reauth");
         this.userService.tryTokenRenewal().subscribe(
-          (worked) => {
+          () => {
             this.logger.debug("RouteGuard - re-auth worked");
             this.router.navigate([state.url]);
             return true
           },
-          (failed) => {
+          () => {
             this.router.navigate(['/'], {queryParams: {returnUrl: state.url}});
             return false
           }

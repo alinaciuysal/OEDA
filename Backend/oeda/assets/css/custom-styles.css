@@ -50,7 +50,7 @@ h4 {
     padding-top:10px;
 }
 .square-btn-adjust {
-    border: 0px solid transparent;
+    border: 0 solid transparent;
    -webkit-border-radius: 0px;
 -moz-border-radius: 0px;
 border-radius: 0px;

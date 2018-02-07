@@ -11,7 +11,7 @@ export class HttpInterceptor extends Http {
     return new HttpInterceptor(xhrBackend, requestOptions, injector)
   }
 
-  _router: any = null
+  _router: any = null;
 
   constructor(backend: ConnectionBackend, defaultOptions: RequestOptions, private injector: Injector) {
     super(backend, defaultOptions);

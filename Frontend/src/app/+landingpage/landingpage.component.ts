@@ -1,8 +1,8 @@
-import {Component, Injectable, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import {NotificationsService} from "angular2-notifications";
 import {LayoutService} from "../shared/modules/helper/layout.service";
 import {UserEntity, OEDAApiService} from "../shared/modules/api/oeda-api.service";
-import {ActivatedRoute, Router} from "@angular/router";
+import {Router} from "@angular/router";
 import {TempStorageService} from "../shared/modules/helper/temp-storage-service";
 import {EntityService} from "../shared/util/entity-service";
 import {LoginRequest, UserService} from "../shared/modules/auth/user.service";
@@ -41,7 +41,7 @@ export class LandingpageComponent {
   public submitRegistration() {
     if (this.user.name.length !== 0 && this.user.password.length !== 0) {
       this.api.registerUser(this.user).subscribe(
-        (success) => {
+        () => {
           this.notify.success("Success", "You are registered successfully.");
         }
       )

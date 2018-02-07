@@ -1,4 +1,4 @@
-import {OnInit, Component, Input, EventEmitter, Output, OnChanges, SimpleChanges} from "@angular/core";
+import {Component, Input, EventEmitter, Output, OnChanges, SimpleChanges} from "@angular/core";
 
 @Component({
   selector: 'labeled-input',
@@ -30,33 +30,33 @@ export class LabeledInputComponent implements OnChanges {
 
 
   @Output() modelChanged = new EventEmitter();
-  @Input() info = null
-  @Input() inputType = "text"
+  @Input() info = null;
+  @Input() inputType = "text";
 
-  @Input() minNumber = 0
-  @Input() maxNumber = 100
+  @Input() minNumber = 0;
+  @Input() maxNumber = 100;
 
-  @Input() colSize = 6
-  @Input() name: any
-  @Input() model: any
-  @Input() key: string
-  @Input() placeholder = ""
-  @Input() disabled = false
+  @Input() colSize = 6;
+  @Input() name: any;
+  @Input() model: any;
+  @Input() key: string;
+  @Input() placeholder = "";
+  @Input() disabled = false;
 
 
-  @Input() required = true
-  @Input() hasError = false
+  @Input() required = true;
+  @Input() hasError = false;
   @Input() errorFunction = () => {
     if (this.required) {
       return !this.model[this.key]
     } else {
       return false
     }
-  }
+  };
 
   @Input() onModelChange = (ev) => {
     this.modelChanged.emit(ev)
-  }
+  };
 
   ngOnChanges(changes: SimpleChanges): void {
     this.modelChanged.emit(changes)

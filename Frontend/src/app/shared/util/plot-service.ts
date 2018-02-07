@@ -173,8 +173,8 @@ export class PlotService {
   }
 
   /** retrieves qq plot image from the server */
-  public retrieve_qq_plot_image(experiment_id, selected_stage, distribution, scale): Observable<any> {
-    return this.apiService.getQQPlot(experiment_id, selected_stage.number.toString(), distribution, scale);
+  public retrieve_qq_plot_image(experiment_id, selected_stage, distribution, scale, incoming_data_type_name): Observable<any> {
+    return this.apiService.getQQPlot(experiment_id, selected_stage.number.toString(), distribution, scale, incoming_data_type_name);
   }
 
   /** dstributes data to bins for histogram*/
@@ -269,21 +269,23 @@ export class PlotService {
   }
 
   /**
-   * filters out data above the threshold
+   * calculates the threshold for given percentile by retrieving data from data[data_field]
    * if data_field is null, then it is same to first sorting an array of float/int values, then finding the percentile
    */
   public calculate_threshold_for_given_percentile(data, percentile, data_field) {
     if (data.length !== 0) {
       const sortedData = data.sort(this.entityService.sort_by(data_field, true, parseFloat));
       const index = Math.floor(sortedData.length * percentile / 100 - 1);
-
       // TODO how can this index be -1? this is just a work-around for now
       if (index === -1) {
         return 0;
       }
       if (!isNullOrUndefined(data_field)) {
-        const result = sortedData[index][data_field];
-        return +result.toFixed(2);
+        if (!isNullOrUndefined(sortedData[index][data_field])) {
+          const result = sortedData[index][data_field];
+          return +result.toFixed(2);
+        }
+        return 0;
       }
       const result = sortedData[index];
       return +result.toFixed(2);

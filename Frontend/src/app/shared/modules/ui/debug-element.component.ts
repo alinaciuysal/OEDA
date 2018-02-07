@@ -1,4 +1,4 @@
-import {OnInit, Component, Input, HostListener} from "@angular/core";
+import {Component, Input, HostListener} from "@angular/core";
 import {environment} from "../../../../environments/environment";
 
 @Component({
@@ -8,11 +8,11 @@ import {environment} from "../../../../environments/environment";
 
 export class DebugElementComponent {
 
-  @Input() element
+  @Input() element;
 
-  showDebug = false
+  showDebug = false;
 
-  isProduction = environment.production
+  isProduction = environment.production;
 
   @HostListener('window:keydown', ['$event'])
   keyboardInput(event: KeyboardEvent) {

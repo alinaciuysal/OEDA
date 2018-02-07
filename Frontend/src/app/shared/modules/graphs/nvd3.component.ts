@@ -1,4 +1,4 @@
-import {Component, OnInit, OnChanges, ElementRef, Inject, Input} from '@angular/core';
+import {Component, OnChanges, ElementRef, Inject, Input} from '@angular/core';
 import * as d3 from "d3";
 import * as nv from "nvd3";
 
@@ -39,7 +39,7 @@ export class NVD3Component implements OnChanges {
     for (let key in this.chart) {
       if (!this.chart.hasOwnProperty(key)) continue;
 
-      let value = this.chart[key];
+
 
       if (key[0] === '_') {
       }
@@ -194,7 +194,7 @@ export class NVD3Component implements OnChanges {
       for (let key in dispatch) {
         if (!dispatch.hasOwnProperty(key)) continue;
 
-        let value = dispatch[key];
+
 
         if (options[key] === undefined || options[key] === null) {
         }

@@ -179,7 +179,7 @@ export class PlotService {
 
   /** dstributes data to bins for histogram*/
   public categorize_data(data: any) {
-
+    console.log("data in categorize_data", data);
     const bins = [];
     const onlyValuesInData = this.extract_values_from_array(data, "value");
     const upperThresholdForBins = this.get_maximum_value_from_array(onlyValuesInData);
@@ -303,22 +303,22 @@ export class PlotService {
     d3.select("#" + divID).selectAll("*").remove();
 
     // retrieve data for the initially selected stage
-    const data1 = ctrl.entityService.get_data_from_local_structure(all_data, selected_stage.number, true);
+    const data1 = ctrl.entityService.get_data_from_local_structure(all_data, selected_stage.number);
 
     if (isNullOrUndefined(data1)) {
       ctrl.notify.error("Error", "Selected stage might not contain data. Please select another stage.");
       return;
     }
 
-    const data_for_x_axis = ctrl.entityService.process_single_stage_data(data1, null, null, scale, incoming_data_type_name);
+    const data_for_x_axis = ctrl.entityService.process_single_stage_data(data1, null, null, scale, incoming_data_type_name, true);
 
     // retrieve data for the newly selected stage
-    const data2 = ctrl.entityService.get_data_from_local_structure(all_data, other_stage_number, true);
+    const data2 = ctrl.entityService.get_data_from_local_structure(all_data, other_stage_number);
     if (isNullOrUndefined(data2)) {
       ctrl.notify.error("Error", "Selected stage might not contain data. Please select another stage.");
       return;
     }
-    const data_for_y_axis = ctrl.entityService.process_single_stage_data(data2, null, null, scale, incoming_data_type_name);
+    const data_for_y_axis = ctrl.entityService.process_single_stage_data(data2, null, null, scale, incoming_data_type_name, true);
 
     var tm = mean(data_for_x_axis);
     var td = Math.sqrt(variance(data_for_x_axis));

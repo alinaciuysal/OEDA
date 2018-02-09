@@ -10,7 +10,7 @@ class RTXDefinition:
     _oeda_callback = None
     _oeda_stop_request = None
     primary_data_provider = None
-    secondary_data_providers = None
+    secondary_data_providers = []
     change_provider = None
     id = None
     stage_counter = None
@@ -35,10 +35,10 @@ class RTXDefinition:
         primary_data_provider["data_reducer"] = RTXDefinition.primary_data_reducer
         self.primary_data_provider = primary_data_provider
 
-        self.secondary_data_providers = []
-        for dp in oeda_target["secondaryDataProviders"]:
-            dp["data_reducer"] = RTXDefinition.secondary_data_reducer
-            self.secondary_data_providers.append(dp)
+        if oeda_target["secondaryDataProviders"] is not None:
+            for dp in oeda_target.get("secondaryDataProviders"):  # see dataProviders.json for the mapping
+                dp["data_reducer"] = RTXDefinition.secondary_data_reducer
+                self.secondary_data_providers.append(dp)
 
         # TODO: knob_value[2] is only provided in step_explorer strategy?
         execution_strategy = oeda_experiment["executionStrategy"]
@@ -46,14 +46,12 @@ class RTXDefinition:
             new_knobs = {}
             for knob_key, knob_value in oeda_experiment["executionStrategy"]["knobs"].iteritems():
                 new_knobs[knob_key] = ([knob_value[0], knob_value[1]], knob_value[2])
-            debug("new knobs in RTXDefinition object" + str(new_knobs), Fore.GREEN)
             execution_strategy["knobs"] = new_knobs
 
         self.execution_strategy = execution_strategy
         self.state_initializer = RTXDefinition.state_initializer
         self.evaluator = RTXDefinition.evaluator
         self.folder = None
-        debug("execution_strategy.knobs in RTXDefinition object" + str(execution_strategy["knobs"]), Fore.GREEN)
         self.setup_stage = RTXDefinition.setup_stage
 
         if execution_strategy["type"] == "step_explorer" or execution_strategy["type"] == "sequential":
@@ -65,49 +63,55 @@ class RTXDefinition:
         dictionary['stage_counter'] = self.stage_counter
         self._oeda_callback(dictionary, self.id)
 
-    # TODO: integrate other metrics using a parameter, instead of default average metric
+    # TODO: integrate other metrics using a parameter here, instead of default average metric
+    """ new_data is sth like {'overhead' : 1.22253, 'minimalCosts': '200.2522', ...} but count is same for all keys """
+    """ also https://stackoverflow.com/questions/41034963/typeerror-coercing-to-unicode-need-string-or-buffer-long-found"""
     @staticmethod
     def primary_data_reducer(state, new_data, wf):
-        cnt = state["data_points"]
-        db().save_data_point(new_data, cnt, wf.id, wf.stage_counter)
-        state["overhead"] = (state["overhead"] * cnt + new_data["overhead"]) / (cnt + 1)
-        state["data_points"] += 1
+        for index, (data_type_name, data_type_value) in enumerate(new_data.items()):
+            data_type_count = str(data_type_name) + "_cnt"
+            cnt = state.get(data_type_count)
+            if index == 0:  # perform save operation only once
+                db().save_data_point(new_data, cnt, wf.id, wf.stage_counter, None)
+            state[str(data_type_name)] = (state[str(data_type_name)] * cnt + data_type_value) / (cnt + 1)
+            state[data_type_count] += 1
 
-        # for data_type in incomingDataTypes:
-        #     data_type_name = data_type["name"]
-        #     data_type_count = data_type_name + "_cnt"
-        #     cnt = state[data_type_count]
-        #     db().save_data_point(new_data, cnt, wf.id, wf.stage_counter)
-        #     state[data_type_name] = (state[data_type_name] * cnt + new_data[data_type_name]) / (cnt + 1)
-        #     state[data_type_count] += 1
         if wf._oeda_stop_request.isSet():
             raise RuntimeError("Experiment interrupted from OEDA while gathering data.")
         return state
 
+    """ important assumption here: 1-1 mapping between secondary data provider and its payload """
+    """ i.e. payload (data) with different attributes can be published to same topic of Kafka """
+    """ new_data is a type of dict, e.g. {'routingDuration': 12, 'xDuration': 555.25...} is handled accordingly """
+    """ but publishing different types of payloads to the same topic will not work, declare another secondary data provider for this purpose """
     @staticmethod
-    def secondary_data_reducer(state, new_data, wf):
+    def secondary_data_reducer(state, new_data, wf, idx):
+        for index, (data_type_name, data_type_value) in enumerate(new_data.items()):
+            data_type_count = str(data_type_name) + "_cnt"
+            cnt = state.get(data_type_count)
+            if index == 0:  # perform save operation only once by passing index of data provider(idx)
+                db().save_data_point(new_data, cnt, wf.id, wf.stage_counter, idx)
+            state[data_type_count] += 1
         return state
-    # def secondary_data_reducer(state, new_data, wf, incomingDataTypes):
-    #     for data_type in incomingDataTypes:
-    #         data_type_name = data_type["name"]
-    #         data_type_count = data_type_name + "_cnt"
-    #         cnt = state[data_type_count]
-    #         db().save_data_point(new_data, cnt, wf.id, wf.stage_counter)
-    #         state[data_type_name] = (state[data_type_name] * cnt + new_data[data_type_name]) / (cnt + 1)
-    #         state[data_type_count] += 1
-    #     if wf._oeda_stop_request.isSet():
-    #         raise RuntimeError("Experiment interrupted from OEDA while gathering data.")
-    #     return state
 
     @staticmethod
     def state_initializer(state, wf):
-        state["overhead"] = 0
-        state["data_points"] = 0
 
-        # initialize all incoming data types, not only the hard-coded ones; as well as their counts
-        # for data_type in wf.incoming_data_types:
-        #     state[data_type["name"]] = 0
-        #     state[data_type["name"] + "_cnt"] = 0
+        for data_type in wf.primary_data_provider["incomingDataTypes"]:
+            data_type_name = str(data_type["name"])
+            data_type_count = data_type_name + "_cnt"
+            state[data_type_name] = 0
+            state[data_type_count] = 0
+
+        if len(wf.secondary_data_providers) > 0:
+            # initialize all secondary data types, not only the hard-coded ones; as well as their counts to 0
+            for dp in wf.secondary_data_providers:
+                for data_type in dp["incomingDataTypes"]:
+                    data_type_name = str(data_type["name"])
+                    data_type_count = data_type_name + "_cnt"
+                    state[data_type_name] = 0
+                    state[data_type_count] = 0
+
         return state
 
     @staticmethod
@@ -118,6 +122,9 @@ class RTXDefinition:
     @staticmethod
     def evaluator(result_state, wf):
         wf.stage_counter += 1
+        # TODO: TEST this!
+        if hasattr(wf, "variables_to_be_optimized"):
+            return [result_state[i] for i in wf.variables_to_be_optimized]
         return result_state["overhead"]
 
 

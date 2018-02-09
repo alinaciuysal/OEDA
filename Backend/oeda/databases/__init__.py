@@ -56,7 +56,7 @@ def setup_experiment_database(db_type, host, port):
 
 def user_db():
     if not UserDatabase.DB:
-        error("You have to setup the user database using experiment_db_config.json file")
+        error("You can setup the user database using experiment_db_config.json file")
         return None
     return UserDatabase.DB
 

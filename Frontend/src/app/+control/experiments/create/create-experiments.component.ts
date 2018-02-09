@@ -44,7 +44,7 @@ export class CreateExperimentsComponent implements OnInit {
     ctrl.api.loadAllTargets().subscribe(
       (data) => {
         if (!isNullOrUndefined(data)) {
-          for (let k = 0; k < data.length; k++) {
+          for (var k = 0; k < data.length; k++) {
             if (data[k]["status"] === "READY") {
               ctrl.availableTargetSystems.push(data[k]);
             }
@@ -114,7 +114,7 @@ export class CreateExperimentsComponent implements OnInit {
 
   addAllChangeableVariables() {
     const ctrl = this;
-    for (let i = 0; i < ctrl.targetSystem.changeableVariable.length; i++) {
+    for (var i = 0; i < ctrl.targetSystem.changeableVariable.length; i++) {
       if (ctrl.experiment.changeableVariable.filter(item => item.name === ctrl.targetSystem.changeableVariable[i].name).length === 0) {
         /* vendor does not contain the element we're looking for */
         ctrl.experiment.changeableVariable.push(_(ctrl.targetSystem.changeableVariable[i]));
@@ -152,7 +152,7 @@ export class CreateExperimentsComponent implements OnInit {
   // pre-determines step size of all added variables if selected execution strategy is step_explorer
   preCalculateStepSize() {
     if (this.experiment.executionStrategy.type === 'step_explorer') {
-      for (let j = 0; j < this.experiment["changeableVariable"].length; j++) {
+      for (var j = 0; j < this.experiment["changeableVariable"].length; j++) {
         if (!this.experiment["changeableVariable"][j]["step"]) {
           this.experiment["changeableVariable"][j]["step"] =
             (this.experiment["changeableVariable"][j]["max"] - this.experiment["changeableVariable"][j]["min"]) / 10;
@@ -166,7 +166,7 @@ export class CreateExperimentsComponent implements OnInit {
     this.stages_count = null;
     if (this.experiment.executionStrategy.type === 'step_explorer') {
       const stage_counts = [];
-      for (let j = 0; j < this.experiment.changeableVariable.length; j++) {
+      for (var j = 0; j < this.experiment.changeableVariable.length; j++) {
         if (this.experiment.changeableVariable[j]["step"] <= 0) {
           this.stages_count = null;
           break;
@@ -212,7 +212,7 @@ export class CreateExperimentsComponent implements OnInit {
         return;
       }
       const all_knobs = [];
-      for (let j = 0; j < this.experiment.changeableVariable.length; j++) {
+      for (var j = 0; j < this.experiment.changeableVariable.length; j++) {
         const knob = [];
         knob.push(this.experiment.changeableVariable[j].name);
         knob.push(Number(this.experiment.changeableVariable[j].min));
@@ -241,9 +241,9 @@ export class CreateExperimentsComponent implements OnInit {
           //   console.log("navigated to newly created experiment running page");
           // });
           this.temp_storage.setNewValue(this.experiment);
-          this.router.navigate(["control/experiments"])
+          this.router.navigate(["control/experiments"]);
         }, (error) => {
-          this.notify.success("Error", error.toString());
+          this.notify.error("Error", error.toString());
         }
       )
     }
@@ -260,15 +260,15 @@ export class CreateExperimentsComponent implements OnInit {
     const cond5 = this.experiment.name === null;
     const cond6 = this.experiment.name.length === 0;
 
-    let cond7 = false;
-    let cond8 =  false;
-    let cond9 = false;
-    let cond10 = false;
+    var cond7 = false;
+    var cond8 =  false;
+    var cond9 = false;
+    var cond10 = false;
     if (this.experiment.executionStrategy.type.length === 0) {
       cond7 = true;
     } else {
       if (this.experiment.executionStrategy.type === "step_explorer") {
-        for (let j = 0; j < this.experiment.changeableVariable.length; j++) {
+        for (var j = 0; j < this.experiment.changeableVariable.length; j++) {
           if (this.experiment.changeableVariable[j]["step"] <= 0) {
             cond8 = true;
             break;

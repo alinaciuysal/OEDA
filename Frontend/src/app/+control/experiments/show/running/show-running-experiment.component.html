@@ -246,8 +246,7 @@
 
     </div>
 
-    <div class="col-sm-12 col-xs-12">
-
+    <div class="col-sm-12 col-xs-12" [hidden]="first_render_of_page">
         <div class="panel panel-default chartJs">
           <div class="panel-heading">
             <div class="card-title">
@@ -291,8 +290,11 @@
 
               <div class="col-md-3">
                 <div class="card-title">
-                  <select class="form-control" (change)="incoming_data_type_changed($event.target.value)">
-                    <option *ngFor="let i of targetSystem.incomingDataTypes" [ngValue]="i" [disabled]="is_data_type_disabled(i.name)">
+                  <select class="form-control" [(ngModel)]="incoming_data_type_name" (change)="incoming_data_type_changed()">
+                    <!--<option *ngFor="let i of targetSystem.incomingDataTypes" [ngValue]="i" [disabled]="is_data_type_disabled(i.name)">-->
+                      <!--{{i.name}}-->
+                    <!--</option>-->
+                    <option *ngFor="let i of targetSystem?.incomingDataTypes" [ngValue]="i.name">
                       {{i.name}}
                     </option>
                   </select>

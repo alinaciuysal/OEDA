@@ -16,14 +16,12 @@ import {isNullOrUndefined} from "util";
 export class ShowSuccessfulExperimentComponent implements OnInit {
   private scatter_plot: AmChart;
   private histogram: AmChart;
+  private first_render_of_page: boolean;
+  private all_data: Entity[];
 
   public dataAvailable: boolean;
   public is_collapsed: boolean;
-
-  private first_render_of_page: boolean;
-  private all_data: Entity[];
-  private incoming_data_type_name: string;
-
+  public incoming_data_type_name: string;
   public experiment_id: string;
   public experiment: Experiment;
   public targetSystem: Target;
@@ -141,48 +139,64 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
 
       // draw graphs for all_data
       if (ctrl.selected_stage.number === -1) {
-        let processedData = ctrl.entityService.process_all_stage_data(stage_object, "timestamp", "value", ctrl.scale, ctrl.incoming_data_type_name, true);
-        // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
-        const clonedData = JSON.parse(JSON.stringify(processedData));
-        ctrl.initial_threshold_for_scatter_chart = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value');
-        ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type_name, ctrl.initial_threshold_for_scatter_chart);
-        ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type_name);
-        ctrl.selectDistributionAndDrawQQPlot(ctrl.distribution);
+        try {
+          let processedData = ctrl.entityService.process_all_stage_data(stage_object, "timestamp", "value", ctrl.scale, ctrl.incoming_data_type_name, true);
+          console.log("processedData", processedData);
+          if (!isNullOrUndefined(processedData)) {
+            // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
+            const clonedData = JSON.parse(JSON.stringify(processedData));
+            ctrl.initial_threshold_for_scatter_chart = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value');
+            ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type_name, ctrl.initial_threshold_for_scatter_chart);
+            ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type_name);
+            ctrl.selectDistributionAndDrawQQPlot(ctrl.distribution);
+            ctrl.is_enough_data_for_plots = true;
+          } else {
+            ctrl.notify.error("Error", "Selected scale might not be appropriate for the selected incoming data type");
+            return;
+          }
+        } catch (err) {
+          ctrl.is_enough_data_for_plots = false;
+          ctrl.notify.error("Error", err.message);
+          return;
+        }
       }
       // draw graphs for selected stage data
       else {
-        let processedData = ctrl.entityService.process_single_stage_data(stage_object,"timestamp", "value", ctrl.scale, ctrl.incoming_data_type_name);
-        const clonedData = JSON.parse(JSON.stringify(processedData));
-        ctrl.initial_threshold_for_scatter_chart = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value');
-        ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type_name, ctrl.initial_threshold_for_scatter_chart);
-        ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type_name);
+        try {
+          let processedData = ctrl.entityService.process_single_stage_data(stage_object,"timestamp", "value", ctrl.scale, ctrl.incoming_data_type_name, true);
+          if (!isNullOrUndefined(processedData)) {
+            const clonedData = JSON.parse(JSON.stringify(processedData));
+            ctrl.initial_threshold_for_scatter_chart = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value');
+            ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type_name, ctrl.initial_threshold_for_scatter_chart);
+            ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type_name);
 
-        // check if next stage exists for javascript side of qq plot
-        ctrl.available_stages_for_qq_js.some(function(element) {
-          if (Number(element.number) == Number(ctrl.selected_stage.number) + 1) {
-            ctrl.selected_stage_for_qq_js = (element.number).toString();
-            ctrl.plotService.draw_qq_js("qqPlotJS", ctrl.all_data, ctrl.selected_stage, ctrl.selected_stage_for_qq_js, ctrl.scale, ctrl.incoming_data_type_name);
-            ctrl.qqJSPlotIsRendered = true;
-            return true; // required as a callback for .some function
+            // check if next stage exists for javascript side of qq plot
+            ctrl.available_stages_for_qq_js.some(function (element) {
+              if (Number(element.number) == Number(ctrl.selected_stage.number) + 1) {
+                ctrl.selected_stage_for_qq_js = (element.number).toString();
+                ctrl.plotService.draw_qq_js("qqPlotJS", ctrl.all_data, ctrl.selected_stage, ctrl.selected_stage_for_qq_js, ctrl.scale, ctrl.incoming_data_type_name);
+                ctrl.qqJSPlotIsRendered = true;
+                return true; // required as a callback for .some function
+              }
+            });
+            ctrl.is_enough_data_for_plots = true;
           }
-        });
+        } catch (err) {
+          ctrl.is_enough_data_for_plots = false;
+          ctrl.notify.error("Error", err.message);
+          return;
+        }
       }
-      ctrl.is_enough_data_for_plots = true;
-    } else {
-      ctrl.notify.error("Error", "Selected stage might not contain data points. Please select another stage.");
-      return;
     }
   }
 
   /** called when stage dropdown (All Stages, Stage 1 [...], Stage 2 [...], ...) in main page is changed */
   stage_changed() {
     const ctrl = this;
-
     if (isNullOrUndefined(ctrl.scale)) {
       ctrl.notify.error("Error", "Scale is null or undefined, please try again");
       return;
     }
-
     if (!isNullOrUndefined(ctrl.selected_stage.number)) {
       if (ctrl.selected_stage.number === -1) {
         if (!isNullOrUndefined(ctrl.all_data)) {
@@ -196,7 +210,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
         /*
           Draw plots for the selected stage by retrieving it from local storage
         */
-        const stage_data = ctrl.entityService.get_data_from_local_structure(ctrl.all_data, ctrl.selected_stage.number, true);
+        const stage_data = ctrl.entityService.get_data_from_local_structure(ctrl.all_data, ctrl.selected_stage.number);
         if (!isNullOrUndefined(stage_data)) {
           ctrl.draw_all_plots(stage_data);
         } else {
@@ -208,13 +222,6 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
       ctrl.notify.error("Error", "Stage number is null or undefined, please try again");
       return;
     }
-  }
-
-  /** called when scale dropdown (Normal, Log) in main page is changed */
-  scale_changed(scale: string) {
-    this.scale = scale;
-    // trigger plot drawing process
-    this.stage_changed();
   }
 
   /** returns keys of the retrieved stage */
@@ -266,26 +273,24 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
           this.set_candidate_data_type();
           this.first_render_of_page = false;
         }
-
         this.draw_all_plots(this.all_data);
       }
     );
   }
 
   /** called when incoming data type of the target system is changed */
-  incoming_data_type_changed(i) {
-    if (!this.is_data_type_disabled(i)) {
-      // set incoming_data_type name, so that subsequent polls would draw different plots for different data types
-      this.incoming_data_type_name = i;
-      this.draw_all_plots(this.all_data);
-    }
+  incoming_data_type_changed() {
+    // trigger plot drawing process via stage_changed
+    this.stage_changed();
   }
 
-  /** returns true if payload object of data structure contains selected incoming data type
-   TODO: assumption here: different data types are provided at the same time within the same payload by CrowdNav
-   so, it's reasonable to only look for the first entity (stage) in the controller's data structure to determine
-   if we should disable selection of data type or not.
-   */
+  /** called when scale dropdown (Normal, Log) in main page is changed */
+  scale_changed() {
+    // trigger plot drawing process via stage_changed
+    this.stage_changed();
+  }
+
+  /** returns true if payload object (of data structure) contains selected incoming data type */
   is_data_type_disabled(incoming_data_type_name): boolean {
     let first_stage = this.all_data[0];
     if (first_stage !== undefined) {

@@ -85,9 +85,11 @@ def experimentFunction(wf, exp):
             if hasattr(wf, "secondary_data_providers"):
                 for cp in wf.secondary_data_providers:
                     new_data = cp["instance"].returnDataListNonBlocking()
+                    idx = wf.secondary_data_providers.index(cp)
+                    # just get the name of the variable from (cp) and pass it to (exp["state"], nd, wf, idx)
                     for nd in new_data:
                         try:
-                            exp["state"] = cp["data_reducer"](exp["state"], nd, wf)
+                            exp["state"] = cp["data_reducer"](exp["state"], nd, wf, idx)
                         except StopIteration as e:
                             raise  # just
                         except RuntimeError as e:

@@ -31,14 +31,20 @@ class QQPlotController(Resource):
                     entity = json.loads(entity)
                     if len(entity['values']) == 0:
                         pass
+
                     for data_point in entity['values']:
-                        pts.append(data_point["payload"][incoming_data_type_name])
+                        # there might be payload data that does not include the selected data type. filter them out
+                        point = data_point["payload"].get(incoming_data_type_name)
+                        if point:
+                            pts.append(point)
             else:
                 data_points = db().get_data_points(experiment_id=experiment_id, stage_no=stage_no)
                 if data_points is None:
                     return {"error": "Data points cannot be retrieved for given experiment and/or stage"}, 404
                 for data_point in data_points:
-                    pts.append(data_point["payload"][incoming_data_type_name])
+                    point = data_point["payload"].get(incoming_data_type_name)
+                    if point:
+                        pts.append(point)
 
             # create the qq plot based on the retrieved data against normal distribution
             array = np.asarray(pts)

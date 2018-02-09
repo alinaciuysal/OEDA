@@ -19,39 +19,37 @@
 
       <div class="panel-body" *ngIf="is_db_configured">
         <div class="table-responsive">
-          <table style="margin-top: 20px" class="table table-striped" [mfData]="targets" #mf="mfDataTable"
+          <table style="margin-top: 20px" class="table table-striped table-bordered table-hover" [mfData]="targets" #mf="mfDataTable"
                  [mfRowsOnPage]="10" >
             <thead>
             <tr>
-              <th style="width:1%">
-              </th>
-              <th style="width:1%">
-                <mfDefaultSorter by="status">Status</mfDefaultSorter>
-              </th>
-              <th style="width: 20%">
-                <mfDefaultSorter by="name">Name</mfDefaultSorter>
-              </th>
-              <th style="width: 20%">
-                <mfDefaultSorter by="description">Description</mfDefaultSorter>
-              </th>
-              <th style="width: 10%">
-                <mfDefaultSorter by="target">Primary Data Provider</mfDefaultSorter>
-              </th>
-              <th style="width: 1%">
-                <mfDefaultSorter by="target">Change Provider</mfDefaultSorter>
-              </th>
-              <th style="width: 10%">
-                <div class="pull-right">
+              <th style="width: 5%">
+                <div>
                   <a routerLink="/control/targets/create" class="btn btn-orange btn-sm">Create Target System</a>
                 </div>
+              </th>
+              <th>
+                <mfDefaultSorter by="status">Status</mfDefaultSorter>
+              </th>
+              <th>
+                <mfDefaultSorter by="name">Name</mfDefaultSorter>
+              </th>
+              <th>
+                <mfDefaultSorter by="description">Description</mfDefaultSorter>
+              </th>
+              <th>
+                <mfDefaultSorter by="target">Primary Data Provider</mfDefaultSorter>
+              </th>
+              <th>
+                <mfDefaultSorter by="target">Change Provider</mfDefaultSorter>
               </th>
             </tr>
             </thead>
             <tbody class="bigTable">
             <tr *ngFor="let item of mf.data">
-              <td style="padding-right: 0">
+              <td>
                 <a class="btn btn-xs btn-orange" type="button"
-                   routerLink="/control/targets/edit/{{item.id}}"><i class="fa fa-search"></i>
+                   routerLink="/control/targets/edit/{{item.id}}"><i class="fa fa-search"></i> Details
                 </a>
               </td>
               <td>
@@ -65,7 +63,7 @@
               <td>{{item.changeProvider?.type}}</td>
             </tr>
             </tbody>
-            <tfoot>
+            <tfoot *ngIf="targets.length > 10">
             <tr>
               <td colspan="4">
                 <mfBootstrapPaginator [rowsOnPageSet]="[10,25,100]"></mfBootstrapPaginator>

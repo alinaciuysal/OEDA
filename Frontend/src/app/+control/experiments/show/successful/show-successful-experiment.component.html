@@ -284,8 +284,8 @@
 
           <div class="col-md-3">
             <div class="card-title">
-              <select class="form-control" (change)="incoming_data_type_changed($event.target.value)">
-                <option *ngFor="let i of targetSystem.incomingDataTypes" [ngValue]="i" [disabled]="is_data_type_disabled(i.name)">
+              <select class="form-control" [(ngModel)]="incoming_data_type_name" (change)="incoming_data_type_changed()">
+                <option *ngFor="let i of targetSystem.incomingDataTypes" [ngValue]="i.name">
                   {{i.name}}
                 </option>
               </select>
@@ -294,7 +294,7 @@
 
           <div class="col-md-3">
             <div class="card-title">
-              <select class="form-control" required (change)="scale_changed($event.target.value)">
+              <select class="form-control" required [(ngModel)]="scale" (change)="scale_changed()">
                 <option [selected]="true">Normal</option>
                 <option>Log</option>
               </select>
@@ -307,14 +307,14 @@
 
   <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''"
   [hidden]="is_enough_data_for_plots" style="width: 750px; height: 600px;">
-    <div class="col-sm-6 col-xs-12" style="padding-left: 0">
-      <div class="panel panel-default chartJs">
-        <div class="panel-body" style="padding-top: 20px">
-        <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
-        <h4>Drawing graphs...</h4>
-      </div>
-      </div>
-    </div>
+    <!--<div class="col-sm-6 col-xs-12" style="padding-left: 0">-->
+      <!--<div class="panel panel-default chartJs">-->
+        <!--<div class="panel-body" style="padding-top: 20px">-->
+        <!--<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>-->
+        <!--<h4>Drawing graphs...</h4>-->
+      <!--</div>-->
+      <!--</div>-->
+    <!--</div>-->
   </div>
 
   <!-- Smooth-Line Chart -->
@@ -322,7 +322,7 @@
     <div class="panel panel-default">
       <div class="panel-heading">
         <div class="card-title">
-          <div class="title pull-left">Scatter Plot with {{scale}} Scale</div>
+          <div class="title pull-left">Scatter Plot</div>
         </div>
       </div>
       <div class="panel-body">
@@ -340,7 +340,7 @@
     <div class="panel panel-default">
       <div class="panel-heading">
         <div class="card-title">
-          <div class="title pull-left">Histogram with {{scale}} Scale</div>
+          <div class="title pull-left">Histogram with</div>
         </div>
       </div>
       <div class="panel-body" >
@@ -358,7 +358,7 @@
         <div class="panel-heading">
           <div class="card-title">
             <div class="col-md-6">
-              <div class="title pull-left">Quantile Quantile (QQ) Plot against Theoretical Data with {{scale}} Scale &nbsp;</div>
+              <div class="title pull-left">Quantile Quantile (QQ) Plot against Theoretical Data &nbsp;</div>
             </div>
             <div class="row">
               <div class="col-md-6">
@@ -388,7 +388,7 @@
         <div class="panel-heading">
           <div class="card-title">
             <div class="col-md-6">
-              <div class="title pull-left">Quantile Quantile (QQ) Plot against Other Stage Data with {{scale}} Scale &nbsp;</div>
+              <div class="title pull-left">Quantile Quantile (QQ) Plot against Other Stage Data &nbsp;</div>
             </div>
           </div>
           <div class="row">

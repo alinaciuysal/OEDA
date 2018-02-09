@@ -52,8 +52,8 @@ class Database:
         """ returns all stages of an OEDA experiment that are created after the timestamp """
         pass
 
-    def save_data_point(self, payload, data_point_count, experiment_id, stage_no):
-        """ saves data of the given stage """
+    def save_data_point(self, payload, data_point_count, experiment_id, stage_no, secondary_data_provider_index):
+        """ saves data retrieved from data provider for the given stage """
         pass
 
     def get_data_points(self, experiment_id, stage_no):
@@ -64,14 +64,20 @@ class Database:
         """ returns data_points that are created after the given timestamp. Data points' parents are the concatenated stage_id (see create_stage_id) """
         pass
 
+    def clear_db(self):
+        """ just for testing, it re-creates an index """
+        pass
+
     @staticmethod
     def create_stage_id(experiment_id, stage_no):
         return str(experiment_id) + "#" + str(stage_no)
 
     @staticmethod
-    def create_data_point_id(experiment_id, stage_no, data_point_count):
+    def create_data_point_id(experiment_id, stage_no, data_point_count, secondary_data_provider_index):
+        """ if secondary_data_provider_index is provided, then data is meant to be coming from sec. data provider """
+        if secondary_data_provider_index:
+            return str(experiment_id) + "#" + str(stage_no) + "_" + str(data_point_count) + "-" + str(secondary_data_provider_index)
         return str(experiment_id) + "#" + str(stage_no) + "_" + str(data_point_count)
-
 
 class TargetSystemNotFoundException(Exception):
     pass

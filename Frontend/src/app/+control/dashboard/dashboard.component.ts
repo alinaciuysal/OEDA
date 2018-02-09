@@ -1,5 +1,7 @@
 import {Component} from '@angular/core';
 import {LayoutService} from "../../shared/modules/helper/layout.service";
+import {OEDAApiService} from "../../shared/modules/api/oeda-api.service";
+import {NotificationsService} from "angular2-notifications/dist";
 
 @Component({
   selector: 'control-dashboard',
@@ -7,8 +9,26 @@ import {LayoutService} from "../../shared/modules/helper/layout.service";
 })
 export class DashboardComponent {
 
-  constructor(private layout: LayoutService) {
-    this.layout.setHeader("Dashboard", "OEDA Control Overview")
+  is_cleared: Boolean;
+  constructor(private layout: LayoutService, private api: OEDAApiService, private notify: NotificationsService) {
+    this.layout.setHeader("Dashboard", "OEDA Control Overview");
+    this.is_cleared = false;
+  }
+
+  clear_database(): void {
+    this.api.clear_database().subscribe(
+      (response) => {
+        this.notify.success("Success", response.message);
+        this.is_cleared = true;
+        // this.router.navigate(["control/experiments/show/" + this.experiment.id + "/running"]).then(() => {
+        //   console.log("navigated to newly created experiment running page");
+        // });
+        // this.temp_storage.setNewValue(this.experiment);
+        // this.router.navigate(["control/experiments"])
+      }, (error) => {
+        this.notify.error("Error", error.toString());
+      }
+    )
   }
 
 }

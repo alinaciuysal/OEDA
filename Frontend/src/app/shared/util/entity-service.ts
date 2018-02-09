@@ -18,58 +18,75 @@ export class EntityService {
   }
 
   /** returns data of the selected stage from all_data structure */
-  public get_data_from_local_structure(all_data, stage_no, called_for_successful_experiment) {
+  public get_data_from_local_structure(all_data, stage_no) {
     let retrieved_data = all_data[stage_no - 1];
     if (retrieved_data !== undefined) {
-      if (called_for_successful_experiment)
-        retrieved_data = JSON.parse(retrieved_data);
-      if (retrieved_data.values.length === 0) {
-        this.notify.error("Error", "Selected stage might not contain data points. Please select another stage.");
-        return;
-      }
+      // if (retrieved_data.values.length === 0) {
+      //   this.notify.error("Error", "Selected stage might not contain data points. Please select another stage.");
+      //   return;
+      // }
+      return retrieved_data;
     } else {
       this.notify.error("Error", "Cannot retrieve data from local storage");
       return;
     }
-    return retrieved_data;
+
   }
 
   /** parses single stage data with given attributes & scale, and returns values in array */
-  public process_single_stage_data(single_stage_object, xAttribute, yAttribute, scale, incoming_data_type_name): Array<number> {
+  public process_single_stage_data(single_stage_object, xAttribute, yAttribute, scale, incoming_data_type_name, called_for_successful_experiment): Array<number> {
     const ctrl = this;
     try {
       if (single_stage_object !== undefined) {
         const processedData = [];
-        // now inner element
+        // Parsing string into json should only be done here.
+        if (called_for_successful_experiment) {
+          single_stage_object = JSON.parse(single_stage_object);
+        }
         single_stage_object.values.forEach(function(data_point) {
-          if (xAttribute !== null && yAttribute !== null) {
-            const newElement = {};
-            newElement[xAttribute] = data_point["created"];
-            if (scale === "Log") {
-              newElement[yAttribute] = Math.log(data_point["payload"][incoming_data_type_name]);
-            } else if (scale === "Normal") {
-              newElement[yAttribute] = data_point["payload"][incoming_data_type_name];
-            } else {
-              ctrl.notify.error("Error", "Please provide a valid scale");
-              return;
+          // filter out points that are retrieved from other data providers, o/w they will be undefined
+          if (!isNullOrUndefined(data_point["payload"][incoming_data_type_name])){
+            // first check if log value can be calculated properly
+            if (scale === "Log" && data_point["payload"][incoming_data_type_name] <= 0) {
+              let err = {};
+              err["message"] = "Log scale cannot be applied to "  + incoming_data_type_name;
+              throw(err);
             }
-            processedData.push(newElement);
-          } else {
-            // this is for plotting qq plot with JS, as it only requires raw data in log or normal scale
-            if (scale === "Log") {
-              processedData.push(Math.log(data_point["payload"][incoming_data_type_name]));
-            } else if (scale === "Normal") {
-              processedData.push(data_point["payload"][incoming_data_type_name]);
+            if (xAttribute !== null && yAttribute !== null) {
+              const newElement = {};
+              newElement[xAttribute] = data_point["created"];
+              // if (incoming_data_type_name === "lastTickDuration" || incoming_data_type_name === "routingDuration") {
+              //   console.log(data_point["payload"][incoming_data_type_name]);
+              // }
+
+              if (scale === "Log") {
+                newElement[yAttribute] = Math.log(data_point["payload"][incoming_data_type_name]);
+              } else if (scale === "Normal") {
+
+                newElement[yAttribute] = data_point["payload"][incoming_data_type_name];
+              } else {
+                ctrl.notify.error("Error", "Please provide a valid scale");
+                return;
+              }
+              processedData.push(newElement);
             } else {
-              ctrl.notify.error("Error", "Please provide a valid scale");
-              return;
+              // this is for plotting qq plot with JS, as it only requires raw data in log or normal scale
+              if (scale === "Log") {
+                processedData.push(Math.log(data_point["payload"][incoming_data_type_name]));
+              } else if (scale === "Normal") {
+                processedData.push(data_point["payload"][incoming_data_type_name]);
+              } else {
+                ctrl.notify.error("Error", "Please provide a valid scale");
+                return;
+              }
             }
-          }
+        }
         });
         return processedData;
       }
     } catch (err) {
-      ctrl.notify.error("Error", err.message);
+      this.notify.error("Error", err.message);
+      throw err;
     }
   }
 
@@ -81,10 +98,7 @@ export class EntityService {
         const processedData = [];
 
         all_stage_object.forEach(function(single_stage_object) {
-          if (called_for_successful_experiment) {
-            single_stage_object = JSON.parse(single_stage_object);
-          }
-          const data_array = ctrl.process_single_stage_data(single_stage_object, xAttribute, yAttribute, scale, incoming_data_type_name);
+          const data_array = ctrl.process_single_stage_data(single_stage_object, xAttribute, yAttribute, scale, incoming_data_type_name, called_for_successful_experiment);
           data_array.forEach(function(data_value){
             processedData.push(data_value);
           });

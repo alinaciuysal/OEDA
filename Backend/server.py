@@ -13,6 +13,7 @@ from oeda.controller.stages import StageController
 from oeda.controller.plotting import QQPlotController
 from oeda.controller.users import UserRegisterController, UserListController, UserController, UserLoginController
 from oeda.controller.execution_scheduler import ExecutionSchedulerController
+from oeda.controller.deletedb import DeleteDBController
 
 app = Flask(__name__, static_folder="assets")
 
@@ -92,6 +93,9 @@ api.add_resource(CrowdNavConfigController, '/api/config/crowdnav')
 
 api.add_resource(ExecutionSchedulerController, '/api/execution_scheduler')
 
+# following is for easy deletion of db tuples
+api.add_resource(DeleteDBController, '/api/delete')
+
 if __name__ == '__main__':
     from tornado.wsgi import WSGIContainer
     from tornado.httpserver import HTTPServer
@@ -107,4 +111,9 @@ if __name__ == '__main__':
     http_server.listen(5000)
     enable_pretty_logging()
     setup_user_database()
+    # this is just for easy debugging, o/w user needs to logout & login to the system every time server gets restarted
+    from oeda.databases import setup_experiment_database
+    setup_experiment_database("elasticsearch", "localhost", "9200")
+    from oeda.service.execution_scheduler import initialize_execution_scheduler
+    initialize_execution_scheduler(10)
     IOLoop.instance().start()

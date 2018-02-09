@@ -23,6 +23,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
 
   public dataAvailable: boolean;
   public is_collapsed: boolean;
+  public first_render_of_page: boolean;
 
   private divId: string;
   private histogramDivId: string;
@@ -33,7 +34,6 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
   private processedData: any;
   private timer: any;
   private subscription: any;
-  private first_render_of_page: boolean;
   private first_render_of_plots: boolean;
   private experiment_ended: boolean;
   private timestamp: string;
@@ -174,7 +174,6 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
 
     ctrl.apiService.getOedaCallback(ctrl.experiment_id).subscribe(oedaCallback => {
       if(!isNullOrUndefined(oedaCallback)) {
-        console.log(oedaCallback);
         ctrl.oedaCallback["status"] = oedaCallback.status;
         ctrl.oedaCallback["stage_counter"] = oedaCallback.stage_counter;
 
@@ -231,7 +230,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
             }
             ctrl.apiService.loadAllDataPointsOfRunningExperiment(ctrl.experiment_id, ctrl.timestamp).subscribe(response => {
               ctrl.process_response(response);
-              this.set_candidate_data_type();
+              // this.set_candidate_data_type();
               ctrl.draw_all_plots();
             });
           }
@@ -329,6 +328,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     const ctrl = this;
     // set it to false in case a new scale is selected
     ctrl.is_enough_data_for_plots = false;
+    console.log("INCOMING DATA TYPE initial", ctrl.incoming_data_type_name);
 
     // if "all stages" is selected
     if (ctrl.selected_stage.number == -1) {
@@ -337,13 +337,11 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     // if any other stage is selected
     else {
       ctrl.processedData = ctrl.all_data[ctrl.selected_stage.number - 1];
-      ctrl.processedData = ctrl.entityService.process_single_stage_data(ctrl.processedData,"timestamp", "value", ctrl.scale, ctrl.incoming_data_type_name);
+      ctrl.processedData = ctrl.entityService.process_single_stage_data(ctrl.processedData,"timestamp", "value", ctrl.scale, ctrl.incoming_data_type_name, false);
     }
-
     // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
     const clonedData = JSON.parse(JSON.stringify(ctrl.processedData));
     ctrl.initial_threshold_for_scatter_plot = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value');
-
     // just to inform user about how many points are above the calculated threshold (95-percentile)
     ctrl.nr_points_to_be_filtered = ctrl.processedData.filter(function (item) {
       return item.value > ctrl.initial_threshold_for_scatter_plot;
@@ -352,7 +350,6 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     // just to override the text in div
     // if user previously clicked in the chart; but new data has come, so we should update div that tells user updated threshold and number of points to filtered.
     document.getElementById(ctrl.filterSummaryId).innerHTML = "<p>Threshold for 95-percentile: <b>" + ctrl.initial_threshold_for_scatter_plot + "</b> and # of points to be removed: <b>" + ctrl.nr_points_to_be_filtered + "</b></p>";
-
 
     if (ctrl.first_render_of_plots) {
       ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot(ctrl.divId, ctrl.filterSummaryId, ctrl.processedData, ctrl.incoming_data_type_name, ctrl.initial_threshold_for_scatter_plot);
@@ -363,6 +360,9 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
       ctrl.scatter_plot.dataProvider = ctrl.processedData;
       ctrl.scatter_plot.graphs[0].negativeBase = ctrl.initial_threshold_for_scatter_plot;
       ctrl.scatter_plot.valueAxes[0].guides[0].value = ctrl.initial_threshold_for_scatter_plot;
+      // also rename label of charts in case of a change
+      ctrl.scatter_plot.valueAxes[0].title = ctrl.incoming_data_type_name;
+      ctrl.histogram.categoryAxis.title = ctrl.incoming_data_type_name;
       // https://docs.amcharts.com/3/javascriptcharts/AmChart, following refers to validateNow(validateData = true, skipEvents = false)
       ctrl.scatter_plot.validateNow(true, false);
       ctrl.histogram.dataProvider = ctrl.plotService.categorize_data(ctrl.processedData);
@@ -387,19 +387,12 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
   }
 
   /** called when incoming data type of the target system is changed */
-  incoming_data_type_changed(i) {
-    if (!this.is_data_type_disabled(i)) {
-      // set incoming_data_type name, so that subsequent polls would draw different plots for different data types
-      this.incoming_data_type_name = i;
-      this.draw_all_plots();
-    }
+  incoming_data_type_changed() {
+    console.log(this.incoming_data_type_name);
+    this.draw_all_plots();
   }
 
-  /** returns true if payload object of data structure contains selected incoming data type
-      TODO: assumption here: different data types are provided at the same time within the same payload by CrowdNav
-      so, it's reasonable to only look for the first entity (stage) in the controller's data structure to determine
-      if we should disable selection of data type or not.
-   */
+  /** returns true if payload object at index 0 contains the selected incoming data type */
   is_data_type_disabled(incoming_data_type_name): boolean {
     const first_stage = this.all_data[0];
     if (first_stage !== undefined) {
@@ -485,6 +478,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
         }
       }
     }
+    console.log("seni sectim pikacu", this.incoming_data_type_name);
   }
 
   // helper function that filters out data above the given threshold

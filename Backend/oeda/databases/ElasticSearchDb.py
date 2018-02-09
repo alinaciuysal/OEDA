@@ -48,10 +48,10 @@ class ElasticSearchDb(Database):
                 if mappings:
                     body["mappings"] = mappings
 
-
+                self.body = body
                 self.indices_client = IndicesClient(self.es)
                 if not self.indices_client.exists(self.index):
-                    self.indices_client.create(index=self.index, body=body)
+                    self.indices_client.create(index=self.index, body=self.body)
             else:
                 raise ConnectionError("Host/port values are not valid")
         except TransportError as err1:
@@ -122,6 +122,13 @@ class ElasticSearchDb(Database):
         except ConnectionError:
             error("Error while updating target system in_use flag in elasticsearch. Check connection to elasticsearch.")
 
+    def update_data_point(self, experiment_id, status):
+        body = {"doc": {"status": status}}
+        try:
+            self.es.update(index=self.index, doc_type=self.experiment_type_name, id=experiment_id, body=body)
+        except ConnectionError:
+            error("Error while updating experiment's status in elasticsearch. Check connection to elasticsearch.")
+
     def save_stage(self, stage_no, knobs, experiment_id):
         stage_id = self.create_stage_id(experiment_id, str(stage_no))
         body = dict()
@@ -181,12 +188,12 @@ class ElasticSearchDb(Database):
         except ConnectionError:
             error("Error while getting stage data from elasticsearch. Check connection to elasticsearch.")
 
-    def save_data_point(self, payload, data_point_count, experiment_id, stage_no):
-        data_point_id = Database.create_data_point_id(experiment_id, stage_no, data_point_count)
+    def save_data_point(self, payload, data_point_count, experiment_id, stage_no, secondary_data_provider_index):
+        data_point_id = Database.create_data_point_id(experiment_id, stage_no, data_point_count, secondary_data_provider_index)
         stage_id = Database.create_stage_id(experiment_id, stage_no)
         body = dict()
         body["payload"] = payload
-        body["created"] = datetime.now().isoformat(' ') # used to replace 'T' with ' '
+        body["created"] = datetime.now().isoformat(' ')  # used to replace 'T' with ' '
         try:
             self.es.index(index=self.index, doc_type=self.data_point_type_name, body=body, id=data_point_id, parent=stage_id)
         except ConnectionError:
@@ -262,3 +269,13 @@ class ElasticSearchDb(Database):
             return [r["_source"] for r in res["hits"]["hits"]]
         except ConnectionError:
             error("Error while retrieving data points from elasticsearch. Check connection to elasticsearch.")
+
+    def clear_db(self):
+        try:
+            if self.es.ping():
+                self.indices_client.delete(index=self.index, ignore=[400, 404])  # remove all records
+                self.indices_client.create(index=self.index, body=self.body)
+        except TransportError as err1:
+            error("Error while creating elasticsearch for experiments. Check type mappings for experiments in experiment_db_config.json.")
+            raise err1
+

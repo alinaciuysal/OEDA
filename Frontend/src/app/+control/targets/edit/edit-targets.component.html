@@ -80,8 +80,14 @@
             <labeled-input name="Kafka URI" [model]="dataProvider" key="kafka_uri"
                            [colSize]="10"></labeled-input>
           </div>
-
-          <labeled-input *ngIf="target.dataProviders.length > 1" name="Primary Data Provider?" [model]="dataProvider" key="is_primary" [colSize]="12" inputType="checkbox"></labeled-input>
+          <!-- See https://getbootstrap.com/docs/4.0/components/tooltips/ -->
+          <labeled-input *ngIf="target.dataProviders.length > 1"
+                         name="Primary Data Provider?"
+                         [model]="dataProvider"
+                         key="is_primary"
+                         [colSize]="12"
+                         inputType="checkbox"
+                         data-toggle="tooltip" title="Select the most frequent data publisher as primary data provider"></labeled-input>
           <hr class="col-md-12">
         </div>
       </div>

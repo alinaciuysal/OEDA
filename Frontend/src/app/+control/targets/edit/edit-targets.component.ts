@@ -277,6 +277,11 @@ export class EditTargetsComponent implements OnInit {
       return true;
     }
 
+    // automatically add is_primary attribute if there's only one data provider
+    if (this.target.dataProviders.length === 1) {
+      this.target.dataProviders[0]["is_primary"] = true;
+    }
+
     for (let i = 0; i < this.target.dataProviders.length; i++) {
       let dataProvider = this.target.dataProviders[i];
 

@@ -37,9 +37,10 @@
     <div class="panel panel-default chartJs">
       <div class="panel-heading">
         <div class="card-title">
-          <div class="title pull-left">Data Providers</div>
+          <div class="title pull-left" *ngIf="target.dataProviders.length !== 1">Data Providers</div>
+          <div class="title pull-left" *ngIf="target.dataProviders.length === 1">Primary Data Provider</div>
           <div class="pull-right">
-            <div (click)="addDataProvider()" class="btn btn-xs btn-orange"><i class="fa fa-plus push-5-r"></i> Add</div>
+            <div (click)="addDataProvider()" class="btn btn-xs btn-orange"><i class="fa fa-plus push-5-r"></i> Add Data Provider</div>
           </div>
         </div>
       </div>
@@ -80,7 +81,7 @@
                            [colSize]="10"></labeled-input>
           </div>
 
-          <labeled-input name="Primary Data Provider?" [model]="dataProvider" key="is_primary" [colSize]="12" inputType="checkbox"></labeled-input>
+          <labeled-input *ngIf="target.dataProviders.length > 1" name="Primary Data Provider?" [model]="dataProvider" key="is_primary" [colSize]="12" inputType="checkbox"></labeled-input>
           <hr class="col-md-12">
         </div>
       </div>

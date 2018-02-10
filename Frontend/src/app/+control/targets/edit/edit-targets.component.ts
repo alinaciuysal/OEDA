@@ -41,6 +41,7 @@ export class EditTargetsComponent implements OnInit {
         this.api.loadTargetById(params['id']).subscribe(
           (data) => {
             this.target = data;
+            console.log("target", this.target);
             this.originalTarget = _(this.target);
             this.assureObjectContract();
           }
@@ -165,8 +166,25 @@ export class EditTargetsComponent implements OnInit {
     });
   }
 
+  // removes incoming data type from target system as well as from data provider if it does not contain any variables after deletion
   removeIncoming(index) {
-    this.target.incomingDataTypes.splice(index, 1)
+    let incomingDataType = this.target.incomingDataTypes[index];
+    if (incomingDataType.hasOwnProperty("dataProviderName")) {
+      let dataProviderName = incomingDataType["dataProviderName"];
+      // get dataProvider reference
+      let dataProvider = this.target.dataProviders.find(item => item.name === dataProviderName);
+      if (!isNullOrUndefined(dataProvider)) {
+        if (dataProvider.hasOwnProperty("incomingDataTypes")) {
+          // filter out the incoming variable from data provider
+          dataProvider.incomingDataTypes.splice(dataProvider.incomingDataTypes.indexOf(incomingDataType), 1);
+          // completely remove data provider if there are no associated data types
+          if (dataProvider.incomingDataTypes.length === 0) {
+            this.target.dataProviders.splice(this.target.dataProviders.indexOf(dataProvider), 1);
+          }
+        }
+      }
+    }
+    this.target.incomingDataTypes.splice(index, 1);
   }
 
   hasChanges(): boolean {

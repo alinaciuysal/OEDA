@@ -150,7 +150,6 @@ export class EditTargetsComponent implements OnInit {
     let dataProvider = this.target.dataProviders[index];
     if (dataProvider.hasOwnProperty("incomingDataTypes"))  {
       for (let i = 0; i < dataProvider.incomingDataTypes.length; i++) {
-        console.log("to be filtered", dataProvider.incomingDataTypes[i]);
         this.target.incomingDataTypes = this.target.incomingDataTypes.filter(dataType => dataType.name !== dataProvider.incomingDataTypes[i].name);
       }
     }

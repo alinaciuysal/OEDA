@@ -101,6 +101,8 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
             this.apiService.loadTargetById(experiment.targetSystemId).subscribe(targetSystem => {
               if (!isNullOrUndefined(targetSystem)) {
                 this.targetSystem = targetSystem;
+                console.log("exp", this.experiment);
+                console.log("ts", this.targetSystem);
                 // retrieve stages
                 this.apiService.loadAvailableStagesWithExperimentId(this.experiment_id).subscribe(stages => {
                   if (!isNullOrUndefined(stages)) {
@@ -141,7 +143,6 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
       if (ctrl.selected_stage.number === -1) {
         try {
           let processedData = ctrl.entityService.process_all_stage_data(stage_object, "timestamp", "value", ctrl.scale, ctrl.incoming_data_type_name, true);
-          console.log("processedData", processedData);
           if (!isNullOrUndefined(processedData)) {
             // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
             const clonedData = JSON.parse(JSON.stringify(processedData));
@@ -302,6 +303,16 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
       }
     }
     return true;
+  }
+
+  /** variables_to_be_optimized is retrieved from experiment definition.
+   * so, this function checks if given data type was selected for optimization or not
+   * TODO: it should check array in the future instead of string comparison*/
+  is_optimized(data_type_name) {
+    if (this.experiment.variables_to_be_optimized === data_type_name) {
+      return true;
+    }
+    return false;
   }
 
 }

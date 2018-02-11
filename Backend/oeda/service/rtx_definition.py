@@ -17,6 +17,7 @@ class RTXDefinition:
     all_knobs = None
     remaining_time_and_stages = None
     incoming_data_types = None
+    variables_to_be_optimized = None
 
     def __init__(self, oeda_experiment, oeda_target, oeda_callback, oeda_stop_request):
         self._oeda_experiment = oeda_experiment
@@ -29,6 +30,7 @@ class RTXDefinition:
         self.remaining_time_and_stages = dict() # contains remaining time and stage for an experiment
         self.change_provider = oeda_target["changeProvider"]
         self.incoming_data_types = oeda_target["incomingDataTypes"] # contains all of the data types provided by both config & user
+        self.variables_to_be_optimized = oeda_experiment["variables_to_be_optimized"] # TODO: this will be array in the future
 
         # set-up primary data provider
         primary_data_provider = oeda_target["primaryDataProvider"]
@@ -123,9 +125,9 @@ class RTXDefinition:
     def evaluator(result_state, wf):
         wf.stage_counter += 1
         # TODO: TEST this!
-        if hasattr(wf, "variables_to_be_optimized"):
-            return [result_state[i] for i in wf.variables_to_be_optimized]
-        return result_state["overhead"]
+        # if hasattr(wf, "variables_to_be_optimized"):
+        #     return [result_state[i] for i in wf.variables_to_be_optimized]
+        return result_state[wf.variables_to_be_optimized]
 
 
 def get_experiment_list(strategy_type, knobs):

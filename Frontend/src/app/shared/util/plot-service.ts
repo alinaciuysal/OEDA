@@ -179,7 +179,6 @@ export class PlotService {
 
   /** dstributes data to bins for histogram*/
   public categorize_data(data: any) {
-    console.log("data in categorize_data", data);
     const bins = [];
     const onlyValuesInData = this.extract_values_from_array(data, "value");
     const upperThresholdForBins = this.get_maximum_value_from_array(onlyValuesInData);

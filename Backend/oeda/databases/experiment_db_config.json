@@ -20,8 +20,9 @@
             "stages_count":            { "type": "integer" }
           }
         },
-        "created":        { "type": "date", "format": "yyyy-MM-dd HH:mm:ss.SSSSSS"},
-        "targetSystemId": { "type": "keyword"  }
+        "created":                  { "type": "date", "format": "yyyy-MM-dd HH:mm:ss.SSSSSS"},
+        "targetSystemId":           { "type": "keyword"  },
+        "variable_to_be_optimized": { "type": "keyword"  }
       }
     }
   },

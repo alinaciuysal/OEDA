@@ -52,7 +52,6 @@ def experimentFunction(wf, exp):
                 # NEW - we check for any interruption flags
                 if wf._oeda_stop_request.isSet():
                     raise RuntimeError("Experiment interrupted from OEDA while ignoring data.")
-        print("")
 
     # start collecting data
     sample_size = exp["sample_size"]
@@ -63,14 +62,13 @@ def experimentFunction(wf, exp):
             new_data = wf.primary_data_provider["instance"].returnData()
             if new_data is not None:
                 try:
-                    # print(new_data)
+                    exp["state"] = wf.primary_data_provider["data_reducer"](exp["state"], new_data, wf)
                     # NEW - we call back to oeda and give us infos there
                     wf.run_oeda_callback({"experiment": exp,
                                           "status": "COLLECTING_DATA",
                                           "index": i, "size": sample_size,
                                           str("current_knob"): dict(exp["knobs"]),
                                           "remaining_time_and_stages": wf.remaining_time_and_stages})
-                    exp["state"] = wf.primary_data_provider["data_reducer"](exp["state"], new_data, wf)
                 except StopIteration as e:
                     raise  # just fwd
                 except RuntimeError as e:
@@ -98,7 +96,6 @@ def experimentFunction(wf, exp):
                             tb = traceback.format_exc()
                             error("Exception:", str(tb))
                             error("Could not reduce data set: " + str(nd))
-        print("")
     except StopIteration as e:
         # this iteration should stop asap
         error("This stage got stopped as requested by the StopIteration exception:" + str(e))

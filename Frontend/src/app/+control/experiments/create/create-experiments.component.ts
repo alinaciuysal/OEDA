@@ -23,6 +23,7 @@ export class CreateExperimentsComponent implements OnInit {
   initialVariables: any;
   selectedTargetSystem: any;
   stages_count: any;
+  is_collapsed: boolean;
 
   constructor(private layout: LayoutService, private api: OEDAApiService,
               private router: Router, private notify: NotificationsService,
@@ -36,6 +37,7 @@ export class CreateExperimentsComponent implements OnInit {
     this.experiment = this.createExperiment();
     this.originalExperiment = _(this.experiment);
     this.stages_count = null;
+    this.is_collapsed = true;
   }
 
   ngOnInit(): void {
@@ -206,11 +208,6 @@ export class CreateExperimentsComponent implements OnInit {
 
   saveExperiment() {
     if (!this.hasErrors()) {
-
-      if (this.experiment.changeableVariable.length === 0) {
-        this.notify.error("Error", "Variable length cannot be 0");
-        return;
-      }
       const all_knobs = [];
       for (var j = 0; j < this.experiment.changeableVariable.length; j++) {
         const knob = [];
@@ -232,8 +229,16 @@ export class CreateExperimentsComponent implements OnInit {
       if (this.experiment.executionStrategy.type === "random") {
         this.experiment.executionStrategy.optimizer_iterations = Number(this.experiment.executionStrategy.optimizer_iterations);
         this.experiment.executionStrategy.optimizer_random_starts = Number(this.experiment.executionStrategy.optimizer_random_starts);
-        console.log(this.experiment);
       }
+
+      // now take the incoming data type labeled as "optimize"
+      for (var item of this.targetSystem.incomingDataTypes) {
+        if (item.is_optimized === true) {
+          this.experiment.variables_to_be_optimized = item.name;
+          break;
+        }
+      }
+      console.log(this.experiment);
       this.api.saveExperiment(this.experiment).subscribe(
         (success) => {
           this.notify.success("Success", "Experiment saved");
@@ -287,7 +292,19 @@ export class CreateExperimentsComponent implements OnInit {
       }
     }
 
-    return cond1 || cond2 || cond3 || cond4 || cond5 || cond6 || cond7 || cond8 || cond9 || cond10;
+    // check data types to be optimized
+    var cond11 = false;
+    let nr_of_incoming_data_types_to_be_optimized = 0;
+    for (var item of this.targetSystem.incomingDataTypes) {
+      if (item.is_optimized) {
+        nr_of_incoming_data_types_to_be_optimized += 1;
+      }
+    }
+    if (nr_of_incoming_data_types_to_be_optimized != 1) {
+      cond11 = true;
+    }
+
+    return cond1 || cond2 || cond3 || cond4 || cond5 || cond6 || cond7 || cond8 || cond9 || cond10 || cond11;
   }
 
   createExperiment(): Experiment {
@@ -298,7 +315,8 @@ export class CreateExperimentsComponent implements OnInit {
       "status": "",
       "targetSystemId": "",
       "executionStrategy": this.executionStrategy,
-      "changeableVariable": []
+      "changeableVariable": [],
+      "variables_to_be_optimized": "" // TODO: this will be converted into array
     }
   }
 

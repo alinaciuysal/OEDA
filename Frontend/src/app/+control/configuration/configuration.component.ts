@@ -54,19 +54,15 @@ export class ConfigurationComponent implements OnInit {
       this.user.db_configuration["host"] = this.configuration.host;
       this.user.db_configuration["port"] = this.configuration.port.toString();
       this.user.db_configuration["type"] = this.configuration.type;
-      console.log(this.user);
       this.api.updateUser(this.user).subscribe(
         (success) => {
-          console.log("success", success);
           ctrl.originalConfiguration = _(this.configuration);
           const parsed_json = JSON.parse(success['_body']);
-          console.log("parsed_json", parsed_json);
           ctrl.notify.success("Success", parsed_json["message"]);
           // after a successful update, use the retrieved token and put it into userService, so that user will be able to run experiments
           ctrl.userService.setAuthToken(parsed_json["token"]);
           this.save_button_clicked = false;
         }, (error => {
-          console.log("error", error);
           error = JSON.parse(error._body);
           ctrl.notify.error("Error", error.message);
           this.save_button_clicked = false;

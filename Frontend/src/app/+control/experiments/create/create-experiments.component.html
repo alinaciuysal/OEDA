@@ -1,5 +1,5 @@
 <div class="row">
-
+  <!--Target System Selection, Description, Details Button, Status, Create Experiment Button-->
   <div class="col-sm-12 col-xs-12">
     <div class="panel panel-default chartJs">
       <div class="panel-heading">
@@ -27,12 +27,24 @@
             </div>
           </div>
 
-          <div class="col-md-6" *ngIf="targetSystem.name !== ''">
+          <div class="col-md-4" *ngIf="targetSystem.name !== ''">
             <div class="sub-title">Description</div>
             <span>{{targetSystem.description}}</span>
           </div>
 
           <div class="col-md-3" *ngIf="targetSystem.name !== ''">
+            <div class="sub-title">Details</div>
+            <button type="button" class="btn btn-orange"
+                    (click)="is_collapsed = !is_collapsed">
+              <span *ngIf="is_collapsed">Show</span>
+              <i *ngIf="is_collapsed" class="fa fa-angle-double-down" aria-hidden="true"></i>
+
+              <span *ngIf="!is_collapsed">Hide</span>
+              <i *ngIf="!is_collapsed" class="fa fa-angle-double-up" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <div class="col-md-2" *ngIf="targetSystem.name !== ''">
             <div class="sub-title">Status</div>
             <label *ngIf="targetSystem.status == 'READY'" class="label label-success">READY</label>
             <label *ngIf="targetSystem.status == 'WORKING'" class="label label-info">WORKING</label>
@@ -40,8 +52,6 @@
           </div>
         </div>
       </div>
-
-
       <div class="panel-body" *ngIf="availableTargetSystems.length == 0" style="padding-top: 20px">
         <div class="row">
           <div class="col-md-6">
@@ -51,12 +61,10 @@
           </div>
         </div>
       </div>
-
-
     </div>
   </div>
 
-  <!--NEWLY ADDED ONE-->
+  <!--Experiment Parameters-->
   <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''">
     <div class="panel panel-default chartJs">
       <div class="panel-heading">
@@ -73,8 +81,9 @@
     </div>
   </div>
 
-  <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''" >
-    <!-- Primary Data Provider -->
+  <!-- Primary Data Provider & Secondary Data Provider(s)-->
+  <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed">
+
     <div class="col-sm-6 col-xs-12" style="padding-left: 0">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
@@ -85,51 +94,137 @@
         <div class="panel-body" style="padding-top: 20px">
 
           <div class="row" *ngIf="targetSystem.primaryDataProvider.type == 'http_request'">
-            <div class="col-md-6">
+            <div class="col-md-3">
+              <div class="sub-title">Name</div>
+              <span>{{targetSystem.primaryDataProvider.name}}</span>
+            </div>
+            <div class="col-md-3">
               <div class="sub-title">URL</div>
               <span>{{targetSystem.primaryDataProvider.url}}</span>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
               <div class="sub-title">Port</div>
               <span>{{targetSystem.primaryDataProvider.port}}</span>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
               <div class="sub-title">Serializer</div>
               <span>{{targetSystem.primaryDataProvider.serializer}}</span>
             </div>
           </div>
 
           <div class="row" *ngIf="targetSystem.primaryDataProvider.type == 'kafka_consumer'">
-            <div class="col-md-6">
+            <div class="col-md-3">
+              <div class="sub-title">Name</div>
+              <span>{{targetSystem.primaryDataProvider.name}}</span>
+            </div>
+            <div class="col-md-3">
               <div class="sub-title">Kafka URI</div>
               <span>{{targetSystem.primaryDataProvider.kafka_uri}}</span>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
               <div class="sub-title">Topic</div>
               <span>{{targetSystem.primaryDataProvider.topic}}</span>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
               <div class="sub-title">Serializer</div>
               <span>{{targetSystem.primaryDataProvider.serializer}}</span>
             </div>
           </div>
 
           <div class="row" *ngIf="targetSystem.primaryDataProvider.type == 'mqtt_listener'">
-            <div class="col-md-6">
+            <div class="col-md-2">
+              <div class="sub-title">Name</div>
+              <span>{{targetSystem.primaryDataProvider.name}}</span>
+            </div>
+            <div class="col-md-3">
               <div class="sub-title">Host</div>
               <span>{{targetSystem.primaryDataProvider.host}}</span>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
               <div class="sub-title">Port</div>
               <span>{{targetSystem.primaryDataProvider.port}}</span>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
               <div class="sub-title">Topic</div>
               <span>{{targetSystem.primaryDataProvider.topic}}</span>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-1">
               <div class="sub-title">Serializer</div>
               <span>{{targetSystem.primaryDataProvider.serializer}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secondary Data Provider(s) -->
+      <div class="panel panel-default chartJs" *ngIf="targetSystem.secondaryDataProviders.length > 0">
+        <div class="panel-heading">
+          <div class="card-title">
+            <div class="title pull-left" *ngIf="targetSystem.secondaryDataProviders.length > 1">Secondary Data Providers</div>
+            <div class="title pull-left" *ngIf="targetSystem.secondaryDataProviders.length == 1">Secondary Data Provider</div>
+          </div>
+        </div>
+        <div class="panel-body" style="padding-top: 20px">
+          <div class="row" *ngFor="let secondaryDataProvider of targetSystem.secondaryDataProviders">
+            <div *ngIf="secondaryDataProvider.type == 'http_request'">
+              <div class="col-md-3">
+                <div class="sub-title">Name</div>
+                <span>{{secondaryDataProvider.name}}</span>
+              </div>
+              <div class="col-md-3">
+                <div class="sub-title">URL</div>
+                <span>{{secondaryDataProvider.url}}</span>
+              </div>
+              <div class="col-md-3">
+                <div class="sub-title">Port</div>
+                <span>{{secondaryDataProvider.port}}</span>
+              </div>
+              <div class="col-md-3">
+                <div class="sub-title">Serializer</div>
+                <span>{{secondaryDataProvider.serializer}}</span>
+              </div>
+            </div>
+
+            <div *ngIf="secondaryDataProvider.type == 'kafka_consumer'">
+              <div class="col-md-3">
+                <div class="sub-title">Name</div>
+                <span>{{secondaryDataProvider.name}}</span>
+              </div>
+              <div class="col-md-3">
+                <div class="sub-title">Kafka URI</div>
+                <span>{{secondaryDataProvider.kafka_uri}}</span>
+              </div>
+              <div class="col-md-3">
+                <div class="sub-title">Topic</div>
+                <span>{{secondaryDataProvider.topic}}</span>
+              </div>
+              <div class="col-md-3">
+                <div class="sub-title">Serializer</div>
+                <span>{{secondaryDataProvider.serializer}}</span>
+              </div>
+            </div>
+
+            <div *ngIf="secondaryDataProvider.type == 'mqtt_listener'">
+              <div class="col-md-2">
+                <div class="sub-title">Name</div>
+                <span>{{secondaryDataProvider.name}}</span>
+              </div>
+              <div class="col-md-3">
+                <div class="sub-title">Host</div>
+                <span>{{secondaryDataProvider.host}}</span>
+              </div>
+              <div class="col-md-3">
+                <div class="sub-title">Port</div>
+                <span>{{secondaryDataProvider.port}}</span>
+              </div>
+              <div class="col-md-3">
+                <div class="sub-title">Topic</div>
+                <span>{{secondaryDataProvider.topic}}</span>
+              </div>
+              <div class="col-md-1">
+                <div class="sub-title">Serializer</div>
+                <span>{{secondaryDataProvider.serializer}}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -147,49 +242,49 @@
         <div class="panel-body" style="padding-top: 20px">
 
           <div class="row" *ngIf="targetSystem.changeProvider.type == 'http_request'">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="sub-title">URL</div>
               <span>{{targetSystem.changeProvider.url}}</span>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="sub-title">Port</div>
               <span>{{targetSystem.changeProvider.port}}</span>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="sub-title">Serializer</div>
               <span>{{targetSystem.changeProvider.serializer}}</span>
             </div>
           </div>
 
           <div class="row" *ngIf="targetSystem.changeProvider.type == 'kafka_producer'">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="sub-title">Kafka URI</div>
               <span>{{targetSystem.changeProvider.kafka_uri}}</span>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="sub-title">Topic</div>
               <span>{{targetSystem.changeProvider.topic}}</span>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="sub-title">Serializer</div>
               <span>{{targetSystem.changeProvider.serializer}}</span>
             </div>
           </div>
 
           <div class="row" *ngIf="targetSystem.changeProvider.type == 'mqtt_listener'">
-            <div class="col-md-6">
+            <div class="col-md-3">
               <div class="sub-title">Host</div>
               <span>{{targetSystem.changeProvider.host}}</span>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
               <div class="sub-title">Port</div>
               <span>{{targetSystem.changeProvider.port}}</span>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
               <div class="sub-title">Topic</div>
               <span>{{targetSystem.changeProvider.topic}}</span>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
               <div class="sub-title">Serializer</div>
               <span>{{targetSystem.changeProvider.serializer}}</span>
             </div>
@@ -199,84 +294,92 @@
     </div>
   </div>
 
-  <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''" >
-    <!-- Incoming Data Types -->
-    <div class="col-sm-6 col-xs-12" style="padding-left: 0">
-      <div class="panel panel-default chartJs">
-        <div class="panel-heading">
-          <div class="card-title">
-            <div class="title pull-left">Incoming Data Types</div>
-          </div>
+  <!-- Incoming Data Types -->
+  <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''">
+    <div class="panel panel-default chartJs">
+      <div class="panel-heading">
+        <div class="card-title">
+          <div class="title pull-left">Incoming Data Types</div>
         </div>
-        <div class="panel-body" style="padding-top: 20px">
-          <table>
+      </div>
+      <div class="panel-body" style="padding-top: 20px">
+        <table class="table table-striped table-bordered table-hover">
+          <thead>
+            <th style="padding-left: 1%">Name</th>
+            <th style="padding-left: 1%">Scale</th>
+            <th style="padding-left: 1%">Description</th>
+            <th style="padding-left: 1%">Data Provider Name</th>
+            <th style="padding-left: 1%">Optimize</th>
+          </thead>
+          <tbody>
+          <tr *ngFor="let dataType of targetSystem.incomingDataTypes" style="padding-top: 1%">
+            <td>{{dataType.name}}</td>
+            <td>{{dataType.scale}}</td>
+            <td>{{dataType.description}}</td>
+            <td>{{dataType.dataProviderName}}</td>
+            <td>
+              <input type="checkbox" class="form-check-input"
+                     [(ngModel)]="dataType['is_optimized']"
+                     data-toggle="tooltip"
+                     title="Select one incoming data type to be optimized">
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!--Changeable Variables -->
+  <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''">
+    <div class="panel panel-default chartJs">
+      <div class="panel-heading">
+        <div class="card-title">
+          <div class="title pull-left">Changeable Variables</div>
+        </div>
+      </div>
+      <div class="panel-body" style="padding-top: 20px">
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered table-hover">
             <thead>
             <th style="width: 5%">Name</th>
             <th style="width: 5%">Scale</th>
             <th style="width: 5%">Description</th>
+            <th style="width: 5%">Min</th>
+            <th style="width: 5%">Max</th>
+            <th style="width: 4%">
+              <div class="btn btn-xs btn-orange" (click)="addAllChangeableVariables()"
+                   *ngIf="targetSystem.changeableVariable.length > 1 && targetSystem.changeableVariable.length != experiment.changeableVariable.length">
+                <i class="fa fa-plus push-5-r"></i> Add All
+              </div>
+            </th>
             </thead>
             <tbody>
-            <tr *ngFor="let dataType of targetSystem.incomingDataTypes" style="padding-top: 1%">
-              <td style="padding-top: 1%">{{dataType.name}}</td>
-              <td>{{dataType.scale}}</td>
-              <td>{{dataType.description}}</td>
+            <tr *ngFor="let dataType of targetSystem.changeableVariable" style="padding-top: 1%">
+              <td style="padding-top: 2%">{{dataType.name}}</td>
+              <td style="padding-top: 2%">{{dataType.scale}}</td>
+              <td style="padding-top: 2%; width: 5%">{{dataType.description}}</td>
+              <td style="padding-top: 2%">{{dataType.min}}</td>
+              <td style="padding-top: 2%; width: 5%">{{dataType.max}}</td>
+              <td style="padding-top: 2%">
+                <div class="btn btn-xs btn-orange" (click)="addChangeableVariable(dataType)"
+                     *ngIf="targetSystem.changeableVariable.length > 0 && targetSystem.changeableVariable.length != experiment.changeableVariable.length">
+                  <i class="fa fa-plus push-5-r"></i> Add
+                </div>
+              </td>
             </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
-
-    <!--Changeable Variables -->
-    <div class="col-sm-6 col-xs-12" style="padding-right: 0">
-      <div class="panel panel-default chartJs">
-        <div class="panel-heading">
-          <div class="card-title">
-            <div class="title pull-left">Changeable Variables</div>
-          </div>
-        </div>
-        <div class="panel-body" style="padding-top: 20px">
-          <div class="table-responsive">
-            <table>
-              <thead>
-              <th style="width: 5%">Name</th>
-              <th style="width: 5%">Scale</th>
-              <th style="width: 5%">Description</th>
-              <th style="width: 5%">Min</th>
-              <th style="width: 5%">Max</th>
-              <th style="width: 4%">
-                <div class="btn btn-xs btn-orange" (click)="addAllChangeableVariables()"
-                     *ngIf="targetSystem.changeableVariable.length > 1 && targetSystem.changeableVariable.length != experiment.changeableVariable.length">
-                  <i class="fa fa-plus push-5-r"></i> Add All
-                </div>
-              </th>
-              </thead>
-              <tbody>
-              <tr *ngFor="let dataType of targetSystem.changeableVariable" style="padding-top: 1%">
-                <td style="padding-top: 2%">{{dataType.name}}</td>
-                <td style="padding-top: 2%">{{dataType.scale}}</td>
-                <td style="padding-top: 2%; width: 5%">{{dataType.description}}</td>
-                <td style="padding-top: 2%">{{dataType.min}}</td>
-                <td style="padding-top: 2%; width: 5%">{{dataType.max}}</td>
-                <td style="padding-top: 2%">
-                  <div class="btn btn-xs btn-orange" (click)="addChangeableVariable(dataType)"
-                       *ngIf="targetSystem.changeableVariable.length > 0 && targetSystem.changeableVariable.length != experiment.changeableVariable.length">
-                    <i class="fa fa-plus push-5-r"></i> Add
-                  </div>
-                </td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 
+  <!--Execution Strategy & Added Variables-->
   <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== '' && experiment.changeableVariable.length > 0" >
 
     <!-- Execution Strategy is allowed to be selected after adding some variables to experiment -->
-    <div class="col-sm-6 col-xs-12" style="padding-left: 0">
+    <div class="col-sm-4 col-xs-4" style="padding-left: 0">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">
@@ -317,8 +420,8 @@
     </div>
 
 
-    <!-- Variables added by User -->
-    <div class="col-sm-6 col-xs-12" style="padding-right: 0">
+    <!-- Added Variables -->
+    <div class="col-sm-8 col-xs-8" style="padding-right: 0">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">
@@ -335,12 +438,16 @@
           <div class="row" *ngFor="let input of experiment.changeableVariable; let i = index">
             <div class="row">
               <div class="row" style="padding-left: 5%">
-                <labeled-input name="Name" [model]="input" key="name" [colSize]="4" disabled="true"></labeled-input>
+                <labeled-input name="Name" [model]="input" key="name" [colSize]="3" disabled="true"></labeled-input>
                 <labeled-input inputType="number" name="Min" [model]="input" key="min" [colSize]="2" (modelChanged)="minMaxModelsChanged($event)"></labeled-input>
                 <labeled-input inputType="number" name="Max" [model]="input" key="max" [colSize]="2" (modelChanged)="minMaxModelsChanged($event)"></labeled-input>
                 <labeled-input *ngIf="experiment.executionStrategy.type == 'step_explorer'" inputType="number" name="Step Size" [model]="input" key="step" [colSize]="2" (modelChanged)="stepSizeChanged($event)"></labeled-input>
-                <div class="col-md-3 pull-left">
-                  <div (click)="removeChangeableVariable(i, input)" class="btn btn-xs btn-primary"><i class="fa fa-remove"></i>Remove</div>
+                <div class="col-sm-1">
+                  <div class="sub-title">
+                    <div>
+                      <div (click)="removeChangeableVariable(i, input)" class="btn btn-xs btn-primary"><i class="fa fa-remove"></i> Remove</div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <hr class="col-md-12">

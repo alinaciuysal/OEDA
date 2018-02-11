@@ -328,7 +328,6 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     const ctrl = this;
     // set it to false in case a new scale is selected
     ctrl.is_enough_data_for_plots = false;
-    console.log("INCOMING DATA TYPE initial", ctrl.incoming_data_type_name);
 
     // if "all stages" is selected
     if (ctrl.selected_stage.number == -1) {
@@ -388,7 +387,6 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
 
   /** called when incoming data type of the target system is changed */
   incoming_data_type_changed() {
-    console.log(this.incoming_data_type_name);
     this.draw_all_plots();
   }
 
@@ -478,7 +476,16 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
         }
       }
     }
-    console.log("seni sectim pikacu", this.incoming_data_type_name);
+  }
+
+  /** variables_to_be_optimized is retrieved from experiment definition.
+   * so, this function checks if given data type was selected for optimization or not
+   * TODO: it should check array in the future instead of string comparison*/
+  is_optimized(data_type_name) {
+    if (this.experiment.variables_to_be_optimized === data_type_name) {
+      return true;
+    }
+    return false;
   }
 
   // helper function that filters out data above the given threshold

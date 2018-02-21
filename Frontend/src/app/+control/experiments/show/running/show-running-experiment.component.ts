@@ -59,7 +59,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
   public is_enough_data_for_plots: boolean;
   public is_all_stages_selected: boolean;
 
-  public incoming_data_type_name: string;
+  public incoming_data_type: object;
 
   public available_stages = [];
   public available_stages_for_qq_js = [];
@@ -331,12 +331,12 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
 
     // if "all stages" is selected
     if (ctrl.selected_stage.number == -1) {
-      ctrl.processedData = ctrl.entityService.process_all_stage_data(ctrl.all_data, "timestamp", "value", ctrl.scale, ctrl.incoming_data_type_name, false);
+      ctrl.processedData = ctrl.entityService.process_all_stage_data(ctrl.all_data, "timestamp", "value", ctrl.scale, ctrl.incoming_data_type["name"], false);
     }
     // if any other stage is selected
     else {
       ctrl.processedData = ctrl.all_data[ctrl.selected_stage.number - 1];
-      ctrl.processedData = ctrl.entityService.process_single_stage_data(ctrl.processedData,"timestamp", "value", ctrl.scale, ctrl.incoming_data_type_name, false);
+      ctrl.processedData = ctrl.entityService.process_single_stage_data(ctrl.processedData,"timestamp", "value", ctrl.scale, ctrl.incoming_data_type["name"], false);
     }
     // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
     const clonedData = JSON.parse(JSON.stringify(ctrl.processedData));
@@ -351,8 +351,8 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     document.getElementById(ctrl.filterSummaryId).innerHTML = "<p>Threshold for 95-percentile: <b>" + ctrl.initial_threshold_for_scatter_plot + "</b> and # of points to be removed: <b>" + ctrl.nr_points_to_be_filtered + "</b></p>";
 
     if (ctrl.first_render_of_plots) {
-      ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot(ctrl.divId, ctrl.filterSummaryId, ctrl.processedData, ctrl.incoming_data_type_name, ctrl.initial_threshold_for_scatter_plot);
-      ctrl.histogram = ctrl.plotService.draw_histogram(ctrl.histogramDivId, ctrl.processedData, ctrl.incoming_data_type_name);
+      ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot(ctrl.divId, ctrl.filterSummaryId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_plot);
+      ctrl.histogram = ctrl.plotService.draw_histogram(ctrl.histogramDivId, ctrl.processedData, ctrl.incoming_data_type["name"]);
       ctrl.first_render_of_plots = false;
     } else {
       // now update (validate) values & threshold value and its guide (line) of the scatter plot
@@ -360,8 +360,8 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
       ctrl.scatter_plot.graphs[0].negativeBase = ctrl.initial_threshold_for_scatter_plot;
       ctrl.scatter_plot.valueAxes[0].guides[0].value = ctrl.initial_threshold_for_scatter_plot;
       // also rename label of charts in case of a change
-      ctrl.scatter_plot.valueAxes[0].title = ctrl.incoming_data_type_name;
-      ctrl.histogram.categoryAxis.title = ctrl.incoming_data_type_name;
+      ctrl.scatter_plot.valueAxes[0].title = ctrl.incoming_data_type["name"];
+      ctrl.histogram.categoryAxis.title = ctrl.incoming_data_type["name"];
       // https://docs.amcharts.com/3/javascriptcharts/AmChart, following refers to validateNow(validateData = true, skipEvents = false)
       ctrl.scatter_plot.validateNow(true, false);
       ctrl.histogram.dataProvider = ctrl.plotService.categorize_data(ctrl.processedData);
@@ -372,35 +372,111 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
 
   /** called when stage dropdown (All Stages, Stage 1 [...], Stage 2 [...], ...) in main page is changed */
   stage_changed() {
-    if (isNullOrUndefined(this.scale)) {
-      this.notify.error("Error", "Scale is null or undefined, please try again");
-      return;
+    if (this.entityService.scale_allowed(this.scale, this.incoming_data_type["scale"])) {
+      this.draw_all_plots();
+    } else {
+     this.notify.error(this.scale + " scale cannot be applied to " + this.incoming_data_type["name"]);
     }
-    this.draw_all_plots();
   }
 
   /** called when scale dropdown (Normal, Log) in main page is changed */
-  scale_changed(scale: string) {
-    this.scale = scale;
-    this.draw_all_plots();
+  scale_changed(user_selected_scale: string) {
+    if (this.entityService.scale_allowed(user_selected_scale, this.incoming_data_type["scale"])) {
+      this.scale = user_selected_scale;
+      this.draw_all_plots();
+    } else {
+      this.notify.error(user_selected_scale + " scale cannot be applied to " + this.incoming_data_type["name"]);
+    }
   }
 
   /** called when incoming data type of the target system is changed */
   incoming_data_type_changed() {
-    this.draw_all_plots();
+    if (this.entityService.scale_allowed(this.scale, this.incoming_data_type["scale"])) {
+      this.draw_all_plots();
+    } else {
+      this.notify.error(this.scale + " scale cannot be applied to " + this.incoming_data_type["name"]);
+    }
   }
 
   /** returns true if payload object at index 0 contains the selected incoming data type */
-  is_data_type_disabled(incoming_data_type_name): boolean {
+  is_data_type_disabled(incoming_data_type): boolean {
     const first_stage = this.all_data[0];
     if (first_stage !== undefined) {
       if (first_stage.hasOwnProperty("values")) {
         const first_tuple = first_stage.values;
         const first_payload = first_tuple[0]["payload"];
-        return !first_payload.hasOwnProperty(incoming_data_type_name);
+        return !first_payload.hasOwnProperty(incoming_data_type["name"]);
       }
     }
     return true;
+  }
+
+  /** returns keys the given data structure */
+  keys(object) : Array<string> { //this.oedaCallback.current_knob
+    if (!isNullOrUndefined(object)) {
+      return Object.keys(object);
+    }
+  }
+
+  /** tries to set the initially-selected incoming data type name by looking at the payload
+   *  we retrieve stages and data points in following format
+   *  e.g. [ 0: {number: 1, values: ..., knobs: [...]}, 1: {number: 2, values: ..., knobs: [...] }...]
+   *  this method should be called after checking whether it's the first render of page or not.
+   *  because, if it's not the first time, then user's selection of incoming data type (via dropdown UI) is important
+   *  but: before plotting, we must ensure that a proper & valid incoming data type is selected
+   */
+  private set_candidate_data_type(): void {
+    if(!this.incoming_data_type["name"]) {
+      for (let j = 0; j < this.targetSystem.incomingDataTypes.length; j++) {
+        const candidate_incoming_data_type = this.targetSystem.incomingDataTypes[j];
+        if (!this.is_data_type_disabled(candidate_incoming_data_type["name"])) {
+          this.incoming_data_type = candidate_incoming_data_type;
+          break;
+        }
+      }
+    }
+  }
+
+  /** variables_to_be_optimized is retrieved from experiment definition.
+   * so, this function checks if given data type was selected for optimization or not
+   * TODO: it should check array in the future instead of string comparison*/
+  is_optimized(data_type_name) {
+    if (this.experiment.variables_to_be_optimized === data_type_name) {
+      return true;
+    }
+    return false;
+  }
+
+  // helper function that filters out data above the given threshold
+  filter_outliers(event) {
+    const target = event.target || event.srcElement || event.currentTarget;
+    const idAttr = target.attributes.id;
+    const value = idAttr.nodeValue;
+    console.log(target);
+    console.log(idAttr);
+    console.log(value);
+  }
+
+  stopRunningExperiment(): void {
+    alert("Do you really want to stop the running experiment?");
+    this.experiment.status = "INTERRUPTED";
+    this.apiService.updateExperiment(this.experiment).subscribe(() => {
+      this.targetSystem.status = "READY";
+      this.apiService.updateTarget(this.targetSystem).subscribe(() => {
+        this.subscription.unsubscribe();
+        // set temp_storage so that experiments page will reflect the new status of it
+        this.temp_storage.setNewValue(this.experiment);
+        // switch to regular experiments page
+        this.router.navigate(["control/experiments"]).then(() => {
+          console.log("navigated to experiments page");
+          this.notify.success("Success", "Experiment stopped successfully");
+        });
+      }, errorResp2 => {
+        this.notify.error("Error", errorResp2.message);
+      });
+    }, errorResp => {
+      this.notify.error("Error", errorResp.message);
+    });
   }
 
   /** disables polling upon user click, and informs user */
@@ -428,73 +504,5 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
       this.fetch_oeda_callback();
     });
     this.notify.success("Success", "Polling enabled");
-  }
-
-  /** returns keys the given data structure */
-  keys(object) : Array<string> { //this.oedaCallback.current_knob
-    if (!isNullOrUndefined(object)) {
-      return Object.keys(object);
-    }
-  }
-
-  stopRunningExperiment(): void {
-    alert("Do you really want to stop the running experiment?");
-    this.experiment.status = "INTERRUPTED";
-    this.apiService.updateExperiment(this.experiment).subscribe(() => {
-      this.targetSystem.status = "READY";
-      this.apiService.updateTarget(this.targetSystem).subscribe(() => {
-        this.subscription.unsubscribe();
-        // set temp_storage so that experiments page will reflect the new status of it
-        this.temp_storage.setNewValue(this.experiment);
-        // switch to regular experiments page
-        this.router.navigate(["control/experiments"]).then(() => {
-          console.log("navigated to experiments page");
-          this.notify.success("Success", "Experiment stopped successfully");
-        });
-      }, errorResp2 => {
-        this.notify.error("Error", errorResp2.message);
-      });
-    }, errorResp => {
-      this.notify.error("Error", errorResp.message);
-    });
-  }
-
-  /** tries to set the initially-selected incoming data type name by looking at the payload
-   *  we retrieve stages and data points in following format
-   *  e.g. [ 0: {number: 1, values: ..., knobs: [...]}, 1: {number: 2, values: ..., knobs: [...] }...]
-   *  this method should be called after checking whether it's the first render of page or not.
-   *  because, if it's not the first time, then user's selection of incoming data type (via dropdown UI) is important
-   *  but: before plotting, we must ensure that a proper & valid incoming data type is selected
-   */
-  private set_candidate_data_type(): void {
-    if(!this.incoming_data_type_name) {
-      for (let j = 0; j < this.targetSystem.incomingDataTypes.length; j++) {
-        const candidate_incoming_data_type_name = this.targetSystem.incomingDataTypes[j]["name"];
-        if (!this.is_data_type_disabled(candidate_incoming_data_type_name)) {
-          this.incoming_data_type_name = candidate_incoming_data_type_name;
-          break;
-        }
-      }
-    }
-  }
-
-  /** variables_to_be_optimized is retrieved from experiment definition.
-   * so, this function checks if given data type was selected for optimization or not
-   * TODO: it should check array in the future instead of string comparison*/
-  is_optimized(data_type_name) {
-    if (this.experiment.variables_to_be_optimized === data_type_name) {
-      return true;
-    }
-    return false;
-  }
-
-  // helper function that filters out data above the given threshold
-  filter_outliers(event) {
-    const target = event.target || event.srcElement || event.currentTarget;
-    const idAttr = target.attributes.id;
-    const value = idAttr.nodeValue;
-    console.log(target);
-    console.log(idAttr);
-    console.log(value);
   }
 }

@@ -377,8 +377,8 @@
 
           <div class="col-md-3">
             <div class="card-title">
-              <select class="form-control" [(ngModel)]="incoming_data_type_name" (change)="incoming_data_type_changed()">
-                <option *ngFor="let i of targetSystem.incomingDataTypes" [ngValue]="i.name">
+              <select class="form-control" [(ngModel)]="incoming_data_type" (change)="incoming_data_type_changed()">
+                <option *ngFor="let i of targetSystem.incomingDataTypes" [ngValue]="i">
                   {{i.name}}
                 </option>
               </select>

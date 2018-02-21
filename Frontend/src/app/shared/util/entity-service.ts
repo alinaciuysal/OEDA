@@ -9,22 +9,12 @@ export class EntityService {
 
   constructor(public notify: NotificationsService, public log: LoggerService) {}
 
-  public create_entity(): Entity {
-    return {
-      number: "",
-      values: [],
-      knobs: null
-    }
-  }
+
 
   /** returns data of the selected stage from all_data structure */
   public get_data_from_local_structure(all_data, stage_no) {
     let retrieved_data = all_data[stage_no - 1];
     if (retrieved_data !== undefined) {
-      // if (retrieved_data.values.length === 0) {
-      //   this.notify.error("Error", "Selected stage might not contain data points. Please select another stage.");
-      //   return;
-      // }
       return retrieved_data;
     } else {
       this.notify.error("Error", "Cannot retrieve data from local storage");
@@ -174,6 +164,22 @@ export class EntityService {
       password: "",
       db_configuration: new Map<string, string>()
     };
+  }
+
+  public create_entity(): Entity {
+    return {
+      number: "",
+      values: [],
+      knobs: null
+    }
+  }
+
+  /** we do not allow user to take Log of Nominal data */
+  public scale_allowed(user_selected_scale, data_scale) {
+    if (user_selected_scale === "Log" && data_scale === "Nominal") {
+      return false;
+    }
+    return true;
   }
 
 }

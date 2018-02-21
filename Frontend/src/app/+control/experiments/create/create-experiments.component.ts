@@ -288,7 +288,7 @@ export class CreateExperimentsComponent implements OnInit {
       }
     }
 
-    // check data types to be optimized
+    // check data types to be optimized (minimize or maximize)
     var cond11 = false;
     let nr_of_incoming_data_types_to_be_optimized = 0;
     for (var item of this.targetSystem.incomingDataTypes) {

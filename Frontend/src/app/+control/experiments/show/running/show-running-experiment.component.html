@@ -268,6 +268,7 @@
                   <th style="padding-left: 2%">Scale</th>
                   <th style="padding-left: 2%">Description</th>
                   <th style="padding-left: 2%">Data Provider Name</th>
+                  <th style="padding-left: 2%">Optimization Criteria</th>
                   <th style="padding-left: 2%; padding-right: 2%">Consider</th>
                 </thead>
                 <tbody>
@@ -276,6 +277,7 @@
                   <td>{{dataType.scale}}</td>
                   <td>{{dataType.description}}</td>
                   <td>{{dataType.dataProviderName}}</td>
+                  <td>{{dataType.criteria}}</td>
                   <td *ngIf="is_optimized(dataType.name)">Yes</td>
                   <td *ngIf="!is_optimized(dataType.name)">No</td>
                 </tr>

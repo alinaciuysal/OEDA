@@ -364,7 +364,8 @@ export class EditTargetsComponent implements OnInit {
           || this.target.incomingDataTypes[i].length === 0
           || this.target.incomingDataTypes[i].description == null
           || this.target.incomingDataTypes[i].description === 0
-          || isNullOrUndefined(this.target.incomingDataTypes[i].scale))
+          || isNullOrUndefined(this.target.incomingDataTypes[i].scale)
+          || isNullOrUndefined(this.target.incomingDataTypes[i].criteria))
         return true;
     }
 

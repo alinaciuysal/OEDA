@@ -320,6 +320,7 @@
             <th style="padding-left: 1%">Scale</th>
             <th style="padding-left: 1%">Description</th>
             <th style="padding-left: 1%">Data Provider Name</th>
+            <th style="padding-left: 1%">Optimization Criteria</th>
             <th style="padding-left: 1%">Consider</th>
           </thead>
           <tbody>
@@ -328,6 +329,7 @@
             <td>{{dataType.scale}}</td>
             <td>{{dataType.description}}</td>
             <td>{{dataType.dataProviderName}}</td>
+            <td>{{dataType.criteria}}</td>
             <td>
               <input type="checkbox" class="form-check-input"
                      [(ngModel)]="dataType['is_optimized']"

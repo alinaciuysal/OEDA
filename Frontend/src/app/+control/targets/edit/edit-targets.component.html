@@ -172,6 +172,9 @@
                                 data-toggle="tooltip" title="Select Nominal scale for boolean values">
             <!--TODO: add more informative scale tips here-->
           </labeled-input-select>
+          <labeled-input-select name="Optimization Criteria" [model]="input" key="criteria" [colSize]="5"
+                                [options]="[{key:'Minimize',label:'Minimize'},
+                                {key:'Maximize',label:'Maximize'}]"></labeled-input-select>
           <hr class="col-md-12">
         </div>
       </div>

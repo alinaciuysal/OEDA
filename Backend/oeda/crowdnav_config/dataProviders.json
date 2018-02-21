@@ -11,17 +11,20 @@
         "name": "overhead",
         "description": "overhead of the trips",
         "scale": "Metric",
-        "dataProviderName": "Trips"
+        "dataProviderName": "Trips",
+        "criteria": "Minimize"
       }, {
         "name": "complaint",
         "description": "complaint indicator if overhead of a trip is greater than zero in a uniformly distributed manner",
         "scale": "Metric",
-        "dataProviderName": "Trips"
+        "dataProviderName": "Trips",
+        "criteria": "Minimize"
       }, {
         "name": "minimalCosts",
         "description": "optimal costs of the trips",
         "scale": "Metric",
-        "dataProviderName": "Trips"
+        "dataProviderName": "Trips",
+        "criteria": "Minimize"
       }
     ]
   }, {
@@ -36,7 +39,8 @@
         "name": "lastTickDuration",
         "description": "last tick duration processed by the system before generating a new car",
         "scale": "Metric",
-        "dataProviderName": "Performance"
+        "dataProviderName": "Performance",
+        "criteria": "Minimize"
       }
     ]
   }, {
@@ -51,7 +55,8 @@
         "name": "routingDuration",
         "description": "time for routing a car",
         "scale": "Metric",
-        "dataProviderName": "Routing"
+        "dataProviderName": "Routing",
+        "criteria": "Minimize"
       }
     ]
   }

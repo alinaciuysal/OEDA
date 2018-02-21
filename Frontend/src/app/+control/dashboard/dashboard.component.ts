@@ -20,11 +20,6 @@ export class DashboardComponent {
       (response) => {
         this.notify.success("Success", response.message);
         this.is_cleared = true;
-        // this.router.navigate(["control/experiments/show/" + this.experiment.id + "/running"]).then(() => {
-        //   console.log("navigated to newly created experiment running page");
-        // });
-        // this.temp_storage.setNewValue(this.experiment);
-        // this.router.navigate(["control/experiments"])
       }, (error) => {
         this.notify.error("Error", error.toString());
       }

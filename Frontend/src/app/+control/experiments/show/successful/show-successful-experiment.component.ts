@@ -249,17 +249,6 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     });
   }
 
-  /** tries to set the initially-selected incoming data type name by looking at the payload */
-  private set_candidate_data_type(): void {
-    for (let j = 0; j < this.targetSystem.incomingDataTypes.length; j++) {
-      const candidate_incoming_data_type = this.targetSystem.incomingDataTypes[j];
-      if (!this.is_data_type_disabled(candidate_incoming_data_type)) {
-        this.incoming_data_type = candidate_incoming_data_type;
-        break;
-      }
-    }
-  }
-
   /** retrieves all_data from server */
   private fetch_data() {
     const ctrl = this;
@@ -271,7 +260,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
         }
         this.all_data = ctrl.entityService.process_response_for_successful_experiment(this.all_data, data);
         if(this.first_render_of_page) {
-          this.set_candidate_data_type();
+          this.incoming_data_type = this.entityService.get_candidate_data_type(this.targetSystem, this.all_data[0]);
           this.first_render_of_page = false;
         }
         this.draw_all_plots(this.all_data);
@@ -297,20 +286,6 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     } else {
       this.notify.error(this.scale + " scale cannot be applied to " + this.incoming_data_type["name"]);
     }
-  }
-
-  /** returns true if payload object (of data structure) contains selected incoming data type */
-  is_data_type_disabled(incoming_data_type): boolean {
-    let first_stage = this.all_data[0];
-    if (first_stage !== undefined) {
-      first_stage = JSON.parse(first_stage.toString());
-      if (first_stage.hasOwnProperty("values")) {
-        const first_tuple = first_stage.values;
-        const first_payload = first_tuple[0]["payload"];
-        return !first_payload.hasOwnProperty(incoming_data_type["name"]);
-      }
-    }
-    return true;
   }
 
   /** variables_to_be_optimized is retrieved from experiment definition.

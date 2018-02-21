@@ -13,7 +13,6 @@
         "executionStrategy": {
           "type": "nested",
           "properties": {
-            "ignore_first_n_results":  { "type": "integer" },
             "knobs":                   { "type": "object"  },
             "sample_size":             { "type": "integer" },
             "type":                    { "type": "keyword" },
@@ -65,7 +64,8 @@
           "type": "nested",
           "properties": {
             "type":          { "type": "keyword" },
-            "serializer":    { "type": "keyword" }
+            "serializer":    { "type": "keyword" },
+            "ignore_first_n_samples":  { "type": "integer" }
           }
         },
         "change_provider": {

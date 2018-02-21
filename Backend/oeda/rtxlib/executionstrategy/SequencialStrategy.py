@@ -11,6 +11,6 @@ def start_sequential_strategy(wf):
     for kn in wf.execution_strategy["knobs"]:
         experimentFunction(wf, {
             "knobs":kn,
-            "ignore_first_n_results": wf.execution_strategy["ignore_first_n_results"],
+            "ignore_first_n_samples": wf.primary_data_provider["ignore_first_n_samples"],
             "sample_size": wf.execution_strategy["sample_size"],
         })

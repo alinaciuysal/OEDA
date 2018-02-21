@@ -46,7 +46,7 @@ def self_optimizer_execution(wf, opti_values, variables):
     knob_object = recreate_knob_from_optimizer_values(variables, opti_values)
     # create a new experiment to run in execution
     exp = dict()
-    exp["ignore_first_n_results"] = wf.execution_strategy["ignore_first_n_results"]
+    exp["ignore_first_n_samples"] = wf.primary_data_provider["ignore_first_n_samples"]
     exp["sample_size"] = wf.execution_strategy["sample_size"]
     exp["knobs"] = knob_object
     return experimentFunction(wf, exp)

@@ -212,14 +212,13 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
           if (oedaCallback.remaining_time_and_stages["remaining_time"] !== undefined)
             ctrl.oedaCallback.remaining_time_and_stages["remaining_time"] = oedaCallback.remaining_time_and_stages["remaining_time"];
 
-
           if (ctrl.first_render_of_page) {
             ctrl.apiService.loadAllDataPointsOfExperiment(ctrl.experiment_id).subscribe(response => {
               // TODO: after re-factoring, i.e. when we switch to using entityService.process_response_for_running_experiment, time to validate scatter plot data 8-times larger than this old version.
               // let is_successful_fetch = ctrl.entityService.process_response_for_running_experiment(response, ctrl.all_data, ctrl.first_render_of_page, ctrl.available_stages, ctrl.available_stages_for_qq_js, ctrl.timestamp);
               let is_successful_fetch = ctrl.process_response(response);
-              this.set_candidate_data_type();
-              if (is_successful_fetch) {
+              this.incoming_data_type = this.entityService.get_candidate_data_type(this.targetSystem, this.all_data[0]);
+              if (is_successful_fetch && this.incoming_data_type !== null) {
                 ctrl.first_render_of_page = false;
                 ctrl.draw_all_plots();
               }
@@ -398,42 +397,10 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** returns true if payload object at index 0 contains the selected incoming data type */
-  is_data_type_disabled(incoming_data_type): boolean {
-    const first_stage = this.all_data[0];
-    if (first_stage !== undefined) {
-      if (first_stage.hasOwnProperty("values")) {
-        const first_tuple = first_stage.values;
-        const first_payload = first_tuple[0]["payload"];
-        return !first_payload.hasOwnProperty(incoming_data_type["name"]);
-      }
-    }
-    return true;
-  }
-
   /** returns keys the given data structure */
   keys(object) : Array<string> { //this.oedaCallback.current_knob
     if (!isNullOrUndefined(object)) {
       return Object.keys(object);
-    }
-  }
-
-  /** tries to set the initially-selected incoming data type name by looking at the payload
-   *  we retrieve stages and data points in following format
-   *  e.g. [ 0: {number: 1, values: ..., knobs: [...]}, 1: {number: 2, values: ..., knobs: [...] }...]
-   *  this method should be called after checking whether it's the first render of page or not.
-   *  because, if it's not the first time, then user's selection of incoming data type (via dropdown UI) is important
-   *  but: before plotting, we must ensure that a proper & valid incoming data type is selected
-   */
-  private set_candidate_data_type(): void {
-    if(!this.incoming_data_type["name"]) {
-      for (let j = 0; j < this.targetSystem.incomingDataTypes.length; j++) {
-        const candidate_incoming_data_type = this.targetSystem.incomingDataTypes[j];
-        if (!this.is_data_type_disabled(candidate_incoming_data_type["name"])) {
-          this.incoming_data_type = candidate_incoming_data_type;
-          break;
-        }
-      }
     }
   }
 

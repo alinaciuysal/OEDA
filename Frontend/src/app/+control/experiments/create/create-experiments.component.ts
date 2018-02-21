@@ -221,7 +221,6 @@ export class CreateExperimentsComponent implements OnInit {
       }
       this.experiment.executionStrategy.knobs = all_knobs;
 
-      this.experiment.executionStrategy.ignore_first_n_results = Number(this.experiment.executionStrategy.ignore_first_n_results);
       this.experiment.executionStrategy.sample_size = Number(this.experiment.executionStrategy.sample_size);
       // save experiment stage to executionStrategy, so that it can be used in determining nr of remaining stages and estimated time
       this.experiment.executionStrategy.stages_count = Number(this.stages_count);
@@ -242,9 +241,6 @@ export class CreateExperimentsComponent implements OnInit {
       this.api.saveExperiment(this.experiment).subscribe(
         (success) => {
           this.notify.success("Success", "Experiment saved");
-          // this.router.navigate(["control/experiments/show/" + this.experiment.id + "/running"]).then(() => {
-          //   console.log("navigated to newly created experiment running page");
-          // });
           this.temp_storage.setNewValue(this.experiment);
           this.router.navigate(["control/experiments"]);
         }, (error) => {
@@ -325,7 +321,8 @@ export class CreateExperimentsComponent implements OnInit {
       "id": "",
       "dataProviders": [],
       "primaryDataProvider": {
-        "type": ""
+        "type": "",
+        "ignore_first_n_samples": null
       },
       "secondaryDataProviders": [],
       "changeProvider": {
@@ -342,7 +339,6 @@ export class CreateExperimentsComponent implements OnInit {
   createExecutionStrategy(): ExecutionStrategy {
     return {
       type: "",
-      ignore_first_n_results: 10,
       sample_size: 40,
       knobs: [],
       stages_count: 0,

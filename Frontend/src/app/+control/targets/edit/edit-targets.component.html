@@ -88,6 +88,16 @@
                          [colSize]="12"
                          inputType="checkbox"
                          data-toggle="tooltip" title="Select the most frequent data publisher as primary data provider"></labeled-input>
+          <div *ngIf="dataProvider.is_primary">
+            <labeled-input
+              inputType="number"
+              name="Ignore First N Samples"
+              [model]="dataProvider"
+              key="ignore_first_n_samples"
+              [colSize]="6"
+              [minNumber]="0">
+            </labeled-input>
+          </div>
           <hr class="col-md-12">
         </div>
       </div>

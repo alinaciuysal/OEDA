@@ -118,7 +118,6 @@ export interface Target {
 
 export interface ExecutionStrategy {
   type: string,
-  ignore_first_n_results: number,
   sample_size: number,
   knobs: any,
   stages_count: number,

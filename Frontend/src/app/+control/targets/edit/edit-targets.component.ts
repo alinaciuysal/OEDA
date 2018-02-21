@@ -216,8 +216,11 @@ export class EditTargetsComponent implements OnInit {
     for (let i = 0; i < this.target.dataProviders.length; i++) {
       let dataProvider = this.target.dataProviders[i];
       if (dataProvider["is_primary"] === true) {
-        primary_exists = true;
-        this.target.primaryDataProvider = dataProvider;
+        // now check if user provided a valid input for number of samples to ignore
+        if (!isNullOrUndefined(dataProvider["ignore_first_n_samples"])){
+          primary_exists = true;
+          this.target.primaryDataProvider = dataProvider;
+        }
       } else {
         this.target.secondaryDataProviders.push(dataProvider);
       }
@@ -235,7 +238,7 @@ export class EditTargetsComponent implements OnInit {
         this.checkValidityOfTargetSystemDefinition();
         let primary_data_provider_exists = this.refreshDataProvidersAndCheckValidity();
         if (!primary_data_provider_exists) {
-          return ctrl.notify.error("", "Provide at least one primary data provider");
+          return ctrl.notify.error("", "Provide at least one primary data provider and number of samples to ignore");
         }
 
         // and perform save operation
@@ -251,7 +254,7 @@ export class EditTargetsComponent implements OnInit {
         this.checkValidityOfTargetSystemDefinition();
         let primary_exists = this.refreshDataProvidersAndCheckValidity();
         if (!primary_exists) {
-          return ctrl.notify.error("", "Provide at least one primary data provider");
+          return ctrl.notify.error("", "Provide at least one primary data provider and number of samples to ignore");
         }
         // everything is OK, create new uuid for edit operation
         ctrl.target.id = UUID.UUID();

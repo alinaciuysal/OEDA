@@ -45,9 +45,6 @@ export class EntityService {
             if (xAttribute !== null && yAttribute !== null) {
               const newElement = {};
               newElement[xAttribute] = data_point["created"];
-              // if (incoming_data_type_name === "lastTickDuration" || incoming_data_type_name === "routingDuration") {
-              //   console.log(data_point["payload"][incoming_data_type_name]);
-              // }
 
               if (scale === "Log") {
                 newElement[yAttribute] = Math.log(data_point["payload"][incoming_data_type_name]);
@@ -182,4 +179,37 @@ export class EntityService {
     return true;
   }
 
+  /** returns true if payload object at index 0 contains the given incoming data type's name */
+  public is_data_type_disabled(stage_data, incoming_data_type): boolean {
+    if (stage_data !== undefined) {
+      if (stage_data.hasOwnProperty("values")) {
+        const first_tuple = stage_data.values;
+        const first_payload = first_tuple[0]["payload"];
+        if(first_payload.hasOwnProperty(incoming_data_type.name)){
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  /** tries to set the initially-selected incoming data type name by looking at the payload
+   *  we retrieve stages and data points in following format
+   *  e.g. [ 0: {number: 1, values: ..., knobs: [...]}, 1: {number: 2, values: ..., knobs: [...] }...]
+   *  this method should be called after checking whether it's the first render of page or not.
+   *  because, if it's not the first time, then user's selection of incoming data type (via dropdown UI) is important
+   *  but: before plotting, we must ensure that a proper & valid incoming data type is selected
+   */
+  public get_candidate_data_type(targetSystem, first_stage_data) {
+    if (typeof first_stage_data === 'string') {
+      first_stage_data = JSON.parse(first_stage_data);
+    }
+    for (let j = 0; j < targetSystem.incomingDataTypes.length; j++) {
+      const candidate_incoming_data_type = targetSystem.incomingDataTypes[j];
+      if (!this.is_data_type_disabled(first_stage_data, candidate_incoming_data_type)) {
+        return candidate_incoming_data_type;
+      }
+    }
+    return null;
+  }
 }

@@ -49,7 +49,7 @@ def step_execution(wf, configuration, variables):
     debug("knob_object in step_execution" + str(knob_object), Fore.GREEN)
     # create a new experiment to run in execution
     exp = dict()
-    exp["ignore_first_n_results"] = wf.execution_strategy["ignore_first_n_results"]
+    exp["ignore_first_n_samples"] = wf.primary_data_provider["ignore_first_n_samples"]
     exp["sample_size"] = wf.execution_strategy["sample_size"]
     exp["knobs"] = knob_object
     wf.setup_stage(wf, exp["knobs"])

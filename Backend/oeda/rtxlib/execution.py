@@ -34,7 +34,7 @@ def experimentFunction(wf, exp):
         error("apply changes did not work")
 
     # ignore the first data sets
-    to_ignore = exp["ignore_first_n_results"]
+    to_ignore = exp["ignore_first_n_samples"]
     if to_ignore > 0:
         i = 0
         while i < to_ignore:

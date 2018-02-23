@@ -71,7 +71,7 @@ class OEDACallbackController(Resource):
             else:
                 # should return the dict to user after callback is received
                 resp = jsonify(globalDict[experiment_id])
-                info("> globalDict[experiment_id]     | " + str(globalDict[experiment_id]))
+                # info("> globalDict[experiment_id]     | " + str(globalDict[experiment_id]))
 
             resp.status_code = 200
             return resp

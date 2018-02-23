@@ -233,8 +233,7 @@ export class CreateExperimentsComponent implements OnInit {
       // now take the incoming data type labeled as "optimize"
       for (var item of this.targetSystem.incomingDataTypes) {
         if (item.is_optimized === true) {
-          this.experiment.variables_to_be_optimized = item.name;
-          break;
+          this.experiment.optimized_data_types.push(item);
         }
       }
       console.log(this.experiment);
@@ -312,7 +311,7 @@ export class CreateExperimentsComponent implements OnInit {
       "targetSystemId": "",
       "executionStrategy": this.executionStrategy,
       "changeableVariable": [],
-      "variables_to_be_optimized": "" // TODO: this will be converted into array
+      "optimized_data_types": []
     }
   }
 

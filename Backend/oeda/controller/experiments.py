@@ -40,20 +40,17 @@ class ExperimentController(Resource):
             if status == "INTERRUPTED":
                 kill_experiment(experiment_id=experiment_id)
 
-            # db().update_experiment_status(experiment_id, status)
+            db().update_experiment_status(experiment_id, status)
             # also remove callback from globalDict
-            # globalDict.pop(experiment_id, None)
+            globalDict.pop(experiment_id, None)
             resp = jsonify({"message": "Experiment status is updated"})
             resp.status_code = 200
-            print "resp", resp
             return resp
         except Exception as e:
-            print "e", e
             tb = traceback.format_exc()
             print(tb)
             return {"message": e.message}, 404
-        except KeyError as key_error:
-            print "key_error", key_error
+        except KeyError:
             return {"message": "experiment_id does not exist in globalDict, please re-create experiment"}, 404
 
 class ExperimentsListController(Resource):

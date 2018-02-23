@@ -1,4 +1,5 @@
 from oeda.databases import db
+import numpy as np
 from oeda.log import *
 
 class RTXDefinition:
@@ -17,7 +18,7 @@ class RTXDefinition:
     all_knobs = None
     remaining_time_and_stages = None
     incoming_data_types = None
-    variables_to_be_optimized = None
+    optimized_data_types = []
 
     def __init__(self, oeda_experiment, oeda_target, oeda_callback, oeda_stop_request):
         self._oeda_experiment = oeda_experiment
@@ -30,7 +31,7 @@ class RTXDefinition:
         self.remaining_time_and_stages = dict() # contains remaining time and stage for an experiment
         self.change_provider = oeda_target["changeProvider"]
         self.incoming_data_types = oeda_target["incomingDataTypes"] # contains all of the data types provided by both config & user
-        self.variables_to_be_optimized = oeda_experiment["variables_to_be_optimized"] # TODO: this will be array in the future
+        self.optimized_data_types = oeda_experiment["optimized_data_types"]
 
         # set-up primary data provider
         primary_data_provider = oeda_target["primaryDataProvider"]
@@ -124,10 +125,24 @@ class RTXDefinition:
     @staticmethod
     def evaluator(result_state, wf):
         wf.stage_counter += 1
+        result_state = match_criteria(result_state, wf)
         # TODO: TEST this!
-        # if hasattr(wf, "variables_to_be_optimized"):
-        #     return [result_state[i] for i in wf.variables_to_be_optimized]
-        return result_state[wf.variables_to_be_optimized]
+        # if hasattr(wf, "optimized_data_types"):
+        #     return [result_state[i] for i in wf.optimized_data_types]
+
+        # TODO: remove [0] and return an array
+        return result_state[wf.optimized_data_types[0]['name']]
+
+
+''' Takes the inverse of the result variable according to provided criteria'''
+def match_criteria(result_state, wf):
+    for data_type in wf.optimized_data_types:
+        if data_type['criteria'] == 'Maximize':
+            # get value of data type
+            value = result_state[data_type['name']]
+            # modify result_state by taking inverse of the value
+            result_state[data_type['name']] = np.reciprocal(value)
+    return result_state
 
 
 def get_experiment_list(strategy_type, knobs):

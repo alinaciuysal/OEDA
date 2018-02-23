@@ -93,7 +93,7 @@ export interface Experiment {
   targetSystemId: string,
   changeableVariable: any,
   executionStrategy: ExecutionStrategy,
-  variables_to_be_optimized: any
+  optimized_data_types: object[]
 }
 
 export interface Entity {

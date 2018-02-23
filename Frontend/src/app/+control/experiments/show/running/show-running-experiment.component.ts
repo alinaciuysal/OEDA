@@ -404,12 +404,14 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** variables_to_be_optimized is retrieved from experiment definition.
+  /** optimized_data_types is retrieved from experiment definition.
    * so, this function checks if given data type was selected for optimization or not
-   * TODO: it should check array in the future instead of string comparison*/
+   */
   is_optimized(data_type_name) {
-    if (this.experiment.variables_to_be_optimized === data_type_name) {
-      return true;
+    for (let i = 0; i < this.experiment.optimized_data_types.length; i++) {
+      if (this.experiment.optimized_data_types[i]["name"] === data_type_name) {
+        return true;
+      }
     }
     return false;
   }

@@ -19,6 +19,7 @@ setup(
         'numpy',
         'requests',
         'rpy2==2.7.8',
-        'pyjwt'
+        'pyjwt',
+        'backports.ssl_match_hostname'
     ]
 )

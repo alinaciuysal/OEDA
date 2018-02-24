@@ -1,6 +1,5 @@
 from oeda.databases import user_db, setup_user_database, create_instance_for_users, create_instance_for_experiments
 import json as json
-import blackbox as bb
 import traceback
 
 from oeda.controller.experiment_results import AllStageResultsWithExperimentIdController
@@ -84,44 +83,52 @@ import rpy2.robjects as robjects
 #               resfile='output.csv')  # text file where results will be saved
 
 #
-# if __name__ == '__main__':
-#     main()
 
 # http://rpy2.readthedocs.io/en/version_2.7.x/lib_dplyr.html
 # https://mlr-org.github.io/mlr-tutorial/release/html/
 # R package names to be installed
-packnames = ('ggplot2', 'spoof', 'mlrMBO', 'DiceKriging', 'randomForest')
+def install_packages():
+    packnames = ('ggplot2', 'spoof', 'mlrMBO', 'DiceKriging', 'randomForest', 'rPython')
 
-if all(isinstalled(x) for x in packnames):
-    have_tutorial_packages = True
-else:
-    have_tutorial_packages = False
+    if all(isinstalled(x) for x in packnames):
+        have_tutorial_packages = True
+    else:
+        have_tutorial_packages = False
 
-if not have_tutorial_packages:
-    # import R's utility package
-    utils = importr('utils')
-    # select a mirror for R packages
-    utils.chooseCRANmirror(ind = 1) # select the first mirror in the list
+    if not have_tutorial_packages:
+        # import R's utility package
+        utils = importr('utils')
+        # select a mirror for R packages
+        utils.chooseCRANmirror(ind = 1) # select the first mirror in the list
 
-    # R vector of strings
-    from rpy2.robjects.vectors import StrVector
-    # file
-    packnames_to_install = [x for x in packnames if not isinstalled(x)]
-    if len(packnames_to_install) > 0:
-        utils.install_packages(StrVector(packnames_to_install))
+        # R vector of strings
+        from rpy2.robjects.vectors import StrVector
+        # file
+        packnames_to_install = [x for x in packnames if not isinstalled(x)]
+        if len(packnames_to_install) > 0:
+            utils.install_packages(StrVector(packnames_to_install))
 
-mlr = importr('mlrMBO')
 
-# use a pre-defined function
-# robjects.r('obj.fun = makeCosineMixtureFunction(1)')
+def run_mlr():
+    mlr = importr('mlrMBO')
 
-# or create your own objective function
-robjects.r('obj.fun = makeSingleObjectiveFunction(name = "my_sphere", fn = function(x) {sum(x*x) + 7}, par.set = makeParamSet(makeNumericVectorParam("x", len = 2L, lower = -5, upper = 5)),minimize = TRUE)')
-robjects.r('des = generateDesign(n = 5, par.set = getParamSet(obj.fun), fun = lhs::randomLHS)')
-robjects.r('des$y = apply(des, 1, obj.fun)')
-robjects.r('surr.km = makeLearner("regr.km", predict.type = "se", covtype = "matern3_2", control = list(trace = FALSE))')
-robjects.r('control=makeMBOControl()')
-robjects.r('control = setMBOControlTermination(control, iters = 10)')
-robjects.r('control = setMBOControlInfill(control, crit = makeMBOInfillCritEI())')
-run = robjects.r('run = mbo(obj.fun, design = des, learner = surr.km, control = control, show.info = TRUE)')
-print run
+    # use a pre-defined function
+    # robjects.r('obj.fun = makeCosineMixtureFunction(1)')
+
+    # or create your own objective function
+    # robjects.r('obj.fun = makeSingleObjectiveFunction(name = "my_sphere", fn = function(x) {sum(x*x) + 7}, par.set = makeParamSet(makeNumericVectorParam("x", len = 2L, lower = -5, upper = 5)),minimize = TRUE)')
+    # example 2
+    robjects.r('obj.fun = makeSingleObjectiveFunction(name = "My fancy function name", fn = function(x) x * sin(3*x), par.set = makeNumericParamSet("x", len = 1L, lower = 0, upper = 2 * pi), minimize = TRUE)')
+
+    robjects.r('des = generateDesign(n = 5, par.set = getParamSet(obj.fun), fun = lhs::randomLHS)')
+    robjects.r('des$y = apply(des, 1, obj.fun)')
+    robjects.r('surr.km = makeLearner("regr.km", predict.type = "se", covtype = "matern3_2", control = list(trace = FALSE))')
+    robjects.r('control=makeMBOControl()')
+    robjects.r('control = setMBOControlTermination(control, iters = 10)')
+    robjects.r('control = setMBOControlInfill(control, crit = makeMBOInfillCritEI())')
+    run = robjects.r('run = mbo(obj.fun, design = des, learner = surr.km, control = control, show.info = TRUE)')
+    print run
+
+if __name__ == '__main__':
+    install_packages()
+    run_mlr()

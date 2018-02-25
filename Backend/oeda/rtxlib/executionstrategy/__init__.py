@@ -3,6 +3,7 @@ from oeda.rtxlib.executionstrategy.StepStrategy import start_step_strategy
 from oeda.rtxlib.executionstrategy.SelfOptimizerStrategy import start_self_optimizer_strategy
 from oeda.rtxlib.executionstrategy.SequencialStrategy import start_sequential_strategy
 from oeda.rtxlib.executionstrategy.RandomStrategy import start_random_strategy
+from oeda.rtxlib.executionstrategy.MlrStrategy import start_mlr_strategy
 
 
 from oeda.log import *
@@ -35,6 +36,9 @@ def run_execution_strategy(wf):
 
     elif wf.execution_strategy["type"] == "random":
         start_random_strategy(wf)
+
+    elif wf.execution_strategy["type"] == "mlr":
+        start_mlr_strategy(wf)
 
     # finished
     info(">")

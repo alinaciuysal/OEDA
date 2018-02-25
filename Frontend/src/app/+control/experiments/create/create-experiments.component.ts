@@ -225,7 +225,8 @@ export class CreateExperimentsComponent implements OnInit {
       // save experiment stage to executionStrategy, so that it can be used in determining nr of remaining stages and estimated time
       this.experiment.executionStrategy.stages_count = Number(this.stages_count);
 
-      if (this.experiment.executionStrategy.type === "random") {
+      let experiment_type = this.experiment.executionStrategy.type;
+      if (experiment_type === "random" || experiment_type === "mlr" || experiment_type === "self_optimizer" || experiment_type === "uncorrelated_self_optimizer") {
         this.experiment.executionStrategy.optimizer_iterations = Number(this.experiment.executionStrategy.optimizer_iterations);
         this.experiment.executionStrategy.optimizer_random_starts = Number(this.experiment.executionStrategy.optimizer_random_starts);
       }

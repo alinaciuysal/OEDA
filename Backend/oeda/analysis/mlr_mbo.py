@@ -5,9 +5,9 @@ import traceback
 from oeda.controller.experiment_results import AllStageResultsWithExperimentIdController
 import oeda.controller.stages as sc
 
-from rpy2.robjects.packages import importr, data, isinstalled
-
+from rpy2.robjects.packages import importr, isinstalled
 import rpy2.robjects as robjects
+import rpy2.rinterface as ri
 
 # def get_stages(experiment_db, experiment_id):
 #     stage_ids, stages = experiment_db.get_stages(experiment_id)
@@ -88,7 +88,7 @@ import rpy2.robjects as robjects
 # https://mlr-org.github.io/mlr-tutorial/release/html/
 # R package names to be installed
 def install_packages():
-    packnames = ('ggplot2', 'spoof', 'mlrMBO', 'DiceKriging', 'randomForest', 'rPython')
+    packnames = ('ggplot2', 'smoof', 'mlrMBO', 'DiceKriging', 'randomForest', 'rPython', 'ParamHelpers', 'stats', 'rgenoud')
 
     if all(isinstalled(x) for x in packnames):
         have_tutorial_packages = True
@@ -109,8 +109,8 @@ def install_packages():
             utils.install_packages(StrVector(packnames_to_install))
 
 
-def run_mlr():
-    mlr = importr('mlrMBO')
+def run_mlr_using_robjects():
+    importr('mlrMBO')
 
     # use a pre-defined function
     # robjects.r('obj.fun = makeCosineMixtureFunction(1)')
@@ -118,8 +118,9 @@ def run_mlr():
     # or create your own objective function
     # robjects.r('obj.fun = makeSingleObjectiveFunction(name = "my_sphere", fn = function(x) {sum(x*x) + 7}, par.set = makeParamSet(makeNumericVectorParam("x", len = 2L, lower = -5, upper = 5)),minimize = TRUE)')
     # example 2
-    robjects.r('obj.fun = makeSingleObjectiveFunction(name = "My fancy function name", fn = function(x) x * sin(3*x), par.set = makeNumericParamSet("x", len = 1L, lower = 0, upper = 2 * pi), minimize = TRUE)')
+    # robjects.r('obj.fun = makeSingleObjectiveFunction(name = "My fancy function name", fn = function(x) x * sin(3*x), par.set = makeNumericParamSet("x", len = 1L, lower = 0, upper = 2 * pi), minimize = TRUE)')
 
+    robjects.r('obj.fun = makeSingleObjectiveFunction(name = "My fancy function name", fn = g, par.set = makeNumericParamSet("x", len = 1L, lower = 0, upper = 2 * pi), minimize = TRUE)')
     robjects.r('des = generateDesign(n = 5, par.set = getParamSet(obj.fun), fun = lhs::randomLHS)')
     robjects.r('des$y = apply(des, 1, obj.fun)')
     robjects.r('surr.km = makeLearner("regr.km", predict.type = "se", covtype = "matern3_2", control = list(trace = FALSE))')
@@ -129,6 +130,33 @@ def run_mlr():
     run = robjects.r('run = mbo(obj.fun, design = des, learner = surr.km, control = control, show.info = TRUE)')
     print run
 
+
+def run_mlr_using_rpy2():
+    mlr = importr('mlrMBO')
+    smoof = importr('smoof')
+    param_helpers = importr('ParamHelpers')
+
+    # cost function, callable from R
+    @ri.rternalize
+    def cost_f(x):
+        # Rosenbrock Banana function as a cost function
+        # (as in the R man page for optim())
+        x1, x2 = x
+        return 100 * (x2 - x1 * x1)**2 + (1 - x1)**2
+
+    # call mlr's mbo function using our cost funtion
+    obj_fcn = smoof.makeSingleObjectiveFunction(name="my_sphere",
+                                      fn=cost_f,
+                                      par_set=param_helpers.makeNumericParamSet("x", len=2L, lower=-5, upper=5),
+                                      minimize=True)
+    control = mlr.makeMBOControl()
+    control = mlr.setMBOControlTermination(control, iters=10)
+    control = mlr.setMBOControlInfill(control, crit=mlr.makeMBOInfillCritEI())
+    run = mlr.mbo(obj_fcn, control=control)
+    print run
+
 if __name__ == '__main__':
     install_packages()
-    run_mlr()
+    run_mlr_using_rpy2()
+    # run_mlr()
+    # random_function([0, 0.9])

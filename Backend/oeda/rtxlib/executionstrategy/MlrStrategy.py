@@ -1,13 +1,24 @@
 from colorama import Fore
 from oeda.log import *
 from oeda.rtxlib.execution import experimentFunction
-from rpy2.robjects.vectors import FloatVector
-from rpy2.robjects.packages import importr, STAP, isinstalled
-import rpy2.robjects as robjects
+from rpy2.robjects.packages import importr, isinstalled
+from rpy2.robjects.conversion import Converter
+from rpy2.rinterface import FloatSexpVector
+
 import rpy2.rinterface as ri
+import rpy2.robjects as robjects
 
 global_wf = None
 global_var = None
+
+
+# method to return Python representation of R vectors
+def tuple_str(tpl):
+    return FloatSexpVector(tpl)
+
+# group conversion functions into one object
+my_converter = Converter('my converter')
+my_converter.py2ri.register(tuple, tuple_str)
 
 def start_mlr_strategy(wf):
     global global_wf
@@ -110,28 +121,8 @@ def self_optimizer_execution_function(x):
     exp["sample_size"] = global_wf.execution_strategy["sample_size"]
 
     knobs = {}
-    knobs[global_var] = x
+    knobs[global_var] = x[0]
     exp["knobs"] = knobs
-
+    global_wf.setup_stage(global_wf, exp["knobs"])
     # create a new experiment to run in execution
     return float(experimentFunction(global_wf, exp))
-
-# cost function, callable from R
-@ri.rternalize
-def cost_f(x):
-    # Rosenbrock Banana function as a cost function
-    # (as in the R man page for optim())
-    x1, x2 = x
-    return 100 * (x2 - x1 * x1)**2 + (1 - x1)**2
-
-# cost function, callable from R (that did not work)
-# @ri.rternalize
-# def self_optimizer_execution(wf, opti_values, variables):
-#     """ this is the function we call and that returns a value for optimization """
-#     knob_object = recreate_knob_from_optimizer_values(variables, opti_values)
-#     # create a new experiment to run in execution
-#     exp = dict()
-#     exp["ignore_first_n_samples"] = wf.primary_data_provider["ignore_first_n_samples"]
-#     exp["sample_size"] = wf.execution_strategy["sample_size"]
-#     exp["knobs"] = knob_object
-#     return experimentFunction(wf, exp)

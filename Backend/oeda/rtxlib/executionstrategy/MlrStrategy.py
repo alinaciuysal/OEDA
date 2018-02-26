@@ -21,12 +21,11 @@ my_converter = Converter('my converter')
 my_converter.py2ri.register(tuple, tuple_str)
 
 def start_mlr_strategy(wf):
-    global global_wf
-    global_wf = wf
     """ executes a self optimizing strategy """
     info("> ExecStrategy   | MLR", Fore.CYAN)
-    wf.totalExperiments = wf.execution_strategy["optimizer_iterations"]
+    optimizer_iterations = wf.execution_strategy["optimizer_iterations"]
     optimizer_random_starts = wf.execution_strategy["optimizer_random_starts"]
+    wf.totalExperiments = optimizer_iterations + optimizer_random_starts # also include random starts to it
 
     # we look at the ranges the user has specified in the knobs
     knobs = wf.execution_strategy["knobs"]
@@ -43,36 +42,32 @@ def start_mlr_strategy(wf):
         info(variable, Fore.CYAN)
         info(range_tuples, Fore.GREEN)
 
-    global global_var
+    global global_var, global_wf
     global_var = variable
+    global_wf = wf
 
+    # ref: https://www.rdocumentation.org/packages/smoof/versions/1.5.1/topics/makeSingleObjectiveFunction
     install_packages()
-    mlr = importr('mlrMBO')
+    mlr = importr('mlr')
+    mlr_mbo = importr('mlrMBO')
     smoof = importr('smoof')
     lhs = importr('lhs')
     param_helpers = importr('ParamHelpers')
-
-    # call mlr's mbo function using our cost funtion
-    # we give the function a callback to execute
-    # it uses the return value to select new knobs to test
-    # TODO: we optimize single variable for now
-    # by default, minimize = True for makeSingleObjectiveFunction
-    # obj_fcn = smoof.makeSingleObjectiveFunction(
-    #             lambda opti_values: self_optimizer_execution(wf, opti_values, variables),
-    #             param_helpers.makeNumericParamSet(variables[0], lower=range_tuples[0][0], upper=range_tuples[0][1]))
     obj_fcn = smoof.makeSingleObjectiveFunction(
                     name="my_fcn",
                     fn=self_optimizer_execution_function,
                     par_set=param_helpers.makeNumericParamSet("x", len=1L, lower=range_tuples[0], upper=range_tuples[1]),
                     minimize=True)
-    info(obj_fcn, Fore.GREEN)
-    # design = mlr.generateDesign(optimizer_random_starts, smoof.getParamSet(obj_fcn), lhs.randomLHS)
-    # surr_km = mlr.makeLearner("regr.km", "cl", "se", covtype = "matern3_2", control = list(trace = FALSE))
 
-    control = mlr.makeMBOControl()
-    control = mlr.setMBOControlTermination(control, iters=wf.totalExperiments)
-    control = mlr.setMBOControlInfill(control, crit=mlr.makeMBOInfillCritEI())
-    run = mlr.mbo(obj_fcn, control=control)
+    design = param_helpers.generateDesign(n=optimizer_random_starts, par_set=param_helpers.getParamSet(obj_fcn), fun=lhs.randomLHS)
+    surr_km = mlr.makeLearner(cl="regr.km", predict_type="se", covtype="matern3_2")
+
+    control = mlr_mbo.makeMBOControl()
+    control = mlr_mbo.setMBOControlTermination(control, iters=optimizer_iterations)
+    control = mlr_mbo.setMBOControlInfill(control, crit=mlr_mbo.makeMBOInfillCritEI())
+    info(obj_fcn, Fore.GREEN)
+    run = mlr_mbo.mbo(obj_fcn, design=design, learner=surr_km, control=control)
+    # run = mlr_mbo.mbo(obj_fcn, control=control)
     info(">>>>>>>>>>> MLR RUN")
     info(run)
 
@@ -81,9 +76,10 @@ def start_mlr_strategy(wf):
     # info("> OptimalResult  | Knobs:  " + str(recreate_knob_from_optimizer_values(variables, optimizer_result.x)))
     # info(">                | Result: " + str(optimizer_result.fun))
 
+
 ''' installs required packages and libraries for executing R functions'''
 def install_packages():
-    packnames = ('ggplot2', 'smoof', 'mlrMBO', 'DiceKriging', 'randomForest', 'rPython', 'ParamHelpers', 'stats', 'rgenoud', 'lhs')
+    packnames = ('ggplot2', 'smoof', 'mlr', 'mlrMBO', 'DiceKriging', 'randomForest', 'rPython', 'ParamHelpers', 'stats', 'rgenoud', 'lhs')
 
     if all(isinstalled(x) for x in packnames):
         have_tutorial_packages = True

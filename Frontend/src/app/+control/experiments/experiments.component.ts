@@ -47,7 +47,6 @@ export class ExperimentsComponent {
       (data) => {
         if (!isNullOrUndefined(data)) {
           this.experiments = data;
-          this.experiments = this.utilService.format_date(data, "created", null);
 
           // also check if there is any newly added experiment with TempStorageService
           const new_experiment = this.temp_storage.getNewValue();
@@ -59,6 +58,8 @@ export class ExperimentsComponent {
             }
             this.temp_storage.clearNewValue();
           }
+          // parse date field of experiments
+          this.experiments = this.utilService.format_date(data, "created", null);
 
           // and now, get target system information by using targetSystemId
           for (let i = 0; i < this.experiments.length; i++) {

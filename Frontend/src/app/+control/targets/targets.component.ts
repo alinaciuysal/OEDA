@@ -4,6 +4,7 @@ import {TempStorageService} from "../../shared/modules/helper/temp-storage-servi
 import {OEDAApiService} from "../../shared/modules/api/oeda-api.service";
 import {Router} from "@angular/router";
 import {UserService} from "../../shared/modules/auth/user.service";
+import {UtilService} from "../../shared/modules/util/util.service";
 
 
 @Component({
@@ -17,7 +18,8 @@ export class TargetsComponent implements OnInit {
               private temp_storage: TempStorageService,
               private api: OEDAApiService,
               private router: Router,
-              private userService: UserService) {
+              private userService: UserService,
+              private utilService: UtilService) {
     // redirect user to configuration page if it's not configured yet.
     this.is_db_configured = userService.is_db_configured();
   }
@@ -38,6 +40,8 @@ export class TargetsComponent implements OnInit {
             }
             this.temp_storage.clearNewValue();
           }
+          // parse date field of targets
+          this.targets = this.utilService.format_date(data, "created", null);
         }
       )
     }

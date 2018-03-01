@@ -20,7 +20,9 @@
       <div class="panel-body" *ngIf="is_db_configured">
         <div class="table-responsive">
           <table style="margin-top: 20px" class="table table-striped table-bordered table-hover" [mfData]="targets" #mf="mfDataTable"
-                 [mfRowsOnPage]="10" >
+                 [mfRowsOnPage]="10"
+                 [mfSortBy]="'created'"
+                 [mfSortOrder]="'desc'">
             <thead>
             <tr>
               <th style="width: 5%">
@@ -36,6 +38,9 @@
               </th>
               <th>
                 <mfDefaultSorter by="description">Description</mfDefaultSorter>
+              </th>
+              <th>
+                <mfDefaultSorter by="created">Created</mfDefaultSorter>
               </th>
               <th>
                 <mfDefaultSorter by="target">Primary Data Provider</mfDefaultSorter>
@@ -59,6 +64,7 @@
               </td>
               <td>{{item.name}}</td>
               <td>{{item.description}}</td>
+              <td>{{item.created}}</td>
               <td>{{item.primaryDataProvider?.type}}</td>
               <td>{{item.changeProvider?.type}}</td>
             </tr>

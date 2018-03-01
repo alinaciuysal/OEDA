@@ -35,6 +35,7 @@
     "intl": "^1.2.5",
     "jquery": "^3.3.1",
     "lodash.clonedeep": "^4.5.0",
+    "moment": "^2.20.1",
     "monapt": "^0.7.1",
     "ngx-bootstrap": "^2.0.2",
     "nvd3": "1.8.5",

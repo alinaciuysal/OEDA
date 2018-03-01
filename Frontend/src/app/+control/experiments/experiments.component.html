@@ -38,6 +38,9 @@
                 <mfDefaultSorter by="description">Description</mfDefaultSorter>
               </th>
               <th>
+                <mfDefaultSorter by="created">Created</mfDefaultSorter>
+              </th>
+              <th>
                 <mfDefaultSorter by="target">Target System</mfDefaultSorter>
               </th>
               <th>
@@ -69,6 +72,7 @@
               </td>
               <td>{{item.name}}</td>
               <td>{{item.description}}</td>
+              <td>{{item.created}}</td>
               <td><a routerLink="/control/targets/edit/{{item.targetSystemId}}">{{item.targetSystem?.name}}</a></td>
               <td>
                 <label *ngIf="item.targetSystem?.status == 'READY'" class="label label-success">READY</label>

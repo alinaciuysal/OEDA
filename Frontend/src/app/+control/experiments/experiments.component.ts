@@ -6,6 +6,8 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {isNullOrUndefined} from "util";
 import {TempStorageService} from "../../shared/modules/helper/temp-storage-service";
 import {UserService} from "../../shared/modules/auth/user.service";
+import * as moment from 'moment';
+import {UtilService} from "../../shared/modules/util/util.service";
 
 @Component({
   selector: 'control-experiments',
@@ -22,7 +24,8 @@ export class ExperimentsComponent {
                 private notify: NotificationsService,
                 private temp_storage: TempStorageService,
                 private userService: UserService,
-                private activatedRoute: ActivatedRoute) {
+                private activatedRoute: ActivatedRoute,
+                private utilService: UtilService) {
     const ctrl = this;
     // redirect user to configuration page if it's not configured yet.
     ctrl.is_db_configured = ctrl.userService.is_db_configured();
@@ -44,12 +47,14 @@ export class ExperimentsComponent {
       (data) => {
         if (!isNullOrUndefined(data)) {
           this.experiments = data;
+          this.experiments = this.utilService.format_date(data, "created", null);
 
           // also check if there is any newly added experiment with TempStorageService
           const new_experiment = this.temp_storage.getNewValue();
           if (new_experiment) {
             // this is needed because the retrieved targets might already contain the new one
             if (!(ctrl.experiments.find(e => e.id == new_experiment.id))) {
+
               this.experiments.push(new_experiment);
             }
             this.temp_storage.clearNewValue();

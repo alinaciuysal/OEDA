@@ -5,11 +5,10 @@ import {Entity, OedaCallbackEntity, UserEntity} from "../modules/api/oeda-api.se
 import {isNullOrUndefined} from "util";
 
 @Injectable()
+/** This class provides methods related with experiment data object(s) that are retrieved from backend */
 export class EntityService {
 
   constructor(public notify: NotificationsService, public log: LoggerService) {}
-
-
 
   /** returns data of the selected stage from all_data structure */
   public get_data_from_local_structure(all_data, stage_no) {

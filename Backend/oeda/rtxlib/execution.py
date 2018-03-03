@@ -13,11 +13,11 @@ def experimentFunction(wf, exp):
     """ executes a given experiment stage """
     start_time = current_milli_time()
     # remove all old data from the queues
-    wf.primary_data_provider["instance"].reset()
+    wf["primary_data_provider"]["instance"].reset()
 
     # load change event creator or use a default
     if hasattr(wf, "change_event_creator"):
-        change_creator = wf.change_event_creator
+        change_creator = wf["change_event_creator"]
     else:
         change_creator = _defaultChangeProvider
 
@@ -25,11 +25,11 @@ def experimentFunction(wf, exp):
     info(">")
     info("> KnobValues     | " + str(exp["knobs"]))
     # create new state
-    exp["state"] = wf.state_initializer(dict(), wf)
+    exp["state"] = wf["state_initializer"](dict(), wf)
 
     # apply changes to system
     try:
-        wf.change_provider["instance"].applyChange(change_creator(exp["knobs"], wf))
+        wf["change_provider"]["instance"].applyChange(change_creator(exp["knobs"], wf))
     except:
         error("apply changes did not work")
 

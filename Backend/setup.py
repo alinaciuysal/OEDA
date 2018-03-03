@@ -20,6 +20,7 @@ setup(
         'requests',
         'rpy2==2.7.8',
         'pyjwt',
-        'backports.ssl_match_hostname'
+        'backports.ssl_match_hostname',
+        'pandas'
     ]
 )

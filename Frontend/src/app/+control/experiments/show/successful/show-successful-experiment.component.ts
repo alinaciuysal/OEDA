@@ -288,7 +288,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     }
   }
 
-  /** optimized_data_types is retrieved from experiment definition.
+  /** optimized_data_types are retrieved from experiment definition.
    * so, this function checks if given data type was selected for optimization or not
    */
   is_optimized(data_type_name) {

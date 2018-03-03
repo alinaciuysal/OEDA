@@ -276,12 +276,14 @@ export class CreateExperimentsComponent implements OnInit {
           }
         }
       }
-      if (this.experiment.executionStrategy.type === "random") {
-        if (this.experiment.executionStrategy.optimizer_iterations === null || this.experiment.executionStrategy.optimizer_random_starts === null) {
+      let experiment_type = this.experiment.executionStrategy.type;
+      if (experiment_type === "random" || experiment_type === "mlr" || experiment_type === "self_optimizer" || experiment_type === "uncorrelated_self_optimizer") {
+        if (this.experiment.executionStrategy.optimizer_iterations === null || this.experiment.executionStrategy.optimizer_random_starts === null
+            || this.experiment.executionStrategy.optimizer_iterations <= 0 || this.experiment.executionStrategy.optimizer_random_starts < 0) {
           cond9 = true;
         }
       }
-      if (this.experiment.executionStrategy.type === "self_optimizer") {
+      if (experiment_type === "self_optimizer") {
         if (this.experiment.executionStrategy.optimizer_method === null || this.experiment.executionStrategy.optimizer_method.length === 0) {
           cond10 = true;
         }

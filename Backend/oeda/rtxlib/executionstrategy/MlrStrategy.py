@@ -78,11 +78,7 @@ def start_mlr_mbo_strategy(wf):
     # info(">")
     # info("> OptimalResult  | Knobs:  " + str(recreate_knob_from_optimizer_values(variables, optimizer_result.x)))
     # info(">                | Result: " + str(optimizer_result.fun))
-
-@robjects.conversion.ri2ro.register(ListSexpVector)
-def my_ri2ro(obj):
-    return obj
-
+    
 ''' this is the cost function callable from R and that returns a value for optimization '''
 @ri.rternalize
 def self_optimizer_execution_function(**kwargs):

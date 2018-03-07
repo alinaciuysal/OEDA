@@ -75,7 +75,9 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
               private activated_route: ActivatedRoute,
               private router: Router,
               private notify: NotificationsService,
-              private temp_storage: TempStorageService) {
+              private temp_storage: TempStorageService
+              // private confirmationDialogService: ConfirmationDialogService
+  ) {
 
     this.layout.setHeader("Experiment Results", "");
     this.dataAvailable = false;
@@ -426,28 +428,6 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     console.log(value);
   }
 
-  stopRunningExperiment(): void {
-    alert("Do you really want to stop the running experiment?");
-    this.experiment.status = "INTERRUPTED";
-    this.apiService.updateExperiment(this.experiment).subscribe(() => {
-      this.targetSystem.status = "READY";
-      this.apiService.updateTarget(this.targetSystem).subscribe(() => {
-        this.subscription.unsubscribe();
-        // set temp_storage so that experiments page will reflect the new status of it
-        this.temp_storage.setNewValue(this.experiment);
-        // switch to regular experiments page
-        this.router.navigate(["control/experiments"]).then(() => {
-          console.log("navigated to experiments page");
-          this.notify.success("Success", "Experiment stopped successfully");
-        });
-      }, errorResp2 => {
-        this.notify.error("Error", errorResp2.message);
-      });
-    }, errorResp => {
-      this.notify.error("Error", errorResp.message);
-    });
-  }
-
   /** disables polling upon user click, and informs user */
   disable_polling(status: string, content: string) {
     document.getElementById("polling_off_button").setAttribute('class', 'btn btn-primary active');
@@ -473,5 +453,26 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
       this.fetch_oeda_callback();
     });
     this.notify.success("Success", "Polling enabled");
+  }
+
+  stopRunningExperiment(): void {
+    this.experiment.status = "INTERRUPTED";
+    this.apiService.updateExperiment(this.experiment).subscribe(() => {
+      this.targetSystem.status = "READY";
+      this.apiService.updateTarget(this.targetSystem).subscribe(() => {
+        this.subscription.unsubscribe();
+        // set temp_storage so that experiments page will reflect the new status of it
+        this.temp_storage.setNewValue(this.experiment);
+        // switch to regular experiments page
+        this.router.navigate(["control/experiments"]).then(() => {
+          console.log("navigated to experiments page");
+          this.notify.success("Success", "Experiment stopped successfully");
+        });
+      }, errorResp2 => {
+        this.notify.error("Error", errorResp2.message);
+      });
+    }, errorResp => {
+      this.notify.error("Error", errorResp.message);
+    });
   }
 }

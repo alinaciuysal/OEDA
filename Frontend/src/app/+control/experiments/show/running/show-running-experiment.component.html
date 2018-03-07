@@ -1,517 +1,208 @@
 <div class="row" *ngIf="dataAvailable">
 
-    <!-- Experiment Details -->
-    <div class="col-sm-12 col-xs-12">
+  <!-- Experiment Details -->
+  <experiment-details [experiment]="experiment" [is_collapsed]="is_collapsed" [targetSystem]="targetSystem"></experiment-details>
+
+  <!--Stages Header-->
+  <div class="col-sm-12" [hidden]="first_render_of_page">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
-          <button type="button" class="btn btn-orange"
-                  (click)="is_collapsed = !is_collapsed">Experiment Details
-            <i *ngIf="is_collapsed" class="fa fa-angle-double-down" aria-hidden="true"></i>
-            <i *ngIf="!is_collapsed" class="fa fa-angle-double-up" aria-hidden="true"></i>
-          </button>
-          <button type="button" class="btn btn-primary" *ngIf="oedaCallback['status'] === 'IGNORING_SAMPLES' || oedaCallback['status'] === 'COLLECTING_DATA'"
-                  (click)="stopRunningExperiment()">Stop Experiment
-          </button>
-        </div>
-        <div class="panel-body" [hidden]="is_collapsed">
-          <div class="row">
-            <labeled-input name="Experiment Name" [model]="experiment" key="name" [colSize]="6" [disabled]="true"></labeled-input>
-            <labeled-input name="Experiment Description" [model]="experiment" key="description" [colSize]="6" [disabled]="true"></labeled-input>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Primary Data Provider & Secondary Data Provider(s) & Change Provider -->
-    <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed" >
-
-      <!-- Primary Data Provider & Secondary Data Provider(s) -->
-      <div class="col-sm-6 col-xs-12" style="padding-left: 0">
-        <div class="panel panel-default chartJs">
-          <div class="panel-heading">
-            <div class="card-title">
-              <div class="title pull-left">Primary Data Provider</div>
-            </div>
-          </div>
-          <div class="panel-body" style="padding-top: 20px">
-
-            <div class="row" *ngIf="targetSystem.primaryDataProvider.type == 'http_request'">
-              <div class="col-md-3">
-                <div class="sub-title">Name</div>
-                <span>{{targetSystem.primaryDataProvider.name}}</span>
-              </div>
-              <div class="col-md-2">
-                <div class="sub-title">URL</div>
-                <span>{{targetSystem.primaryDataProvider.url}}</span>
-              </div>
-              <div class="col-md-2">
-                <div class="sub-title">Port</div>
-                <span>{{targetSystem.primaryDataProvider.port}}</span>
-              </div>
-              <div class="col-md-2">
-                <div class="sub-title">Serializer</div>
-                <span>{{targetSystem.primaryDataProvider.serializer}}</span>
-              </div>
-              <div class="col-md-2">
-                <div class="sub-title">Ignore First N Samples</div>
-                <span>{{targetSystem.primaryDataProvider.ignore_first_n_samples}}</span>
-              </div>
-            </div>
-
-            <div class="row" *ngIf="targetSystem.primaryDataProvider.type == 'kafka_consumer'">
-              <div class="col-md-3">
-                <div class="sub-title">Name</div>
-                <span>{{targetSystem.primaryDataProvider.name}}</span>
-              </div>
-              <div class="col-md-2">
-                <div class="sub-title">Kafka URI</div>
-                <span>{{targetSystem.primaryDataProvider.kafka_uri}}</span>
-              </div>
-              <div class="col-md-2">
-                <div class="sub-title">Topic</div>
-                <span>{{targetSystem.primaryDataProvider.topic}}</span>
-              </div>
-              <div class="col-md-2">
-                <div class="sub-title">Serializer</div>
-                <span>{{targetSystem.primaryDataProvider.serializer}}</span>
-              </div>
-              <div class="col-md-2">
-                <div class="sub-title">Ignore First N Samples</div>
-                <span>{{targetSystem.primaryDataProvider.ignore_first_n_samples}}</span>
-              </div>
-            </div>
-
-            <div class="row" *ngIf="targetSystem.primaryDataProvider.type == 'mqtt_listener'">
-              <div class="col-md-2">
-                <div class="sub-title">Name</div>
-                <span>{{targetSystem.primaryDataProvider.name}}</span>
-              </div>
-              <div class="col-md-3">
-                <div class="sub-title">Host</div>
-                <span>{{targetSystem.primaryDataProvider.host}}</span>
-              </div>
-              <div class="col-md-2">
-                <div class="sub-title">Port</div>
-                <span>{{targetSystem.primaryDataProvider.port}}</span>
-              </div>
-              <div class="col-md-2">
-                <div class="sub-title">Topic</div>
-                <span>{{targetSystem.primaryDataProvider.topic}}</span>
-              </div>
-              <div class="col-md-2">
-                <div class="sub-title">Serializer</div>
-                <span>{{targetSystem.primaryDataProvider.serializer}}</span>
-              </div>
-              <div class="col-md-2">
-                <div class="sub-title">Ignore First N Samples</div>
-                <span>{{targetSystem.primaryDataProvider.ignore_first_n_samples}}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Secondary Data Provider(s) -->
-        <div class="panel panel-default chartJs" *ngIf="targetSystem.secondaryDataProviders.length > 0">
-          <div class="panel-heading">
-            <div class="card-title">
-              <div class="title pull-left" *ngIf="targetSystem.secondaryDataProviders.length > 1">Secondary Data Providers</div>
-              <div class="title pull-left" *ngIf="targetSystem.secondaryDataProviders.length == 1">Secondary Data Provider</div>
-            </div>
-          </div>
-          <div class="panel-body" style="padding-top: 20px">
-            <div class="row" *ngFor="let secondaryDataProvider of targetSystem.secondaryDataProviders">
-              <div *ngIf="secondaryDataProvider.type == 'http_request'">
-                <div class="col-md-3">
-                  <div class="sub-title">Name</div>
-                  <span>{{secondaryDataProvider.name}}</span>
-                </div>
-                <div class="col-md-3">
-                  <div class="sub-title">URL</div>
-                  <span>{{secondaryDataProvider.url}}</span>
-                </div>
-                <div class="col-md-3">
-                  <div class="sub-title">Port</div>
-                  <span>{{secondaryDataProvider.port}}</span>
-                </div>
-                <div class="col-md-3">
-                  <div class="sub-title">Serializer</div>
-                  <span>{{secondaryDataProvider.serializer}}</span>
-                </div>
-              </div>
-
-              <div *ngIf="secondaryDataProvider.type == 'kafka_consumer'">
-                <div class="col-md-3">
-                  <div class="sub-title">Name</div>
-                  <span>{{secondaryDataProvider.name}}</span>
-                </div>
-                <div class="col-md-3">
-                  <div class="sub-title">Kafka URI</div>
-                  <span>{{secondaryDataProvider.kafka_uri}}</span>
-                </div>
-                <div class="col-md-3">
-                  <div class="sub-title">Topic</div>
-                  <span>{{secondaryDataProvider.topic}}</span>
-                </div>
-                <div class="col-md-3">
-                  <div class="sub-title">Serializer</div>
-                  <span>{{secondaryDataProvider.serializer}}</span>
-                </div>
-              </div>
-
-              <div *ngIf="secondaryDataProvider.type == 'mqtt_listener'">
-                <div class="col-md-3">
-                  <div class="sub-title">Name</div>
-                  <span>{{secondaryDataProvider.name}}</span>
-                </div>
-                <div class="col-md-3">
-                  <div class="sub-title">Host</div>
-                  <span>{{secondaryDataProvider.host}}</span>
-                </div>
-                <div class="col-md-3">
-                  <div class="sub-title">Port</div>
-                  <span>{{secondaryDataProvider.port}}</span>
-                </div>
-                <div class="col-md-3">
-                  <div class="sub-title">Topic</div>
-                  <span>{{secondaryDataProvider.topic}}</span>
-                </div>
-                <div class="col-md-3">
-                  <div class="sub-title">Serializer</div>
-                  <span>{{secondaryDataProvider.serializer}}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Change Provider -->
-      <div class="col-sm-6 col-xs-12" style="padding-right: 0">
-        <div class="panel panel-default chartJs">
-          <div class="panel-heading">
-            <div class="card-title">
-              <div class="title pull-left">Change Provider</div>
-            </div>
-          </div>
-          <div class="panel-body" style="padding-top: 20px">
-
-            <div class="row" *ngIf="targetSystem.changeProvider.type == 'http_request'">
-              <div class="col-md-4">
-                <div class="sub-title">URL</div>
-                <span>{{targetSystem.changeProvider.url}}</span>
-              </div>
-              <div class="col-md-4">
-                <div class="sub-title">Port</div>
-                <span>{{targetSystem.changeProvider.port}}</span>
-              </div>
-              <div class="col-md-4">
-                <div class="sub-title">Serializer</div>
-                <span>{{targetSystem.changeProvider.serializer}}</span>
-              </div>
-            </div>
-
-            <div class="row" *ngIf="targetSystem.changeProvider.type == 'kafka_producer'">
-              <div class="col-md-4">
-                <div class="sub-title">Kafka URI</div>
-                <span>{{targetSystem.changeProvider.kafka_uri}}</span>
-              </div>
-              <div class="col-md-4">
-                <div class="sub-title">Topic</div>
-                <span>{{targetSystem.changeProvider.topic}}</span>
-              </div>
-              <div class="col-md-4">
-                <div class="sub-title">Serializer</div>
-                <span>{{targetSystem.changeProvider.serializer}}</span>
-              </div>
-            </div>
-
-            <div class="row" *ngIf="targetSystem.changeProvider.type == 'mqtt_listener'">
-              <div class="col-md-3">
-                <div class="sub-title">Host</div>
-                <span>{{targetSystem.changeProvider.host}}</span>
-              </div>
-              <div class="col-md-3">
-                <div class="sub-title">Port</div>
-                <span>{{targetSystem.changeProvider.port}}</span>
-              </div>
-              <div class="col-md-3">
-                <div class="sub-title">Topic</div>
-                <span>{{targetSystem.changeProvider.topic}}</span>
-              </div>
-              <div class="col-md-3">
-                <div class="sub-title">Serializer</div>
-                <span>{{targetSystem.changeProvider.serializer}}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Incoming Data Types, Execution strategy & Experiment Variables -->
-    <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed" >
-
-      <!-- Incoming Data Types-->
-      <div class="col-sm-6 col-xs-12" style="padding-left: 0">
-        <div class="panel panel-default chartJs">
-          <div class="panel-heading">
-            <div class="card-title">
-              <div class="title pull-left">Incoming Data Types</div>
-            </div>
-          </div>
-          <div class="panel-body" style="padding-top: 20px">
-            <div class="table-responsive" style="padding-top: 20px">
-              <table class="table table-striped table-bordered table-hover">
-                <thead>
-                  <th style="padding-left: 2%">Name</th>
-                  <th style="padding-left: 2%">Scale</th>
-                  <th style="padding-left: 2%">Description</th>
-                  <th style="padding-left: 2%">Data Provider Name</th>
-                  <th style="padding-left: 2%">Optimization Criteria</th>
-                  <th style="padding-left: 2%; padding-right: 2%">Consider</th>
-                </thead>
-                <tbody>
-                <tr *ngFor="let dataType of targetSystem.incomingDataTypes" style="padding-top: 1%">
-                  <td>{{dataType.name}}</td>
-                  <td>{{dataType.scale}}</td>
-                  <td>{{dataType.description}}</td>
-                  <td>{{dataType.dataProviderName}}</td>
-                  <td>{{dataType.criteria}}</td>
-                  <td *ngIf="is_optimized(dataType.name)">Yes</td>
-                  <td *ngIf="!is_optimized(dataType.name)">No</td>
-                </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Execution Strategy & Experiment Variables -->
-      <div class="col-sm-6 col-xs-12" style="padding-right: 0">
-        <div class="panel panel-default chartJs">
-          <div class="panel-heading">
-            <div class="card-title">
-              <div class="title pull-left">Execution Strategy</div>
-            </div>
-          </div>
-          <div class="panel-body" style="padding-top: 20px">
-            <div class="table-responsive" style="padding-top: 20px">
-              <table>
-                <thead>
-                <th style="width: 5%">Type</th>
-                <th style="width: 5%">Sample Size</th>
-                <th style="width: 5%" *ngIf="experiment.executionStrategy.type == 'random'">Optimizer Iterations</th>
-                <th style="width: 5%" *ngIf="experiment.executionStrategy.type == 'random'">Optimizer Random Starts</th>
-                <th style="width: 5%" *ngIf="experiment.executionStrategy.type == 'self_optimizer'">Optimizer Method</th>
-                </thead>
-                <tbody>
-                <td style="padding-top: 1%">{{experiment.executionStrategy.type}}</td>
-                <td>{{experiment.executionStrategy.sample_size}}</td>
-                <td *ngIf="experiment.executionStrategy.type == 'random'">{{experiment.executionStrategy.optimizer_iterations}}</td>
-                <td *ngIf="experiment.executionStrategy.type == 'random'">{{experiment.executionStrategy.optimizer_random_starts}}</td>
-                <td *ngIf="experiment.executionStrategy.type == 'self_optimizer'">{{experiment.executionStrategy.optimizer_method}}</td>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- Experiment variables -->
-        <div class="panel panel-default chartJs">
-          <div class="panel-heading">
-            <div class="card-title"><div class="title pull-left">Experiment Variables</div></div>
-          </div>
-          <div class="panel-body" style="padding-top: 20px">
-            <div class="table-responsive" style="padding-top: 20px">
-              <table>
-                <thead>
-                <th style="width: 5%">Name</th>
-                <th style="width: 5%">Min</th>
-                <th style="width: 5%">Max</th>
-                <th *ngIf="experiment.executionStrategy.type == 'step_explorer'" style="width: 5%">Step Size</th>
-                </thead>
-                <tbody>
-                <tr *ngFor="let input of experiment.changeableVariable" style="padding-top: 1%">
-                  <td style="padding-top: 1%">{{input.name}}</td>
-                  <td>{{input.min}}</td>
-                  <td>{{input.max}}</td>
-                  <td *ngIf="experiment.executionStrategy.type == 'step_explorer'">{{input.step}}</td>
-                </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!--Stages Header-->
-    <div class="col-sm-12 col-xs-12" [hidden]="first_render_of_page">
-        <div class="panel panel-default chartJs">
-          <div class="panel-heading">
-            <div class="card-title">
-              <div class="col-md-5">
+          <div class="card-title">
+            <div class="row">
+              <div class="col-sm-4">
                 <div class="title pull-left">Stages of Experiment</div>
               </div>
 
-              <div class="col-md-3">
+              <div class="col-sm-2">
                 <div class="title pull-left">Incoming Data Type</div>
               </div>
 
-              <div class="col-md-2">
+              <div class="col-sm-2">
                 <div class="title pull-left">Scale of Results</div>
               </div>
 
-              <div class="col-md-2">
+              <div class="col-sm-2">
                 <div class="title pull-left">Polling</div>
               </div>
 
+              <div class="col-sm-2" *ngIf="oedaCallback['status'] === 'IGNORING_SAMPLES' || oedaCallback['status'] === 'COLLECTING_DATA'">
+                <div class="title pull-left">Stop Experiment</div>
+              </div>
             </div>
           </div>
-          <div class="panel-body" style="padding-top: 20px">
-            <div class="row">
-              <div class="col-md-5">
-                <div>
-                  <select class="form-control" required [(ngModel)]="selected_stage" (change)="stage_changed()">
-                    <option *ngFor="let i of available_stages; let first_stage = first;" [ngValue]="i">
-                      <div *ngIf="first_stage">All Stages</div>
-                      <div *ngIf="!first_stage">Stage: {{ i.number }}
-                        <div *ngFor="let key of keys(i.knobs); let last_knob=last; let first_knob=first;">
-                          <b *ngIf="first_knob">[</b>
-                          <b>{{key}}: {{i.knobs[key]}}</b>
-                          <b *ngIf="!last_knob">,</b>
-                          <b *ngIf="last_knob">]</b>
-                        </div>
+        </div>
+        <div class="panel-body" style="padding-top: 20px">
+          <div class="row">
+            <div class="col-sm-4">
+              <div>
+                <select class="form-control" required [(ngModel)]="selected_stage" (change)="stage_changed()">
+                  <option *ngFor="let i of available_stages; let first_stage = first;" [ngValue]="i">
+                    <div *ngIf="first_stage">All Stages</div>
+                    <div *ngIf="!first_stage">Stage: {{ i.number }}
+                      <div *ngFor="let key of keys(i.knobs); let last_knob=last; let first_knob=first;">
+                        <b *ngIf="first_knob">[</b>
+                        <b>{{key}}: {{i.knobs[key]}}</b>
+                        <b *ngIf="!last_knob">,</b>
+                        <b *ngIf="last_knob">]</b>
                       </div>
-                    </option>
-                  </select>
-                </div>
+                    </div>
+                  </option>
+                </select>
               </div>
+            </div>
 
-              <div class="col-md-3">
-                <div class="card-title">
-                  <select class="form-control" [(ngModel)]="incoming_data_type" (change)="incoming_data_type_changed()">
-                    <!--<option *ngFor="let i of targetSystem.incomingDataTypes" [ngValue]="i" [disabled]="is_data_type_disabled(i.name)">-->
-                      <!--{{i.name}}-->
-                    <!--</option>-->
-                    <option *ngFor="let dataType of targetSystem.incomingDataTypes"
-                            [ngValue]="dataType">
-                      {{dataType.name}}
-                    </option>
-                  </select>
-                </div>
+            <div class="col-sm-2">
+              <div class="card-title">
+                <select class="form-control" [(ngModel)]="incoming_data_type" (change)="incoming_data_type_changed()">
+                  <!--<option *ngFor="let i of targetSystem.incomingDataTypes" [ngValue]="i" [disabled]="is_data_type_disabled(i.name)">-->
+                    <!--{{i.name}}-->
+                  <!--</option>-->
+                  <option *ngFor="let dataType of targetSystem.incomingDataTypes"
+                          [ngValue]="dataType">
+                    {{dataType.name}}
+                  </option>
+                </select>
               </div>
+            </div>
 
-              <div class="col-md-2">
-                <div class="card-title">
-                  <select class="form-control" required (change)="scale_changed($event.target.value)">
-                    <option [selected]="true">Normal</option>
-                    <option>Log</option>
-                  </select>
-                </div>
+            <div class="col-sm-2">
+              <div class="card-title">
+                <select class="form-control" required (change)="scale_changed($event.target.value)">
+                  <option [selected]="true">Normal</option>
+                  <option>Log</option>
+                </select>
               </div>
+            </div>
 
-              <div class="col-md-2">
-                <div class="card-title">
-                  <div class="btn-group btn-toggle">
-                    <button class="btn btn-primary active" id="polling_on_button" (click)="enable_polling()">ON</button>
-                    <button class="btn btn-default" id="polling_off_button" (click)="disable_polling()">OFF</button>
-                  </div>
+            <div class="col-sm-2">
+              <div class="card-title">
+                <div class="btn-group btn-toggle">
+                  <button class="btn btn-primary active" id="polling_on_button" (click)="enable_polling()">ON</button>
+                  <button class="btn btn-default" id="polling_off_button" (click)="disable_polling()">OFF</button>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-    </div>
 
-    <!--Status (Callback) Info-->
-    <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''">
-        <div class="panel panel-default chartJs">
-          <div class="panel-body" style="padding-top: 20px">
-            <h3>Current Status of Experiment</h3>
-            <div *ngIf="oedaCallback['status'] !== 'IGNORING_SAMPLES' && oedaCallback['status'] !== 'COLLECTING_DATA' && oedaCallback['status'] !== 'EXPERIMENT_STAGE_DONE'">
-              <i class="fa fa-spinner fa-pulse fa-3x fa-fw" style="padding-top: 1%"></i>
-              <h4>Please wait...</h4>
-            </div>
-            <div *ngIf="oedaCallback['status'] === 'IGNORING_SAMPLES'">
-              <h4 *ngIf="oedaCallback['remaining_time_and_stages']['remaining_stages'] !== undefined && oedaCallback['remaining_time_and_stages']['remaining_time'] !== undefined">
-                Remaining number of stages: {{oedaCallback['remaining_time_and_stages']['remaining_stages']}}, estimated remaining time: {{oedaCallback['remaining_time_and_stages']['remaining_time']}} seconds
-              </h4>
-              <h4>
-                Ignoring samples for <b>stage {{oedaCallback['stage_counter']}}</b>
-              </h4>
-              <h4>
-                Configuration:
-              </h4>
-              <ul>
-                <li *ngFor="let key of keys(oedaCallback.current_knob)"><b>{{key}}:</b> {{oedaCallback.current_knob[key]}}</li>
-              </ul>
-              <p>
-                Number of ignored samples: {{oedaCallback['index']}} , total size: {{oedaCallback['size']}}
-              </p>
-              <progressbar [value]="oedaCallback['complete']*100"></progressbar>
-            </div>
-
-            <div *ngIf="oedaCallback['status'] === 'COLLECTING_DATA' || oedaCallback['status'] === 'EXPERIMENT_STAGE_DONE'">
-              <h4 *ngIf="oedaCallback['remaining_time_and_stages']['remaining_stages'] != null && oedaCallback['remaining_time_and_stages']['remaining_time'] != null">
-                Remaining number of stages: {{oedaCallback['remaining_time_and_stages']['remaining_stages']}}, estimated remaining time: {{oedaCallback['remaining_time_and_stages']['remaining_time']}} seconds
-              </h4>
-              <h4>
-                Collecting data for  <b>stage {{oedaCallback['stage_counter']}}</b>
-              </h4>
-              <h4>
-                Configuration:
-              </h4>
-              <ul>
-                <li *ngFor="let key of keys(oedaCallback.current_knob);"><b>{{key}}:</b> {{oedaCallback.current_knob[key]}}</li>
-              </ul>
-              <p>
-                Number of collected data: {{oedaCallback['index']}} , total size: {{oedaCallback['size']}}
-              </p>
-              <progressbar [value]="oedaCallback['complete']*100"></progressbar>
-            </div>
-            <div *ngIf="oedaCallback['remaining_stages'] === 0">
-              <h4>
-                Experiment is completed with {{oedaCallback['experiment_counter']}} stages...
-              </h4>
+            <div class="col-sm-2" *ngIf="oedaCallback['status'] === 'IGNORING_SAMPLES' || oedaCallback['status'] === 'COLLECTING_DATA'">
+              <div class="card-title">
+                <!--<button type="button" class="btn btn-primary" (click)="stopRunningExperiment()">Stop Experiment</button>-->
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+                  Stop Experiment
+                </button>
+              </div>
             </div>
 
           </div>
         </div>
-    </div>
+      </div>
+  </div>
 
-    <!-- Scatter Plot -->
-    <div class="col-sm-12 col-xs-12" [hidden]="!is_enough_data_for_plots">
-      <div class="panel panel-default">
+  <!--Status (Callback) Info-->
+  <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''">
+      <div class="panel panel-default chartJs">
+        <div class="panel-body" style="padding-top: 20px">
+          <h3>Current Status of Experiment</h3>
+          <div *ngIf="oedaCallback['status'] !== 'IGNORING_SAMPLES' && oedaCallback['status'] !== 'COLLECTING_DATA' && oedaCallback['status'] !== 'EXPERIMENT_STAGE_DONE'">
+            <i class="fa fa-spinner fa-pulse fa-3x fa-fw" style="padding-top: 1%"></i>
+            <h4>Please wait...</h4>
+          </div>
+          <div *ngIf="oedaCallback['status'] === 'IGNORING_SAMPLES'">
+            <h4 *ngIf="oedaCallback['remaining_time_and_stages']['remaining_stages'] !== undefined && oedaCallback['remaining_time_and_stages']['remaining_time'] !== undefined">
+              Remaining number of stages: {{oedaCallback['remaining_time_and_stages']['remaining_stages']}}, estimated remaining time: {{oedaCallback['remaining_time_and_stages']['remaining_time']}} seconds
+            </h4>
+            <h4>
+              Ignoring samples for <b>stage {{oedaCallback['stage_counter']}}</b>
+            </h4>
+            <h4>
+              Configuration:
+            </h4>
+            <ul>
+              <li *ngFor="let key of keys(oedaCallback.current_knob)"><b>{{key}}:</b> {{oedaCallback.current_knob[key]}}</li>
+            </ul>
+            <p>
+              Number of ignored samples: {{oedaCallback['index']}} , total size: {{oedaCallback['size']}}
+            </p>
+            <progressbar [value]="oedaCallback['complete']*100"></progressbar>
+          </div>
+
+          <div *ngIf="oedaCallback['status'] === 'COLLECTING_DATA' || oedaCallback['status'] === 'EXPERIMENT_STAGE_DONE'">
+            <h4 *ngIf="oedaCallback['remaining_time_and_stages']['remaining_stages'] != null && oedaCallback['remaining_time_and_stages']['remaining_time'] != null">
+              Remaining number of stages: {{oedaCallback['remaining_time_and_stages']['remaining_stages']}}, estimated remaining time: {{oedaCallback['remaining_time_and_stages']['remaining_time']}} seconds
+            </h4>
+            <h4>
+              Collecting data for  <b>stage {{oedaCallback['stage_counter']}}</b>
+            </h4>
+            <h4>
+              Configuration:
+            </h4>
+            <ul>
+              <li *ngFor="let key of keys(oedaCallback.current_knob);"><b>{{key}}:</b> {{oedaCallback.current_knob[key]}}</li>
+            </ul>
+            <p>
+              Number of collected data: {{oedaCallback['index']}} , total size: {{oedaCallback['size']}}
+            </p>
+            <progressbar [value]="oedaCallback['complete']*100"></progressbar>
+          </div>
+          <div *ngIf="oedaCallback['remaining_stages'] === 0">
+            <h4>
+              Experiment is completed with {{oedaCallback['experiment_counter']}} stages...
+            </h4>
+          </div>
+
+        </div>
+      </div>
+  </div>
+
+  <!-- Scatter Plot -->
+  <div class="col-sm-12 col-xs-12" [hidden]="!is_enough_data_for_plots">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <div class="card-title">
+          <div class="title pull-left">Scatter Plot with {{scale}} Scale</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="col-md-12" id="chartdiv" style="width: 100%; height: 400px"></div>
+      </div>
+      <div class="panel-footer">
+        <p id="filterSummary">Threshold for 95-percentile: <b>{{initial_threshold_for_scatter_plot}}</b>, number of points to be filtered: {{nr_points_to_be_filtered}}</p>
+        <!--<button id="filterButton{{selected_stage.number}}" type="button" class="btn btn-primary" (click)="filter_outliers($event)">Filter</button>-->
+      </div>
+    </div>
+  </div>
+
+  <!-- Histogram -->
+  <div class="col-sm-12 col-xs-12" [hidden]="!is_enough_data_for_plots">
+    <div class="panel panel-default">
         <div class="panel-heading">
           <div class="card-title">
-            <div class="title pull-left">Scatter Plot with {{scale}} Scale</div>
-          </div>
-        </div>
-        <div class="panel-body">
-          <div class="col-md-12" id="chartdiv" style="width: 100%; height: 400px"></div>
-        </div>
-        <div class="panel-footer">
-          <p id="filterSummary">Threshold for 95-percentile: <b>{{initial_threshold_for_scatter_plot}}</b>, number of points to be filtered: {{nr_points_to_be_filtered}}</p>
-          <!--<button id="filterButton{{selected_stage.number}}" type="button" class="btn btn-primary" (click)="filter_outliers($event)">Filter</button>-->
+            <div class="title pull-left">Histogram with {{scale}} Scale</div>
         </div>
       </div>
+      <div class="panel-body" >
+        <div class="col-md-12" id="histogram" style="width: 100%; height: 400px"></div>
+      </div>
     </div>
+  </div>
 
-    <!-- Histogram -->
-    <div class="col-sm-12 col-xs-12" [hidden]="!is_enough_data_for_plots">
-      <div class="panel panel-default">
-          <div class="panel-heading">
-            <div class="card-title">
-              <div class="title pull-left">Histogram with {{scale}} Scale</div>
-          </div>
+  <!-- Modal for stop experiment-->
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Please confirm</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
-        <div class="panel-body" >
-          <div class="col-md-12" id="histogram" style="width: 100%; height: 400px"></div>
+        <div class="modal-body">
+          Do you really want to stop the whole experiment?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+          <button type="button" class="btn btn-primary" (click)="stopRunningExperiment()" data-dismiss="modal">Yes</button>
         </div>
       </div>
     </div>
+  </div>
 </div>

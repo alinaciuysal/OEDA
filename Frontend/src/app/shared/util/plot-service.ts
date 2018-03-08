@@ -18,7 +18,8 @@ export class PlotService {
                             summaryFieldID: string,
                             processedData: any,
                             incoming_data_type_name: string,
-                            initial_threshold_for_scatter_plot: number) {
+                            initial_threshold_for_scatter_plot: number,
+                            stage_details: string) {
     let selectedThreshold = -1;
     const scatter_plot = this.AmCharts.makeChart(divID, {
       "responsive": {
@@ -47,6 +48,11 @@ export class PlotService {
         "lineAlpha": 0,
         "negativeLineAlpha": 0
       }],
+      "titles": [{
+          "text": stage_details,
+          "size": 12
+        }
+      ],
       "chartScrollbar": {
         "graph": "g1",
         "gridAlpha": 0,
@@ -75,7 +81,7 @@ export class PlotService {
           "event": "moved",
           "method": function (event) {
             const yValueAsThreshold = event.chart.valueAxes[0].coordinateToValue(event.y);
-            const roundedThreshold = yValueAsThreshold.toFixed(2);
+            const roundedThreshold = yValueAsThreshold.toFixed(3);
             selectedThreshold = roundedThreshold;
           }
         }]
@@ -143,7 +149,7 @@ export class PlotService {
   }
 
   /** draws an histogram with given parameters and the data */
-  public draw_histogram(divID: string, processedData: any, incoming_data_type_name: string) {
+  public draw_histogram(divID: string, processedData: any, incoming_data_type_name: string, stage_details: string) {
     const histogram = this.AmCharts.makeChart(divID, {
       "type": "serial",
       "theme": "light",
@@ -165,6 +171,11 @@ export class PlotService {
         "startOnAxis": true,
         "title": incoming_data_type_name
       },
+      "titles": [{
+          "text": stage_details,
+          "size": 12
+        }
+      ],
       "valueAxes": [{
         "title": "Percentage"
       }]
@@ -189,7 +200,7 @@ export class PlotService {
 
     for (let i = 0; i < upperThresholdForBins; i = i + stepSize) {
       // unary plus to convert a string to a number
-      const bin = {binLowerBound: +i.toFixed(2), count: 0, percentage: 0};
+      const bin = {binLowerBound: +i.toFixed(3), count: 0, percentage: 0};
       bins.push(bin);
     }
 
@@ -211,9 +222,9 @@ export class PlotService {
 
     // now transform the array to indicate the percentage instead of counts
     for (let k = 0; k < bins.length; k++) {
-      // rounding to 2 decimals and indicating the percentage %
+      // rounding to 3 decimals and indicating the percentage %
       // unary plus to convert a string to a number
-      bins[k]["percentage"] = +(bins[k]["count"] * 100 / data.length).toFixed(2);
+      bins[k]["percentage"] = +(bins[k]["count"] * 100 / data.length).toFixed(3);
     }
     return bins;
 
@@ -282,12 +293,12 @@ export class PlotService {
       if (!isNullOrUndefined(data_field)) {
         if (!isNullOrUndefined(sortedData[index][data_field])) {
           const result = sortedData[index][data_field];
-          return +result.toFixed(2);
+          return +result.toFixed(3);
         }
         return 0;
       }
       const result = sortedData[index];
-      return +result.toFixed(2);
+      return +result.toFixed(3);
     }
     return 0;
   }
@@ -303,7 +314,6 @@ export class PlotService {
 
     // retrieve data for the initially selected stage
     const data1 = ctrl.entityService.get_data_from_local_structure(all_data, selected_stage.number);
-
     if (isNullOrUndefined(data1)) {
       ctrl.notify.error("Error", "Selected stage might not contain data. Please select another stage.");
       return;

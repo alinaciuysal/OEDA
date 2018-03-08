@@ -37,6 +37,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
   private first_render_of_plots: boolean;
   private experiment_ended: boolean;
   private timestamp: string;
+  private stage_details: string;
 
 
   private all_data: Entity[];
@@ -333,11 +334,15 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     // if "all stages" is selected
     if (ctrl.selected_stage.number == -1) {
       ctrl.processedData = ctrl.entityService.process_all_stage_data(ctrl.all_data, "timestamp", "value", ctrl.scale, ctrl.incoming_data_type["name"], false);
+      ctrl.stage_details = "All Stages";
     }
     // if any other stage is selected
     else {
       ctrl.processedData = ctrl.all_data[ctrl.selected_stage.number - 1];
       ctrl.processedData = ctrl.entityService.process_single_stage_data(ctrl.processedData,"timestamp", "value", ctrl.scale, ctrl.incoming_data_type["name"], false);
+      // ctrl.processedData is the stage object here
+      ctrl.stage_details = ctrl.entityService.get_stage_details(ctrl.selected_stage);
+      console.log("stage details baba", ctrl.stage_details);
     }
     // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
     const clonedData = JSON.parse(JSON.stringify(ctrl.processedData));
@@ -352,14 +357,15 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     document.getElementById(ctrl.filterSummaryId).innerHTML = "<p>Threshold for 95-percentile: <b>" + ctrl.initial_threshold_for_scatter_plot + "</b> and # of points to be removed: <b>" + ctrl.nr_points_to_be_filtered + "</b></p>";
 
     if (ctrl.first_render_of_plots) {
-      ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot(ctrl.divId, ctrl.filterSummaryId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_plot);
-      ctrl.histogram = ctrl.plotService.draw_histogram(ctrl.histogramDivId, ctrl.processedData, ctrl.incoming_data_type["name"]);
+      ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot(ctrl.divId, ctrl.filterSummaryId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_plot, ctrl.stage_details);
+      ctrl.histogram = ctrl.plotService.draw_histogram(ctrl.histogramDivId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.stage_details);
       ctrl.first_render_of_plots = false;
     } else {
-      // now update (validate) values & threshold value and its guide (line) of the scatter plot
+      // now update (validate) values & threshold value and its guide (line) of the scatter plot & also update title
       ctrl.scatter_plot.dataProvider = ctrl.processedData;
       ctrl.scatter_plot.graphs[0].negativeBase = ctrl.initial_threshold_for_scatter_plot;
       ctrl.scatter_plot.valueAxes[0].guides[0].value = ctrl.initial_threshold_for_scatter_plot;
+      ctrl.scatter_plot.titles[0].text = ctrl.stage_details;
       // also rename label of charts in case of a change
       ctrl.scatter_plot.valueAxes[0].title = ctrl.incoming_data_type["name"];
       ctrl.histogram.categoryAxis.title = ctrl.incoming_data_type["name"];

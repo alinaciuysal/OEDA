@@ -18,6 +18,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
   private histogram: AmChart;
   private first_render_of_page: boolean;
   private all_data: Entity[];
+  private stage_details: string;
 
   public dataAvailable: boolean;
   public is_collapsed: boolean;
@@ -147,8 +148,8 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
             // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
             const clonedData = JSON.parse(JSON.stringify(processedData));
             ctrl.initial_threshold_for_scatter_chart = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value');
-            ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_chart);
-            ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type["name"]);
+            ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_chart, "All Stages");
+            ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type["name"], "All Stages");
             ctrl.selectDistributionAndDrawQQPlot(ctrl.distribution);
             ctrl.is_enough_data_for_plots = true;
           } else {
@@ -168,8 +169,9 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
           if (!isNullOrUndefined(processedData)) {
             const clonedData = JSON.parse(JSON.stringify(processedData));
             ctrl.initial_threshold_for_scatter_chart = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value');
-            ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_chart);
-            ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type["name"]);
+            ctrl.stage_details = ctrl.entityService.get_stage_details(ctrl.selected_stage);
+            ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_chart, ctrl.stage_details);
+            ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type["name"], ctrl.stage_details);
 
             // check if next stage exists for javascript side of qq plot
             ctrl.available_stages_for_qq_js.some(function (element) {

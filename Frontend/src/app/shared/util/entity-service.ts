@@ -1,7 +1,7 @@
 import {NotificationsService} from "angular2-notifications";
 import {LoggerService} from "../modules/helper/logger.service";
 import {Injectable} from "@angular/core";
-import {Entity, OedaCallbackEntity, UserEntity} from "../modules/api/oeda-api.service";
+import {Entity, Experiment, OedaCallbackEntity, UserEntity} from "../modules/api/oeda-api.service";
 import {isNullOrUndefined} from "util";
 
 @Injectable()
@@ -46,10 +46,9 @@ export class EntityService {
               newElement[xAttribute] = data_point["created"];
 
               if (scale === "Log") {
-                newElement[yAttribute] = Math.log(data_point["payload"][incoming_data_type_name]);
+                newElement[yAttribute] = Number(Math.log(data_point["payload"][incoming_data_type_name]).toFixed(3));
               } else if (scale === "Normal") {
-
-                newElement[yAttribute] = data_point["payload"][incoming_data_type_name];
+                newElement[yAttribute] = Number(data_point["payload"][incoming_data_type_name].toFixed(3));
               } else {
                 ctrl.notify.error("Error", "Please provide a valid scale");
                 return;
@@ -58,9 +57,10 @@ export class EntityService {
             } else {
               // this is for plotting qq plot with JS, as it only requires raw data in log or normal scale
               if (scale === "Log") {
-                processedData.push(Math.log(data_point["payload"][incoming_data_type_name]));
+                processedData.push(Number(Math.log(data_point["payload"][incoming_data_type_name]).toFixed(3)));
               } else if (scale === "Normal") {
-                processedData.push(data_point["payload"][incoming_data_type_name]);
+                // processedData.push(Number(data_point["payload"][incoming_data_type_name].toFixed(3)));
+                processedData.push(Number(data_point["payload"][incoming_data_type_name].toFixed(3)));
               } else {
                 ctrl.notify.error("Error", "Please provide a valid scale");
                 return;
@@ -210,5 +210,22 @@ export class EntityService {
       }
     }
     return null;
+  }
+
+  /**
+   * for successful experiments, we pass string representation
+   * @param {selected_stage} JSON representation of selected stage object
+   * @returns {string}
+   */
+  public get_stage_details(selected_stage: any): string {
+    let details: string = "Stage: ";
+    details += selected_stage["number"] + " ";
+    let json_str = JSON.stringify(selected_stage["knobs"]);
+    json_str = json_str.replace(/["']/g, "");
+    json_str = json_str.replace(",", ", ");
+    json_str = json_str.replace("{", "[");
+    json_str = json_str.replace("}", "]");
+    details += json_str;
+    return details;
   }
 }

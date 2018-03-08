@@ -19,7 +19,8 @@ export class PlotService {
                             processedData: any,
                             incoming_data_type_name: string,
                             initial_threshold_for_scatter_plot: number,
-                            stage_details: string) {
+                            stage_details: string,
+                            decimal_places: number) {
     let selectedThreshold = -1;
     const scatter_plot = this.AmCharts.makeChart(divID, {
       "responsive": {
@@ -81,7 +82,7 @@ export class PlotService {
           "event": "moved",
           "method": function (event) {
             const yValueAsThreshold = event.chart.valueAxes[0].coordinateToValue(event.y);
-            const roundedThreshold = yValueAsThreshold.toFixed(3);
+            const roundedThreshold = yValueAsThreshold.toFixed(decimal_places);
             selectedThreshold = roundedThreshold;
           }
         }]
@@ -149,7 +150,7 @@ export class PlotService {
   }
 
   /** draws an histogram with given parameters and the data */
-  public draw_histogram(divID: string, processedData: any, incoming_data_type_name: string, stage_details: string) {
+  public draw_histogram(divID: string, processedData: any, incoming_data_type_name: string, stage_details: string, decimal_places) {
     const histogram = this.AmCharts.makeChart(divID, {
       "type": "serial",
       "theme": "light",
@@ -157,7 +158,7 @@ export class PlotService {
         "enabled": true
       },
       "columnWidth": 1,
-      "dataProvider": this.categorize_data(processedData),
+      "dataProvider": this.categorize_data(processedData, decimal_places),
       "graphs": [{
         "fillColors": "#c55",
         "fillAlphas": 0.9,
@@ -189,7 +190,7 @@ export class PlotService {
   }
 
   /** dstributes data to bins for histogram*/
-  public categorize_data(data: any) {
+  public categorize_data(data: any, decimal_places) {
     const bins = [];
     const onlyValuesInData = this.extract_values_from_array(data, "value");
     const upperThresholdForBins = this.get_maximum_value_from_array(onlyValuesInData);
@@ -200,7 +201,7 @@ export class PlotService {
 
     for (let i = 0; i < upperThresholdForBins; i = i + stepSize) {
       // unary plus to convert a string to a number
-      const bin = {binLowerBound: +i.toFixed(3), count: 0, percentage: 0};
+      const bin = {binLowerBound: +i.toFixed(decimal_places), count: 0, percentage: 0};
       bins.push(bin);
     }
 
@@ -224,7 +225,7 @@ export class PlotService {
     for (let k = 0; k < bins.length; k++) {
       // rounding to 3 decimals and indicating the percentage %
       // unary plus to convert a string to a number
-      bins[k]["percentage"] = +(bins[k]["count"] * 100 / data.length).toFixed(3);
+      bins[k]["percentage"] = +(bins[k]["count"] * 100 / data.length).toFixed(decimal_places);
     }
     return bins;
 
@@ -282,7 +283,7 @@ export class PlotService {
    * calculates the threshold for given percentile by retrieving data from data[data_field]
    * if data_field is null, then it is same to first sorting an array of float/int values, then finding the percentile
    */
-  public calculate_threshold_for_given_percentile(data, percentile, data_field) {
+  public calculate_threshold_for_given_percentile(data, percentile, data_field, decimal_places) {
     if (data.length !== 0) {
       const sortedData = data.sort(this.entityService.sort_by(data_field, true, parseFloat));
       const index = Math.floor(sortedData.length * percentile / 100 - 1);
@@ -293,12 +294,12 @@ export class PlotService {
       if (!isNullOrUndefined(data_field)) {
         if (!isNullOrUndefined(sortedData[index][data_field])) {
           const result = sortedData[index][data_field];
-          return +result.toFixed(3);
+          return +result.toFixed(decimal_places);
         }
         return 0;
       }
       const result = sortedData[index];
-      return +result.toFixed(3);
+      return +result.toFixed(decimal_places);
     }
     return 0;
   }
@@ -306,7 +307,7 @@ export class PlotService {
   /** draws QQ Plot for a successful experiment.
    * It's based on https://gist.github.com/mbostock/4349187 and http://mbostock.github.io/protovis/ex/qqplot.html
    */
-  public draw_qq_js(divID, all_data, selected_stage, other_stage_number, scale, incoming_data_type_name) {
+  public draw_qq_js(divID, all_data, selected_stage, other_stage_number, scale, incoming_data_type_name, decimal_places) {
     const ctrl = this;
     // clear svg data, so that two different plots should not overlap with each other upon several rendering
     // https://stackoverflow.com/questions/3674265/is-there-an-easy-way-to-clear-an-svg-elements-contents
@@ -345,8 +346,8 @@ export class PlotService {
 
     // now determine domain of the graph by simply calculating the 95-th percentile of values
     // also p.ticks functions (in qq()) can be changed accordingly.
-    const percentile_for_data_x = ctrl.calculate_threshold_for_given_percentile(data_for_x_axis, 95,  null);
-    const percentile_for_data_y = ctrl.calculate_threshold_for_given_percentile(data_for_y_axis, 95,  null);
+    const percentile_for_data_x = ctrl.calculate_threshold_for_given_percentile(data_for_x_axis, 95,  null, decimal_places);
+    const percentile_for_data_y = ctrl.calculate_threshold_for_given_percentile(data_for_y_axis, 95,  null, decimal_places);
 
     let scale_upper_bound = percentile_for_data_x;
     if (scale_upper_bound < percentile_for_data_y)

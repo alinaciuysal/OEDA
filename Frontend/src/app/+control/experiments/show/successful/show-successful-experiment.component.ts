@@ -4,7 +4,7 @@ import {NotificationsService} from "angular2-notifications";
 import {LayoutService} from "../../../../shared/modules/helper/layout.service";
 import {PlotService} from "../../../../shared/util/plot-service";
 import {EntityService} from "../../../../shared/util/entity-service";
-import {Experiment, Target, OEDAApiService, Entity} from "../../../../shared/modules/api/oeda-api.service";
+import {Experiment, Target, OEDAApiService, StageEntity} from "../../../../shared/modules/api/oeda-api.service";
 import {AmChartsService, AmChart} from "@amcharts/amcharts3-angular";
 import {isNullOrUndefined} from "util";
 
@@ -17,8 +17,9 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
   private scatter_plot: AmChart;
   private histogram: AmChart;
   private first_render_of_page: boolean;
-  private all_data: Entity[];
-  private stage_details: string;
+  private all_data: StageEntity[];
+  private decimal_places: number;
+  public stage_details: string;
 
   public dataAvailable: boolean;
   public is_collapsed: boolean;
@@ -54,7 +55,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
               private router: Router,
               private notify: NotificationsService) {
 
-
+    this.decimal_places = 3;
     this.dataAvailable = false;
     this.is_all_stages_selected = false;
     this.is_qq_plot_rendered = false;
@@ -64,6 +65,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     this.first_render_of_page = true;
     this.all_data = [];
     this.scale = "Normal";
+    this.stage_details = "All Stages";
 
     this.distribution = "Norm";
     this.available_distributions = ['Norm', 'Gamma', 'Logistic', 'T', 'Uniform', 'Lognorm', 'Loggamma'];
@@ -102,8 +104,6 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
             this.apiService.loadTargetById(experiment.targetSystemId).subscribe(targetSystem => {
               if (!isNullOrUndefined(targetSystem)) {
                 this.targetSystem = targetSystem;
-                console.log("exp", this.experiment);
-                console.log("ts", this.targetSystem);
                 // retrieve stages
                 this.apiService.loadAvailableStagesWithExperimentId(this.experiment_id).subscribe(stages => {
                   if (!isNullOrUndefined(stages)) {
@@ -112,6 +112,10 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
                     this.available_stages.push(this.selected_stage);
 
                     for (let j = 0; j < stages.length; j++) {
+                      // round knob values of stages to 3 decimals
+                      if (!isNullOrUndefined(stages[j]["knobs"])) {
+                        stages[j]["knobs"] = this.entityService.round_knob_values(stages[j]["knobs"], 3);
+                      }
                       this.available_stages.push(stages[j]);
                     }
                     stages.sort(this.entityService.sort_by('number', true, parseInt));
@@ -139,7 +143,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     const ctrl = this;
 
     if (stage_object !== undefined && stage_object.length !== 0) {
-
+      ctrl.selectDistributionAndDrawQQPlot(ctrl.distribution);
       // draw graphs for all_data
       if (ctrl.selected_stage.number === -1) {
         try {
@@ -147,10 +151,10 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
           if (!isNullOrUndefined(processedData)) {
             // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
             const clonedData = JSON.parse(JSON.stringify(processedData));
-            ctrl.initial_threshold_for_scatter_chart = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value');
-            ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_chart, "All Stages");
-            ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type["name"], "All Stages");
-            ctrl.selectDistributionAndDrawQQPlot(ctrl.distribution);
+            ctrl.initial_threshold_for_scatter_chart = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value', ctrl.decimal_places);
+            ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_chart, "All Stages", ctrl.decimal_places);
+            ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type["name"], "All Stages", ctrl.decimal_places);
+
             ctrl.is_enough_data_for_plots = true;
           } else {
             ctrl.notify.error("Error", "Selected scale might not be appropriate for the selected incoming data type");
@@ -168,16 +172,16 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
           let processedData = ctrl.entityService.process_single_stage_data(stage_object,"timestamp", "value", ctrl.scale, ctrl.incoming_data_type["name"], true);
           if (!isNullOrUndefined(processedData)) {
             const clonedData = JSON.parse(JSON.stringify(processedData));
-            ctrl.initial_threshold_for_scatter_chart = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value');
+            ctrl.initial_threshold_for_scatter_chart = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value', ctrl.decimal_places);
             ctrl.stage_details = ctrl.entityService.get_stage_details(ctrl.selected_stage);
-            ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_chart, ctrl.stage_details);
-            ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type["name"], ctrl.stage_details);
+            ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_chart, ctrl.stage_details, ctrl.decimal_places);
+            ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type["name"], ctrl.stage_details, ctrl.decimal_places);
 
             // check if next stage exists for javascript side of qq plot
             ctrl.available_stages_for_qq_js.some(function (element) {
               if (Number(element.number) == Number(ctrl.selected_stage.number) + 1) {
                 ctrl.selected_stage_for_qq_js = (element.number).toString();
-                ctrl.plotService.draw_qq_js("qqPlotJS", ctrl.all_data, ctrl.selected_stage, ctrl.selected_stage_for_qq_js, ctrl.scale, ctrl.incoming_data_type["name"]);
+                ctrl.plotService.draw_qq_js("qqPlotJS", ctrl.all_data, ctrl.selected_stage, ctrl.selected_stage_for_qq_js, ctrl.scale, ctrl.incoming_data_type["name"], ctrl.decimal_places);
                 ctrl.qqJSPlotIsRendered = true;
                 return true; // required as a callback for .some function
               }
@@ -235,7 +239,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
   /** called when selected stage dropdown in QQ JS is changed */
   selectStageNoForQQJS(selected_stage_for_qq_js) {
     this.selected_stage_for_qq_js = selected_stage_for_qq_js;
-    this.plotService.draw_qq_js("qqPlotJS", this.all_data, this.selected_stage, this.selected_stage_for_qq_js, this.scale, this.incoming_data_type["name"]);
+    this.plotService.draw_qq_js("qqPlotJS", this.all_data, this.selected_stage, this.selected_stage_for_qq_js, this.scale, this.incoming_data_type["name"], this.decimal_places);
     this.qqJSPlotIsRendered = true;
   }
 

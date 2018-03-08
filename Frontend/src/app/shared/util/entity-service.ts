@@ -1,14 +1,18 @@
 import {NotificationsService} from "angular2-notifications";
 import {LoggerService} from "../modules/helper/logger.service";
 import {Injectable} from "@angular/core";
-import {Entity, Experiment, OedaCallbackEntity, UserEntity} from "../modules/api/oeda-api.service";
+import {StageEntity, Experiment, OedaCallbackEntity, UserEntity} from "../modules/api/oeda-api.service";
 import {isNullOrUndefined} from "util";
 
 @Injectable()
 /** This class provides methods related with experiment data object(s) that are retrieved from backend */
 export class EntityService {
 
-  constructor(public notify: NotificationsService, public log: LoggerService) {}
+  private decimal_places: number;
+
+  constructor(public notify: NotificationsService, public log: LoggerService) {
+    this.decimal_places = 3;
+  }
 
   /** returns data of the selected stage from all_data structure */
   public get_data_from_local_structure(all_data, stage_no) {
@@ -46,9 +50,9 @@ export class EntityService {
               newElement[xAttribute] = data_point["created"];
 
               if (scale === "Log") {
-                newElement[yAttribute] = Number(Math.log(data_point["payload"][incoming_data_type_name]).toFixed(3));
+                newElement[yAttribute] = Number(Math.log(data_point["payload"][incoming_data_type_name]).toFixed(ctrl.decimal_places));
               } else if (scale === "Normal") {
-                newElement[yAttribute] = Number(data_point["payload"][incoming_data_type_name].toFixed(3));
+                newElement[yAttribute] = Number(data_point["payload"][incoming_data_type_name].toFixed(ctrl.decimal_places));
               } else {
                 ctrl.notify.error("Error", "Please provide a valid scale");
                 return;
@@ -57,10 +61,9 @@ export class EntityService {
             } else {
               // this is for plotting qq plot with JS, as it only requires raw data in log or normal scale
               if (scale === "Log") {
-                processedData.push(Number(Math.log(data_point["payload"][incoming_data_type_name]).toFixed(3)));
+                processedData.push(Number(Math.log(data_point["payload"][incoming_data_type_name]).toFixed(ctrl.decimal_places)));
               } else if (scale === "Normal") {
-                // processedData.push(Number(data_point["payload"][incoming_data_type_name].toFixed(3)));
-                processedData.push(Number(data_point["payload"][incoming_data_type_name].toFixed(3)));
+                processedData.push(Number(data_point["payload"][incoming_data_type_name].toFixed(ctrl.decimal_places)));
               } else {
                 ctrl.notify.error("Error", "Please provide a valid scale");
                 return;
@@ -115,7 +118,7 @@ export class EntityService {
   }
 
   /** parses static response object returned from server, creates new stage-point tuple(s) and pushes them to the all_data (array of json strings) */
-  public process_response_for_successful_experiment(response, all_data): Entity[] {
+  public process_response_for_successful_experiment(response, all_data): StageEntity[] {
     if (isNullOrUndefined(response)) {
       this.notify.error("Error", "Cannot retrieve data from DB, please try again");
       return;
@@ -126,7 +129,7 @@ export class EntityService {
       if (response.hasOwnProperty(index)) {
         const parsed_json_object = JSON.parse(response[index]);
         // distribute data points to empty bins
-        const new_entity = this.create_entity();
+        const new_entity = this.create_stage_entity();
         new_entity.number = parsed_json_object['number'].toString();
         new_entity.values = parsed_json_object['values'];
         new_entity.knobs = parsed_json_object['knobs'];
@@ -162,7 +165,7 @@ export class EntityService {
     };
   }
 
-  public create_entity(): Entity {
+  public create_stage_entity(): StageEntity {
     return {
       number: "",
       values: [],
@@ -227,5 +230,15 @@ export class EntityService {
     json_str = json_str.replace("}", "]");
     details += json_str;
     return details;
+  }
+
+  /**
+   * iterates given knob object and round their values to given decimal number
+   */
+  public round_knob_values(iterable_knob_object: any, decimal: number) {
+    for (const [key, value] of Object.entries(iterable_knob_object)) {
+      iterable_knob_object[key] = Number(value.toFixed(decimal));
+    }
+    return iterable_knob_object;
   }
 }

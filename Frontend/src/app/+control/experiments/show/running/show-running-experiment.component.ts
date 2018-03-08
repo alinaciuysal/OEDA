@@ -2,7 +2,7 @@ import {Component, OnInit, OnDestroy} from '@angular/core';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {NotificationsService} from "angular2-notifications";
 import {LayoutService} from "../../../../shared/modules/helper/layout.service";
-import {Experiment, Target, OEDAApiService, Entity, OedaCallbackEntity} from "../../../../shared/modules/api/oeda-api.service";
+import {Experiment, Target, OEDAApiService, StageEntity, OedaCallbackEntity} from "../../../../shared/modules/api/oeda-api.service";
 import {AmChart} from "@amcharts/amcharts3-angular";
 import {isNullOrUndefined} from "util";
 import {Observable} from "rxjs/Observable";
@@ -39,8 +39,8 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
   private timestamp: string;
   private stage_details: string;
 
-
-  private all_data: Entity[];
+  private decimal_places: number;
+  private all_data: StageEntity[];
 
   public experiment_id: string;
   public experiment: Experiment;
@@ -77,7 +77,6 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
               private router: Router,
               private notify: NotificationsService,
               private temp_storage: TempStorageService
-              // private confirmationDialogService: ConfirmationDialogService
   ) {
 
     this.layout.setHeader("Experiment Results", "");
@@ -92,7 +91,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     this.all_data = [];
     this.scale = "Normal";
     this.first_render_of_plots = true;
-
+    this.decimal_places = 3;
     this.distribution = "Norm";
     this.available_distributions = ['Norm', 'Gamma', 'Logistic', 'T', 'Uniform', 'Lognorm', 'Loggamma'];
 
@@ -141,6 +140,10 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
                     this.selected_stage = {"number": -1, "knobs": ""};
                     this.available_stages.push(this.selected_stage);
                     for (let j = 0; j < stages.length; j++) {
+                      // if there are any existing stages, round their knob values of stages to provided decimals
+                      if (!isNullOrUndefined(stages[j]["knobs"])) {
+                        stages[j]["knobs"] = this.entityService.round_knob_values(stages[j]["knobs"], this.decimal_places);
+                      }
                       this.available_stages.push(stages[j]);
                     }
                     stages.sort(this.entityService.sort_by('number', true, parseInt));
@@ -187,6 +190,8 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
           ctrl.oedaCallback["index"] = oedaCallback.index;
           ctrl.oedaCallback["size"] = oedaCallback.size;
           ctrl.oedaCallback["complete"] = (Number(oedaCallback.index)) / (Number(oedaCallback.size));
+          // round knob values to provided decimal places
+          oedaCallback.current_knob = ctrl.entityService.round_knob_values(oedaCallback.current_knob, ctrl.decimal_places);
           ctrl.oedaCallback.current_knob = oedaCallback.current_knob;
           // remaining_time_and_stages is a experiment-wise unique dict that contains remaining stages and time
           ctrl.oedaCallback.remaining_time_and_stages = oedaCallback.remaining_time_and_stages;
@@ -203,6 +208,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
           ctrl.oedaCallback["index"] = oedaCallback.index;
           ctrl.oedaCallback["size"] = oedaCallback.size;
           ctrl.oedaCallback["complete"] = (Number(oedaCallback.index)) / (Number(oedaCallback.size));
+          oedaCallback.current_knob = ctrl.entityService.round_knob_values(oedaCallback.current_knob, ctrl.decimal_places);
           ctrl.oedaCallback.current_knob = oedaCallback.current_knob;
           // remaining_time_and_stages is a experiment-wise unique dict that contains remaining stages and time
           ctrl.oedaCallback.remaining_time_and_stages = oedaCallback.remaining_time_and_stages;
@@ -250,7 +256,10 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** refactoring this method (integrating it into entityService) makes significant/drastic changes in user-experience in terms of delays, spikes while validating/updating all_data.*/
+  /** refactoring this method (integrating it into entityService) makes significant/drastic changes in user-experience
+   * in terms of delays,
+   * spikes while validating/updating all_data.
+   */
   private process_response(response) {
     const ctrl = this;
     if (isNullOrUndefined(response)) {
@@ -263,17 +272,19 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
         if (response.hasOwnProperty(index)) {
           let parsed_json_object = JSON.parse(response[index]);
           // distribute data points to empty bins
-          let new_entity = ctrl.entityService.create_entity();
+          let new_entity = ctrl.entityService.create_stage_entity();
           new_entity.number = parsed_json_object['number'];
           new_entity.values = parsed_json_object['values'];
-          new_entity.knobs = parsed_json_object['knobs'];
+          // round knob values before pushing to all_data
+          new_entity.knobs = ctrl.entityService.round_knob_values(parsed_json_object['knobs'], ctrl.decimal_places);
 
           if (new_entity.values.length != 0) {
             ctrl.all_data.push(new_entity);
           }
           // as a guard against stage duplications
-          const new_stage = {"number": parsed_json_object.number, "knobs": parsed_json_object.knobs};
-          let existing_stage = ctrl.available_stages.find(entity => entity.number === parsed_json_object.number);
+          // also round stages retrieved at first render to provided decimal places
+          const new_stage = {"number": parsed_json_object.number, "knobs": ctrl.entityService.round_knob_values(parsed_json_object.knobs, ctrl.decimal_places)};
+          let existing_stage = ctrl.available_stages.find(entity => entity.number === new_entity.number);
           // stage does not exist yet
           if (isNullOrUndefined(existing_stage)) {
             ctrl.available_stages.push(new_stage);
@@ -299,14 +310,14 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
             ctrl.all_data[stage_index].values = ctrl.all_data[stage_index].values.concat(parsed_json_object['values']);
           }
         } else {
-          // a new stage has been fetched, create a new bin for it, and push all the values to the bin, also push bin to all_data
+          // a new stage has been fetched, create a new bin for it, and push all the values to the bin, also push bin to all_data, round knob values to provided decimal places
           const number = parsed_json_object['number'];
           const values = parsed_json_object['values'];
-          const knobs = parsed_json_object['knobs'];
+          const knobs = ctrl.entityService.round_knob_values(parsed_json_object['knobs'], ctrl.decimal_places);
           const new_stage = {"number": number, "knobs": knobs};
           ctrl.available_stages.push(new_stage);
 
-          let new_entity = ctrl.entityService.create_entity();
+          let new_entity = ctrl.entityService.create_stage_entity();
           new_entity.number = number;
           new_entity.values = values;
           new_entity.knobs = knobs;
@@ -346,7 +357,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     }
     // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
     const clonedData = JSON.parse(JSON.stringify(ctrl.processedData));
-    ctrl.initial_threshold_for_scatter_plot = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value');
+    ctrl.initial_threshold_for_scatter_plot = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value', ctrl.decimal_places);
     // just to inform user about how many points are above the calculated threshold (95-percentile)
     ctrl.nr_points_to_be_filtered = ctrl.processedData.filter(function (item) {
       return item.value > ctrl.initial_threshold_for_scatter_plot;
@@ -357,8 +368,8 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     document.getElementById(ctrl.filterSummaryId).innerHTML = "<p>Threshold for 95-percentile: <b>" + ctrl.initial_threshold_for_scatter_plot + "</b> and # of points to be removed: <b>" + ctrl.nr_points_to_be_filtered + "</b></p>";
 
     if (ctrl.first_render_of_plots) {
-      ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot(ctrl.divId, ctrl.filterSummaryId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_plot, ctrl.stage_details);
-      ctrl.histogram = ctrl.plotService.draw_histogram(ctrl.histogramDivId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.stage_details);
+      ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot(ctrl.divId, ctrl.filterSummaryId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_plot, ctrl.stage_details, ctrl.decimal_places);
+      ctrl.histogram = ctrl.plotService.draw_histogram(ctrl.histogramDivId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.stage_details, ctrl.decimal_places);
       ctrl.first_render_of_plots = false;
     } else {
       // now update (validate) values & threshold value and its guide (line) of the scatter plot & also update title
@@ -371,7 +382,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
       ctrl.histogram.categoryAxis.title = ctrl.incoming_data_type["name"];
       // https://docs.amcharts.com/3/javascriptcharts/AmChart, following refers to validateNow(validateData = true, skipEvents = false)
       ctrl.scatter_plot.validateNow(true, false);
-      ctrl.histogram.dataProvider = ctrl.plotService.categorize_data(ctrl.processedData);
+      ctrl.histogram.dataProvider = ctrl.plotService.categorize_data(ctrl.processedData, ctrl.decimal_places);
       ctrl.histogram.validateData();
     }
     ctrl.is_enough_data_for_plots = true;

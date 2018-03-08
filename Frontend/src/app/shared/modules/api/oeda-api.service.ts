@@ -96,7 +96,7 @@ export interface Experiment {
   optimized_data_types: object[]
 }
 
-export interface Entity {
+export interface StageEntity {
   number: string,
   values: object[],
   knobs: any

@@ -26,6 +26,7 @@ export class EditTargetsComponent implements OnInit {
   originalTarget: Target;
   pageTitle: string;
   saveButtonLabel: string;
+  errorButtonLabel: string;
   availableConfigurations = [];
   selectedConfiguration: any;
   configsAvailable = false;
@@ -276,6 +277,7 @@ export class EditTargetsComponent implements OnInit {
 
 
     if (this.target.dataProviders.length === 0) {
+      this.errorButtonLabel = "Provide data provider(s)";
       return true;
     }
 
@@ -286,13 +288,17 @@ export class EditTargetsComponent implements OnInit {
 
     for (let i = 0; i < this.target.dataProviders.length; i++) {
       let dataProvider = this.target.dataProviders[i];
-
       // indicate error if user has selected more than one primary_data_provider
       if (dataProvider.hasOwnProperty("is_primary")) {
-        if (dataProvider["is_primary"] === true) {
+        if (dataProvider["is_primary"]) {
           nr_of_selected_primary_data_providers += 1;
+          if (isNullOrUndefined(dataProvider["ignore_first_n_samples"])) {
+            this.errorButtonLabel = "Provide sample size to ignore";
+            return true;
+          }
         }
         if (nr_of_selected_primary_data_providers > 1) {
+          this.errorButtonLabel = "Only one primary data provider is allowed";
           return true;
         }
       }
@@ -304,6 +310,7 @@ export class EditTargetsComponent implements OnInit {
           || dataProvider.kafka_uri.length === 0
           || dataProvider.topic == null
           || dataProvider.topic.length === 0) {
+          this.errorButtonLabel = "Provide valid inputs for Kafka data provider";
           return true;
         }
       } else if (dataProvider.type === "mqtt_listener") {
@@ -316,6 +323,7 @@ export class EditTargetsComponent implements OnInit {
           || dataProvider.topic.length === 0
           || dataProvider.topic == null
           ) {
+          this.errorButtonLabel = "Provide valid inputs for MQTT data provider";
           return true;
         }
       } else if (dataProvider.type === "http_request") {
@@ -323,8 +331,12 @@ export class EditTargetsComponent implements OnInit {
           || dataProvider.url == null
           || dataProvider.url.length === 0
         ) {
+          this.errorButtonLabel = "Provide valid inputs for HTTP data provider";
           return true;
         }
+      } else {
+        this.errorButtonLabel = "Please select data provider type";
+        return true;
       }
     }
 
@@ -335,6 +347,7 @@ export class EditTargetsComponent implements OnInit {
         || this.target.changeProvider.kafka_uri.length === 0
         || this.target.changeProvider.topic == null
         || this.target.changeProvider.topic.length === 0) {
+        this.errorButtonLabel = "Provide valid inputs for Kafka change provider";
         return true;
       }
     } else if (this.target.changeProvider.type === "mqtt_publisher") {
@@ -347,6 +360,7 @@ export class EditTargetsComponent implements OnInit {
         || this.target.changeProvider.topic.length === 0
         || this.target.changeProvider.topic == null
       ) {
+        this.errorButtonLabel = "Provide valid inputs for MQTT change provider";
         return true;
       }
     } else if (this.target.changeProvider.type === "http_request") {
@@ -354,6 +368,7 @@ export class EditTargetsComponent implements OnInit {
         || this.target.changeProvider.url == null
         || this.target.changeProvider.url.length === 0
       ) {
+        this.errorButtonLabel = "Provide valid inputs for http change provider";
         return true;
       }
     }
@@ -365,8 +380,10 @@ export class EditTargetsComponent implements OnInit {
           || this.target.incomingDataTypes[i].description == null
           || this.target.incomingDataTypes[i].description === 0
           || isNullOrUndefined(this.target.incomingDataTypes[i].scale)
-          || isNullOrUndefined(this.target.incomingDataTypes[i].criteria))
+          || isNullOrUndefined(this.target.incomingDataTypes[i].criteria)) {
+        this.errorButtonLabel = "Provide valid inputs for incoming data type(s)";
         return true;
+      }
     }
 
     // check for attributes of changeable variables
@@ -377,19 +394,37 @@ export class EditTargetsComponent implements OnInit {
         || this.target.changeableVariable[i].description === 0
         || isNullOrUndefined(this.target.changeableVariable[i].scale)
         || isNullOrUndefined(this.target.changeableVariable[i].min)
-        || isNullOrUndefined(this.target.changeableVariable[i].max))
+        || isNullOrUndefined(this.target.changeableVariable[i].max)) {
+        this.errorButtonLabel = "Provide valid inputs for changeable variable(s)";
         return true;
+      }
     }
 
-    return (this.target.name == null || this.target.name === "") ||
-      (this.target.changeProvider.type == null || this.target.changeProvider.type === "") ||
-      (this.target.changeProvider.type == null || this.target.changeProvider.type === "") ||
-      (this.target.changeProvider.type == null || this.target.changeProvider.type === "") ||
+    if (this.target.changeProvider.type == null || this.target.changeProvider.type === "" ||
+        this.target.changeProvider.type == null || this.target.changeProvider.type === "" ||
+        this.target.changeProvider.type == null || this.target.changeProvider.type === "" ||
+        this.target.changeProvider.type == null || this.target.changeProvider.type === "" ||
+        this.target.changeProvider.type == null || this.target.changeProvider.type === "" ||
+        this.target.changeProvider.type == null || this.target.changeProvider.type === "") {
+      this.errorButtonLabel = "Provide valid inputs for change provider";
+      return true;
+    }
 
-      (this.target.changeProvider.type == null || this.target.changeProvider.type === "") ||
-      (this.target.changeProvider.type == null || this.target.changeProvider.type === "") ||
-      (this.target.changeProvider.type == null || this.target.changeProvider.type === "") ||
-      (this.target.changeableVariable.length === 0 || this.target.incomingDataTypes.length === 0)
+    if (this.target.name == null || this.target.name === "") {
+      this.errorButtonLabel = "Provide valid target system name";
+      return true;
+    }
+
+    if (this.target.changeableVariable.length === 0) {
+      this.errorButtonLabel = "Provide at least one changeable variable";
+      return true;
+    }
+
+    if (this.target.incomingDataTypes.length === 0) {
+      this.errorButtonLabel = "Provide at least one incoming data type";
+      return true;
+    }
+    return false;
   }
 
   revertChanges() {

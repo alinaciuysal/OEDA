@@ -54,9 +54,6 @@
             <div class="col-sm-2">
               <div class="card-title">
                 <select class="form-control" [(ngModel)]="incoming_data_type" (change)="incoming_data_type_changed()">
-                  <!--<option *ngFor="let i of targetSystem.incomingDataTypes" [ngValue]="i" [disabled]="is_data_type_disabled(i.name)">-->
-                    <!--{{i.name}}-->
-                  <!--</option>-->
                   <option *ngFor="let dataType of targetSystem.incomingDataTypes"
                           [ngValue]="dataType">
                     {{dataType.name}}
@@ -85,7 +82,6 @@
 
             <div class="col-sm-2" *ngIf="oedaCallback['status'] === 'IGNORING_SAMPLES' || oedaCallback['status'] === 'COLLECTING_DATA'">
               <div class="card-title">
-                <!--<button type="button" class="btn btn-primary" (click)="stopRunningExperiment()">Stop Experiment</button>-->
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
                   Stop Experiment
                 </button>

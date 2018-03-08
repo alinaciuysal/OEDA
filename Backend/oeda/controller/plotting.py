@@ -46,7 +46,7 @@ class QQPlotController(Resource):
                     if point:
                         pts.append(point)
 
-            # create the qq plot based on the retrieved data against normal distribution
+            # create the qq plot based on the retrieved data against provided distribution
             array = np.asarray(pts)
             sorted_array = np.sort(array)
             if str(scale).lower() == "log":

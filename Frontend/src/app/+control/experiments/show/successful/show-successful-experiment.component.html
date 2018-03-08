@@ -101,15 +101,16 @@
   </div>
 
   <!-- QQ graphs -->
-  <!--<div class="col-sm-12 col-xs-12" [hidden]="!is_enough_data_for_plots">-->
+
   <div class="col-sm-12 col-xs-12" [hidden]="!is_enough_data_for_plots" >
     <!-- QQ graph 1 -->
-    <div class="col-sm-6 col-xs-12" *ngIf="selected_stage.number === -1">
+    <div class="col-sm-6 col-xs-12">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">
             <div class="col-md-6">
               <div class="title pull-left">Quantile Quantile (QQ) Plot against Theoretical Data &nbsp;</div>
+
             </div>
             <div class="row">
               <div class="col-md-6">
@@ -124,6 +125,7 @@
         </div>
 
         <div class="panel-body">
+          <div>{{stage_details}}</div>
           <div [hidden]="!is_qq_plot_rendered">
             <!--additional css for centering the img-->
             <img class="col-md-6" id="qqPlot" class="img-thumbnail">
@@ -134,40 +136,40 @@
 
 
     <!-- QQ graph 2 -->
-    <div class="col-sm-6 col-xs-12" [hidden]="selected_stage.number === -1">
-      <div class="panel panel-default chartJs">
-        <div class="panel-heading">
-          <div class="card-title">
-            <div class="col-md-6">
-              <div class="title pull-left">Quantile Quantile (QQ) Plot against Other Stage Data &nbsp;</div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6">
-              <div class="title">Other  Stage</div>
-              <select class="form-control"
-                      [(ngModel)]="selected_stage_for_qq_js" (ngModelChange)="selectStageNoForQQJS($event)" size="1">
-                <option *ngFor="let stage_no of available_stages_for_qq_js" value="{{stage_no.number}}">{{stage_no.number}}</option>
-              </select>
-            </div>
-          </div>
-        </div>
+    <!--<div class="col-sm-6 col-xs-12" [hidden]="selected_stage.number === -1">-->
+      <!--<div class="panel panel-default chartJs">-->
+        <!--<div class="panel-heading">-->
+          <!--<div class="card-title">-->
+            <!--<div class="col-md-6">-->
+              <!--<div class="title pull-left">Quantile Quantile (QQ) Plot against Other Stage Data &nbsp;</div>-->
+            <!--</div>-->
+          <!--</div>-->
+          <!--<div class="row">-->
+            <!--<div class="col-md-6">-->
+              <!--<div class="title">Other  Stage</div>-->
+              <!--<select class="form-control"-->
+                      <!--[(ngModel)]="selected_stage_for_qq_js" (ngModelChange)="selectStageNoForQQJS($event)" size="1">-->
+                <!--<option *ngFor="let stage_no of available_stages_for_qq_js" value="{{stage_no.number}}">{{stage_no.number}}</option>-->
+              <!--</select>-->
+            <!--</div>-->
+          <!--</div>-->
+        <!--</div>-->
 
-        <div class="panel-body">
-          <div class="col-md-6">
-            <div class="panel-body" style="padding-top: 20px">
-              <!--ref: https://css-tricks.com/scale-svg/-->
-              <div class="scaling-svg-container"
-                   style="padding-bottom: 100% /* 100% * 55/60 */">
-                <svg class="scaling-svg" viewBox="0 0 400 400" id="qqPlotJS">
-                  <!-- SVG content -->
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+        <!--<div class="panel-body">-->
+          <!--<div class="col-md-6">-->
+            <!--<div class="panel-body" style="padding-top: 20px">-->
+              <!--&lt;!&ndash;ref: https://css-tricks.com/scale-svg/&ndash;&gt;-->
+              <!--<div class="scaling-svg-container"-->
+                   <!--style="padding-bottom: 100% /* 100% * 55/60 */">-->
+                <!--<svg class="scaling-svg" viewBox="0 0 400 400" id="qqPlotJS">-->
+                  <!--&lt;!&ndash; SVG content &ndash;&gt;-->
+                <!--</svg>-->
+              <!--</div>-->
+            <!--</div>-->
+          <!--</div>-->
+        <!--</div>-->
+      <!--</div>-->
+    <!--</div>-->
   </div>
 
 </div>

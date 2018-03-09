@@ -24,6 +24,7 @@ export class CreateExperimentsComponent implements OnInit {
   selectedTargetSystem: any;
   stages_count: any;
   is_collapsed: boolean;
+  errorButtonLabel: string;
 
   constructor(private layout: LayoutService, private api: OEDAApiService,
               private router: Router, private notify: NotificationsService,
@@ -254,25 +255,48 @@ export class CreateExperimentsComponent implements OnInit {
   hasErrors(): boolean {
     const cond1 = this.targetSystem.status === "WORKING";
     const cond2 = this.targetSystem.status === "ERROR";
+    if (cond1 || cond2) {
+      this.errorButtonLabel = "Target system is not available";
+      return true;
+    }
 
-    const cond3 = this.experiment.changeableVariable == null;
-    const cond4 = this.experiment.changeableVariable.length === 0;
+    const cond3 = this.experiment.name === null;
+    const cond4 = this.experiment.name.length === 0;
+    if (cond3 || cond4) {
+      this.errorButtonLabel = "Provide experiment name";
+      return true;
+    }
 
-    const cond5 = this.experiment.name === null;
-    const cond6 = this.experiment.name.length === 0;
+    // check data types to be optimized (minimize or maximize)
+    let nr_of_incoming_data_types_to_be_optimized = 0;
+    for (let item of this.targetSystem.incomingDataTypes) {
+      if (item.is_optimized) {
+        nr_of_incoming_data_types_to_be_optimized += 1;
+      }
+    }
+    if (nr_of_incoming_data_types_to_be_optimized != 1) {
+      this.errorButtonLabel = "Provide one incoming type to be optimized";
+      return true;
+    }
 
-    var cond7 = false;
-    var cond8 =  false;
-    var cond9 = false;
-    var cond10 = false;
+    const cond5 = this.experiment.changeableVariable == null;
+    const cond6 = this.experiment.changeableVariable.length === 0;
+    if (cond5 || cond6) {
+      this.errorButtonLabel = "Provide at least one changeable variable";
+      return true;
+    }
+
     if (this.experiment.executionStrategy.type.length === 0) {
-      cond7 = true;
+      this.errorButtonLabel = "Provide execution strategy";
+      return true;
     } else {
       if (this.experiment.executionStrategy.type === "step_explorer") {
         for (var j = 0; j < this.experiment.changeableVariable.length; j++) {
-          if (this.experiment.changeableVariable[j]["step"] <= 0) {
-            cond8 = true;
-            break;
+          if (this.experiment.changeableVariable[j]["step"] <= 0
+            || this.experiment.changeableVariable[j]["min"] >= this.experiment.changeableVariable[j]["max"]
+            || this.experiment.changeableVariable[j]["step"] > this.experiment.changeableVariable[j]["max"] - this.experiment.changeableVariable[j]["min"]) {
+            this.errorButtonLabel = "Provide valid inputs for changeable variable(s)";
+            return true;
           }
         }
       }
@@ -280,29 +304,23 @@ export class CreateExperimentsComponent implements OnInit {
       if (experiment_type === "random" || experiment_type === "mlr" || experiment_type === "self_optimizer" || experiment_type === "uncorrelated_self_optimizer") {
         if (this.experiment.executionStrategy.optimizer_iterations === null || this.experiment.executionStrategy.optimizer_random_starts === null
             || this.experiment.executionStrategy.optimizer_iterations <= 0 || this.experiment.executionStrategy.optimizer_random_starts < 0) {
-          cond9 = true;
+          this.errorButtonLabel = "Provide valid inputs for execution strategy";
+          return true;
         }
       }
-      if (experiment_type === "self_optimizer") {
-        if (this.experiment.executionStrategy.optimizer_method === null || this.experiment.executionStrategy.optimizer_method.length === 0) {
-          cond10 = true;
-        }
-      }
+      // we're not using self_optimizer method name for now
+      // if (experiment_type === "self_optimizer") {
+      //   if (this.experiment.executionStrategy.optimizer_method === null || this.experiment.executionStrategy.optimizer_method.length === 0) {
+      //     this.errorButtonLabel = "Provide valid inputs for self-optimizer strategy";
+      //   }
+      // }
     }
 
-    // check data types to be optimized (minimize or maximize)
-    var cond11 = false;
-    let nr_of_incoming_data_types_to_be_optimized = 0;
-    for (var item of this.targetSystem.incomingDataTypes) {
-      if (item.is_optimized) {
-        nr_of_incoming_data_types_to_be_optimized += 1;
-      }
+    if (this.experiment.executionStrategy.sample_size <= 0) {
+      this.errorButtonLabel = "Provide a valid sample size";
+      return true;
     }
-    if (nr_of_incoming_data_types_to_be_optimized != 1) {
-      cond11 = true;
-    }
-
-    return cond1 || cond2 || cond3 || cond4 || cond5 || cond6 || cond7 || cond8 || cond9 || cond10 || cond11;
+    return false;
   }
 
   createExperiment(): Experiment {

@@ -236,9 +236,10 @@ export class EntityService {
    * iterates given knob object and round their values to given decimal number
    */
   public round_knob_values(iterable_knob_object: any, decimal: number) {
-    for (const [key, value] of Object.entries(iterable_knob_object)) {
+    Object.getOwnPropertyNames(iterable_knob_object).forEach(key => {
+      let value = iterable_knob_object[key];
       iterable_knob_object[key] = Number(value.toFixed(decimal));
-    }
+    });
     return iterable_knob_object;
   }
 }

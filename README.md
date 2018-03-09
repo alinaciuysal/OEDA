@@ -1,4 +1,4 @@
-## OEDA (Online Experimentation & Design Analysis) Tool
+## OEDA (Online Experiment-Driven Adaptation) Tool
 ***
  
 ##### Required Dependencies

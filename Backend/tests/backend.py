@@ -23,7 +23,7 @@ def parse_crowd_nav_config():
 
 
 # usable strategy_name = sequential, self_optimizer, uncorrelated_self_optimizer, step_explorer, forever, random, mlr
-def create_experiment_tuple(strategy_name, sample_size, knobs, optimizer_iterations=5, optimizer_random_starts=3):
+def create_experiment_tuple(strategy_name, sample_size, knobs, optimizer_iterations=5, optimizer_iterations_in_design=3):
     num = randint(0, 25)
     experiment_id=str(uuid4())
     experiment = dict(
@@ -36,7 +36,7 @@ def create_experiment_tuple(strategy_name, sample_size, knobs, optimizer_iterati
             sample_size=sample_size,
             knobs=knobs,
             optimizer_iterations=optimizer_iterations,
-            optimizer_random_starts=optimizer_random_starts
+            optimizer_iterations_in_design=optimizer_iterations_in_design
         )
     )
     return experiment
@@ -75,6 +75,6 @@ if __name__ == '__main__':
         route_random_sigma=(0, 0.3),
         exploration_percentage=(1, 1.7)
     )
-    experiment = create_experiment_tuple(strategy_name="mlr", sample_size=20, knobs=knobs)
+    experiment = create_experiment_tuple(strategy_name="mlr_mbo", sample_size=20, knobs=knobs)
     dataProviders, config_knobs = parse_crowd_nav_config()
     create_rtx_definition(dataProviders, config_knobs, experiment, 30)

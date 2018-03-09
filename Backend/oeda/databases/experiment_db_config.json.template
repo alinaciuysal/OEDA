@@ -19,8 +19,9 @@
             "stages_count":            { "type": "integer" }
           }
         },
-        "created":        { "type": "date", "format": "yyyy-MM-dd HH:mm:ss.SSSSSS"},
-        "targetSystemId": { "type": "keyword"  }
+        "created":                  { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"},
+        "targetSystemId":           { "type": "keyword"  },
+        "variable_to_be_optimized": { "type": "keyword"  }
       }
     }
   },
@@ -31,7 +32,7 @@
       "properties": {
         "number":     { "type": "integer" },
         "knobs":      { "type": "object"  },
-        "created":    { "type": "date", "format": "yyyy-MM-dd HH:mm:ss.SSSSSS"}
+        "created":    { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"}
       }
     }
   },
@@ -42,7 +43,7 @@
         "rtx_run_ids":   { "type": "keyword" },
         "name":          { "type": "keyword" },
         "result":        { "type": "object"  },
-        "created":       { "type": "date", "format": "yyyy-MM-dd HH:mm:ss.SSSSSS"}
+        "created":       { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"}
       }
     }
   },
@@ -52,7 +53,7 @@
       "_parent":    { "type": "stage"},
       "properties": {
         "payload":  { "type": "object"  },
-        "created":  { "type": "date", "format": "yyyy-MM-dd HH:mm:ss.SSSSSS"}
+        "created":  { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"}
       }
     }
   },
@@ -68,6 +69,9 @@
             "ignore_first_n_samples":  { "type": "integer" }
           }
         },
+        "secondary_data_providers": {
+          "type": "nested"
+        },
         "change_provider": {
           "type": "nested",
           "properties": {
@@ -78,7 +82,7 @@
         "name":         { "type": "keyword"  },
         "description":  { "type": "text"     },
         "status":       { "type": "keyword"  },
-        "created":      { "type": "date", "format": "yyyy-MM-dd HH:mm:ss.SSSSSS"}
+        "created":      { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"}
       }
     }
   }

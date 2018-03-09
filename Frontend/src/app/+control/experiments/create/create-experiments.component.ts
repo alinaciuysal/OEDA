@@ -227,9 +227,9 @@ export class CreateExperimentsComponent implements OnInit {
       this.experiment.executionStrategy.stages_count = Number(this.stages_count);
 
       let experiment_type = this.experiment.executionStrategy.type;
-      if (experiment_type === "random" || experiment_type === "mlr" || experiment_type === "self_optimizer" || experiment_type === "uncorrelated_self_optimizer") {
+      if (experiment_type === "random" || experiment_type === "mlr_mbo" || experiment_type === "self_optimizer" || experiment_type === "uncorrelated_self_optimizer") {
         this.experiment.executionStrategy.optimizer_iterations = Number(this.experiment.executionStrategy.optimizer_iterations);
-        this.experiment.executionStrategy.optimizer_random_starts = Number(this.experiment.executionStrategy.optimizer_random_starts);
+        this.experiment.executionStrategy.optimizer_iterations_in_design = Number(this.experiment.executionStrategy.optimizer_iterations_in_design);
       }
 
       // now take the incoming data type labeled as "optimize"
@@ -300,20 +300,29 @@ export class CreateExperimentsComponent implements OnInit {
           }
         }
       }
-      let experiment_type = this.experiment.executionStrategy.type;
-      if (experiment_type === "random" || experiment_type === "mlr" || experiment_type === "self_optimizer" || experiment_type === "uncorrelated_self_optimizer") {
-        if (this.experiment.executionStrategy.optimizer_iterations === null || this.experiment.executionStrategy.optimizer_random_starts === null
-            || this.experiment.executionStrategy.optimizer_iterations <= 0 || this.experiment.executionStrategy.optimizer_random_starts < 0) {
+      let execution_strategy_type = this.experiment.executionStrategy.type;
+      if (execution_strategy_type === "random" || execution_strategy_type === "mlr_mbo" || execution_strategy_type === "self_optimizer" || execution_strategy_type === "uncorrelated_self_optimizer") {
+        if (this.experiment.executionStrategy.optimizer_iterations === null || this.experiment.executionStrategy.optimizer_iterations_in_design === null
+            || this.experiment.executionStrategy.optimizer_iterations <= 0 || this.experiment.executionStrategy.optimizer_iterations_in_design < 0) {
           this.errorButtonLabel = "Provide valid inputs for execution strategy";
           return true;
         }
       }
+      // check if initial design is large enough
+      if (execution_strategy_type === "mlr_mbo") {
+        let minimum_number_of_iterations = this.experiment.changeableVariable.length * 4
+        if (this.experiment.executionStrategy.optimizer_iterations_in_design < minimum_number_of_iterations) {
+          this.errorButtonLabel = "Number of optimizer iterations should be greater than " + minimum_number_of_iterations.toString();
+          return true;
+        }
+      }
       // we're not using self_optimizer method name for now
-      // if (experiment_type === "self_optimizer") {
-      //   if (this.experiment.executionStrategy.optimizer_method === null || this.experiment.executionStrategy.optimizer_method.length === 0) {
-      //     this.errorButtonLabel = "Provide valid inputs for self-optimizer strategy";
-      //   }
-      // }
+      if (execution_strategy_type === "self_optimizer") {
+        if (this.experiment.executionStrategy.optimizer_method === null || this.experiment.executionStrategy.optimizer_method.length === 0) {
+          this.errorButtonLabel = "Provide valid inputs for self-optimizer strategy";
+          return true;
+        }
+      }
     }
 
     if (this.experiment.executionStrategy.sample_size <= 0) {
@@ -364,7 +373,7 @@ export class CreateExperimentsComponent implements OnInit {
       stages_count: 0,
       optimizer_method: "",
       optimizer_iterations: 10,
-      optimizer_random_starts: 5
+      optimizer_iterations_in_design: 0
     }
   }
 

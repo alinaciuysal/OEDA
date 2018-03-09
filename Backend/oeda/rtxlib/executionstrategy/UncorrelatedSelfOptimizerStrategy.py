@@ -32,9 +32,9 @@ def start_uncorrelated_self_optimizer_strategy(wf):
 def optimizeOneVariable(wf, totalExperiments, key, range):
     variables = [key]
     range_tuples = [range]
-    optimizer_random_starts = wf.execution_strategy["optimizer_random_starts"]
+    optimizer_iterations_in_design = wf.execution_strategy["optimizer_iterations_in_design"]
     optimizer_result = gp_minimize(lambda opti_values: self_optimizer_execution(wf, opti_values, variables),
-                                   range_tuples, n_calls=totalExperiments, n_random_starts=optimizer_random_starts)
+                                   range_tuples, n_calls=totalExperiments, n_random_starts=optimizer_iterations_in_design)
     info(">")
     info("> OptimalResult  | Knobs:  " + str(recreate_knob_from_optimizer_values(variables, optimizer_result.x)))
     info(">                | Result: " + str(optimizer_result.fun))

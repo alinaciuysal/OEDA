@@ -10,7 +10,7 @@ def start_self_optimizer_strategy(wf):
     info("> ExecStrategy   | SelfOptimizer", Fore.CYAN)
     optimizer_method = wf.execution_strategy["optimizer_method"]
     wf.totalExperiments = wf.execution_strategy["optimizer_iterations"]
-    optimizer_random_starts = wf.execution_strategy["optimizer_random_starts"]
+    optimizer_iterations_in_design = wf.execution_strategy["optimizer_iterations_in_design"]
     info("> Optimizer      | " + optimizer_method, Fore.CYAN)
 
     # we look at the ranges the user has specified in the knobs
@@ -25,7 +25,7 @@ def start_self_optimizer_strategy(wf):
     # we give the minimization function a callback to execute
     # it uses the return value (it tries to minimize it) to select new knobs to test
     optimizer_result = gp_minimize(lambda opti_values: self_optimizer_execution(wf, opti_values, variables),
-                                   range_tuples, n_calls=wf.totalExperiments, n_random_starts=optimizer_random_starts)
+                                   range_tuples, n_calls=wf.totalExperiments, n_random_starts=optimizer_iterations_in_design)
     # optimizer is done, print results
     info(">")
     info("> OptimalResult  | Knobs:  " + str(recreate_knob_from_optimizer_values(variables, optimizer_result.x)))

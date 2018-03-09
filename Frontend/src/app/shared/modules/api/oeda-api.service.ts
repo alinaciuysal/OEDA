@@ -121,7 +121,7 @@ export interface ExecutionStrategy {
   sample_size: number,
   knobs: any,
   stages_count: number,
-  optimizer_random_starts: number,
+  optimizer_iterations_in_design: number,
   optimizer_iterations: number,
   optimizer_method: any
 }

@@ -15,15 +15,14 @@ def start_mlr_mbo_strategy(wf):
     """ executes a self optimizing strategy """
     info("> ExecStrategy   | MLR", Fore.CYAN)
     install_packages()
-    mlr = importr('mlr')
     mlr_mbo = importr('mlrMBO')
     smoof = importr('smoof')
     lhs = importr('lhs')
     param_helpers = importr('ParamHelpers')
 
     optimizer_iterations = wf.execution_strategy["optimizer_iterations"]
-    optimizer_random_starts = wf.execution_strategy["optimizer_random_starts"]
-    wf.totalExperiments = optimizer_iterations + optimizer_random_starts # also include random starts to it
+    optimizer_iterations_in_design = wf.execution_strategy["optimizer_iterations_in_design"]
+    wf.totalExperiments = optimizer_iterations + optimizer_iterations_in_design # also include number of samples in design to it
 
     # we look at the ranges the user has specified in the knobs
     knobs = wf.execution_strategy["knobs"]
@@ -59,9 +58,13 @@ def start_mlr_mbo_strategy(wf):
                         params=[param for param in param_list]
                     ),
                     has_simple_signature=False,
+                    noisy=True, # Our objective is the average trip overhead, which is only estimated, i.e. it's a noisy fcn
                     minimize=True)
-    design = param_helpers.generateDesign(n=optimizer_random_starts, par_set=param_helpers.getParamSet(obj_fcn), fun=lhs.randomLHS)
-    surr_km = mlr.makeLearner(cl="regr.km", predict_type="se", covtype="matern3_2")
+    design = param_helpers.generateDesign(n=optimizer_iterations_in_design, par_set=param_helpers.getParamSet(obj_fcn), fun=lhs.randomLHS)
+    # If no surrogate learner is defined, mbo() automatically uses Kriging for a numerical domain, otherwise random forest regression.
+    # if you don't specify a learner in mbo() one is created depending on the structure of the problem
+    # it also sets some other stuff if the function is noisy
+    # surr_km = mlr.makeLearner(cl="regr.km", predict_type="se", covtype="matern3_2")
 
     control = mlr_mbo.makeMBOControl()
     control = mlr_mbo.setMBOControlTermination(control, iters=optimizer_iterations)

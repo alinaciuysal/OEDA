@@ -17,15 +17,18 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from "
         </div>
         <div class="panel-body" [hidden]="is_collapsed">
           <div class="row">
-            <labeled-input name="Experiment Name" [model]="experiment" key="name" [colSize]="6" [disabled]="true"></labeled-input>
-            <labeled-input name="Experiment Description" [model]="experiment" key="description" [colSize]="6" [disabled]="true"></labeled-input>
+            <labeled-input name="Experiment Name" [model]="experiment" key="name" [colSize]="6"
+                           [disabled]="true"></labeled-input>
+            <labeled-input name="Experiment Description" [model]="experiment" key="description" [colSize]="6"
+                           [disabled]="true"></labeled-input>
           </div>
         </div>
       </div>
     </div>
-    
+
     <!-- Data Providers & Change Provider -->
-    <div class="col-sm-12 col-xs-12" (ngModelChange)="onModelChange($event)" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed" >
+    <div class="col-sm-12 col-xs-12" (ngModelChange)="onModelChange($event)" *ngIf="targetSystem.name !== ''"
+         [hidden]="is_collapsed">
 
       <!-- Primary Data Provider & Secondary Data Provider(s)-->
       <div class="col-sm-6 col-xs-12" style="padding-left: 0">
@@ -116,8 +119,12 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from "
         <div class="panel panel-default chartJs" *ngIf="targetSystem.secondaryDataProviders.length > 0">
           <div class="panel-heading">
             <div class="card-title">
-              <div class="title pull-left" *ngIf="targetSystem.secondaryDataProviders.length > 1">Secondary Data Providers</div>
-              <div class="title pull-left" *ngIf="targetSystem.secondaryDataProviders.length == 1">Secondary Data Provider</div>
+              <div class="title pull-left" *ngIf="targetSystem.secondaryDataProviders.length > 1">Secondary Data
+                Providers
+              </div>
+              <div class="title pull-left" *ngIf="targetSystem.secondaryDataProviders.length == 1">Secondary Data
+                Provider
+              </div>
             </div>
           </div>
           <div class="panel-body" style="padding-top: 20px">
@@ -252,7 +259,7 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from "
     </div>
 
     <!-- Incoming Data Types, Execution strategy, Experiment Variables -->
-    <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed" >
+    <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed">
       <!-- Incoming Data Types -->
       <div class="col-sm-6 col-xs-12" style="padding-left: 0">
         <div class="panel panel-default chartJs">
@@ -303,16 +310,39 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from "
                 <thead>
                 <th style="width: 5%">Type</th>
                 <th style="width: 5%">Sample Size</th>
-                <th style="width: 5%" *ngIf="experiment.executionStrategy.type == 'random'">Optimizer Iterations</th>
-                <th style="width: 5%" *ngIf="experiment.executionStrategy.type == 'random'">Optimizer Random Starts</th>
-                <th style="width: 5%" *ngIf="experiment.executionStrategy.type == 'self_optimizer'">Optimizer Method</th>
+                <th style="width: 5%" *ngIf="experiment.executionStrategy.type == 'random' 
+                  || experiment.executionStrategy.type == 'mlr_mbo' 
+                  || experiment.executionStrategy.type == 'self_optimizer' 
+                  || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">
+                  Optimizer Iterations
+                </th>
+                <th style="width: 5%" *ngIf="experiment.executionStrategy.type == 'random' 
+                  || experiment.executionStrategy.type == 'mlr_mbo' 
+                  || experiment.executionStrategy.type == 'self_optimizer' 
+                  || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">
+                  Optimizer Iterations in Design
+                </th>
+                <th style="width: 5%" *ngIf="experiment.executionStrategy.type == 'self_optimizer'">Optimizer Method
+                </th>
                 </thead>
                 <tbody>
                 <td style="padding-top: 1%">{{experiment.executionStrategy.type}}</td>
                 <td>{{experiment.executionStrategy.sample_size}}</td>
-                <td *ngIf="experiment.executionStrategy.type == 'random'">{{experiment.executionStrategy.optimizer_iterations}}</td>
-                <td *ngIf="experiment.executionStrategy.type == 'random'">{{experiment.executionStrategy.optimizer_random_starts}}</td>
-                <td *ngIf="experiment.executionStrategy.type == 'self_optimizer'">{{experiment.executionStrategy.optimizer_method}}</td>
+                <td *ngIf="experiment.executionStrategy.type == 'random'
+                || experiment.executionStrategy.type == 'mlr_mbo'
+                || experiment.executionStrategy.type == 'self_optimizer'
+                || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">
+                  {{experiment.executionStrategy.optimizer_iterations}}
+                </td>
+                <td *ngIf="experiment.executionStrategy.type == 'random' 
+                  || experiment.executionStrategy.type == 'mlr_mbo' 
+                  || experiment.executionStrategy.type == 'self_optimizer' 
+                  || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">
+                  {{experiment.executionStrategy.optimizer_iterations_in_design}}
+                </td>
+                <td *ngIf="experiment.executionStrategy.type == 'self_optimizer'">
+                  {{experiment.executionStrategy.optimizer_method}}
+                </td>
                 </tbody>
               </table>
             </div>
@@ -322,7 +352,9 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from "
         <!-- Experiment variables -->
         <div class="panel panel-default chartJs">
           <div class="panel-heading">
-            <div class="card-title"><div class="title pull-left">Experiment Variables</div></div>
+            <div class="card-title">
+              <div class="title pull-left">Experiment Variables</div>
+            </div>
           </div>
           <div class="panel-body" style="padding-top: 20px">
             <div class="table-responsive" style="padding-top: 20px">

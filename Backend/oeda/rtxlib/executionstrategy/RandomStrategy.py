@@ -21,7 +21,7 @@ def start_random_strategy(wf):
     """ executes experiments by randomly picking values from the provided interval(s) """
     info("> ExecStrategy   | Random", Fore.CYAN)
     wf.totalExperiments = wf.execution_strategy["optimizer_iterations"]
-    optimizer_random_starts = wf.execution_strategy["optimizer_random_starts"]
+    optimizer_iterations_in_design = wf.execution_strategy["optimizer_iterations_in_design"]
     # optimizer_method = wf.execution_strategy["optimizer_method"]
 
     # we look at the ranges the user has specified in the knobs
@@ -50,12 +50,12 @@ def start_random_strategy(wf):
     #     lambda optimum_values: random_execution(wf, optimum_values, variables), # given function
     #     box=range_tuples, # range of values for each parameter
     #     n=wf.totalExperiments, # number of function calls on initial stage (global search)
-    #     m=optimizer_random_starts, # number of function calls on subsequent stage (local search)
+    #     m=optimizer_iterations_in_design, # number of function calls on subsequent stage (local search)
     #     batch=4,  # number of calls that will be evaluated in parallel
     #     resfile='output.csv') # text file where results will be saved
 
     optimizer_result = gp_minimize(lambda opti_values: random_execution(wf, opti_values, variables),
-                                   range_tuples, n_calls=wf.totalExperiments, n_random_starts=optimizer_random_starts)
+                                   range_tuples, n_calls=wf.totalExperiments, n_random_starts=optimizer_iterations_in_design)
 
     # optimizer is done, print results
     info(">")

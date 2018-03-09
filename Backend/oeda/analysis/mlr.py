@@ -1,5 +1,4 @@
 from rpy2.robjects.packages import importr, data, isinstalled
-
 import rpy2.robjects as robjects
 
 
@@ -26,14 +25,10 @@ if not have_tutorial_packages:
     if len(packnames_to_install) > 0:
         utils.install_packages(StrVector(packnames_to_install))
 
-# pi = robjects.r['pi']
-# print(pi[0])
-
 mlr = importr('mlr')
 datasets = importr('datasets')
 iris_env = data(datasets).fetch('iris')
 iris = iris_env['iris']
-# print(iris)
 robjects.r('task = makeClassifTask(data = iris, target = "Species")')
 robjects.r('lrn = makeLearner("classif.lda")')
 robjects.r('n = nrow(iris)')

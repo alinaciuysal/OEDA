@@ -407,14 +407,14 @@
                                     {key:'forever',label:'Forever Strategy'},
                                     {key:'sequential_strategy',label:'Sequential Strategy'},
                                     {key:'self_optimizer',label:'Self Optimizer Strategy'},
-                                    {key:'mlr',label:'mlrMBO Strategy'},
+                                    {key:'mlr_mbo',label:'mlrMBO Strategy'},
                                     {key:'uncorrelated_self_optimizer',label:'Uncorrelated Self Optimizer Strategy'}]"
                                 (modelChanged)="executionStrategyModelChanged($event)">
           </labeled-input-select>
           <labeled-input inputType="number" name="Sample Size" [model]="experiment.executionStrategy" key="sample_size" [colSize]="12" [minNumber]="1"></labeled-input>
-          <div *ngIf="experiment.executionStrategy.type == 'random' || experiment.executionStrategy.type == 'mlr' || experiment.executionStrategy.type == 'self_optimizer' || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'" >
+          <div *ngIf="experiment.executionStrategy.type == 'random' || experiment.executionStrategy.type == 'mlr_mbo' || experiment.executionStrategy.type == 'self_optimizer' || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'" >
             <labeled-input inputType="number" name="Optimizer Iterations" [model]="experiment.executionStrategy" key="optimizer_iterations" [colSize]="12" [minNumber]="1"></labeled-input>
-            <labeled-input inputType="number" name="Optimizer Random Starts" [model]="experiment.executionStrategy" key="optimizer_random_starts" [colSize]="12" [minNumber]="0"></labeled-input>
+            <labeled-input inputType="number" name="Optimizer Iterations in Design" [model]="experiment.executionStrategy" key="optimizer_iterations_in_design" [colSize]="12" [minNumber]="0"></labeled-input>
           </div>
           <div *ngIf="experiment.executionStrategy.type == 'self_optimizer'">
             <labeled-input inputType="text" name="Optimizer Method" [model]="experiment.executionStrategy" key="optimizer_method" [colSize]="12"></labeled-input>

@@ -7,5 +7,11 @@
 - [Zookeeper & Kafka](https://kafka.apache.org/quickstart#quickstart_startserver)
 - [Python 2.7](https://www.python.org/download/releases/2.7/)
 - [ElasticSearch 5.6.3](https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.3.tar.gz)
+- [R](https://www.r-project.org/)
 
-#### Instructions for installation & usage are given [here](https://github.com/alinaciuysal/OEDA/wiki/OEDA-Getting-Started-Guide)
+#### [Installation](https://github.com/alinaciuysal/OEDA/wiki/Installation)
+
+#### [Instructions to Use](https://github.com/alinaciuysal/OEDA/wiki/Instructions-to-Use)
+
+#### _Contact_ 
+[Ali Naci Uysal](https://github.com/alinaciuysal) or [Dr. Ilias Gerostathopoulos](http://www4.in.tum.de/~gerostat/)

@@ -15,13 +15,13 @@
         "criteria": "Minimize"
       }, {
         "name": "complaint",
-        "description": "complaint indicator if overhead of a trip is greater than zero in a uniformly distributed manner",
-        "scale": "Metric",
+        "description": "indicates complaint (in a uniformly distributed manner) if overhead of a trip is greater than 2.5",
+        "scale": "Nominal",
         "dataProviderName": "Trips",
         "criteria": "Minimize"
       }, {
         "name": "minimalCosts",
-        "description": "optimal costs of the trips",
+        "description": "total cost of optimum route of a car",
         "scale": "Metric",
         "dataProviderName": "Trips",
         "criteria": "Minimize"

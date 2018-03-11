@@ -2,7 +2,7 @@
   <div class="col-sm-1" [hidden]="!configsAvailable">
     <div class="panel panel-default chartJs" style="width: auto;">
       <!-- Button to trigger opening modal -->
-      <button type="button" class="btn btn-primary" id="openModalButton" data-toggle="modal" data-target="#configModal">Available Configurations</button>
+      <button type="button" class="btn btn-primary" id="openModalButton" data-toggle="modal" data-target="#configModal" >Available Configurations</button>
     </div>
   </div>
 
@@ -26,7 +26,7 @@
       </div>
       <div class="panel-body" style="padding-top: 20px">
         <div class="row">
-          <labeled-input name="Target System Name" [model]="target" key="name"></labeled-input>
+          <labeled-input name="Target System Name" [model]="target" key="name" data-toggle="tooltip" title="Please provide a unique name"></labeled-input>
           <labeled-input name="Target Description" [model]="target" key="description"></labeled-input>
         </div>
       </div>
@@ -95,7 +95,8 @@
               [model]="dataProvider"
               key="ignore_first_n_samples"
               [colSize]="6"
-              [minNumber]="0">
+              [minNumber]="0"
+              data-toggle="tooltip" title="Number of data points to be ignored before processing data">
             </labeled-input>
           </div>
           <hr class="col-md-12">

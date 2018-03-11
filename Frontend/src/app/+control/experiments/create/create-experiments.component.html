@@ -74,7 +74,8 @@
       </div>
       <div class="panel-body">
         <div class="row">
-          <labeled-input name="Experiment Name (required)" [model]="experiment" key="name" [colSize]="6"></labeled-input>
+          <labeled-input name="Experiment Name (required)" [model]="experiment" key="name" [colSize]="6"
+                         data-toggle="tooltip" title="Please provide a name"></labeled-input>
           <labeled-input name="Experiment Description" [model]="experiment" key="description" [required]="false" [colSize]="6"></labeled-input>
         </div>
       </div>
@@ -397,6 +398,9 @@
         <div class="panel-heading">
           <div class="card-title">
             <div class="title pull-left">Execution Strategy</div>
+            <div class="title pull-right">
+              <a data-toggle="modal" data-target="#infoModal"><i class="fa fa-info fa-lg"></i></a>
+            </div>
           </div>
         </div>
         <div class="panel-body" style="padding-top: 20px">
@@ -468,5 +472,54 @@
         </div>
       </div>
     </div>
+
+    <!-- Info modal for Execution Strategies -->
+    <div class="modal fade bd-example-modal-sm" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+      <div class="col-md-12">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 class="modal-title" id="modalTitle">Execution Strategies</h3>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>Execution strategies define the experimentation process, i.e. specify how multiple
+                experiments are to be performed.</p>
+              <p>OEDA supports following strategies:</p>
+              <hr>
+              <p><b>Step: </b>Goes through the specified ranges of changeable variables</p>
+              <hr>
+
+              <p><b>Random: </b>Randomly picks values within specified ranges of changeable variables</p>
+              <hr>
+
+              <p><b>Forever: </b>Uses default values of the simulation and runs the experimentation process forever</p>
+              <hr>
+
+              <p><b>Sequential: </b>Runs a list of experiments one after another</p>
+              <hr>
+
+              <p><b>Self Optimizer: </b>Runs multiple experiments and tries to find the best value for the knobs
+                using <a target="_blank" href="http://scikit-learn.org">scikit-learn's</a> Bayesian optimization with Gaussian Processes</p>
+              <hr>
+
+              <p><b>Uncorrelated Self Optimizer:</b>Instead of finding best values for all knobs at the same time,
+                it tries to find the best value for one variable at each experimentation</p>
+              <hr>
+
+              <p><b>mlr MBO:</b> Optimizes expensive black-box functions by model-based optimization
+                using  <a target="_blank" href="https://mlr-org.github.io/mlrMBO/articles/mlrMBO.html">mlrMBO</a> that is based on machine learning library written in R</p>
+              <hr>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>

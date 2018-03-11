@@ -204,8 +204,9 @@
             </a>
           </div>
           <labeled-input name="Description" [model]="input" key="description" [colSize]="12"></labeled-input>
-          <labeled-input name="Minimum Value" inputType="number" [model]="input" key="min" [colSize]="6"></labeled-input>
-          <labeled-input name="Maximum Value" inputType="number" [model]="input" key="max" [colSize]="6"></labeled-input>
+          <labeled-input name="Minimum Value" inputType="number" [model]="input" key="min" [colSize]="3"></labeled-input>
+          <labeled-input name="Maximum Value" inputType="number" [model]="input" key="max" [colSize]="3"></labeled-input>
+          <labeled-input name="Default Value" inputType="number" [model]="input" key="default" [colSize]="3" disabled="{{input.disabled}}" data-toggle="tooltip" title="Value in the default configuration"></labeled-input>
           <labeled-input-select name="Scale" [model]="input" key="scale" [colSize]="5"
                                 [options]="[{key:'Ordinal',label:'Ordinal'},
                                 {key:'Metric',label:'Metric'},

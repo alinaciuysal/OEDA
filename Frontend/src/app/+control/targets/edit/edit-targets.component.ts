@@ -105,8 +105,11 @@ export class EditTargetsComponent implements OnInit {
   }
 
   addChangeableVariable(existingKnob) {
-    if (existingKnob == null)
-      this.target.changeableVariable.push({}); // for usual case, without any configuration files
+    if (existingKnob == null) { // for usual case, without using any configuration files
+      this.target.changeableVariable.push({
+        "disabled": false // mark the variable as 'not' disabled, so that user can provide a default value for it
+      });
+    }
     else {
       // user should not be able to add already-added variable coming from config
       if (this.target.changeableVariable.filter(variable => variable.name === existingKnob.name).length === 0) {
@@ -136,7 +139,7 @@ export class EditTargetsComponent implements OnInit {
         // also push variables of pushed data provider to incoming data types
         for (let i = 0; i < dataProvider.incomingDataTypes.length; i++) {
           this.target.incomingDataTypes.push(dataProvider.incomingDataTypes[i]);
-          // mark name and description of pushed variables as disabled, but Scale is not disabled (TODO?)
+          // mark name, description and default values of pushed variables as disabled, but Scale is not disabled (TODO?)
           let pushedDataType =  this.target.incomingDataTypes[this.target.incomingDataTypes.length - 1];
           pushedDataType["disabled"] = true;
         }
@@ -394,7 +397,11 @@ export class EditTargetsComponent implements OnInit {
         || this.target.changeableVariable[i].description === 0
         || isNullOrUndefined(this.target.changeableVariable[i].scale)
         || isNullOrUndefined(this.target.changeableVariable[i].min)
-        || isNullOrUndefined(this.target.changeableVariable[i].max)) {
+        || isNullOrUndefined(this.target.changeableVariable[i].max)
+        || isNullOrUndefined(this.target.changeableVariable[i].default)
+        || this.target.changeableVariable[i].default < this.target.changeableVariable[i].min
+        || this.target.changeableVariable[i].default > this.target.changeableVariable[i].max
+        || this.target.changeableVariable[i].min > this.target.changeableVariable[i].max) {
         this.errorButtonLabel = "Provide valid inputs for changeable variable(s)";
         return true;
       }

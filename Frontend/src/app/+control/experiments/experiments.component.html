@@ -59,7 +59,7 @@
                 <a class="btn btn-xs btn-orange" type="button" *ngIf="item.status == 'INTERRUPTED'"
                    routerLink="/control/experiments/show/{{item.id}}/interrupted" data-toggle="tooltip" title="Click to see results"><i class="fa fa-search"></i> Results
                 </a>
-                <a class="btn btn-xs btn-orange" type="button" *ngIf="item.status == 'RUNNING'"
+                <a class="btn btn-xs btn-orange" type="button" *ngIf="item.status !== 'INTERRUPTED' && item.status !== 'SUCCESS'"
                    routerLink="/control/experiments/show/{{item.id}}/running" data-toggle="tooltip" title="Click to see results in real-time"><i class="fa fa-search"></i> Results
                 </a>
               </td>
@@ -93,4 +93,5 @@
       </div>
     </div>
   </div>
+  <debug-element [element]="experiments"></debug-element>
 </div>

@@ -393,7 +393,7 @@
   <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== '' && experiment.changeableVariable.length > 0" >
 
     <!-- Execution Strategy is allowed to be selected after adding some variables to experiment -->
-    <div class="col-sm-4 col-xs-4" style="padding-left: 0">
+    <div class="col-sm-3 col-xs-3" style="padding-left: 0">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">
@@ -437,7 +437,7 @@
 
 
     <!-- Added Variables -->
-    <div class="col-sm-8 col-xs-8" style="padding-right: 0">
+    <div class="col-sm-9 col-xs-9" style="padding-right: 0">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">
@@ -457,6 +457,7 @@
                 <labeled-input name="Name" [model]="input" key="name" [colSize]="3" disabled="true"></labeled-input>
                 <labeled-input inputType="number" name="Min" [model]="input" key="min" [colSize]="2" (modelChanged)="minMaxModelsChanged($event)"></labeled-input>
                 <labeled-input inputType="number" name="Max" [model]="input" key="max" [colSize]="2" (modelChanged)="minMaxModelsChanged($event)"></labeled-input>
+                <labeled-input inputType="number" name="Default" [model]="input" key="default" [colSize]="2" disabled="true"></labeled-input>
                 <labeled-input *ngIf="experiment.executionStrategy.type == 'step_explorer'" inputType="number" name="Step Size" [model]="input" key="step" [colSize]="2" (modelChanged)="stepSizeChanged($event)"></labeled-input>
                 <div class="col-sm-1">
                   <div class="sub-title">
@@ -522,4 +523,5 @@
     </div>
 
   </div>
+  <debug-element [element]="experiment"></debug-element>
 </div>

@@ -363,6 +363,7 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from "
                 <th style="width: 5%">Name</th>
                 <th style="width: 5%">Min</th>
                 <th style="width: 5%">Max</th>
+                <th style="width: 5%">Default</th>
                 <th *ngIf="experiment.executionStrategy.type == 'step_explorer'" style="width: 5%">Step Size</th>
                 </thead>
                 <tbody>
@@ -370,6 +371,7 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from "
                   <td style="padding-top: 1%">{{input.name}}</td>
                   <td>{{input.min}}</td>
                   <td>{{input.max}}</td>
+                  <td>{{input.default}}</td>
                   <td *ngIf="experiment.executionStrategy.type == 'step_explorer'">{{input.step}}</td>
                 </tr>
                 </tbody>

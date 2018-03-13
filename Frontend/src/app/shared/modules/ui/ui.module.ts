@@ -5,12 +5,14 @@ import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import {LabeledInputSelectComponent} from "./labeled-input-select-component";
 import {ExperimentDetailsComponent} from "./experiment-details.component";
+import {ExperimentStagesComponent} from "./experiment-stages.component";
 
 const uiElements = [
   DebugElementComponent,
   LabeledInputComponent,
   LabeledInputSelectComponent,
-  ExperimentDetailsComponent
+  ExperimentDetailsComponent,
+  ExperimentStagesComponent
 ];
 
 @NgModule({

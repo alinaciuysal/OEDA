@@ -197,9 +197,42 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     }
   }
 
-  /** called when stage dropdown (All Stages, Stage 1 [...], Stage 2 [...], ...) in main page is changed */
-  stage_changed() {
+  /** called when theoretical distribution in QQ Plot's dropdown is changed */
+  selectDistributionAndDrawQQPlot(distName) {
+    this.distribution = distName;
+    this.plotService.retrieve_qq_plot_image(this.experiment_id, this.selected_stage, this.distribution, this.scale, this.incoming_data_type["name"]).subscribe(response => {
+      const imageSrc = 'data:image/jpg;base64,' + response;
+      document.getElementById("qqPlot").setAttribute('src', imageSrc);
+      this.is_qq_plot_rendered = true;
+    }, err => {
+      this.notify.error("Error", err.message);
+    });
+  }
+
+  /** retrieves all_data from server */
+  fetch_data() {
     const ctrl = this;
+    this.apiService.loadAllDataPointsOfExperiment(this.experiment_id).subscribe(
+      data => {
+        if (isNullOrUndefined(data)) {
+          this.notify.error("Error", "Cannot retrieve data from DB, please try again");
+          return;
+        }
+        this.all_data = ctrl.entityService.process_response_for_successful_experiment(this.all_data, data);
+        if(this.first_render_of_page) {
+          this.incoming_data_type = this.entityService.get_candidate_data_type(this.targetSystem, this.all_data[0]);
+          this.first_render_of_page = false;
+        }
+        this.draw_all_plots(this.all_data);
+      }
+    );
+  }
+
+  /** called when stage dropdown (All Stages, Stage 1 [...], Stage 2 [...], ...) in main page is changed */
+  stage_changed(selected_stage) {
+    const ctrl = this;
+    if (selected_stage !== null)
+      ctrl.selected_stage = selected_stage;
     if (this.entityService.scale_allowed(this.scale, this.incoming_data_type["scale"])) {
       if (!isNullOrUndefined(ctrl.selected_stage.number)) {
         if (ctrl.selected_stage.number === -1) {
@@ -227,69 +260,33 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
         return;
       }
     } else {
+      // inform user and remove graphs from page for now
+      this.is_enough_data_for_plots = false;
       this.notify.error(this.scale + " scale cannot be applied to " + this.incoming_data_type["name"]);
     }
-  }
-
-  /** returns keys of the retrieved stage */
-  knobs_of_stage(stage) : Array<string> {
-    return Object.keys(stage);
-  }
-
-  /** called when selected stage dropdown in QQ JS is changed */
-  selectStageNoForQQJS(selected_stage_for_qq_js) {
-    this.selected_stage_for_qq_js = selected_stage_for_qq_js;
-    this.plotService.draw_qq_js("qqPlotJS", this.all_data, this.selected_stage, this.selected_stage_for_qq_js, this.scale, this.incoming_data_type["name"], this.decimal_places);
-    this.qqJSPlotIsRendered = true;
-  }
-
-  /** called when theoretical distribution in QQ Plot's dropdown is changed */
-  selectDistributionAndDrawQQPlot(distName) {
-    this.distribution = distName;
-    this.plotService.retrieve_qq_plot_image(this.experiment_id, this.selected_stage, this.distribution, this.scale, this.incoming_data_type["name"]).subscribe(response => {
-      const imageSrc = 'data:image/jpg;base64,' + response;
-      document.getElementById("qqPlot").setAttribute('src', imageSrc);
-      this.is_qq_plot_rendered = true;
-    }, err => {
-      this.notify.error("Error", err.message);
-    });
-  }
-
-  /** retrieves all_data from server */
-  private fetch_data() {
-    const ctrl = this;
-    this.apiService.loadAllDataPointsOfExperiment(this.experiment_id).subscribe(
-      data => {
-        if (isNullOrUndefined(data)) {
-          this.notify.error("Error", "Cannot retrieve data from DB, please try again");
-          return;
-        }
-        this.all_data = ctrl.entityService.process_response_for_successful_experiment(this.all_data, data);
-        if(this.first_render_of_page) {
-          this.incoming_data_type = this.entityService.get_candidate_data_type(this.targetSystem, this.all_data[0]);
-          this.first_render_of_page = false;
-        }
-        this.draw_all_plots(this.all_data);
-      }
-    );
   }
 
   /** called when incoming data type of the target system is changed */
-  incoming_data_type_changed() {
+  incoming_data_type_changed(incoming_data_type) {
+    this.incoming_data_type = incoming_data_type;
     if (this.entityService.scale_allowed(this.scale, this.incoming_data_type["scale"])) {
       // trigger plot drawing process via stage_changed function
-      this.stage_changed();
+      this.stage_changed(null);
     } else {
+      // inform user and remove graphs from page for now
+      this.is_enough_data_for_plots = false;
       this.notify.error(this.scale + " scale cannot be applied to " + this.incoming_data_type["name"]);
     }
   }
-
   /** called when scale dropdown (Normal, Log) in main page is changed */
-  scale_changed() {
+  scale_changed(user_selected_scale) {
+    this.scale = user_selected_scale;
     if (this.entityService.scale_allowed(this.scale, this.incoming_data_type["scale"])) {
       // trigger plot drawing process via stage_changed function
-      this.stage_changed();
+      this.stage_changed(null);
     } else {
+      // inform user and remove graphs from page for now
+      this.is_enough_data_for_plots = false;
       this.notify.error(this.scale + " scale cannot be applied to " + this.incoming_data_type["name"]);
     }
   }
@@ -304,5 +301,12 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
       }
     }
     return false;
+  }
+
+  /** called when selected stage dropdown in QQ JS is changed */
+  selectStageNoForQQJS(selected_stage_for_qq_js) {
+    this.selected_stage_for_qq_js = selected_stage_for_qq_js;
+    this.plotService.draw_qq_js("qqPlotJS", this.all_data, this.selected_stage, this.selected_stage_for_qq_js, this.scale, this.incoming_data_type["name"], this.decimal_places);
+    this.qqJSPlotIsRendered = true;
   }
 }

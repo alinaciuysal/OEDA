@@ -353,7 +353,6 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
       ctrl.processedData = ctrl.entityService.process_single_stage_data(ctrl.processedData,"timestamp", "value", ctrl.scale, ctrl.incoming_data_type["name"], false);
       // ctrl.processedData is the stage object here
       ctrl.stage_details = ctrl.entityService.get_stage_details(ctrl.selected_stage);
-      console.log("stage details baba", ctrl.stage_details);
     }
     // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
     const clonedData = JSON.parse(JSON.stringify(ctrl.processedData));
@@ -389,38 +388,45 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
   }
 
   /** called when stage dropdown (All Stages, Stage 1 [...], Stage 2 [...], ...) in main page is changed */
-  stage_changed() {
+  stage_changed(selected_stage) {
+    if (selected_stage !== null)
+      this.selected_stage = selected_stage;
     if (this.entityService.scale_allowed(this.scale, this.incoming_data_type["scale"])) {
       this.draw_all_plots();
     } else {
-     this.notify.error(this.scale + " scale cannot be applied to " + this.incoming_data_type["name"]);
-    }
-  }
-
-  /** called when scale dropdown (Normal, Log) in main page is changed */
-  scale_changed(user_selected_scale: string) {
-    if (this.entityService.scale_allowed(user_selected_scale, this.incoming_data_type["scale"])) {
-      this.scale = user_selected_scale;
-      this.draw_all_plots();
-    } else {
-      this.notify.error(user_selected_scale + " scale cannot be applied to " + this.incoming_data_type["name"]);
-    }
-  }
-
-  /** called when incoming data type of the target system is changed */
-  incoming_data_type_changed() {
-    if (this.entityService.scale_allowed(this.scale, this.incoming_data_type["scale"])) {
-      this.draw_all_plots();
-    } else {
+      // inform user and remove graphs from page for now
+      this.is_enough_data_for_plots = false;
       this.notify.error(this.scale + " scale cannot be applied to " + this.incoming_data_type["name"]);
     }
   }
 
-  /** returns keys the given data structure */
-  keys(object) : Array<string> { //this.oedaCallback.current_knob
-    if (!isNullOrUndefined(object)) {
-      return Object.keys(object);
+  /** called when scale dropdown (Normal, Log) in main page is changed */
+  scale_changed(user_selected_scale) {
+    this.scale = user_selected_scale;
+    if (this.entityService.scale_allowed(this.scale, this.incoming_data_type["scale"])) {
+      this.draw_all_plots();
+    } else {
+      // inform user and remove graphs from page for now
+      this.is_enough_data_for_plots = false;
+      this.notify.error(this.scale + " scale cannot be applied to " + this.incoming_data_type["name"]);
     }
+  }
+
+  /** called when incoming data type of the target system is changed */
+  incoming_data_type_changed(incoming_data_type) {
+    this.incoming_data_type = incoming_data_type;
+    if (this.entityService.scale_allowed(this.scale, this.incoming_data_type["scale"])) {
+      this.draw_all_plots();
+    } else {
+      // inform user and remove graphs from page for now
+      this.is_enough_data_for_plots = false;
+      this.notify.error(this.scale + " scale cannot be applied to " + this.incoming_data_type["name"]);
+    }
+  }
+
+  /** returns keys of the given map */
+  get_keys(object) : Array<string> {
+    return this.entityService.get_keys(object);
   }
 
   /** optimized_data_types is retrieved from experiment definition.

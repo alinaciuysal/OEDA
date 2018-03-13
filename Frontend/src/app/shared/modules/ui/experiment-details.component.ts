@@ -1,9 +1,10 @@
-import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from "@angular/core";
+import {Component, Input, Output, EventEmitter} from "@angular/core";
 
 @Component({
   selector: 'experiment-details',
   template: `
-    <div class="col-sm-12 col-xs-12">
+    <!-- Show/Hide Button & Additional Buttons for Running experiments -->
+    <div class="col-md-12">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <button type="button" class="btn btn-orange"
@@ -14,7 +15,22 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from "
             <span *ngIf="!is_collapsed">Hide Experiment Details</span>
             <i *ngIf="!is_collapsed" class="fa fa-angle-double-up" aria-hidden="true"></i>
           </button>
+          
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" *ngIf="!for_successful_experiment">
+            Stop Experiment
+          </button>
+          
+          <div class="btn btn-group btn-toggle" style="padding-top: 5px; padding-left: 1%" *ngIf="!for_successful_experiment">
+            <button class="btn btn-primary active" id="polling_on_button" (click)="enable_polling($event)" data-toggle="tooltip" title="Click to enable polling">Polling ON</button>
+            <button class="btn btn-default" id="polling_off_button" (click)="disable_polling($event)" data-toggle="tooltip" title="Click to disable polling">Polling OFF</button>
+          </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Experiment Name & Description -->
+    <div class="col-md-12">
+      <div class="panel panel-default chartJs">
         <div class="panel-body" [hidden]="is_collapsed">
           <div class="row">
             <labeled-input name="Experiment Name" [model]="experiment" key="name" [colSize]="6"
@@ -27,11 +43,11 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from "
     </div>
 
     <!-- Data Providers & Change Provider -->
-    <div class="col-sm-12 col-xs-12" (ngModelChange)="onModelChange($event)" *ngIf="targetSystem.name !== ''"
+    <div class="col-md-12" *ngIf="targetSystem.name !== ''"
          [hidden]="is_collapsed">
 
       <!-- Primary Data Provider & Secondary Data Provider(s)-->
-      <div class="col-sm-6 col-xs-12" style="padding-left: 0">
+      <div class="col-md-6" style="padding-left: 0">
         <div class="panel panel-default chartJs">
           <div class="panel-heading">
             <div class="card-title">
@@ -195,7 +211,7 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from "
       </div>
 
       <!-- Change Provider -->
-      <div class="col-sm-6 col-xs-12" style="padding-right: 0">
+      <div class="col-md-6" style="padding-right: 0">
         <div class="panel panel-default chartJs">
           <div class="panel-heading">
             <div class="card-title">
@@ -259,9 +275,9 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from "
     </div>
 
     <!-- Incoming Data Types, Execution strategy, Experiment Variables -->
-    <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed">
+    <div class="col-md-12" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed">
       <!-- Incoming Data Types -->
-      <div class="col-sm-6 col-xs-12" style="padding-left: 0">
+      <div class="col-md-6" style="padding-left: 0">
         <div class="panel panel-default chartJs">
           <div class="panel-heading">
             <div class="card-title">
@@ -297,7 +313,7 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from "
       </div>
 
       <!-- Execution Strategy & Experiment Variables -->
-      <div class="col-sm-6 col-xs-12" style="padding-right: 0">
+      <div class="col-md-6" style="padding-right: 0">
         <div class="panel panel-default chartJs">
           <div class="panel-heading">
             <div class="card-title">
@@ -380,27 +396,42 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from "
           </div>
         </div>
       </div>
-
     </div>
 
+    <!-- Modal for stop experiment-->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" *ngIf="!for_successful_experiment">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Please confirm</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Do you really want to stop the whole experiment?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+            <button type="button" class="btn btn-primary" (click)="stopRunningExperiment($event)" data-dismiss="modal">Yes</button>
+          </div>
+        </div>
+      </div>
+    </div>
   `
 })
 
-export class ExperimentDetailsComponent implements OnChanges{
-  @Output() modelChanged = new EventEmitter();
+export class ExperimentDetailsComponent {
   @Input() targetSystem: any;
   @Input() experiment: any;
   @Input() is_collapsed: boolean;
   @Input() experiment_type: string;
   @Input() oedaCallback: any;
+  @Input() for_successful_experiment: boolean;
 
-  @Input() onModelChange = (ev) => {
-    this.modelChanged.emit(ev);
-  };
-
-  ngOnChanges(changes: SimpleChanges): void {
-    this.modelChanged.emit(changes);
-  }
+  @Output() enable_polling_btn_clicked = new EventEmitter<MouseEvent>();
+  @Output() disable_polling_btn_clicked = new EventEmitter<MouseEvent>();
+  @Output() stop_experiment_btn_clicked = new EventEmitter<MouseEvent>();
 
   /** optimized_data_types are retrieved from experiment definition.
    * so, this function checks if given data type was selected for optimization or not
@@ -412,5 +443,17 @@ export class ExperimentDetailsComponent implements OnChanges{
       }
     }
     return false;
+  }
+
+  public enable_polling(event: MouseEvent) {
+    this.enable_polling_btn_clicked.emit(event);
+  }
+
+  public disable_polling(event: MouseEvent) {
+    this.disable_polling_btn_clicked.emit(event);
+  }
+
+  public stopRunningExperiment(event: MouseEvent) {
+    this.stop_experiment_btn_clicked.emit(event);
   }
 }

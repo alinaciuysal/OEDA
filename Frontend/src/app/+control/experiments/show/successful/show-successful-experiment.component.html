@@ -1,75 +1,22 @@
 <div class="row" *ngIf="dataAvailable">
 
   <!-- Experiment Details -->
-  <experiment-details [experiment]="experiment" [is_collapsed]="is_collapsed" [targetSystem]="targetSystem"></experiment-details>
+  <experiment-details [experiment]="experiment" [targetSystem]="targetSystem" [is_collapsed]="is_collapsed" [for_successful_experiment]="true"></experiment-details>
 
-  <!--Stages Header-->
-  <div class="col-sm-12 col-xs-12">
-
-    <div class="panel panel-default chartJs">
-      <div class="panel-heading">
-        <div class="card-title">
-          <div class="row">
-            <div class="col-md-6">
-              <div class="title pull-left">Stages of Experiment</div>
-            </div>
-
-            <div class="col-md-3">
-              <div class="title pull-left">Incoming Data Type</div>
-            </div>
-
-            <div class="col-md-3">
-              <div class="title pull-left">Scale of Results</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="panel-body" style="padding-top: 20px">
-        <div class="row">
-
-          <div class="col-md-6">
-            <div>
-              <select class="form-control" required [(ngModel)]="selected_stage" (change)="stage_changed()">
-                <option *ngFor="let i of available_stages; let first_stage = first;" [ngValue]="i">
-                  <div *ngIf="first_stage">All Stages</div>
-                  <div *ngIf="!first_stage">Stage: {{ i.number }}
-                    <div *ngFor="let key of knobs_of_stage(i.knobs); let last_knob=last; let first_knob=first;">
-                      <b *ngIf="first_knob">[</b>
-                        <b>{{key}}: {{i.knobs[key]}}</b>
-                        <b *ngIf="!last_knob">,</b>
-                      <b *ngIf="last_knob">]</b>
-                    </div>
-                  </div>
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div class="col-md-3">
-            <div class="card-title">
-              <select class="form-control" [(ngModel)]="incoming_data_type" (change)="incoming_data_type_changed()">
-                <option *ngFor="let dataType of targetSystem.incomingDataTypes" [ngValue]="dataType">
-                  {{dataType.name}}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div class="col-md-3">
-            <div class="card-title">
-              <select class="form-control" required [(ngModel)]="scale" (change)="scale_changed()">
-                <option [selected]="true">Normal</option>
-                <option>Log</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- Experiment Stages -->
+  <experiment-stages [selected_stage]="selected_stage"
+                     [available_stages]="available_stages"
+                     [incoming_data_type]="incoming_data_type"
+                     [scale]="scale"
+                     [targetSystem]="targetSystem"
+                     [for_successful_experiment]="true"
+                     (incomingDataTypeChanged)="incoming_data_type_changed($event)"
+                     (scaleChanged)="scale_changed($event)"
+                     (stageChanged)="stage_changed($event)"
+                     [hidden]="false"></experiment-stages>
 
   <!-- Smooth-Line Chart -->
-  <div class="col-sm-12 col-xs-12" [hidden]="!is_enough_data_for_plots">
+  <div class="col-md-12" [hidden]="!is_enough_data_for_plots">
     <div class="panel panel-default">
       <div class="panel-heading">
         <div class="card-title">
@@ -87,7 +34,7 @@
   </div>
 
   <!-- Histogram -->
-  <div class="col-sm-12 col-xs-12" [hidden]="!is_enough_data_for_plots">
+  <div class="col-md-12" [hidden]="!is_enough_data_for_plots">
     <div class="panel panel-default">
       <div class="panel-heading">
         <div class="card-title">
@@ -102,9 +49,9 @@
 
   <!-- QQ graphs -->
 
-  <div class="col-sm-12 col-xs-12" [hidden]="!is_enough_data_for_plots" >
+  <div class="col-md-12" [hidden]="!is_enough_data_for_plots" >
     <!-- QQ graph 1 -->
-    <div class="col-sm-6 col-xs-12">
+    <div class="col-md-6">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">
@@ -136,7 +83,7 @@
 
 
     <!-- QQ graph 2 -->
-    <!--<div class="col-sm-6 col-xs-12" [hidden]="selected_stage.number === -1">-->
+    <!--<div class="col-md-6" [hidden]="selected_stage.number === -1">-->
       <!--<div class="panel panel-default chartJs">-->
         <!--<div class="panel-heading">-->
           <!--<div class="card-title">-->

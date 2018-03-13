@@ -1,100 +1,29 @@
 <div class="row" *ngIf="dataAvailable">
-
   <!-- Experiment Details -->
-  <experiment-details [experiment]="experiment" [is_collapsed]="is_collapsed" [targetSystem]="targetSystem"></experiment-details>
+  <experiment-details [experiment]="experiment"
+                      [is_collapsed]="is_collapsed"
+                      [targetSystem]="targetSystem"
+                      [for_successful_experiment]="false"
+                      [oedaCallback]="oedaCallback"
+                      (enable_polling_btn_clicked)="enable_polling($event)"
+                      (disable_polling_btn_clicked)="disable_polling($event)"
+                      (stop_experiment_btn_clicked)="stopRunningExperiment($event)"></experiment-details>
 
-  <!--Stages Header-->
-  <div class="col-sm-12" [hidden]="first_render_of_page">
-      <div class="panel panel-default chartJs">
-        <div class="panel-heading">
-          <div class="card-title">
-            <div class="row">
-              <div class="col-sm-4">
-                <div class="title pull-left">Stages of Experiment</div>
-              </div>
-
-              <div class="col-sm-2">
-                <div class="title pull-left">Incoming Data Type</div>
-              </div>
-
-              <div class="col-sm-2">
-                <div class="title pull-left">Scale of Results</div>
-              </div>
-
-              <div class="col-sm-2">
-                <div class="title pull-left">Polling</div>
-              </div>
-
-              <div class="col-sm-2" *ngIf="oedaCallback['status'] === 'IGNORING_SAMPLES' || oedaCallback['status'] === 'COLLECTING_DATA'">
-                <div class="title pull-left">Stop Experiment</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="panel-body" style="padding-top: 20px">
-          <div class="row">
-            <div class="col-sm-4">
-              <div>
-                <select class="form-control" required [(ngModel)]="selected_stage" (change)="stage_changed()">
-                  <option *ngFor="let i of available_stages; let first_stage = first;" [ngValue]="i">
-                    <div *ngIf="first_stage">All Stages</div>
-                    <div *ngIf="!first_stage">Stage: {{ i.number }}
-                      <div *ngFor="let key of keys(i.knobs); let last_knob=last; let first_knob=first;">
-                        <b *ngIf="first_knob">[</b>
-                        <b>{{key}}: {{i.knobs[key]}}</b>
-                        <b *ngIf="!last_knob">,</b>
-                        <b *ngIf="last_knob">]</b>
-                      </div>
-                    </div>
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div class="col-sm-2">
-              <div class="card-title">
-                <select class="form-control" [(ngModel)]="incoming_data_type" (change)="incoming_data_type_changed()">
-                  <option *ngFor="let dataType of targetSystem.incomingDataTypes"
-                          [ngValue]="dataType">
-                    {{dataType.name}}
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div class="col-sm-2">
-              <div class="card-title">
-                <select class="form-control" required (change)="scale_changed($event.target.value)">
-                  <option [selected]="true">Normal</option>
-                  <option>Log</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="col-sm-2">
-              <div class="card-title">
-                <div class="btn-group btn-toggle">
-                  <button class="btn btn-primary active" id="polling_on_button" (click)="enable_polling()">ON</button>
-                  <button class="btn btn-default" id="polling_off_button" (click)="disable_polling()">OFF</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-sm-2" *ngIf="oedaCallback['status'] === 'IGNORING_SAMPLES' || oedaCallback['status'] === 'COLLECTING_DATA'">
-              <div class="card-title">
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-                  Stop Experiment
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-  </div>
+  <!-- Experiment Stages -->
+  <experiment-stages [selected_stage]="selected_stage"
+                     [available_stages]="available_stages"
+                     [incoming_data_type]="incoming_data_type"
+                     [scale]="scale"
+                     [targetSystem]="targetSystem"
+                     [for_successful_experiment]="false"
+                     [oedaCallback]="oedaCallback"
+                     (incomingDataTypeChanged)="incoming_data_type_changed($event)"
+                     (scaleChanged)="scale_changed($event)"
+                     (stageChanged)="stage_changed($event)"
+                     [hidden]="first_render_of_page"></experiment-stages>
 
   <!--Status (Callback) Info-->
-  <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''">
+  <div class="col-md-12" *ngIf="targetSystem.name !== ''">
       <div class="panel panel-default chartJs">
         <div class="panel-body" style="padding-top: 20px">
           <h3>Current Status of Experiment</h3>
@@ -113,7 +42,7 @@
               Configuration:
             </h4>
             <ul>
-              <li *ngFor="let key of keys(oedaCallback.current_knob)"><b>{{key}}:</b> {{oedaCallback.current_knob[key]}}</li>
+              <li *ngFor="let key of get_keys(oedaCallback.current_knob)"><b>{{key}}:</b> {{oedaCallback.current_knob[key]}}</li>
             </ul>
             <p>
               Number of ignored samples: {{oedaCallback['index']}} , total size: {{oedaCallback['size']}}
@@ -132,7 +61,7 @@
               Configuration:
             </h4>
             <ul>
-              <li *ngFor="let key of keys(oedaCallback.current_knob);"><b>{{key}}:</b> {{oedaCallback.current_knob[key]}}</li>
+              <li *ngFor="let key of get_keys(oedaCallback.current_knob);"><b>{{key}}:</b> {{oedaCallback.current_knob[key]}}</li>
             </ul>
             <p>
               Number of collected data: {{oedaCallback['index']}} , total size: {{oedaCallback['size']}}
@@ -150,7 +79,7 @@
   </div>
 
   <!-- Scatter Plot -->
-  <div class="col-sm-12 col-xs-12" [hidden]="!is_enough_data_for_plots">
+  <div class="col-md-12" [hidden]="!is_enough_data_for_plots">
     <div class="panel panel-default">
       <div class="panel-heading">
         <div class="card-title">
@@ -168,7 +97,7 @@
   </div>
 
   <!-- Histogram -->
-  <div class="col-sm-12 col-xs-12" [hidden]="!is_enough_data_for_plots">
+  <div class="col-md-12" [hidden]="!is_enough_data_for_plots">
     <div class="panel panel-default">
         <div class="panel-heading">
           <div class="card-title">
@@ -181,24 +110,4 @@
     </div>
   </div>
 
-  <!-- Modal for stop experiment-->
-  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Please confirm</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          Do you really want to stop the whole experiment?
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-          <button type="button" class="btn btn-primary" (click)="stopRunningExperiment()" data-dismiss="modal">Yes</button>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>

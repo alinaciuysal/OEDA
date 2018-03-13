@@ -242,4 +242,13 @@ export class EntityService {
     });
     return iterable_knob_object;
   }
+
+  /** returns keys of the given map */
+  get_keys(object) : Array<string> {
+    if (!isNullOrUndefined(object)) {
+      return Object.keys(object);
+    }
+    return null;
+  }
+
 }

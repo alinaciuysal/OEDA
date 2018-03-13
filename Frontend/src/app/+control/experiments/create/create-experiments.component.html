@@ -1,6 +1,6 @@
 <div class="row">
   <!--Target System Selection, Description, Details Button, Status, Create Experiment Button-->
-  <div class="col-sm-12 col-xs-12">
+  <div class="col-md-12">
     <div class="panel panel-default chartJs">
       <div class="panel-heading">
         <div class="card-title">
@@ -65,7 +65,7 @@
   </div>
 
   <!--Experiment Parameters-->
-  <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''">
+  <div class="col-md-12" *ngIf="targetSystem.name !== ''">
     <div class="panel panel-default chartJs">
       <div class="panel-heading">
         <div class="card-title">
@@ -83,9 +83,9 @@
   </div>
 
   <!-- Primary Data Provider & Secondary Data Provider(s)-->
-  <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed">
+  <div class="col-md-12" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed">
 
-    <div class="col-sm-6 col-xs-12" style="padding-left: 0">
+    <div class="col-sm-6" style="padding-left: 0">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">
@@ -244,7 +244,7 @@
     </div>
 
     <!-- Change Provider -->
-    <div class="col-sm-6 col-xs-12" style="padding-right: 0">
+    <div class="col-sm-6" style="padding-right: 0">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">
@@ -307,7 +307,7 @@
   </div>
 
   <!-- Incoming Data Types -->
-  <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''">
+  <div class="col-md-12" *ngIf="targetSystem.name !== ''">
     <div class="panel panel-default chartJs">
       <div class="panel-heading">
         <div class="card-title">
@@ -345,7 +345,7 @@
   </div>
 
   <!--Changeable Variables -->
-  <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== ''">
+  <div class="col-md-12" *ngIf="targetSystem.name !== ''">
     <div class="panel panel-default chartJs">
       <div class="panel-heading">
         <div class="card-title">
@@ -390,10 +390,10 @@
   </div>
 
   <!--Execution Strategy & Added Variables-->
-  <div class="col-sm-12 col-xs-12" *ngIf="targetSystem.name !== '' && experiment.changeableVariable.length > 0" >
+  <div class="col-md-12" *ngIf="targetSystem.name !== '' && experiment.changeableVariable.length > 0" >
 
     <!-- Execution Strategy is allowed to be selected after adding some variables to experiment -->
-    <div class="col-sm-3 col-xs-3" style="padding-left: 0">
+    <div class="col-md-3" style="padding-left: 0">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">
@@ -437,7 +437,7 @@
 
 
     <!-- Added Variables -->
-    <div class="col-sm-9 col-xs-9" style="padding-right: 0">
+    <div class="col-md-9" style="padding-right: 0">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">

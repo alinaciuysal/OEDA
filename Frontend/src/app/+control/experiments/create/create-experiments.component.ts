@@ -319,7 +319,7 @@ export class CreateExperimentsComponent implements OnInit {
           return true;
         }
       }
-      // check if initial designs are large enough for respective strategies
+      // check if initial design of mlr mbo is large enough
       if (execution_strategy_type === "mlr_mbo") {
         let minimum_number_of_iterations = this.experiment.changeableVariable.length * 4;
         if (this.experiment.executionStrategy.optimizer_iterations_in_design < minimum_number_of_iterations) {
@@ -327,9 +327,10 @@ export class CreateExperimentsComponent implements OnInit {
           return true;
         }
       } else if (execution_strategy_type === "uncorrelated_self_optimizer" || execution_strategy_type === "self_optimizer") {
-        let minimum_number_of_iterations = 5; // determined by library
-        if (this.experiment.executionStrategy.optimizer_iterations_in_design < minimum_number_of_iterations) {
-          this.errorButtonLabel = "Number of optimizer iterations in design should be greater than " + minimum_number_of_iterations.toString() + " for " + execution_strategy_type;
+        // check if number of iterations for skopt are enough
+        let minimum_number_of_iterations = 5; // determined by library?
+        if (this.experiment.executionStrategy.optimizer_iterations < minimum_number_of_iterations) {
+          this.errorButtonLabel = "Number of optimizer iterations should be greater than " + minimum_number_of_iterations.toString() + " for " + execution_strategy_type;
           return true;
         }
       }

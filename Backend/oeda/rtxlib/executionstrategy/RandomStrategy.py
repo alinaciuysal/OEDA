@@ -22,7 +22,6 @@ def start_random_strategy(wf):
     info("> ExecStrategy   | Random", Fore.CYAN)
     wf.totalExperiments = wf.execution_strategy["optimizer_iterations"]
     optimizer_iterations_in_design = wf.execution_strategy["optimizer_iterations_in_design"]
-    # optimizer_method = wf.execution_strategy["optimizer_method"]
 
     # we look at the ranges the user has specified in the knobs
     knobs = wf.execution_strategy["knobs"]

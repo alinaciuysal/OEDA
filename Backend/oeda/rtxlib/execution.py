@@ -8,7 +8,11 @@ def _defaultChangeProvider(variables,wf):
 def experimentFunction(wf, exp):
 
     if hasattr(wf, "experimentCounter"):
-        wf.remaining_time_and_stages['remaining_stages'] = wf.totalExperiments - wf.experimentCounter
+        if wf.execution_strategy["type"] == "forever":
+            wf.remaining_time_and_stages['remaining_stages'] = 'Infinite'
+            wf.remaining_time_and_stages['remaining_time'] = 'Infinite'
+        else:
+            wf.remaining_time_and_stages['remaining_stages'] = wf.totalExperiments - wf.experimentCounter
 
     """ executes a given experiment stage """
     start_time = current_milli_time()
@@ -27,11 +31,12 @@ def experimentFunction(wf, exp):
     # create new state
     exp["state"] = wf.state_initializer(dict(), wf)
 
-    # apply changes to system
-    try:
-        wf.change_provider["instance"].applyChange(change_creator(exp["knobs"], wf))
-    except:
-        error("apply changes did not work")
+    # do not apply any changes to the system for forever strategy TODO: discuss with Ilias
+    if wf.execution_strategy["type"] != "forever":
+        try:
+            wf.change_provider["instance"].applyChange(change_creator(exp["knobs"], wf))
+        except:
+            error("apply changes did not work")
 
     # ignore the first data sets
     to_ignore = exp["ignore_first_n_samples"]
@@ -111,11 +116,10 @@ def experimentFunction(wf, exp):
     else:
         wf.experimentCounter = 1
 
-
-    # print the results
     duration = current_milli_time() - start_time
-    wf.remaining_time_and_stages['remaining_stages'] = wf.totalExperiments - wf.experimentCounter
-    wf.remaining_time_and_stages['remaining_time'] = str(wf.remaining_time_and_stages['remaining_stages'] * duration / 1000)
+    if wf.execution_strategy["type"] != "forever":
+        wf.remaining_time_and_stages['remaining_stages'] = wf.totalExperiments - wf.experimentCounter
+        wf.remaining_time_and_stages['remaining_time'] = str(wf.remaining_time_and_stages['remaining_stages'] * duration / 1000)
 
     wf.run_oeda_callback({"experiment": exp, "status": "EXPERIMENT_STAGE_DONE",
                           "experiment_counter": wf.experimentCounter, "total_experiments": wf.totalExperiments,

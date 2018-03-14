@@ -19,6 +19,8 @@ class ExperimentController(Resource):
         for knob in content["executionStrategy"]["knobs"]:
             if content["executionStrategy"]["type"] == 'step_explorer':
                 new_knobs[knob[0]] = [knob[1], knob[2], knob[3]]
+            elif content["executionStrategy"]["type"] == 'forever':
+                new_knobs[knob[0]] = knob[1]
             else:
                 new_knobs[knob[0]] = [knob[1], knob[2]]
 

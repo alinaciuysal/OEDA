@@ -100,7 +100,8 @@ export class EditTargetsComponent implements OnInit {
       "status": "IDLE",
       "description": "",
       "incomingDataTypes": [],
-      "changeableVariable": []
+      "changeableVariable": [],
+      "defaultVariables": []
     }
   }
 
@@ -453,6 +454,10 @@ export class EditTargetsComponent implements OnInit {
       this.target.changeProvider['type'] = 'kafka_producer';
       this.target.changeProvider['topic'] = this.selectedConfiguration['kafkaCommandsTopic'];
       this.target.changeProvider['serializer'] = 'JSON';
+    }
+    // also push each knob into defaultVariables array
+    for (let knob of this.selectedConfiguration.knobs) {
+      this.target.defaultVariables.push(knob);
     }
   }
 

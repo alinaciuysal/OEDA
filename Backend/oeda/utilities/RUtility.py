@@ -22,7 +22,7 @@ my_converter.py2ri.register(dict, complex_sexp_str)
 
 ''' installs required packages and libraries for executing R functions  '''
 def install_packages():
-    packnames = ('base', 'ggplot2', 'smoof', 'mlr', 'mlrMBO', 'DiceKriging', 'randomForest', 'ParamHelpers', 'stats', 'rgenoud', 'lhs', 'methods')
+    packnames = ('base', 'ggplot2', 'smoof', 'mlr', 'mlrMBO', 'DiceKriging', 'randomForest', 'ParamHelpers', 'stats', 'rgenoud', 'lhs', 'methods', 'emoa')
 
     if all(isinstalled(x) for x in packnames):
         have_tutorial_packages = True

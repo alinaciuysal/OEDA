@@ -10,7 +10,6 @@ def start_step_strategy(wf):
 
     # we look at the ranges and the steps the user has specified in the knobs
     knobs = wf.execution_strategy["knobs"]
-    debug("knobs in start_step_strategy" + str(knobs), Fore.GREEN)
     # we create a list of variable names and a list of lists of values:
     # [[par1_val1, par1_val2, par1_val3], [par2_val1, par2_val2, par2_val3], [...],...]
     variables = []

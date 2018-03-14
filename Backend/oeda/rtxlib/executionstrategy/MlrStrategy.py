@@ -23,6 +23,8 @@ def start_mlr_mbo_strategy(wf):
     optimizer_iterations = wf.execution_strategy["optimizer_iterations"]
     optimizer_iterations_in_design = wf.execution_strategy["optimizer_iterations_in_design"]
     wf.totalExperiments = optimizer_iterations + optimizer_iterations_in_design # also include number of samples in design to it
+    acquisition_method = wf.execution_strategy["acquisition_method"]
+    acquisition_criteria = create_acquisition_criteria(acquisition_method)
 
     # we look at the ranges the user has specified in the knobs
     knobs = wf.execution_strategy["knobs"]
@@ -68,7 +70,7 @@ def start_mlr_mbo_strategy(wf):
 
     control = mlr_mbo.makeMBOControl()
     control = mlr_mbo.setMBOControlTermination(control, iters=optimizer_iterations)
-    control = mlr_mbo.setMBOControlInfill(control, crit=mlr_mbo.makeMBOInfillCritEI())
+    control = mlr_mbo.setMBOControlInfill(control, crit=acquisition_criteria)
     # run = mlr_mbo.mbo(obj_fcn, design=design, learner=surr_km, control=control)
     run = mlr_mbo.mbo(obj_fcn, design=design, control=control)
     info(">>>>>>>>>>> MLR RUN")
@@ -109,3 +111,27 @@ def self_optimizer_execution_function(**kwargs):
     wf.setup_stage(wf, exp["knobs"])
     # create a new experiment to run in execution
     return float(experimentFunction(wf, exp))
+
+''' Creates acquisition criteria with provided method and default values for it
+    see: https://mlr-org.github.io/mlrMBO/reference/infillcrits.html
+    'ei' = 'Expected Improvement',
+    'mr' = 'Mean Error',
+    'se' = 'Standard Error',
+    'cb' = 'Confidence Bound',
+    'aei' = 'Augmented Expected Improvement',
+    'eqi' = 'Expected Quantile Improvement'
+'''
+def create_acquisition_criteria(acquisition_method):
+    mlr_mbo = importr('mlrMBO')
+    if acquisition_method == "mr":
+        return mlr_mbo.makeMBOInfillCritMeanResponse()
+    elif acquisition_method == "se":
+        return mlr_mbo.makeMBOInfillCritStandardError()
+    elif acquisition_method == "cb":
+        return mlr_mbo.makeMBOInfillCritCB()
+    elif acquisition_method == "aei":
+        return mlr_mbo.makeMBOInfillCritEI()
+    elif acquisition_method == "eqi":
+        return mlr_mbo.makeMBOInfillCritEQI()
+    else: # default is the expected improvement (ei)
+        return mlr_mbo.makeMBOInfillCritEI()

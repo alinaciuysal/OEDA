@@ -113,7 +113,8 @@ export interface Target {
   secondaryDataProviders: any,
   changeProvider: any,
   incomingDataTypes: any,
-  changeableVariable: any
+  changeableVariable: any,
+  defaultVariables: any
 }
 
 export interface ExecutionStrategy {
@@ -123,7 +124,7 @@ export interface ExecutionStrategy {
   stages_count: number,
   optimizer_iterations_in_design: number,
   optimizer_iterations: number,
-  optimizer_method: any
+  acquisition_method: any
 }
 
 export interface OedaCallbackEntity {
@@ -136,7 +137,7 @@ export interface OedaCallbackEntity {
   total_experiments: number,
   stage_counter: number,
   current_knob: any,
-  remaining_time_and_stages: any
+  remaining_time_and_stages: Map<any, any>
 }
 
 export interface Configuration {

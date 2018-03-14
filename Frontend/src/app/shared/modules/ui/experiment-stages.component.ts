@@ -32,11 +32,13 @@ import {isNullOrUndefined} from "util";
                   <option *ngFor="let i of available_stages; let first_stage = first;" [ngValue]="i">
                     <div *ngIf="first_stage">All Stages</div>
                     <div *ngIf="!first_stage">Stage: {{ i.number }}
-                      <div *ngFor="let key of get_keys(i.knobs); let last_knob=last; let first_knob=first;">
-                        <b *ngIf="first_knob">[</b>
-                        <b>{{key}}: {{i.knobs[key]}}</b>
-                        <b *ngIf="!last_knob">,</b>
-                        <b *ngIf="last_knob">]</b>
+                      <div *ngIf="experiment.executionStrategy.type !== 'forever'">
+                        <div *ngFor="let key of get_keys(i.knobs); let last_knob=last; let first_knob=first;">
+                          <b *ngIf="first_knob">[</b>
+                          <b>{{key}}: {{i.knobs[key]}}</b>
+                          <b *ngIf="!last_knob">,</b>
+                          <b *ngIf="last_knob">]</b>
+                        </div>
                       </div>
                     </div>
                   </option>
@@ -46,7 +48,6 @@ import {isNullOrUndefined} from "util";
 
             <div class="col-md-3">
               <div class="card-title">
-                <!--<select class="form-control" [(ngModel)]="incoming_data_type" (change)="incoming_data_type_changed()">-->
                 <select class="form-control" [(ngModel)]="incoming_data_type" (ngModelChange)="onIncomingDataTypeChange($event)">
                   <option *ngFor="let dataType of targetSystem.incomingDataTypes" [ngValue]="dataType">
                     {{dataType.name}}
@@ -57,7 +58,6 @@ import {isNullOrUndefined} from "util";
 
             <div class="col-md-3">
               <div class="card-title">
-                <!--<select class="form-control" required [(ngModel)]="scale" (change)="scale_changed()">-->
                 <select class="form-control" required [(ngModel)]="scale" (ngModelChange)="onScaleChange($event)">
                   <option [selected]="true">Normal</option>
                   <option>Log</option>
@@ -76,6 +76,7 @@ export class ExperimentStagesComponent {
   @Output() incomingDataTypeChanged = new EventEmitter();
   @Output() stageChanged = new EventEmitter();
 
+  @Input() experiment: any;
   @Input() selected_stage: any;
   @Input() available_stages: any;
   @Input() targetSystem: any;

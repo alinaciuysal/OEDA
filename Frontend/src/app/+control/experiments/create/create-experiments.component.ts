@@ -143,13 +143,22 @@ export class CreateExperimentsComponent implements OnInit {
     }
   }
 
-  // if user selects step strategy at any moment of experiment creation, it
+  // User can select execution strategy while creating an experiment
   executionStrategyModelChanged(execution_strategy_key) {
     this.experiment.executionStrategy.type = execution_strategy_key;
     if (execution_strategy_key === 'step_explorer') {
       this.preCalculateStepSize();
       this.calculateTotalNrOfStages();
+    } else if (execution_strategy_key === 'mlr_mbo') {
+      this.acquisitionMethodChanged("ei");
+    } else if (execution_strategy_key === 'self_optimizer' || execution_strategy_key === 'uncorrelated_self_optimizer') {
+      this.acquisitionMethodChanged("gp_hedge");
     }
+  }
+
+  // User can select acquisition function for respective strategies
+  acquisitionMethodChanged(acquisition_method_key) {
+    this.experiment.executionStrategy.acquisition_method = acquisition_method_key;
   }
 
   // pre-determines step size of all added variables if selected execution strategy is step_explorer
@@ -209,36 +218,45 @@ export class CreateExperimentsComponent implements OnInit {
 
   saveExperiment() {
     if (!this.hasErrors()) {
-      const all_knobs = [];
-      for (var j = 0; j < this.experiment.changeableVariable.length; j++) {
-        const knob = [];
-        knob.push(this.experiment.changeableVariable[j].name);
-        knob.push(Number(this.experiment.changeableVariable[j].min));
-        knob.push(Number(this.experiment.changeableVariable[j].max));
-        if (this.experiment.executionStrategy.type === "step_explorer") {
-          knob.push(Number(this.experiment.changeableVariable[j].step));
+      let all_knobs = [];
+      let experiment_type = this.experiment.executionStrategy.type;
+      // push names & default values of target system to executionStrategy for forever strategy
+      if (experiment_type === 'forever') {
+        for (let j = 0; j < this.targetSystem.defaultVariables.length; j++) {
+          let default_knob  = this.targetSystem.defaultVariables[j];
+          let knob = [];
+          knob.push(default_knob["name"]);
+          knob.push(default_knob["default"]);
+          all_knobs.push(knob);
         }
-        all_knobs.push(knob);
+      } else {
+        // regular knob creation (name, min, max, step -if applicable-)
+        for (let j = 0; j < this.experiment.changeableVariable.length; j++) {
+          let changeable_variable = this.experiment.changeableVariable[j];
+          const knob = [];
+          knob.push(changeable_variable.name);
+          knob.push(Number(changeable_variable.min));
+          knob.push(Number(changeable_variable.max));
+          if (this.experiment.executionStrategy.type === "step_explorer") {
+            knob.push(Number(changeable_variable.step));
+          }
+          all_knobs.push(knob);
+        }
+        this.experiment.executionStrategy.sample_size = Number(this.experiment.executionStrategy.sample_size);
+        // save experiment stage to executionStrategy, so that it can be used in determining nr of remaining stages and estimated time
+        this.experiment.executionStrategy.stages_count = Number(this.stages_count);
+        if (experiment_type === "random" || experiment_type === "mlr_mbo" || experiment_type === "self_optimizer" || experiment_type === "uncorrelated_self_optimizer") {
+          this.experiment.executionStrategy.optimizer_iterations = Number(this.experiment.executionStrategy.optimizer_iterations);
+          this.experiment.executionStrategy.optimizer_iterations_in_design = Number(this.experiment.executionStrategy.optimizer_iterations_in_design);
+        }
       }
       this.experiment.executionStrategy.knobs = all_knobs;
-
-      this.experiment.executionStrategy.sample_size = Number(this.experiment.executionStrategy.sample_size);
-      // save experiment stage to executionStrategy, so that it can be used in determining nr of remaining stages and estimated time
-      this.experiment.executionStrategy.stages_count = Number(this.stages_count);
-
-      let experiment_type = this.experiment.executionStrategy.type;
-      if (experiment_type === "random" || experiment_type === "mlr_mbo" || experiment_type === "self_optimizer" || experiment_type === "uncorrelated_self_optimizer") {
-        this.experiment.executionStrategy.optimizer_iterations = Number(this.experiment.executionStrategy.optimizer_iterations);
-        this.experiment.executionStrategy.optimizer_iterations_in_design = Number(this.experiment.executionStrategy.optimizer_iterations_in_design);
-      }
-
       // now take the incoming data type labeled as "optimize"
-      for (var item of this.targetSystem.incomingDataTypes) {
+      for (let item of this.targetSystem.incomingDataTypes) {
         if (item.is_optimized === true) {
           this.experiment.optimized_data_types.push(item);
         }
       }
-      console.log(this.experiment);
       this.api.saveExperiment(this.experiment).subscribe(
         (success) => {
           this.notify.success("Success", "Experiment saved");
@@ -279,13 +297,6 @@ export class CreateExperimentsComponent implements OnInit {
       return true;
     }
 
-    const cond5 = this.experiment.changeableVariable == null;
-    const cond6 = this.experiment.changeableVariable.length === 0;
-    if (cond5 || cond6) {
-      this.errorButtonLabel = "Provide at least one changeable variable";
-      return true;
-    }
-
     if (this.experiment.executionStrategy.type.length === 0) {
       this.errorButtonLabel = "Provide execution strategy";
       return true;
@@ -308,21 +319,36 @@ export class CreateExperimentsComponent implements OnInit {
           return true;
         }
       }
-      // check if initial design is large enough
+      // check if initial designs are large enough for respective strategies
       if (execution_strategy_type === "mlr_mbo") {
-        let minimum_number_of_iterations = this.experiment.changeableVariable.length * 4
+        let minimum_number_of_iterations = this.experiment.changeableVariable.length * 4;
         if (this.experiment.executionStrategy.optimizer_iterations_in_design < minimum_number_of_iterations) {
-          this.errorButtonLabel = "Number of optimizer iterations should be greater than " + minimum_number_of_iterations.toString();
+          this.errorButtonLabel = "Number of optimizer iterations in design should be greater than " + minimum_number_of_iterations.toString() + " for " + execution_strategy_type;
+          return true;
+        }
+      } else if (execution_strategy_type === "uncorrelated_self_optimizer" || execution_strategy_type === "self_optimizer") {
+        let minimum_number_of_iterations = 5; // determined by library
+        if (this.experiment.executionStrategy.optimizer_iterations_in_design < minimum_number_of_iterations) {
+          this.errorButtonLabel = "Number of optimizer iterations in design should be greater than " + minimum_number_of_iterations.toString() + " for " + execution_strategy_type;
           return true;
         }
       }
-      // we're not using self_optimizer method name for now
-      if (execution_strategy_type === "self_optimizer") {
-        if (this.experiment.executionStrategy.optimizer_method === null || this.experiment.executionStrategy.optimizer_method.length === 0) {
-          this.errorButtonLabel = "Provide valid inputs for self-optimizer strategy";
+      if (execution_strategy_type === "self_optimizer"
+        || execution_strategy_type === "uncorrelated_self_optimizer"
+        || execution_strategy_type === "mlr_mbo") {
+        if (this.experiment.executionStrategy.acquisition_method === null) {
+          this.errorButtonLabel = "Provide valid input for the acquisition method of the selected strategy";
           return true;
         }
       }
+    }
+
+    const cond5 = this.experiment.changeableVariable == null;
+    const cond6 = this.experiment.changeableVariable.length === 0;
+    const cond7 = this.experiment.executionStrategy.type !== 'forever';
+    if ( (cond5 || cond6) && cond7) {
+      this.errorButtonLabel = "Provide at least one changeable variable";
+      return true;
     }
 
     if (this.experiment.executionStrategy.sample_size <= 0) {
@@ -361,7 +387,8 @@ export class CreateExperimentsComponent implements OnInit {
       "status": "",
       "description": "",
       "incomingDataTypes": [],
-      "changeableVariable": []
+      "changeableVariable": [],
+      "defaultVariables": []
     }
   }
 
@@ -371,7 +398,7 @@ export class CreateExperimentsComponent implements OnInit {
       sample_size: 40,
       knobs: [],
       stages_count: 0,
-      optimizer_method: "",
+      acquisition_method: "",
       optimizer_iterations: 10,
       optimizer_iterations_in_design: 0
     }

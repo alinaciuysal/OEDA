@@ -8,10 +8,10 @@ from oeda.rtxlib.execution import experimentFunction
 def start_self_optimizer_strategy(wf):
     """ executes a self optimizing strategy """
     info("> ExecStrategy   | SelfOptimizer", Fore.CYAN)
-    optimizer_method = wf.execution_strategy["optimizer_method"]
+    acquisition_method = wf.execution_strategy["acquisition_method"]
     wf.totalExperiments = wf.execution_strategy["optimizer_iterations"]
     optimizer_iterations_in_design = wf.execution_strategy["optimizer_iterations_in_design"]
-    info("> Optimizer      | " + optimizer_method, Fore.CYAN)
+    info("> Optimizer      | " + acquisition_method, Fore.CYAN)
 
     # we look at the ranges the user has specified in the knobs
     knobs = wf.execution_strategy["knobs"]
@@ -25,7 +25,7 @@ def start_self_optimizer_strategy(wf):
     # we give the minimization function a callback to execute
     # it uses the return value (it tries to minimize it) to select new knobs to test
     optimizer_result = gp_minimize(lambda opti_values: self_optimizer_execution(wf, opti_values, variables),
-                                   range_tuples, n_calls=wf.totalExperiments, n_random_starts=optimizer_iterations_in_design)
+                                   range_tuples, n_calls=wf.totalExperiments, n_random_starts=optimizer_iterations_in_design, acq_func=acquisition_method)
     # optimizer is done, print results
     info(">")
     info("> OptimalResult  | Knobs:  " + str(recreate_knob_from_optimizer_values(variables, optimizer_result.x)))
@@ -49,4 +49,5 @@ def self_optimizer_execution(wf, opti_values, variables):
     exp["ignore_first_n_samples"] = wf.primary_data_provider["ignore_first_n_samples"]
     exp["sample_size"] = wf.execution_strategy["sample_size"]
     exp["knobs"] = knob_object
+    wf.setup_stage(wf, exp["knobs"])
     return experimentFunction(wf, exp)

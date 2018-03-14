@@ -10,17 +10,19 @@
                       (stop_experiment_btn_clicked)="stopRunningExperiment($event)"></experiment-details>
 
   <!-- Experiment Stages -->
-  <experiment-stages [selected_stage]="selected_stage"
+  <experiment-stages [experiment]="experiment"
+                     [selected_stage]="selected_stage"
                      [available_stages]="available_stages"
                      [incoming_data_type]="incoming_data_type"
                      [scale]="scale"
                      [targetSystem]="targetSystem"
                      [for_successful_experiment]="false"
                      [oedaCallback]="oedaCallback"
+                     [hidden]="first_render_of_page"
                      (incomingDataTypeChanged)="incoming_data_type_changed($event)"
                      (scaleChanged)="scale_changed($event)"
                      (stageChanged)="stage_changed($event)"
-                     [hidden]="first_render_of_page"></experiment-stages>
+                     ></experiment-stages>
 
   <!--Status (Callback) Info-->
   <div class="col-md-12" *ngIf="targetSystem.name !== ''">
@@ -38,10 +40,10 @@
             <h4>
               Ignoring samples for <b>stage {{oedaCallback['stage_counter']}}</b>
             </h4>
-            <h4>
+            <h4 *ngIf="experiment.executionStrategy.type !== 'forever'">
               Configuration:
             </h4>
-            <ul>
+            <ul *ngIf="experiment.executionStrategy.type !== 'forever'">
               <li *ngFor="let key of get_keys(oedaCallback.current_knob)"><b>{{key}}:</b> {{oedaCallback.current_knob[key]}}</li>
             </ul>
             <p>
@@ -57,10 +59,10 @@
             <h4>
               Collecting data for  <b>stage {{oedaCallback['stage_counter']}}</b>
             </h4>
-            <h4>
+            <h4 *ngIf="experiment.executionStrategy.type !== 'forever'">
               Configuration:
             </h4>
-            <ul>
+            <ul *ngIf="experiment.executionStrategy.type !== 'forever'">
               <li *ngFor="let key of get_keys(oedaCallback.current_knob);"><b>{{key}}:</b> {{oedaCallback.current_knob[key]}}</li>
             </ul>
             <p>
@@ -110,4 +112,5 @@
     </div>
   </div>
 
+  <debug-element [element]="experiment"></debug-element>
 </div>

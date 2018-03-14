@@ -1,4 +1,5 @@
 import {Component, Input, Output, EventEmitter} from "@angular/core";
+import {isNullOrUndefined} from "util";
 
 @Component({
   selector: 'experiment-details',
@@ -338,7 +339,9 @@ import {Component, Input, Output, EventEmitter} from "@angular/core";
                   || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">
                   Optimizer Iterations in Design
                 </th>
-                <th style="width: 5%" *ngIf="experiment.executionStrategy.type == 'self_optimizer'">Optimizer Method
+                <th style="width: 5%" *ngIf="experiment.executionStrategy.type == 'mlr_mbo' 
+                  || experiment.executionStrategy.type == 'self_optimizer' 
+                  || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">Acquisition Method
                 </th>
                 </thead>
                 <tbody>
@@ -356,8 +359,10 @@ import {Component, Input, Output, EventEmitter} from "@angular/core";
                   || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">
                   {{experiment.executionStrategy.optimizer_iterations_in_design}}
                 </td>
-                <td *ngIf="experiment.executionStrategy.type == 'self_optimizer'">
-                  {{experiment.executionStrategy.optimizer_method}}
+                <td *ngIf="experiment.executionStrategy.type == 'mlr_mbo' 
+                  || experiment.executionStrategy.type == 'self_optimizer' 
+                  || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">
+                  {{experiment.executionStrategy.acquisition_method}}
                 </td>
                 </tbody>
               </table>
@@ -365,8 +370,8 @@ import {Component, Input, Output, EventEmitter} from "@angular/core";
           </div>
         </div>
 
-        <!-- Experiment variables -->
-        <div class="panel panel-default chartJs">
+        <!-- Experiment variables (or default variables for forever)-->
+        <div class="panel panel-default chartJs" *ngIf="experiment.executionStrategy.type !== 'forever'">
           <div class="panel-heading">
             <div class="card-title">
               <div class="title pull-left">Experiment Variables</div>
@@ -389,6 +394,30 @@ import {Component, Input, Output, EventEmitter} from "@angular/core";
                   <td>{{input.max}}</td>
                   <td>{{input.default}}</td>
                   <td *ngIf="experiment.executionStrategy.type == 'step_explorer'">{{input.step}}</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel panel-default chartJs" *ngIf="experiment.executionStrategy.type === 'forever'">
+          <div class="panel-heading">
+            <div class="card-title">
+              <div class="title pull-left">Default Configuration of {{targetSystem.name}}</div>
+            </div>
+          </div>
+          <div class="panel-body" style="padding-top: 20px">
+            <div class="table-responsive" style="padding-top: 20px">
+              <table>
+                <thead>
+                <th style="width: 5%">Name</th>
+                <th style="width: 5%">Default</th>
+                </thead>
+                <tbody>
+                <tr *ngFor="let key of get_keys(experiment.executionStrategy.knobs)" style="padding-top: 1%">
+                  <td style="padding-top: 1%">{{key}}</td>
+                  <td>{{experiment.executionStrategy.knobs[key]}}</td>
                 </tr>
                 </tbody>
               </table>
@@ -443,6 +472,14 @@ export class ExperimentDetailsComponent {
       }
     }
     return false;
+  }
+
+  /** returns keys of the given map */
+  get_keys(object) : Array<string> {
+    if (!isNullOrUndefined(object)) {
+      return Object.keys(object);
+    }
+    return null;
   }
 
   public enable_polling(event: MouseEvent) {

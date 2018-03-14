@@ -63,7 +63,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
   public incoming_data_type: object;
 
   public available_stages = [];
-  public available_stages_for_qq_js = [];
+  // public available_stages_for_qq_js = [];
 
   public selected_stage: any;
   public oedaCallback: OedaCallbackEntity;
@@ -139,9 +139,10 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
                     // initially selected stage is "All Stages"
                     this.selected_stage = {"number": -1, "knobs": ""};
                     this.available_stages.push(this.selected_stage);
+                    console.log(stages);
                     for (let j = 0; j < stages.length; j++) {
-                      // if there are any existing stages, round their knob values of stages to provided decimals
-                      if (!isNullOrUndefined(stages[j]["knobs"])) {
+                      // if there are any existing stages, round their knob values of stages to provided decimals (provided that executionStrategy is not forever)
+                      if (!isNullOrUndefined(stages[j]["knobs"]) && this.experiment.executionStrategy.type !== "forever") {
                         stages[j]["knobs"] = this.entityService.round_knob_values(stages[j]["knobs"], this.decimal_places);
                       }
                       this.available_stages.push(stages[j]);
@@ -149,7 +150,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
                     stages.sort(this.entityService.sort_by('number', true, parseInt));
 
                     // prepare available stages for qq js that does not include all stages
-                    this.available_stages_for_qq_js = this.available_stages.slice(1);
+                    // this.available_stages_for_qq_js = this.available_stages.slice(1);
                     this.dataAvailable = true;
 
                     // polling using Timer (2 sec interval) for real-time data visualization
@@ -184,64 +185,47 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
         ctrl.oedaCallback["stage_counter"] = oedaCallback.stage_counter;
 
         // keywords (index, size) are same for the first two cases, but they indicate different things
-        if (oedaCallback.status.toString() === "PROCESSING") {
+        if (oedaCallback.status === "PROCESSING") {
           ctrl.oedaCallback["message"] = oedaCallback.message;
-        } else if (oedaCallback.status.toString() === "IGNORING_SAMPLES") {
+        } else if (oedaCallback.status === "IGNORING_SAMPLES" || oedaCallback.status.toString() === "COLLECTING_DATA") {
           ctrl.oedaCallback["index"] = oedaCallback.index;
           ctrl.oedaCallback["size"] = oedaCallback.size;
           ctrl.oedaCallback["complete"] = (Number(oedaCallback.index)) / (Number(oedaCallback.size));
-          // round knob values to provided decimal places
-          oedaCallback.current_knob = ctrl.entityService.round_knob_values(oedaCallback.current_knob, ctrl.decimal_places);
-          ctrl.oedaCallback.current_knob = oedaCallback.current_knob;
-          // remaining_time_and_stages is a experiment-wise unique dict that contains remaining stages and time
-          ctrl.oedaCallback.remaining_time_and_stages = oedaCallback.remaining_time_and_stages;
-
-          if (oedaCallback.remaining_time_and_stages === undefined)
-            ctrl.oedaCallback.remaining_time_and_stages["remaining_stages"] = ctrl.experiment.executionStrategy.sample_size;
-          else
-            ctrl.oedaCallback.remaining_time_and_stages["remaining_stages"] = ctrl.oedaCallback.remaining_time_and_stages.remaining_stages;
-
-          if (oedaCallback.remaining_time_and_stages["remaining_time"] !== undefined)
-            ctrl.oedaCallback.remaining_time_and_stages["remaining_time"] = oedaCallback.remaining_time_and_stages["remaining_time"];
-
-        } else if (oedaCallback.status.toString() === "COLLECTING_DATA") {
-          ctrl.oedaCallback["index"] = oedaCallback.index;
-          ctrl.oedaCallback["size"] = oedaCallback.size;
-          ctrl.oedaCallback["complete"] = (Number(oedaCallback.index)) / (Number(oedaCallback.size));
-          oedaCallback.current_knob = ctrl.entityService.round_knob_values(oedaCallback.current_knob, ctrl.decimal_places);
-          ctrl.oedaCallback.current_knob = oedaCallback.current_knob;
-          // remaining_time_and_stages is a experiment-wise unique dict that contains remaining stages and time
-          ctrl.oedaCallback.remaining_time_and_stages = oedaCallback.remaining_time_and_stages;
-
-          if (oedaCallback.remaining_time_and_stages["remaining_stages"] === undefined)
-            ctrl.oedaCallback.remaining_time_and_stages["remaining_stages"] = ctrl.experiment.executionStrategy.sample_size;
-          else
-            ctrl.oedaCallback.remaining_time_and_stages["remaining_stages"] = ctrl.oedaCallback.remaining_time_and_stages.remaining_stages;
-
-          if (oedaCallback.remaining_time_and_stages["remaining_time"] !== undefined)
-            ctrl.oedaCallback.remaining_time_and_stages["remaining_time"] = oedaCallback.remaining_time_and_stages["remaining_time"];
-
-          if (ctrl.first_render_of_page) {
-            ctrl.apiService.loadAllDataPointsOfExperiment(ctrl.experiment_id).subscribe(response => {
-              // TODO: after re-factoring, i.e. when we switch to using entityService.process_response_for_running_experiment, time to validate scatter plot data 8-times larger than this old version.
-              // let is_successful_fetch = ctrl.entityService.process_response_for_running_experiment(response, ctrl.all_data, ctrl.first_render_of_page, ctrl.available_stages, ctrl.available_stages_for_qq_js, ctrl.timestamp);
-              let is_successful_fetch = ctrl.process_response(response);
-              this.incoming_data_type = this.entityService.get_candidate_data_type(this.targetSystem, this.all_data[0]);
-              if (is_successful_fetch && this.incoming_data_type !== null) {
-                ctrl.first_render_of_page = false;
-                ctrl.draw_all_plots();
-              }
-            });
+          // round knob values to provided decimal places (provided that execution strategy is not forever)
+          if (ctrl.experiment.executionStrategy.type !== "forever") {
+            oedaCallback.current_knob = ctrl.entityService.round_knob_values(oedaCallback.current_knob, ctrl.decimal_places);
+            // remaining_time_and_stages is a experiment-wise unique dict that contains remaining stages and time
+            ctrl.oedaCallback.remaining_time_and_stages.set("remaining_time", oedaCallback.remaining_time_and_stages["remaining_time"]);
+            ctrl.oedaCallback.remaining_time_and_stages.set("remaining_stages", oedaCallback.remaining_time_and_stages["remaining_stages"] );
           } else {
-            if (ctrl.timestamp == undefined) {
-              ctrl.timestamp = "-1";
-            }
-            ctrl.apiService.loadAllDataPointsOfRunningExperiment(ctrl.experiment_id, ctrl.timestamp).subscribe(response => {
-              ctrl.process_response(response);
-              // this.set_candidate_data_type();
-              ctrl.draw_all_plots();
-            });
+            ctrl.oedaCallback.remaining_time_and_stages.set("remaining_time", "Infinite");
+            ctrl.oedaCallback.remaining_time_and_stages.set("remaining_stages", "Infinite");
           }
+          ctrl.oedaCallback.current_knob = oedaCallback.current_knob;
+
+          // fetch data from backend
+          if (oedaCallback.status === "COLLECTING_DATA") {
+            if (ctrl.first_render_of_page) {
+              ctrl.apiService.loadAllDataPointsOfExperiment(ctrl.experiment_id).subscribe(response => {
+                let is_successful_fetch = ctrl.process_response(response);
+                this.incoming_data_type = this.entityService.get_candidate_data_type(this.targetSystem, this.all_data[0]);
+                if (is_successful_fetch && !isNullOrUndefined(this.incoming_data_type)) {
+                  ctrl.first_render_of_page = false;
+                  ctrl.draw_all_plots();
+                }
+              });
+            } else {
+              if (ctrl.timestamp == undefined) {
+                ctrl.timestamp = "-1";
+              }
+              ctrl.apiService.loadAllDataPointsOfRunningExperiment(ctrl.experiment_id, ctrl.timestamp).subscribe(response => {
+                ctrl.process_response(response);
+                // ctrl.set_candidate_data_type();
+                ctrl.draw_all_plots();
+              });
+            }
+          }
+
         } else if (oedaCallback.status.toString() === "EXPERIMENT_STAGE_DONE") {
           if (oedaCallback.remaining_time_and_stages["remaining_stages"] == 0) {
             ctrl.disable_polling("Success", "Data is up-to-date, stopped polling.");
@@ -275,20 +259,28 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
           let new_entity = ctrl.entityService.create_stage_entity();
           new_entity.number = parsed_json_object['number'];
           new_entity.values = parsed_json_object['values'];
-          // round knob values before pushing to all_data
-          new_entity.knobs = ctrl.entityService.round_knob_values(parsed_json_object['knobs'], ctrl.decimal_places);
+          // round knob values before pushing to all_data (provided that execution strategy is not forever)
+          if (ctrl.experiment.executionStrategy.type !== "forever") {
+            new_entity.knobs = ctrl.entityService.round_knob_values(parsed_json_object['knobs'], ctrl.decimal_places);
+          } else {
+            new_entity.knobs = parsed_json_object['knobs'];
+          }
 
           if (new_entity.values.length != 0) {
             ctrl.all_data.push(new_entity);
           }
           // as a guard against stage duplications
-          // also round stages retrieved at first render to provided decimal places
-          const new_stage = {"number": parsed_json_object.number, "knobs": ctrl.entityService.round_knob_values(parsed_json_object.knobs, ctrl.decimal_places)};
+          // also round stages retrieved at first render to provided decimal places (provided that execution strategy is not forever)
           let existing_stage = ctrl.available_stages.find(entity => entity.number === new_entity.number);
           // stage does not exist yet
           if (isNullOrUndefined(existing_stage)) {
+            const new_stage = {"number": parsed_json_object.number};
+            if (ctrl.experiment.executionStrategy.type !== "forever")
+              new_stage["knobs"] = ctrl.entityService.round_knob_values(parsed_json_object.knobs, ctrl.decimal_places);
+            else
+              new_stage["knobs"] = parsed_json_object.knobs;
             ctrl.available_stages.push(new_stage);
-            ctrl.available_stages_for_qq_js.push(new_stage);
+            // ctrl.available_stages_for_qq_js.push(new_stage);
           }
           // do not update timestamp here if we can't retrieve any data, just keep fetching with timestamp "-1"
           // because backend is also updated accordingly, i.e. it continues to fetch all data if timestamp is -1
@@ -310,10 +302,14 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
             ctrl.all_data[stage_index].values = ctrl.all_data[stage_index].values.concat(parsed_json_object['values']);
           }
         } else {
-          // a new stage has been fetched, create a new bin for it, and push all the values to the bin, also push bin to all_data, round knob values to provided decimal places
+          // a new stage has been fetched, create a new bin for it, and push all the values to the bin, also push bin to all_data, round knob values to provided decimal places (provided that execution strategy is not forever)
           const number = parsed_json_object['number'];
           const values = parsed_json_object['values'];
-          const knobs = ctrl.entityService.round_knob_values(parsed_json_object['knobs'], ctrl.decimal_places);
+          let knobs;
+          if (this.experiment.executionStrategy.type !== "forever")
+            knobs = ctrl.entityService.round_knob_values(parsed_json_object['knobs'], ctrl.decimal_places);
+          else
+            knobs = parsed_json_object['knobs'];
           const new_stage = {"number": number, "knobs": knobs};
           ctrl.available_stages.push(new_stage);
 

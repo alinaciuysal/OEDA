@@ -1,4 +1,5 @@
 #!flask/bin/python
+import logging
 from flask import Flask
 from flask_restful import Api
 
@@ -106,6 +107,7 @@ if __name__ == '__main__':
     import sys
     reload(sys)  # Reload does the trick! #see:https://github.com/flask-restful/flask-restful/issues/552
     sys.setdefaultencoding('UTF8')
+    app.logger.setLevel(logging.CRITICAL)
     cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
     http_server = HTTPServer(WSGIContainer(app))
     http_server.listen(5000)

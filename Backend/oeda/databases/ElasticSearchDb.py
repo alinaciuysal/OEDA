@@ -1,4 +1,5 @@
 import traceback
+import logging
 from datetime import datetime
 from elasticsearch.exceptions import ConnectionError
 from elasticsearch import Elasticsearch
@@ -15,6 +16,9 @@ class ElasticSearchDb(Database):
         self.es = Elasticsearch([{"host": host, "port": port}])
         try:
             if self.es.ping():
+                es_logger = logging.getLogger('elasticsearch')
+                es_logger.setLevel(logging.CRITICAL)
+
                 index = db_config["index"]
                 self.index = index["name"]
 

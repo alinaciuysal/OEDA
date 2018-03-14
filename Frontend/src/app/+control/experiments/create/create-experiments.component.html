@@ -344,55 +344,10 @@
     </div>
   </div>
 
-  <!--Changeable Variables -->
+  <!--Execution Strategy & Added Variables or Default Configuration -->
   <div class="col-md-12" *ngIf="targetSystem.name !== ''">
-    <div class="panel panel-default chartJs">
-      <div class="panel-heading">
-        <div class="card-title">
-          <div class="title pull-left">Changeable Variables</div>
-        </div>
-      </div>
-      <div class="panel-body" style="padding-top: 20px">
-        <div class="table-responsive">
-          <table class="table table-striped table-bordered table-hover">
-            <thead>
-            <th style="width: 5%">Name</th>
-            <th style="width: 5%">Scale</th>
-            <th style="width: 5%">Description</th>
-            <th style="width: 5%">Min</th>
-            <th style="width: 5%">Max</th>
-            <th style="width: 4%">
-              <div class="btn btn-xs btn-orange" (click)="addAllChangeableVariables()"
-                   *ngIf="targetSystem.changeableVariable.length > 1 && targetSystem.changeableVariable.length != experiment.changeableVariable.length">
-                <i class="fa fa-plus push-5-r"></i> Add All
-              </div>
-            </th>
-            </thead>
-            <tbody>
-            <tr *ngFor="let dataType of targetSystem.changeableVariable" style="padding-top: 1%">
-              <td style="padding-top: 2%">{{dataType.name}}</td>
-              <td style="padding-top: 2%">{{dataType.scale}}</td>
-              <td style="padding-top: 2%; width: 5%">{{dataType.description}}</td>
-              <td style="padding-top: 2%">{{dataType.min}}</td>
-              <td style="padding-top: 2%; width: 5%">{{dataType.max}}</td>
-              <td style="padding-top: 2%">
-                <div class="btn btn-xs btn-orange" (click)="addChangeableVariable(dataType)"
-                     *ngIf="targetSystem.changeableVariable.length > 0 && targetSystem.changeableVariable.length != experiment.changeableVariable.length">
-                  <i class="fa fa-plus push-5-r"></i> Add
-                </div>
-              </td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!--Execution Strategy & Added Variables-->
-  <div class="col-md-12" *ngIf="targetSystem.name !== '' && experiment.changeableVariable.length > 0" >
-
-    <!-- Execution Strategy is allowed to be selected after adding some variables to experiment -->
+    <!-- Execution Strategy -->
     <div class="col-md-3" style="padding-left: 0">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
@@ -407,12 +362,12 @@
           <labeled-input-select name="Type" [model]="experiment.executionStrategy" key="type" [colSize]="12"
                                 [options]="[
                                     {key:'step_explorer',label:'Step Strategy'},
-                                    {key:'random',label:'Random Strategy'},
-                                    {key:'forever',label:'Forever Strategy'},
-                                    {key:'sequential_strategy',label:'Sequential Strategy'},
                                     {key:'self_optimizer',label:'Self Optimizer Strategy'},
+                                    {key:'uncorrelated_self_optimizer',label:'Uncorrelated Self Optimizer Strategy'},
                                     {key:'mlr_mbo',label:'mlrMBO Strategy'},
-                                    {key:'uncorrelated_self_optimizer',label:'Uncorrelated Self Optimizer Strategy'}]"
+                                    {key:'forever',label:'Forever Strategy'},
+                                    {key:'random',label:'Random Strategy'},
+                                    {key:'sequential_strategy',label:'Sequential Strategy'}]"
                                 (modelChanged)="executionStrategyModelChanged($event)">
           </labeled-input-select>
           <labeled-input inputType="number" name="Sample Size" [model]="experiment.executionStrategy" key="sample_size" [colSize]="12" [minNumber]="1"></labeled-input>
@@ -420,8 +375,27 @@
             <labeled-input inputType="number" name="Optimizer Iterations" [model]="experiment.executionStrategy" key="optimizer_iterations" [colSize]="12" [minNumber]="1"></labeled-input>
             <labeled-input inputType="number" name="Optimizer Iterations in Design" [model]="experiment.executionStrategy" key="optimizer_iterations_in_design" [colSize]="12" [minNumber]="0"></labeled-input>
           </div>
-          <div *ngIf="experiment.executionStrategy.type == 'self_optimizer'">
-            <labeled-input inputType="text" name="Optimizer Method" [model]="experiment.executionStrategy" key="optimizer_method" [colSize]="12"></labeled-input>
+          <div *ngIf="experiment.executionStrategy.type == 'self_optimizer' || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">
+            <labeled-input-select name="Acquisition Method" [model]="experiment.executionStrategy" key="acquisition_method" [colSize]="12"
+                                  [options]="[
+                                    {key:'LCB',label:'Lower Confidence Bound'},
+                                    {key:'EI',label:'Negative Expected Improvement'},
+                                    {key:'PI',label:'Negative Probability of Improvement'},
+                                    {key:'gp_hedge',label:'Choosing one of the three above at each iteration'},
+                                    {key:'EIps',label:'Negated Expected Improvement per second'},
+                                    {key:'PIps',label:'Negated Probability of Improvement per second'}]"
+                                  (modelChanged)="acquisitionMethodChanged($event)"></labeled-input-select>
+          </div>
+          <div *ngIf="experiment.executionStrategy.type == 'mlr_mbo'">
+            <labeled-input-select name="Acquisition Method" [model]="experiment.executionStrategy" key="acquisition_method" [colSize]="12"
+                                  [options]="[
+                                    {key:'ei',label:'Expected Improvement'},
+                                    {key:'mr',label:'Mean Error'},
+                                    {key:'se',label:'Standard Error'},
+                                    {key:'cb',label:'Confidence Bound'},
+                                    {key:'aei',label:'Augmented Expected Improvement'},
+                                    {key:'eqi',label:'Expected Quantile Improvement'}]"
+                                  (modelChanged)="acquisitionMethodChanged($event)"></labeled-input-select>
           </div>
           <div *ngIf="experiment.executionStrategy.type == 'step_explorer' && stages_count !== null">
             <div class="col-md-12">
@@ -435,93 +409,160 @@
       </div>
     </div>
 
-
-    <!-- Added Variables -->
-    <div class="col-md-9" style="padding-right: 0">
+    <!--Changeable Variables -->
+    <div class="col-md-9" *ngIf="targetSystem.name !== '' && experiment.executionStrategy.type !== 'forever' && experiment.executionStrategy.type.length !== 0">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">
-            <div class="title pull-left">Added Variables</div>
-            <div class="pull-right">
-              <div class="btn btn-xs btn-primary" (click)="removeAllVariables()"
-                   *ngIf="targetSystem.changeableVariable.length > 1 && experiment.changeableVariable.length > 1">
-                <i class="fa fa-remove"></i> Remove All
-              </div>
-            </div>
+            <div class="title pull-left">Changeable Variables</div>
           </div>
         </div>
         <div class="panel-body" style="padding-top: 20px">
-          <div class="row" *ngFor="let input of experiment.changeableVariable; let i = index">
-            <div class="row">
-              <div class="row" style="padding-left: 5%">
-                <labeled-input name="Name" [model]="input" key="name" [colSize]="3" disabled="true"></labeled-input>
-                <labeled-input inputType="number" name="Min" [model]="input" key="min" [colSize]="2" (modelChanged)="minMaxModelsChanged($event)"></labeled-input>
-                <labeled-input inputType="number" name="Max" [model]="input" key="max" [colSize]="2" (modelChanged)="minMaxModelsChanged($event)"></labeled-input>
-                <labeled-input inputType="number" name="Default" [model]="input" key="default" [colSize]="2" disabled="true"></labeled-input>
-                <labeled-input *ngIf="experiment.executionStrategy.type == 'step_explorer'" inputType="number" name="Step Size" [model]="input" key="step" [colSize]="2" (modelChanged)="stepSizeChanged($event)"></labeled-input>
-                <div class="col-sm-1">
-                  <div class="sub-title">
-                    <div>
-                      <div (click)="removeChangeableVariable(i, input)" class="btn btn-xs btn-primary"><i class="fa fa-remove"></i> Remove</div>
-                    </div>
-                  </div>
+          <div class="table-responsive">
+            <table class="table table-striped table-bordered table-hover">
+              <thead>
+              <th style="width: 5%">Name</th>
+              <th style="width: 5%">Scale</th>
+              <th style="width: 5%">Description</th>
+              <th style="width: 5%">Min</th>
+              <th style="width: 5%">Max</th>
+              <th style="width: 5%">Default</th>
+              <th style="width: 4%">
+                <div class="btn btn-xs btn-orange" (click)="addAllChangeableVariables()"
+                     *ngIf="targetSystem.changeableVariable.length > 1 && targetSystem.changeableVariable.length != experiment.changeableVariable.length">
+                  <i class="fa fa-plus push-5-r"></i> Add All
                 </div>
-              </div>
-              <hr class="col-md-12">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Info modal for Execution Strategies -->
-    <div class="modal fade bd-example-modal-sm" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
-      <div class="col-md-12">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h3 class="modal-title" id="modalTitle">Execution Strategies</h3>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <p>Execution strategies define the experimentation process, i.e. specify how multiple
-                experiments are to be performed.</p>
-              <p>OEDA supports following strategies:</p>
-              <hr>
-              <p><b>Step: </b>Goes through the specified ranges of changeable variables</p>
-              <hr>
-
-              <p><b>Random: </b>Randomly picks values within specified ranges of changeable variables</p>
-              <hr>
-
-              <p><b>Forever: </b>Uses default values of the simulation and runs the experimentation process forever</p>
-              <hr>
-
-              <p><b>Sequential: </b>Runs a list of experiments one after another</p>
-              <hr>
-
-              <p><b>Self Optimizer: </b>Runs multiple experiments and tries to find the best value for the knobs
-                using <a target="_blank" href="http://scikit-learn.org">scikit-learn's</a> Bayesian optimization with Gaussian Processes</p>
-              <hr>
-
-              <p><b>Uncorrelated Self Optimizer:</b>Instead of finding best values for all knobs at the same time,
-                it tries to find the best value for one variable at each experimentation</p>
-              <hr>
-
-              <p><b>mlr MBO:</b> Optimizes expensive black-box functions by model-based optimization
-                using  <a target="_blank" href="https://mlr-org.github.io/mlrMBO/articles/mlrMBO.html">mlrMBO</a> that is based on machine learning library written in R</p>
-              <hr>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
+              </th>
+              </thead>
+              <tbody>
+              <tr *ngFor="let dataType of targetSystem.changeableVariable" style="padding-top: 1%">
+                <td style="padding-top: 2%">{{dataType.name}}</td>
+                <td style="padding-top: 2%">{{dataType.scale}}</td>
+                <td style="padding-top: 2%; width: 5%">{{dataType.description}}</td>
+                <td style="padding-top: 2%">{{dataType.min}}</td>
+                <td style="padding-top: 2%; width: 5%">{{dataType.max}}</td>
+                <td style="padding-top: 2%; width: 5%">{{dataType.default}}</td>
+                <td style="padding-top: 2%">
+                  <div class="btn btn-xs btn-orange" (click)="addChangeableVariable(dataType)"
+                       *ngIf="targetSystem.changeableVariable.length > 0 && targetSystem.changeableVariable.length != experiment.changeableVariable.length">
+                    <i class="fa fa-plus push-5-r"></i> Add
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
 
   </div>
+
+  <!-- Added Variables -->
+  <div class="col-md-12" *ngIf="targetSystem.name !== '' && experiment.executionStrategy.type !== 'forever' && experiment.executionStrategy.type.length !== 0 && experiment.changeableVariable.length > 0">
+    <div class="panel panel-default chartJs">
+      <div class="panel-heading">
+        <div class="card-title">
+          <div class="title pull-left" >Added Variables</div>
+          <div class="pull-right">
+            <div class="btn btn-xs btn-primary" (click)="removeAllVariables()"
+                 *ngIf="targetSystem.changeableVariable.length > 1 && experiment.changeableVariable.length > 1">
+              <i class="fa fa-remove"></i> Remove All
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Show regular changeable variable section if strategy is not forever-->
+      <div class="panel-body" style="padding-top: 20px">
+        <div class="row" *ngFor="let input of experiment.changeableVariable; let i = index">
+            <div class="row" style="padding-left: 3%">
+              <labeled-input name="Name" [model]="input" key="name" [colSize]="3" disabled="true"></labeled-input>
+              <labeled-input inputType="number" name="Min" [model]="input" key="min" [colSize]="2" (modelChanged)="minMaxModelsChanged($event)"></labeled-input>
+              <labeled-input inputType="number" name="Max" [model]="input" key="max" [colSize]="2" (modelChanged)="minMaxModelsChanged($event)"></labeled-input>
+              <labeled-input inputType="number" name="Default" [model]="input" key="default" [colSize]="2" disabled="true"></labeled-input>
+              <labeled-input *ngIf="experiment.executionStrategy.type == 'step_explorer'" inputType="number" name="Step Size" [model]="input" key="step" [colSize]="2" (modelChanged)="stepSizeChanged($event)"></labeled-input>
+              <div class="col-sm-1">
+                <div class="sub-title">
+                  <div>
+                    <div (click)="removeChangeableVariable(i, input)" class="btn btn-xs btn-primary"><i class="fa fa-remove"></i> Remove</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <hr class="col-md-12">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Default Configuration of target system if strategy is forever -->
+  <div class="col-md-12" *ngIf="targetSystem.name !== '' && experiment.executionStrategy.type === 'forever' && experiment.executionStrategy.type.length !== 0">
+    <div class="panel panel-default chartJs">
+      <div class="panel-heading">
+        <div class="card-title">
+          <div class="title pull-left">Default Configuration of {{targetSystem.name}}</div>
+        </div>
+      </div>
+      <div class="panel-body" style="padding-top: 20px">
+        <div class="row" *ngFor="let input of targetSystem.defaultVariables; let i = index">
+          <labeled-input name="Name" [model]="input" key="name" [colSize]="3" disabled="true"></labeled-input>
+          <labeled-input inputType="number" name="Default" [model]="input" key="default" [colSize]="3" disabled="true"></labeled-input>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Info modal for Execution Strategies -->
+  <div class="modal fade bd-example-modal-sm" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="col-md-12">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title" id="modalTitle">Execution Strategies</h3>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>Execution strategies define the experimentation process, i.e. specify how multiple
+              experiments are to be performed.</p>
+            <p>OEDA supports following strategies:</p>
+            <hr>
+            <p><b>Step: </b>Goes through the specified ranges of changeable variables</p>
+            <hr>
+
+            <p><b>Self Optimizer: </b>Runs multiple experiments and tries to find the best value for the knobs
+              using <a target="_blank" href="http://scikit-learn.org">scikit-learn's</a> Bayesian optimization with Gaussian Processes</p>
+            <hr>
+
+            <p><b>Uncorrelated Self Optimizer:</b>Instead of finding best values for all knobs at the same time,
+              it tries to find the best value for one variable at each experimentation</p>
+            <hr>
+
+            <p><b>mlr MBO:</b> Optimizes expensive black-box functions by model-based optimization
+              using  <a target="_blank" href="https://mlr-org.github.io/mlrMBO/articles/mlrMBO.html">mlrMBO</a> that is based on machine learning library written in R</p>
+            <hr>
+
+            <p><b>Forever: </b>Uses default values of the selected target system and runs the experimentation process forever</p>
+            <hr>
+
+            <p><b>Random: </b>Randomly picks values within specified ranges of changeable variables</p>
+            <hr>
+
+            <p><b>Sequential: </b>Runs a list of experiments one after another</p>
+            <hr>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <debug-element [element]="experiment"></debug-element>
+  <debug-element [element]="targetSystem"></debug-element>
 </div>

@@ -6,13 +6,16 @@ import {FormsModule} from "@angular/forms";
 import {LabeledInputSelectComponent} from "./labeled-input-select-component";
 import {ExperimentDetailsComponent} from "./experiment-details.component";
 import {ExperimentStagesComponent} from "./experiment-stages.component";
+import {ExperimentStagesPaginatorComponent} from "./experiment-stages-paginator.component";
+import {DataTableModule} from "angular2-datatable";
 
 const uiElements = [
   DebugElementComponent,
   LabeledInputComponent,
   LabeledInputSelectComponent,
   ExperimentDetailsComponent,
-  ExperimentStagesComponent
+  ExperimentStagesComponent,
+  ExperimentStagesPaginatorComponent
 ];
 
 @NgModule({
@@ -20,6 +23,7 @@ const uiElements = [
   imports: [
     CommonModule,
     FormsModule,
+    DataTableModule
   ],
   exports: uiElements,
   providers: [],

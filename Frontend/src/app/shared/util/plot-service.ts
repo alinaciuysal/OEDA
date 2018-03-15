@@ -20,9 +20,10 @@ export class PlotService {
                             incoming_data_type_name: string,
                             initial_threshold_for_scatter_plot: number,
                             stage_details: string,
-                            decimal_places: number) {
+                            decimal_places: number,
+                            sample_size: number) {
     let selectedThreshold = -1;
-    const scatter_plot = this.AmCharts.makeChart(divID, {
+    let scatter_plot = this.AmCharts.makeChart(divID, {
       "responsive": {
         "enabled": true
       },
@@ -145,9 +146,37 @@ export class PlotService {
           })
         }
       }]
+
     });
+    // https://www.amcharts.com/kbase/preserving-zoom-serial-chart-across-data-updates/
+    // scatter_plot.ignoreZoomed = false;
+    // scatter_plot.addListener("zoomed", function(event) {
+    //   if (scatter_plot.ignoreZoomed) {
+    //     scatter_plot.ignoreZoomed = false;
+    //     return;
+    //   }
+    //   scatter_plot.zoomStartDate = event.startDate;
+    //   scatter_plot.zoomEndDate = event.endDate;
+    //   // console.log(event.endDate);
+    //   // let last_data_point_retrieved = scatter_plot.dataProvider[scatter_plot.dataProvider.length - 1];
+    //   // scatter_plot.zoomEndDate = last_data_point_retrieved["timestamp"];
+    // });
+
+    // scatter_plot.addListener("dataUpdated", function(event) {
+    //   scatter_plot.zoomToDates(scatter_plot.zoomStartDate, scatter_plot.zoomEndDate);
+    // });
+
+    // zoom to data retrieved from last stage
+    // scatter_plot.addListener("dataUpdated", function(event) {
+    //   scatter_plot.zoomToIndexes(scatter_plot.dataProvider.length - sample_size, scatter_plot.dataProvider.length - 1);
+    // });
+    //
+    // scatter_plot.addListener("rendered", function(event) {
+    //   scatter_plot.zoomToIndexes(scatter_plot.dataProvider.length - sample_size, scatter_plot.dataProvider.length - 1);
+    // });
     return scatter_plot;
   }
+
 
   /** draws an histogram with given parameters and the data */
   public draw_histogram(divID: string, processedData: any, incoming_data_type_name: string, stage_details: string, decimal_places) {

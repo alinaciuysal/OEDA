@@ -4,18 +4,32 @@
   <experiment-details [experiment]="experiment" [targetSystem]="targetSystem" [is_collapsed]="is_collapsed" [for_successful_experiment]="true"></experiment-details>
 
   <!-- Experiment Stages -->
-  <experiment-stages [experiment]="experiment"
+  <!--<experiment-stages [experiment]="experiment"-->
+                     <!--[selected_stage]="selected_stage"-->
+                     <!--[available_stages]="available_stages"-->
+                     <!--[incoming_data_type]="incoming_data_type"-->
+                     <!--[scale]="scale"-->
+                     <!--[targetSystem]="targetSystem"-->
+                     <!--[for_successful_experiment]="true"-->
+                     <!--[hidden]="false"-->
+                     <!--(incomingDataTypeChanged)="incoming_data_type_changed($event)"-->
+                     <!--(scaleChanged)="scale_changed($event)"-->
+                     <!--(stageChanged)="stage_changed($event)"-->
+                     <!--&gt;</experiment-stages>-->
+
+  <!-- Experiment Stages with paginator -->
+  <experiment-stages-paginator [experiment]="experiment"
                      [selected_stage]="selected_stage"
                      [available_stages]="available_stages"
                      [incoming_data_type]="incoming_data_type"
                      [scale]="scale"
                      [targetSystem]="targetSystem"
                      [for_successful_experiment]="true"
+                     [retrieved_data_length]="retrieved_data_length"
                      [hidden]="false"
                      (incomingDataTypeChanged)="incoming_data_type_changed($event)"
                      (scaleChanged)="scale_changed($event)"
-                     (stageChanged)="stage_changed($event)"
-                     ></experiment-stages>
+                     (rowClicked)="stage_changed($event)"></experiment-stages-paginator>
 
   <!-- Smooth-Line Chart -->
   <div class="col-md-12" [hidden]="!is_enough_data_for_plots">
@@ -50,7 +64,6 @@
   </div>
 
   <!-- QQ graphs -->
-
   <div class="col-md-12" [hidden]="!is_enough_data_for_plots" >
     <!-- QQ graph 1 -->
     <div class="col-md-6">

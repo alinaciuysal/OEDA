@@ -29,6 +29,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
   public targetSystem: Target;
 
   public initial_threshold_for_scatter_chart: number;
+  public retrieved_data_length: number; // number of data points retrieved so far
 
   // following attributes are used for QQ plotting in Python
   public available_distributions: object;
@@ -64,6 +65,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     this.is_collapsed = true;
     this.first_render_of_page = true;
     this.all_data = [];
+    this.retrieved_data_length = 0;
     this.scale = "Normal";
     this.stage_details = "All Stages";
 
@@ -108,13 +110,14 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
                 this.apiService.loadAvailableStagesWithExperimentId(this.experiment_id).subscribe(stages => {
                   if (!isNullOrUndefined(stages)) {
                     // initially selected stage is "All Stages"
-                    this.selected_stage = {"number": -1, "knobs": ""};
+                    this.selected_stage = {"number": -1, "knobs": {}};
+                    this.selected_stage.knobs = this.entityService.populate_knob_objects_with_default_variables(this.selected_stage.knobs, this.targetSystem.defaultVariables);
                     this.available_stages.push(this.selected_stage);
-
                     for (let j = 0; j < stages.length; j++) {
-                      // round knob values of stages to 3 decimals
+                      // if there are any existing stages, round their knob values of stages to provided decimals
                       if (!isNullOrUndefined(stages[j]["knobs"])) {
                         stages[j]["knobs"] = this.entityService.round_knob_values(stages[j]["knobs"], 3);
+                        stages[j]["knobs"] = this.entityService.populate_knob_objects_with_default_variables(stages[j]["knobs"], this.targetSystem.defaultVariables);
                       }
                       this.available_stages.push(stages[j]);
                     }
@@ -141,7 +144,6 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
   /** uses stage_object (that can be either one stage or all_stage) and PlotService to draw plots accordingly */
   draw_all_plots(stage_object) {
     const ctrl = this;
-
     if (stage_object !== undefined && stage_object.length !== 0) {
       ctrl.selectDistributionAndDrawQQPlot(ctrl.distribution);
       // draw graphs for all_data
@@ -152,8 +154,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
             // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
             const clonedData = JSON.parse(JSON.stringify(processedData));
             ctrl.initial_threshold_for_scatter_chart = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value', ctrl.decimal_places);
-            ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_chart, "All Stages", ctrl.decimal_places);
-            ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type["name"], "All Stages", ctrl.decimal_places);
+            ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_chart, "All Stages", ctrl.decimal_places, ctrl.experiment.executionStrategy.sample_size);            ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type["name"], "All Stages", ctrl.decimal_places);
 
             ctrl.is_enough_data_for_plots = true;
           } else {
@@ -174,7 +175,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
             const clonedData = JSON.parse(JSON.stringify(processedData));
             ctrl.initial_threshold_for_scatter_chart = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value', ctrl.decimal_places);
             ctrl.stage_details = ctrl.entityService.get_stage_details(ctrl.selected_stage);
-            ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_chart, ctrl.stage_details, ctrl.decimal_places);
+            ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_chart, ctrl.stage_details, ctrl.decimal_places, ctrl.experiment.executionStrategy.sample_size);
             ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type["name"], ctrl.stage_details, ctrl.decimal_places);
 
             // check if next stage exists for javascript side of qq plot
@@ -213,14 +214,18 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
   fetch_data() {
     const ctrl = this;
     this.apiService.loadAllDataPointsOfExperiment(this.experiment_id).subscribe(
-      data => {
-        if (isNullOrUndefined(data)) {
+      retrieved_data => {
+        if (isNullOrUndefined(retrieved_data)) {
           this.notify.error("Error", "Cannot retrieve data from DB, please try again");
           return;
         }
-        this.all_data = ctrl.entityService.process_response_for_successful_experiment(this.all_data, data);
+        this.all_data = ctrl.entityService.process_response_for_successful_experiment(retrieved_data, this.all_data);
+        for (let stage_data of this.all_data) {
+          this.retrieved_data_length += stage_data['values'].length;
+        }
+
         if(this.first_render_of_page) {
-          this.incoming_data_type = this.entityService.get_candidate_data_type(this.targetSystem, this.all_data[0]);
+          this.incoming_data_type = this.entityService.get_candidate_data_type(this.experiment, this.targetSystem, this.all_data[0]);
           this.first_render_of_page = false;
         }
         this.draw_all_plots(this.all_data);

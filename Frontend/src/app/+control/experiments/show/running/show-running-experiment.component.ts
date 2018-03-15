@@ -137,13 +137,14 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
                 this.apiService.loadAvailableStagesWithExperimentId(this.experiment_id).subscribe(stages => {
                   if (!isNullOrUndefined(stages)) {
                     // initially selected stage is "All Stages"
-                    this.selected_stage = {"number": -1, "knobs": ""};
+                    this.selected_stage = {"number": -1, "knobs": {}};
+                    this.selected_stage.knobs = this.entityService.populate_knob_objects_with_default_variables(this.selected_stage.knobs, this.targetSystem.defaultVariables);
                     this.available_stages.push(this.selected_stage);
-                    console.log(stages);
                     for (let j = 0; j < stages.length; j++) {
-                      // if there are any existing stages, round their knob values of stages to provided decimals (provided that executionStrategy is not forever)
-                      if (!isNullOrUndefined(stages[j]["knobs"]) && this.experiment.executionStrategy.type !== "forever") {
+                      // if there are any existing stages, round their knob values of stages to provided decimals
+                      if (!isNullOrUndefined(stages[j]["knobs"])) {
                         stages[j]["knobs"] = this.entityService.round_knob_values(stages[j]["knobs"], this.decimal_places);
+                        stages[j]["knobs"] = this.entityService.populate_knob_objects_with_default_variables(stages[j]["knobs"], this.targetSystem.defaultVariables);
                       }
                       this.available_stages.push(stages[j]);
                     }
@@ -187,29 +188,27 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
         // keywords (index, size) are same for the first two cases, but they indicate different things
         if (oedaCallback.status === "PROCESSING") {
           ctrl.oedaCallback["message"] = oedaCallback.message;
-        } else if (oedaCallback.status === "IGNORING_SAMPLES" || oedaCallback.status.toString() === "COLLECTING_DATA") {
+        } else if (oedaCallback.status == "IGNORING_SAMPLES" || oedaCallback.status == "COLLECTING_DATA") {
           ctrl.oedaCallback["index"] = oedaCallback.index;
           ctrl.oedaCallback["size"] = oedaCallback.size;
           ctrl.oedaCallback["complete"] = (Number(oedaCallback.index)) / (Number(oedaCallback.size));
+
           // round knob values to provided decimal places (provided that execution strategy is not forever)
           if (ctrl.experiment.executionStrategy.type !== "forever") {
             oedaCallback.current_knob = ctrl.entityService.round_knob_values(oedaCallback.current_knob, ctrl.decimal_places);
-            // remaining_time_and_stages is a experiment-wise unique dict that contains remaining stages and time
-            ctrl.oedaCallback.remaining_time_and_stages.set("remaining_time", oedaCallback.remaining_time_and_stages["remaining_time"]);
-            ctrl.oedaCallback.remaining_time_and_stages.set("remaining_stages", oedaCallback.remaining_time_and_stages["remaining_stages"] );
-          } else {
-            ctrl.oedaCallback.remaining_time_and_stages.set("remaining_time", "Infinite");
-            ctrl.oedaCallback.remaining_time_and_stages.set("remaining_stages", "Infinite");
           }
+          // remaining_time_and_stages is a experiment-wise unique dict that contains remaining stages and time
+          ctrl.oedaCallback.remaining_time_and_stages.set("remaining_time", oedaCallback.remaining_time_and_stages["remaining_time"]);
+          ctrl.oedaCallback.remaining_time_and_stages.set("remaining_stages", oedaCallback.remaining_time_and_stages["remaining_stages"] );
           ctrl.oedaCallback.current_knob = oedaCallback.current_knob;
 
           // fetch data from backend
-          if (oedaCallback.status === "COLLECTING_DATA") {
+          if (oedaCallback.status == "COLLECTING_DATA") {
             if (ctrl.first_render_of_page) {
               ctrl.apiService.loadAllDataPointsOfExperiment(ctrl.experiment_id).subscribe(response => {
                 let is_successful_fetch = ctrl.process_response(response);
-                this.incoming_data_type = this.entityService.get_candidate_data_type(this.targetSystem, this.all_data[0]);
-                if (is_successful_fetch && !isNullOrUndefined(this.incoming_data_type)) {
+                ctrl.incoming_data_type = ctrl.entityService.get_candidate_data_type(ctrl.experiment, ctrl.targetSystem, ctrl.all_data[0]);
+                if (is_successful_fetch && !isNullOrUndefined(ctrl.incoming_data_type)) {
                   ctrl.first_render_of_page = false;
                   ctrl.draw_all_plots();
                 }
@@ -226,7 +225,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
             }
           }
 
-        } else if (oedaCallback.status.toString() === "EXPERIMENT_STAGE_DONE") {
+        } else if (oedaCallback.status == "EXPERIMENT_STAGE_DONE") {
           if (oedaCallback.remaining_time_and_stages["remaining_stages"] == 0) {
             ctrl.disable_polling("Success", "Data is up-to-date, stopped polling.");
 
@@ -363,7 +362,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     document.getElementById(ctrl.filterSummaryId).innerHTML = "<p>Threshold for 95-percentile: <b>" + ctrl.initial_threshold_for_scatter_plot + "</b> and # of points to be removed: <b>" + ctrl.nr_points_to_be_filtered + "</b></p>";
 
     if (ctrl.first_render_of_plots) {
-      ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot(ctrl.divId, ctrl.filterSummaryId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_plot, ctrl.stage_details, ctrl.decimal_places);
+      ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot(ctrl.divId, ctrl.filterSummaryId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_plot, ctrl.stage_details, ctrl.decimal_places, ctrl.experiment.executionStrategy.sample_size);
       ctrl.histogram = ctrl.plotService.draw_histogram(ctrl.histogramDivId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.stage_details, ctrl.decimal_places);
       ctrl.first_render_of_plots = false;
     } else {
@@ -376,6 +375,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
       ctrl.scatter_plot.valueAxes[0].title = ctrl.incoming_data_type["name"];
       ctrl.histogram.categoryAxis.title = ctrl.incoming_data_type["name"];
       // https://docs.amcharts.com/3/javascriptcharts/AmChart, following refers to validateNow(validateData = true, skipEvents = false)
+      ctrl.scatter_plot.ignoreZoomed = true;
       ctrl.scatter_plot.validateNow(true, false);
       ctrl.histogram.dataProvider = ctrl.plotService.categorize_data(ctrl.processedData, ctrl.decimal_places);
       ctrl.histogram.validateData();

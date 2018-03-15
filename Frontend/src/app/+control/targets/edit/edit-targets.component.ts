@@ -42,7 +42,6 @@ export class EditTargetsComponent implements OnInit {
         this.api.loadTargetById(params['id']).subscribe(
           (data) => {
             this.target = data;
-            console.log("target", this.target);
             this.originalTarget = _(this.target);
             this.assureObjectContract();
           }
@@ -55,7 +54,6 @@ export class EditTargetsComponent implements OnInit {
 
         // retrieve config json object via the api provided at localhost:5000/api/config/crowdnav
         this.api.getConfigFromAPI("/crowdnav").subscribe((config) => {
-          console.log("config", config);
             if (!isNullOrUndefined(config)) {
 
               // open the modal in frontend

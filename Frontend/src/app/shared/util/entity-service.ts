@@ -33,9 +33,9 @@ export class EntityService {
       if (single_stage_object !== undefined) {
         const processedData = [];
         // Parsing string into json should only be done here.
-        if (called_for_successful_experiment) {
-          single_stage_object = JSON.parse(single_stage_object);
-        }
+        // if (called_for_successful_experiment) {
+        //   single_stage_object = JSON.parse(single_stage_object);
+        // }
         single_stage_object.values.forEach(function(data_point) {
           // filter out points that are retrieved from other data providers, o/w they will be undefined
           if (!isNullOrUndefined(data_point["payload"][incoming_data_type_name])){
@@ -195,22 +195,35 @@ export class EntityService {
     return true;
   }
 
-  /** tries to set the initially-selected incoming data type name by looking at the payload
+  /** tries to set the initially-selected incoming data type name by looking at the payload and target system's optimized data type(s)
    *  we retrieve stages and data points in following format
    *  e.g. [ 0: {number: 1, values: ..., knobs: [...]}, 1: {number: 2, values: ..., knobs: [...] }...]
    *  this method should be called after checking whether it's the first render of page or not.
    *  because, if it's not the first time, then user's selection of incoming data type (via dropdown UI) is important
    *  but: before plotting, we must ensure that a proper & valid incoming data type is selected
    */
-  public get_candidate_data_type(targetSystem, first_stage_data) {
+  public get_candidate_data_type(experiment, targetSystem, first_stage_data) {
+
     if (typeof first_stage_data === 'string') {
       first_stage_data = JSON.parse(first_stage_data);
     }
+
+    // first check if we can get one of the optimized data types from payload
+    for (let k = 0; k < experiment.optimized_data_types.length; k++) {
+      const candidate_incoming_optimized_data_type = experiment.optimized_data_types[k];
+      if (candidate_incoming_optimized_data_type["is_optimized"]) {
+        if (!this.is_data_type_disabled(first_stage_data, candidate_incoming_optimized_data_type)) {
+          return candidate_incoming_optimized_data_type;
+        }
+      }
+    }
+
+    // now check regular incoming data types
     for (let j = 0; j < targetSystem.incomingDataTypes.length; j++) {
       const candidate_incoming_data_type = targetSystem.incomingDataTypes[j];
-      if (!this.is_data_type_disabled(first_stage_data, candidate_incoming_data_type)) {
-        return candidate_incoming_data_type;
-      }
+        if (!this.is_data_type_disabled(first_stage_data, candidate_incoming_data_type)) {
+          return candidate_incoming_data_type;
+        }
     }
     return null;
   }
@@ -251,4 +264,29 @@ export class EntityService {
     return null;
   }
 
+  /**
+   * puts non-exiting knob keys & values to the actual knob object for a single stage entity.
+   * All knob keys & values are iterated using targetSystem's defaultVariables
+   * experimentKnobs: empty or non-empty object
+   * targetSystemVariables: object[]
+   * return value -> experimentKnobs: object
+   */
+  public populate_knob_objects_with_default_variables(experimentKnobs, targetSystemVariables) {
+    let ctrl = this;
+    let knob_keys = ctrl.get_keys(experimentKnobs);
+    targetSystemVariables.forEach(function(target_system_knob, target_system_knob_index) {
+      if (knob_keys.length > 0) {
+        // knob_keys.forEach(function(experiment_knob_key) {
+          if (!knob_keys.includes(target_system_knob.name)) {
+            let not_found_knob_name = targetSystemVariables[target_system_knob_index].name;
+            experimentKnobs[not_found_knob_name] = targetSystemVariables[target_system_knob_index].default;
+          }
+        // });
+      } else {
+        // this case is for populating all_stage, initially experimentKnobs is an empty Map
+        experimentKnobs[target_system_knob.name] = target_system_knob.default;
+      }
+    });
+    return experimentKnobs
+  }
 }

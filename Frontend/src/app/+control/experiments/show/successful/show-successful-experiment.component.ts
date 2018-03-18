@@ -73,6 +73,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     this.available_distributions = ['Norm', 'Gamma', 'Logistic', 'T', 'Uniform', 'Lognorm', 'Loggamma'];
 
     this.selected_stage_for_qq_js = "Select a stage";
+    this.incoming_data_type = null;
 
     // subscribe to router event
     this.activated_route.params.subscribe((params: Params) => {
@@ -111,13 +112,13 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
                   if (!isNullOrUndefined(stages)) {
                     // initially selected stage is "All Stages"
                     this.selected_stage = {"number": -1, "knobs": {}};
-                    this.selected_stage.knobs = this.entityService.populate_knob_objects_with_default_variables(this.selected_stage.knobs, this.targetSystem.defaultVariables);
+                    this.selected_stage.knobs = this.entityService.populate_knob_objects_with_variables(this.selected_stage.knobs, this.targetSystem.defaultVariables, true, this.experiment.executionStrategy.type);
                     this.available_stages.push(this.selected_stage);
                     for (let j = 0; j < stages.length; j++) {
                       // if there are any existing stages, round their knob values of stages to provided decimals
                       if (!isNullOrUndefined(stages[j]["knobs"])) {
                         stages[j]["knobs"] = this.entityService.round_knob_values(stages[j]["knobs"], 3);
-                        stages[j]["knobs"] = this.entityService.populate_knob_objects_with_default_variables(stages[j]["knobs"], this.targetSystem.defaultVariables);
+                        stages[j]["knobs"] = this.entityService.populate_knob_objects_with_variables(stages[j]["knobs"], this.targetSystem.defaultVariables, false, this.experiment.executionStrategy.type);
                       }
                       this.available_stages.push(stages[j]);
                     }
@@ -225,7 +226,8 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
         }
 
         if(this.first_render_of_page) {
-          this.incoming_data_type = this.entityService.get_candidate_data_type(this.experiment, this.targetSystem, this.all_data[0]);
+          if(this.incoming_data_type == null)
+            this.incoming_data_type = this.entityService.get_candidate_data_type(this.experiment, this.targetSystem, this.all_data[0]);
           this.first_render_of_page = false;
         }
         this.draw_all_plots(this.all_data);
@@ -271,7 +273,9 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     }
   }
 
-  /** called when incoming data type of the target system is changed */
+  /** called when incoming data type of the target system is changed
+   * for_initial_processing flag is true when we determine the candidate data type by looking at the payload retrieved
+   * use-case: */
   incoming_data_type_changed(incoming_data_type) {
     this.incoming_data_type = incoming_data_type;
     if (this.entityService.scale_allowed(this.scale, this.incoming_data_type["scale"])) {

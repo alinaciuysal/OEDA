@@ -196,7 +196,7 @@
         </div>
       </div>
       <div class="panel-body" style="padding-top: 20px">
-        <div class="row" *ngFor="let input of target.changeableVariable; let i = index">
+        <div class="row" *ngFor="let input of target.changeableVariables; let i = index">
           <labeled-input name="Name" [model]="input" key="name" [colSize]="6"></labeled-input>
           <div class="col-md-1 pull-right" style="margin-top: 56px;color: #ef705d">
             <a (click)="removeChangeableVariable(i)">

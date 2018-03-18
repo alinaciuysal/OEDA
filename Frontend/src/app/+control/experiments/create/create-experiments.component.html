@@ -429,13 +429,13 @@
               <th style="width: 5%">Default</th>
               <th style="width: 4%">
                 <div class="btn btn-xs btn-orange" (click)="addAllChangeableVariables()"
-                     *ngIf="targetSystem.changeableVariable.length > 1 && targetSystem.changeableVariable.length != experiment.changeableVariable.length">
+                     *ngIf="targetSystem.changeableVariables.length > 1 && targetSystem.changeableVariables.length != experiment.changeableVariables.length">
                   <i class="fa fa-plus push-5-r"></i> Add All
                 </div>
               </th>
               </thead>
               <tbody>
-              <tr *ngFor="let dataType of targetSystem.changeableVariable" style="padding-top: 1%">
+              <tr *ngFor="let dataType of targetSystem.changeableVariables" style="padding-top: 1%">
                 <td style="padding-top: 2%">{{dataType.name}}</td>
                 <td style="padding-top: 2%">{{dataType.scale}}</td>
                 <td style="padding-top: 2%; width: 5%">{{dataType.description}}</td>
@@ -444,7 +444,7 @@
                 <td style="padding-top: 2%; width: 5%">{{dataType.default}}</td>
                 <td style="padding-top: 2%">
                   <div class="btn btn-xs btn-orange" (click)="addChangeableVariable(dataType)"
-                       *ngIf="targetSystem.changeableVariable.length > 0 && targetSystem.changeableVariable.length != experiment.changeableVariable.length">
+                       *ngIf="targetSystem.changeableVariables.length > 0 && targetSystem.changeableVariables.length != experiment.changeableVariables.length">
                     <i class="fa fa-plus push-5-r"></i> Add
                   </div>
                 </td>
@@ -459,14 +459,14 @@
   </div>
 
   <!-- Added Variables -->
-  <div class="col-md-12" *ngIf="targetSystem.name !== '' && experiment.executionStrategy.type !== 'forever' && experiment.executionStrategy.type.length !== 0 && experiment.changeableVariable.length > 0">
+  <div class="col-md-12" *ngIf="targetSystem.name !== '' && experiment.executionStrategy.type !== 'forever' && experiment.executionStrategy.type.length !== 0 && experiment.changeableVariables.length > 0">
     <div class="panel panel-default chartJs">
       <div class="panel-heading">
         <div class="card-title">
           <div class="title pull-left" >Added Variables</div>
           <div class="pull-right">
             <div class="btn btn-xs btn-primary" (click)="removeAllVariables()"
-                 *ngIf="targetSystem.changeableVariable.length > 1 && experiment.changeableVariable.length > 1">
+                 *ngIf="targetSystem.changeableVariables.length > 1 && experiment.changeableVariables.length > 1">
               <i class="fa fa-remove"></i> Remove All
             </div>
           </div>
@@ -474,11 +474,11 @@
       </div>
       <!-- Show regular changeable variable section if strategy is not forever-->
       <div class="panel-body" style="padding-top: 20px">
-        <div class="row" *ngFor="let input of experiment.changeableVariable; let i = index">
+        <div class="row" *ngFor="let input of experiment.changeableVariables; let i = index">
             <div class="row" style="padding-left: 3%">
               <labeled-input name="Name" [model]="input" key="name" [colSize]="3" disabled="true"></labeled-input>
-              <labeled-input inputType="number" name="Min" [model]="input" key="min" [colSize]="2" (modelChanged)="minMaxModelsChanged($event)"></labeled-input>
-              <labeled-input inputType="number" name="Max" [model]="input" key="max" [colSize]="2" (modelChanged)="minMaxModelsChanged($event)"></labeled-input>
+              <labeled-input inputType="number" name="Min" [model]="input" key="min" [colSize]="2" disabled="true" (modelChanged)="minMaxModelsChanged($event)"></labeled-input>
+              <labeled-input inputType="number" name="Max" [model]="input" key="max" [colSize]="2" disabled="true" (modelChanged)="minMaxModelsChanged($event)"></labeled-input>
               <labeled-input inputType="number" name="Default" [model]="input" key="default" [colSize]="2" disabled="true"></labeled-input>
               <labeled-input *ngIf="experiment.executionStrategy.type == 'step_explorer'" inputType="number" name="Step Size" [model]="input" key="step" [colSize]="2" (modelChanged)="stepSizeChanged($event)"></labeled-input>
               <div class="col-sm-1">
@@ -504,9 +504,9 @@
         </div>
       </div>
       <div class="panel-body" style="padding-top: 20px">
-        <div class="row" *ngFor="let input of targetSystem.defaultVariables; let i = index">
+        <div class="row" *ngFor="let input of targetSystem.defaultVariables">
           <labeled-input name="Name" [model]="input" key="name" [colSize]="3" disabled="true"></labeled-input>
-          <labeled-input inputType="number" name="Default" [model]="input" key="default" [colSize]="3" disabled="true"></labeled-input>
+          <labeled-input inputType="number" name="Value" [model]="input" key="default" [colSize]="3" [minNumber]="input.min" [maxNumber]="input.max"></labeled-input>
         </div>
       </div>
 

@@ -1,12 +1,9 @@
-from colorama import Fore
 from oeda.log import *
-from oeda.utilities.RUtility import install_packages
+from oeda.utilities.RpyUtility import install_packages
 from oeda.rtxlib.execution import experimentFunction
-from rpy2.rinterface import ListSexpVector
 
 from rpy2.robjects.packages import importr
 import rpy2.rinterface as ri
-import rpy2.robjects as robjects
 import numpy as np
 
 global_wf_dict = dict()

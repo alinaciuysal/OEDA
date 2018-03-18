@@ -16,14 +16,20 @@ import {isNullOrUndefined} from "util";
             <span *ngIf="!is_collapsed">Hide Experiment Details</span>
             <i *ngIf="!is_collapsed" class="fa fa-angle-double-up" aria-hidden="true"></i>
           </button>
-          
-          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" *ngIf="!for_successful_experiment">
+
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal"
+                  *ngIf="!for_successful_experiment">
             Stop Experiment
           </button>
-          
-          <div class="btn btn-group btn-toggle" style="padding-top: 5px; padding-left: 1%" *ngIf="!for_successful_experiment">
-            <button class="btn btn-primary active" id="polling_on_button" (click)="enable_polling($event)" data-toggle="tooltip" title="Click to enable polling">Polling ON</button>
-            <button class="btn btn-default" id="polling_off_button" (click)="disable_polling($event)" data-toggle="tooltip" title="Click to disable polling">Polling OFF</button>
+
+          <div class="btn btn-group btn-toggle" style="padding-top: 5px; padding-left: 1%"
+               *ngIf="!for_successful_experiment">
+            <button class="btn btn-primary active" id="polling_on_button" (click)="enable_polling($event)"
+                    data-toggle="tooltip" title="Click to enable polling">Polling ON
+            </button>
+            <button class="btn btn-default" id="polling_off_button" (click)="disable_polling($event)"
+                    data-toggle="tooltip" title="Click to disable polling">Polling OFF
+            </button>
           </div>
         </div>
       </div>
@@ -388,7 +394,7 @@ import {isNullOrUndefined} from "util";
                 <th *ngIf="experiment.executionStrategy.type == 'step_explorer'" style="width: 5%">Step Size</th>
                 </thead>
                 <tbody>
-                <tr *ngFor="let input of experiment.changeableVariable" style="padding-top: 1%">
+                <tr *ngFor="let input of experiment.changeableVariables" style="padding-top: 1%">
                   <td style="padding-top: 1%">{{input.name}}</td>
                   <td>{{input.min}}</td>
                   <td>{{input.max}}</td>
@@ -428,7 +434,8 @@ import {isNullOrUndefined} from "util";
     </div>
 
     <!-- Modal for stop experiment-->
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" *ngIf="!for_successful_experiment">
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true" *ngIf="!for_successful_experiment">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -442,7 +449,9 @@ import {isNullOrUndefined} from "util";
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-            <button type="button" class="btn btn-primary" (click)="stopRunningExperiment($event)" data-dismiss="modal">Yes</button>
+            <button type="button" class="btn btn-primary" (click)="stopRunningExperiment($event)" data-dismiss="modal">
+              Yes
+            </button>
           </div>
         </div>
       </div>

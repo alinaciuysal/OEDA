@@ -34,6 +34,7 @@
     "font-awesome": "^4.7.0",
     "intl": "^1.2.5",
     "jquery": "^3.3.1",
+    "lodash": "^4.17.5",
     "lodash.clonedeep": "^4.5.0",
     "moment": "^2.20.1",
     "monapt": "^0.7.1",

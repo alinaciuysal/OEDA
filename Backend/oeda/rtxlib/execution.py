@@ -31,12 +31,10 @@ def experimentFunction(wf, exp):
     # create new state
     exp["state"] = wf.state_initializer(dict(), wf)
 
-    # do not apply any changes to the system for forever strategy TODO: discuss with Ilias
-    if wf.execution_strategy["type"] != "forever":
-        try:
-            wf.change_provider["instance"].applyChange(change_creator(exp["knobs"], wf))
-        except:
-            error("apply changes did not work")
+    try:
+        wf.change_provider["instance"].applyChange(change_creator(exp["knobs"], wf))
+    except:
+        error("apply changes did not work")
 
     # ignore the first data sets
     to_ignore = exp["ignore_first_n_samples"]

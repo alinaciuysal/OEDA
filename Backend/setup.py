@@ -13,8 +13,7 @@ setup(
         'tornado',
         'flask_restful',
         'flask_cors',
-        'elasticsearch5',
-        'matplotlib',
+        'elasticsearch',
         'statsmodels',
         'numpy',
         'requests',
@@ -22,6 +21,9 @@ setup(
         'pyjwt',
         'backports.ssl_match_hostname',
         'pandas',
-        'scikit-optimize'
+        'scikit-optimize',
+        'kafka',
+        'paho-mqtt',
+        'pyRserve'
     ]
 )

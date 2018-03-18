@@ -91,7 +91,7 @@ export interface Experiment {
   description: string,
   status: string,
   targetSystemId: string,
-  changeableVariable: any,
+  changeableVariables: any,
   executionStrategy: ExecutionStrategy,
   optimized_data_types: object[]
 }
@@ -113,7 +113,7 @@ export interface Target {
   secondaryDataProviders: any,
   changeProvider: any,
   incomingDataTypes: any,
-  changeableVariable: any,
+  changeableVariables: any,
   defaultVariables: any
 }
 
@@ -137,7 +137,7 @@ export interface OedaCallbackEntity {
   total_experiments: number,
   stage_counter: number,
   current_knob: any,
-  remaining_time_and_stages: Map<any, any>
+  remaining_time_and_stages: any
 }
 
 export interface Configuration {

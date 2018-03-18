@@ -80,8 +80,8 @@ export class EditTargetsComponent implements OnInit {
     if (this.target.incomingDataTypes == null) {
       this.target.incomingDataTypes = []
     }
-    if (this.target.changeableVariable == null) {
-      this.target.changeableVariable = []
+    if (this.target.changeableVariables == null) {
+      this.target.changeableVariables = []
     }
   }
 
@@ -98,21 +98,21 @@ export class EditTargetsComponent implements OnInit {
       "status": "IDLE",
       "description": "",
       "incomingDataTypes": [],
-      "changeableVariable": [],
+      "changeableVariables": [],
       "defaultVariables": []
     }
   }
 
   addChangeableVariable(existingKnob) {
     if (existingKnob == null) { // for usual case, without using any configuration files
-      this.target.changeableVariable.push({
+      this.target.changeableVariables.push({
         "disabled": false // mark the variable as 'not' disabled, so that user can provide a default value for it
       });
     }
     else {
       // user should not be able to add already-added variable coming from config
-      if (this.target.changeableVariable.filter(variable => variable.name === existingKnob.name).length === 0) {
-        this.target.changeableVariable.push(existingKnob);
+      if (this.target.changeableVariables.filter(variable => variable.name === existingKnob.name).length === 0) {
+        this.target.changeableVariables.push(existingKnob);
       } else {
         this.notify.error("", "Variable is already added");
       }
@@ -120,7 +120,7 @@ export class EditTargetsComponent implements OnInit {
   }
 
   removeChangeableVariable(index) {
-    this.target.changeableVariable.splice(index, 1)
+    this.target.changeableVariables.splice(index, 1)
   }
 
   addDataProvider(dataProvider) {
@@ -196,7 +196,7 @@ export class EditTargetsComponent implements OnInit {
   checkValidityOfTargetSystemDefinition() {
 
     // check if names of user-added changeable variables are not same with the ones coming from configuration
-    if (this.checkDuplicateInObject('name', this.target.changeableVariable)) {
+    if (this.checkDuplicateInObject('name', this.target.changeableVariables)) {
       return this.notify.error("", "Changeable variables contain duplicate elements");
     }
     // check if names of user-added incoming data types are not same with the ones coming from configuration
@@ -389,18 +389,18 @@ export class EditTargetsComponent implements OnInit {
     }
 
     // check for attributes of changeable variables
-    for (let i = 0; i < this.target.changeableVariable.length; i++) {
-      if (this.target.changeableVariable[i].name == null
-        || this.target.changeableVariable[i].length === 0
-        || this.target.changeableVariable[i].description == null
-        || this.target.changeableVariable[i].description === 0
-        || isNullOrUndefined(this.target.changeableVariable[i].scale)
-        || isNullOrUndefined(this.target.changeableVariable[i].min)
-        || isNullOrUndefined(this.target.changeableVariable[i].max)
-        || isNullOrUndefined(this.target.changeableVariable[i].default)
-        || this.target.changeableVariable[i].default < this.target.changeableVariable[i].min
-        || this.target.changeableVariable[i].default > this.target.changeableVariable[i].max
-        || this.target.changeableVariable[i].min > this.target.changeableVariable[i].max) {
+    for (let i = 0; i < this.target.changeableVariables.length; i++) {
+      if (this.target.changeableVariables[i].name == null
+        || this.target.changeableVariables[i].length === 0
+        || this.target.changeableVariables[i].description == null
+        || this.target.changeableVariables[i].description === 0
+        || isNullOrUndefined(this.target.changeableVariables[i].scale)
+        || isNullOrUndefined(this.target.changeableVariables[i].min)
+        || isNullOrUndefined(this.target.changeableVariables[i].max)
+        || isNullOrUndefined(this.target.changeableVariables[i].default)
+        || this.target.changeableVariables[i].default < this.target.changeableVariables[i].min
+        || this.target.changeableVariables[i].default > this.target.changeableVariables[i].max
+        || this.target.changeableVariables[i].min > this.target.changeableVariables[i].max) {
         this.errorButtonLabel = "Provide valid inputs for changeable variable(s)";
         return true;
       }
@@ -421,7 +421,7 @@ export class EditTargetsComponent implements OnInit {
       return true;
     }
 
-    if (this.target.changeableVariable.length === 0) {
+    if (this.target.changeableVariables.length === 0) {
       this.errorButtonLabel = "Provide at least one changeable variable";
       return true;
     }

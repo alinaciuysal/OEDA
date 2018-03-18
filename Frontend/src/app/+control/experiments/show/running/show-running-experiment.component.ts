@@ -94,7 +94,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     this.decimal_places = 3;
     this.distribution = "Norm";
     this.available_distributions = ['Norm', 'Gamma', 'Logistic', 'T', 'Uniform', 'Lognorm', 'Loggamma'];
-
+    this.incoming_data_type = null;
     this.selected_stage_for_qq_js = "Select a stage";
     this.oedaCallback = this.entityService.create_oeda_callback_entity();
 
@@ -138,13 +138,13 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
                   if (!isNullOrUndefined(stages)) {
                     // initially selected stage is "All Stages"
                     this.selected_stage = {"number": -1, "knobs": {}};
-                    this.selected_stage.knobs = this.entityService.populate_knob_objects_with_default_variables(this.selected_stage.knobs, this.targetSystem.defaultVariables);
+                    this.selected_stage.knobs = this.entityService.populate_knob_objects_with_variables(this.selected_stage.knobs, this.targetSystem.defaultVariables, true, this.experiment.executionStrategy.type);
                     this.available_stages.push(this.selected_stage);
                     for (let j = 0; j < stages.length; j++) {
                       // if there are any existing stages, round their knob values of stages to provided decimals
                       if (!isNullOrUndefined(stages[j]["knobs"])) {
                         stages[j]["knobs"] = this.entityService.round_knob_values(stages[j]["knobs"], this.decimal_places);
-                        stages[j]["knobs"] = this.entityService.populate_knob_objects_with_default_variables(stages[j]["knobs"], this.targetSystem.defaultVariables);
+                        stages[j]["knobs"] = this.entityService.populate_knob_objects_with_variables(stages[j]["knobs"], this.targetSystem.defaultVariables, false, this.experiment.executionStrategy.type);
                       }
                       this.available_stages.push(stages[j]);
                     }
@@ -198,16 +198,17 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
             oedaCallback.current_knob = ctrl.entityService.round_knob_values(oedaCallback.current_knob, ctrl.decimal_places);
           }
           // remaining_time_and_stages is a experiment-wise unique dict that contains remaining stages and time
-          ctrl.oedaCallback.remaining_time_and_stages.set("remaining_time", oedaCallback.remaining_time_and_stages["remaining_time"]);
-          ctrl.oedaCallback.remaining_time_and_stages.set("remaining_stages", oedaCallback.remaining_time_and_stages["remaining_stages"] );
+          ctrl.oedaCallback.remaining_time_and_stages["remaining_time"] = oedaCallback.remaining_time_and_stages["remaining_time"];
+          ctrl.oedaCallback.remaining_time_and_stages["remaining_stages"] = oedaCallback.remaining_time_and_stages["remaining_stages"];
           ctrl.oedaCallback.current_knob = oedaCallback.current_knob;
-
           // fetch data from backend
           if (oedaCallback.status == "COLLECTING_DATA") {
             if (ctrl.first_render_of_page) {
               ctrl.apiService.loadAllDataPointsOfExperiment(ctrl.experiment_id).subscribe(response => {
                 let is_successful_fetch = ctrl.process_response(response);
-                ctrl.incoming_data_type = ctrl.entityService.get_candidate_data_type(ctrl.experiment, ctrl.targetSystem, ctrl.all_data[0]);
+                if (ctrl.incoming_data_type == null)
+                  ctrl.incoming_data_type = ctrl.entityService.get_candidate_data_type(ctrl.experiment, ctrl.targetSystem, ctrl.all_data[0]);
+
                 if (is_successful_fetch && !isNullOrUndefined(ctrl.incoming_data_type)) {
                   ctrl.first_render_of_page = false;
                   ctrl.draw_all_plots();
@@ -219,7 +220,8 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
               }
               ctrl.apiService.loadAllDataPointsOfRunningExperiment(ctrl.experiment_id, ctrl.timestamp).subscribe(response => {
                 ctrl.process_response(response);
-                // ctrl.set_candidate_data_type();
+                if (ctrl.incoming_data_type == null)
+                  ctrl.incoming_data_type = ctrl.entityService.get_candidate_data_type(ctrl.experiment, ctrl.targetSystem, ctrl.all_data[0]);
                 ctrl.draw_all_plots();
               });
             }
@@ -274,10 +276,12 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
           // stage does not exist yet
           if (isNullOrUndefined(existing_stage)) {
             const new_stage = {"number": parsed_json_object.number};
-            if (ctrl.experiment.executionStrategy.type !== "forever")
+            if (ctrl.experiment.executionStrategy.type !== "forever") {
               new_stage["knobs"] = ctrl.entityService.round_knob_values(parsed_json_object.knobs, ctrl.decimal_places);
+            }
             else
               new_stage["knobs"] = parsed_json_object.knobs;
+            new_stage["knobs"] = ctrl.entityService.populate_knob_objects_with_variables(new_stage["knobs"], ctrl.targetSystem.defaultVariables, false, this.experiment.executionStrategy.type);
             ctrl.available_stages.push(new_stage);
             // ctrl.available_stages_for_qq_js.push(new_stage);
           }
@@ -310,6 +314,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
           else
             knobs = parsed_json_object['knobs'];
           const new_stage = {"number": number, "knobs": knobs};
+          new_stage["knobs"] = ctrl.entityService.populate_knob_objects_with_variables(new_stage["knobs"], ctrl.targetSystem.defaultVariables, false, this.experiment.executionStrategy.type);
           ctrl.available_stages.push(new_stage);
 
           let new_entity = ctrl.entityService.create_stage_entity();

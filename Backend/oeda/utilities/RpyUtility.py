@@ -1,6 +1,6 @@
 from rpy2.robjects.packages import importr, isinstalled
-from rpy2.rinterface import FloatSexpVector, ComplexSexpVector, StrSexpVector
-from rpy2.robjects.conversion import Converter, localconverter
+from rpy2.rinterface import FloatSexpVector, ComplexSexpVector
+from rpy2.robjects.conversion import Converter
 import rpy2.robjects as robjects
 import pandas as pd
 
@@ -12,9 +12,6 @@ def tuple_str(tpl):
 @robjects.conversion.py2ri.register(ComplexSexpVector)
 def complex_sexp_str(dictionary):
     return ComplexSexpVector(dictionary)
-
-# def dict_str(dictionary):
-#     return ComplexSexpVector(dictionary)
 
 my_converter = Converter('my converter')
 my_converter.py2ri.register(tuple, tuple_str)

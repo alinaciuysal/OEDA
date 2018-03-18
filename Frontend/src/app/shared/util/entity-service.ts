@@ -153,7 +153,7 @@ export class EntityService {
       total_experiments: 0,
       stage_counter: null,
       current_knob: new Map<string, number>(),
-      remaining_time_and_stages: new Map<any, any>()
+      remaining_time_and_stages: {}
     };
   }
 
@@ -181,18 +181,20 @@ export class EntityService {
     return true;
   }
 
-  /** returns true if payload object at index 0 contains the given incoming data type's name */
-  public is_data_type_disabled(stage_data, incoming_data_type): boolean {
+  /** returns true if first stage's payload contains the given incoming data type's name */
+  public is_data_type_retrieved(stage_data, incoming_data_type): boolean {
+    let retrieved: boolean = false;
     if (stage_data !== undefined) {
       if (stage_data.hasOwnProperty("values")) {
-        const first_tuple = stage_data.values;
-        const first_payload = first_tuple[0]["payload"];
-        if(first_payload.hasOwnProperty(incoming_data_type.name)){
-          return false;
-        }
+        const values = stage_data.values;
+        values.forEach(function(tuple) {
+          if(tuple.payload.hasOwnProperty(incoming_data_type.name) && !retrieved) {
+            retrieved = true;
+          }
+        });
       }
     }
-    return true;
+    return retrieved;
   }
 
   /** tries to set the initially-selected incoming data type name by looking at the payload and target system's optimized data type(s)
@@ -211,8 +213,8 @@ export class EntityService {
     // first check if we can get one of the optimized data types from payload
     for (let k = 0; k < experiment.optimized_data_types.length; k++) {
       const candidate_incoming_optimized_data_type = experiment.optimized_data_types[k];
-      if (candidate_incoming_optimized_data_type["is_optimized"]) {
-        if (!this.is_data_type_disabled(first_stage_data, candidate_incoming_optimized_data_type)) {
+      if (candidate_incoming_optimized_data_type["is_optimized"] === true) {
+        if (this.is_data_type_retrieved(first_stage_data, candidate_incoming_optimized_data_type)) {
           return candidate_incoming_optimized_data_type;
         }
       }
@@ -221,15 +223,15 @@ export class EntityService {
     // now check regular incoming data types
     for (let j = 0; j < targetSystem.incomingDataTypes.length; j++) {
       const candidate_incoming_data_type = targetSystem.incomingDataTypes[j];
-        if (!this.is_data_type_disabled(first_stage_data, candidate_incoming_data_type)) {
-          return candidate_incoming_data_type;
-        }
+      if (this.is_data_type_retrieved(first_stage_data, candidate_incoming_data_type)) {
+        return candidate_incoming_data_type;
+      }
     }
     return null;
   }
 
   /**
-   * for successful experiments, we pass string representation
+   * for experiments, we pass string representation to scatter plots & histograms
    * @param {selected_stage} JSON representation of selected stage object
    * @returns {string}
    */
@@ -266,27 +268,46 @@ export class EntityService {
 
   /**
    * puts non-exiting knob keys & values to the actual knob object for a single stage entity.
+   * it also puts min & max values of actual knob objects for all_stages entity if strategy is not forever.
+   * if strategy is forever, then we don't have to alter stageKnobs at all, it just returns the same knob object.
    * All knob keys & values are iterated using targetSystem's defaultVariables
-   * experimentKnobs: empty or non-empty object
+   * stageKnobs: empty or non-empty Map
    * targetSystemVariables: object[]
-   * return value -> experimentKnobs: object
+   * return value -> stageKnobs
    */
-  public populate_knob_objects_with_default_variables(experimentKnobs, targetSystemVariables) {
+  public populate_knob_objects_with_variables(stageKnobs: any, targetSystemVariables: any, for_all_stages: boolean, execution_strategy_type: string) {
     let ctrl = this;
-    let knob_keys = ctrl.get_keys(experimentKnobs);
-    targetSystemVariables.forEach(function(target_system_knob, target_system_knob_index) {
-      if (knob_keys.length > 0) {
-        // knob_keys.forEach(function(experiment_knob_key) {
+    let knob_keys = ctrl.get_keys(stageKnobs);
+    if (execution_strategy_type !== 'forever') {
+      targetSystemVariables.forEach(function(target_system_knob) {
+        if (knob_keys.length > 0 && !for_all_stages) {
           if (!knob_keys.includes(target_system_knob.name)) {
-            let not_found_knob_name = targetSystemVariables[target_system_knob_index].name;
-            experimentKnobs[not_found_knob_name] = targetSystemVariables[target_system_knob_index].default;
+            stageKnobs[target_system_knob.name] = target_system_knob.default;
           }
-        // });
-      } else {
-        // this case is for populating all_stage, initially experimentKnobs is an empty Map
-        experimentKnobs[target_system_knob.name] = target_system_knob.default;
-      }
+        } else {
+          // this case is for populating all_stage, initially stageKnobs is an empty Map
+          // so it will insert min & max accoringly for non-forever strategies.
+          let min_max_map = {};
+          min_max_map["min"] = target_system_knob.min;
+          min_max_map["max"] = target_system_knob.max;
+          min_max_map["default"] = target_system_knob.default;
+          stageKnobs[target_system_knob.name] = min_max_map;
+
+        }
+      });
+    }
+    return stageKnobs
+  }
+
+  /**
+   * converts a knob object with attributes into a Map<string, any>
+   */
+  public convert_object_into_map(object): Map<string, any> {
+    let map = new Map<string, any>();
+    object.forEach(function(attribute) {
+      let value = object[attribute];
+      map.set(attribute, value);
     });
-    return experimentKnobs
+    return map;
   }
 }

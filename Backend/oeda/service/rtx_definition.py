@@ -129,7 +129,7 @@ class RTXDefinition:
         # if hasattr(wf, "optimized_data_types"):
         #     return [result_state[i] for i in wf.optimized_data_types]
 
-        # TODO: remove [0] and return an array
+        # TODO: remove [0] and return an array for multi-objective optimization
         return result_state[wf.optimized_data_types[0]['name']]
 
 

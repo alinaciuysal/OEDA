@@ -1,28 +1,8 @@
-from rpy2.robjects.packages import importr, isinstalled
+from rpy2.robjects.packages import importr
+from oeda.utilities.RpyUtility import install_packages
 import rpy2.robjects as robjects
 import rpy2.rinterface as ri
 
-''' installs required packages and libraries for executing R functions  '''
-def install_packages():
-    packnames = ('ggplot2', 'smoof', 'mlrMBO', 'DiceKriging', 'randomForest', 'rPython', 'ParamHelpers', 'stats', 'rgenoud')
-
-    if all(isinstalled(x) for x in packnames):
-        have_tutorial_packages = True
-    else:
-        have_tutorial_packages = False
-
-    if not have_tutorial_packages:
-        # import R's utility package
-        utils = importr('utils')
-        # select a mirror for R packages
-        utils.chooseCRANmirror(ind = 1) # select the first mirror in the list
-
-        # R vector of strings
-        from rpy2.robjects.vectors import StrVector
-        # file
-        packnames_to_install = [x for x in packnames if not isinstalled(x)]
-        if len(packnames_to_install) > 0:
-            utils.install_packages(StrVector(packnames_to_install))
 
 
 def run_mlr_using_robjects():

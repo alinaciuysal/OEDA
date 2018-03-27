@@ -1,7 +1,6 @@
 from flask import jsonify
-from flask import request
 from flask_restful import Resource
-from oeda.crowdnav_config import Config
+from oeda.config.crowdnav_config import Config
 import traceback
 import json
 
@@ -10,8 +9,8 @@ class CrowdNavConfigController(Resource):
     @staticmethod
     def get():
         try:
-            knobs = json.loads(open('oeda/crowdnav_config/knobs.json').read())
-            dataProviders = json.loads(open('oeda/crowdnav_config/dataProviders.json').read())
+            knobs = json.loads(open('oeda/config/crowdnav_config/knobs.json').read())
+            dataProviders = json.loads(open('oeda/config/crowdnav_config/dataProviders.json').read())
             data = {
                 "name": "CrowdNav",
                 "description": "Simulation based on SUMO",

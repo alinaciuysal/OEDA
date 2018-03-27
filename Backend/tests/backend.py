@@ -1,5 +1,4 @@
 from oeda.rtxlib.executionstrategy.MlrStrategy import start_mlr_mbo_strategy
-import numpy as np
 from uuid import uuid4
 
 from oeda.service.rtx_definition import RTXDefinition
@@ -10,7 +9,7 @@ import json
 
 
 def parse_crowd_nav_config():
-    pattern = os.path.join('../oeda/crowdnav_config', '*.json')
+    pattern = os.path.join('../oeda/config/crowdnav_config', '*.json')
     arr = []
     for file_name in glob(pattern):
         with open(file_name) as file:
@@ -23,11 +22,11 @@ def parse_crowd_nav_config():
 
 
 # usable strategy_name = sequential, self_optimizer, uncorrelated_self_optimizer, step_explorer, forever, random, mlr
-def create_experiment_tuple(strategy_name, sample_size, knobs, optimizer_iterations=5, optimizer_iterations_in_design=3):
+def create_experiment_tuple(strategy_name, sample_size, knobs, acquisition_method, optimizer_iterations=15, optimizer_iterations_in_design=6):
     num = randint(0, 25)
-    experiment_id=str(uuid4())
+    id = str(uuid4())
     experiment = dict(
-        id=experiment_id,
+        id=id,
         name="test_experiment_" + str(num),
         description="test_description_" + str(num),
         optimized_data_types=["overhead"],
@@ -35,6 +34,7 @@ def create_experiment_tuple(strategy_name, sample_size, knobs, optimizer_iterati
             type=strategy_name,
             sample_size=sample_size,
             knobs=knobs,
+            acquisition_method=acquisition_method,
             optimizer_iterations=optimizer_iterations,
             optimizer_iterations_in_design=optimizer_iterations_in_design
         )
@@ -63,18 +63,17 @@ def create_rtx_definition(dataProviders, config_knobs, experiment, ignore_first_
         target["incomingDataTypes"].append(dp["incomingDataTypes"])
 
     wf = RTXDefinition(oeda_experiment=experiment, oeda_target=target, oeda_callback=dict(), oeda_stop_request=None)
-    print(wf)
-    # wf["execution_strategy"]["sample_size"] = 50
-    # wf["execution_strategy"]["knobs"]["route_random_sigma"] = (0, 0.3)
-    # wf["execution_strategy"]["knobs"]["exploration_percentage"] = (1, 1.7)
     start_mlr_mbo_strategy(wf)
 
 
 if __name__ == '__main__':
     knobs = dict(
-        route_random_sigma=(0, 0.3),
-        exploration_percentage=(1, 1.7)
+        route_random_sigma=(0, 0.2),
+        exploration_percentage=(2, 2.7)
     )
-    experiment = create_experiment_tuple(strategy_name="mlr_mbo", sample_size=20, knobs=knobs)
+    # knobs = dict(
+    #     route_random_sigma=(1.5, 2.5),
+    # )
+    experiment = create_experiment_tuple(strategy_name="mlr_mbo", sample_size=20, knobs=knobs, acquisition_method="ei")
     dataProviders, config_knobs = parse_crowd_nav_config()
     create_rtx_definition(dataProviders, config_knobs, experiment, 30)

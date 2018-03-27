@@ -477,8 +477,8 @@
         <div class="row" *ngFor="let input of experiment.changeableVariables; let i = index">
             <div class="row" style="padding-left: 3%">
               <labeled-input name="Name" [model]="input" key="name" [colSize]="3" disabled="true"></labeled-input>
-              <labeled-input inputType="number" name="Min" [model]="input" key="min" [colSize]="2" disabled="true" (modelChanged)="minMaxModelsChanged($event)"></labeled-input>
-              <labeled-input inputType="number" name="Max" [model]="input" key="max" [colSize]="2" disabled="true" (modelChanged)="minMaxModelsChanged($event)"></labeled-input>
+              <labeled-input inputType="number" name="Min" [model]="input" key="min" [colSize]="2" (modelChanged)="minMaxModelsChanged($event)"></labeled-input>
+              <labeled-input inputType="number" name="Max" [model]="input" key="max" [colSize]="2" (modelChanged)="minMaxModelsChanged($event)"></labeled-input>
               <labeled-input inputType="number" name="Default" [model]="input" key="default" [colSize]="2" disabled="true"></labeled-input>
               <labeled-input *ngIf="experiment.executionStrategy.type == 'step_explorer'" inputType="number" name="Step Size" [model]="input" key="step" [colSize]="2" (modelChanged)="stepSizeChanged($event)"></labeled-input>
               <div class="col-sm-1">

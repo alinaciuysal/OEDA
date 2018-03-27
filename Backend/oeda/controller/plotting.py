@@ -67,4 +67,4 @@ class QQPlotController(Resource):
         except Exception as e:
             tb = traceback.format_exc()
             print(tb)
-            return {"message": e.message}, 40
+            return {"message": e.message}, 404

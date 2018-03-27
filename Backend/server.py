@@ -94,7 +94,7 @@ api.add_resource(CrowdNavConfigController, '/api/config/crowdnav')
 
 api.add_resource(ExecutionSchedulerController, '/api/execution_scheduler')
 
-# following is for easy deletion of db tuples
+# TODO: following is for easy deletion of db tuples, remove upon production
 api.add_resource(DeleteDBController, '/api/delete')
 
 if __name__ == '__main__':
@@ -107,7 +107,7 @@ if __name__ == '__main__':
     import sys
     reload(sys)  # Reload does the trick! #see:https://github.com/flask-restful/flask-restful/issues/552
     sys.setdefaultencoding('UTF8')
-    app.logger.setLevel(logging.CRITICAL)
+    app.logger.setLevel(logging.WARNING)
     cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
     http_server = HTTPServer(WSGIContainer(app))
     http_server.listen(5000)

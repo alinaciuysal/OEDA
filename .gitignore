@@ -172,3 +172,4 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+.Rproj.user

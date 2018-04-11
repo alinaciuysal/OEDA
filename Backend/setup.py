@@ -9,6 +9,7 @@ setup(
     include_package_data=False,
     zip_safe=False,
     install_requires=[
+        'Tempita',
         'colorama',
         'tornado',
         'flask_restful',
@@ -17,13 +18,13 @@ setup(
         'statsmodels',
         'numpy',
         'requests',
-        'rpy2==2.7.8',
+        'freetype-py',
+        'pypng',
+        'matplotlib',
         'pyjwt',
         'backports.ssl_match_hostname',
-        'pandas',
         'scikit-optimize',
         'kafka',
         'paho-mqtt',
-        'pyRserve'
     ]
 )

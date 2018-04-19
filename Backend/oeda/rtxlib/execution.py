@@ -65,7 +65,7 @@ def experimentFunction(wf, exp):
             new_data = wf.primary_data_provider["instance"].returnData()
             if new_data is not None:
                 try:
-                    exp["state"] = wf.primary_data_provider["data_reducer"](exp["state"], new_data, wf)
+                    wf = wf.primary_data_provider["data_reducer"](new_data, wf)
                     # NEW - we call back to oeda and give us infos there
                     wf.run_oeda_callback({"experiment": exp,
                                           "status": "COLLECTING_DATA",
@@ -90,7 +90,7 @@ def experimentFunction(wf, exp):
                     # just get the name of the variable from (cp) and pass it to (exp["state"], nd, wf, idx)
                     for nd in new_data:
                         try:
-                            exp["state"] = cp["data_reducer"](exp["state"], nd, wf, idx)
+                            wf = cp["data_reducer"](nd, wf, idx)
                         except StopIteration as e:
                             raise  # just
                         except RuntimeError as e:

@@ -95,7 +95,7 @@ export class EditTargetsComponent implements OnInit {
         "type": "",
       },
       "name": "",
-      "status": "IDLE",
+      "status": "READY",
       "description": "",
       "incomingDataTypes": [],
       "changeableVariables": [],

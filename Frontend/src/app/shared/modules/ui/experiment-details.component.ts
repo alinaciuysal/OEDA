@@ -1,4 +1,4 @@
-import {Component, Input, Output, EventEmitter} from "@angular/core";
+import {Component, Input, Output, EventEmitter, OnInit} from "@angular/core";
 import {isNullOrUndefined} from "util";
 
 @Component({
@@ -301,16 +301,20 @@ import {isNullOrUndefined} from "util";
                 <th style="padding-left: 2%">Data Provider Name</th>
                 <th style="padding-left: 2%">Optimization Criteria</th>
                 <th style="padding-left: 2%; padding-right: 2%">Consider</th>
+                <th style="padding-left: 2%; padding-right: 2%">Aggregate Function</th>
+                <th style="padding-left: 2%; padding-right: 2%">Weight</th>
                 </thead>
                 <tbody>
-                <tr *ngFor="let dataType of targetSystem.incomingDataTypes" style="padding-top: 1%">
+                <tr *ngFor="let dataType of combined_data_types" style="padding-top: 1%">
                   <td>{{dataType.name}}</td>
                   <td>{{dataType.scale}}</td>
                   <td>{{dataType.description}}</td>
                   <td>{{dataType.dataProviderName}}</td>
                   <td>{{dataType.criteria}}</td>
-                  <td *ngIf="is_optimized(dataType.name)">Yes</td>
-                  <td *ngIf="!is_optimized(dataType.name)">No</td>
+                  <td *ngIf="is_considered(dataType.name)">Yes</td>
+                  <td *ngIf="!is_considered(dataType.name)">No</td>
+                  <td>{{dataType.aggregateFunction}}</td>
+                  <td>{{dataType.weight}}</td>
                 </tr>
                 </tbody>
               </table>
@@ -459,7 +463,7 @@ import {isNullOrUndefined} from "util";
   `
 })
 
-export class ExperimentDetailsComponent {
+export class ExperimentDetailsComponent implements OnInit {
   @Input() targetSystem: any;
   @Input() experiment: any;
   @Input() is_collapsed: boolean;
@@ -471,12 +475,33 @@ export class ExperimentDetailsComponent {
   @Output() disable_polling_btn_clicked = new EventEmitter<MouseEvent>();
   @Output() stop_experiment_btn_clicked = new EventEmitter<MouseEvent>();
 
-  /** optimized_data_types are retrieved from experiment definition.
-   * so, this function checks if given data type was selected for optimization or not
+  combined_data_types: any;
+
+  /** combines unselected data types of targetSystem and selected data types of experiment */
+  ngOnInit(): void {
+    this.combined_data_types = [];
+    for (let considered_data_type of this.experiment.considered_data_types) {
+      this.combined_data_types.push(considered_data_type);
+    }
+    for (let data_type of this.targetSystem.incomingDataTypes) {
+      // previous array includes the data type
+      let data = this.combined_data_types.find( function( element ) {
+        return element.name === data_type["name"];
+      } );
+      // previous array does not include the iterated data type
+      if( !data ) {
+        this.combined_data_types.push(data_type);
+      }
+    }
+  }
+
+  /** considered_data_types are retrieved from experiment definition.
+   * so, this function checks if given data type was selected (considered) or not
+   * same func with the one in EntityService
    */
-  is_optimized(data_type_name) {
-    for (let i = 0; i < this.experiment.optimized_data_types.length; i++) {
-      if (this.experiment.optimized_data_types[i]["name"] === data_type_name) {
+  is_considered(data_type_name) {
+    for (let i = 0; i < this.experiment.considered_data_types.length; i++) {
+      if (this.experiment.considered_data_types[i]["name"] === data_type_name) {
         return true;
       }
     }

@@ -354,51 +354,62 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
       // ctrl.processedData is the stage object here
       ctrl.stage_details = ctrl.entityService.get_stage_details(ctrl.selected_stage);
     }
-    // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
-    const clonedData = JSON.parse(JSON.stringify(ctrl.processedData));
-    ctrl.initial_threshold_for_scatter_plot = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value', ctrl.decimal_places);
-    // just to inform user about how many points are above the calculated threshold (95-percentile)
-    ctrl.nr_points_to_be_filtered = ctrl.processedData.filter(function (item) {
-      return item.value > ctrl.initial_threshold_for_scatter_plot;
-    }).length;
+    if (!isNullOrUndefined(ctrl.processedData)) {
+      // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
+      const clonedData = JSON.parse(JSON.stringify(ctrl.processedData));
+      ctrl.initial_threshold_for_scatter_plot = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value', ctrl.decimal_places);
+      // just to inform user about how many points are above the calculated threshold (95-percentile)
+      ctrl.nr_points_to_be_filtered = ctrl.processedData.filter(function (item) {
+        return item.value > ctrl.initial_threshold_for_scatter_plot;
+      }).length;
 
-    // just to override the text in div
-    // if user previously clicked in the chart; but new data has come, so we should update div that tells user updated threshold and number of points to filtered.
-    document.getElementById(ctrl.filterSummaryId).innerHTML = "<p>Threshold for 95-percentile: <b>" + ctrl.initial_threshold_for_scatter_plot + "</b> and # of points to be removed: <b>" + ctrl.nr_points_to_be_filtered + "</b></p>";
+      // just to override the text in div
+      // if user previously clicked in the chart; but new data has come, so we should update div that tells user updated threshold and number of points to filtered.
+      document.getElementById(ctrl.filterSummaryId).innerHTML = "<p>Threshold for 95-percentile: <b>" + ctrl.initial_threshold_for_scatter_plot + "</b> and # of points to be removed: <b>" + ctrl.nr_points_to_be_filtered + "</b></p>";
 
-    if (ctrl.first_render_of_plots) {
-      ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot(ctrl.divId, ctrl.filterSummaryId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_plot, ctrl.stage_details, ctrl.decimal_places, ctrl.experiment.executionStrategy.sample_size);
-      ctrl.histogram = ctrl.plotService.draw_histogram(ctrl.histogramDivId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.stage_details, ctrl.decimal_places);
-      ctrl.first_render_of_plots = false;
+      if (ctrl.first_render_of_plots) {
+        ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot(ctrl.divId, ctrl.filterSummaryId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_plot, ctrl.stage_details, ctrl.decimal_places, ctrl.experiment.executionStrategy.sample_size);
+        ctrl.histogram = ctrl.plotService.draw_histogram(ctrl.histogramDivId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.stage_details, ctrl.decimal_places);
+        ctrl.first_render_of_plots = false;
+      } else {
+        // now update (validate) values & threshold value and its guide (line) of the scatter plot & also update title
+        ctrl.scatter_plot.dataProvider = ctrl.processedData;
+        ctrl.scatter_plot.graphs[0].negativeBase = ctrl.initial_threshold_for_scatter_plot;
+        ctrl.scatter_plot.valueAxes[0].guides[0].value = ctrl.initial_threshold_for_scatter_plot;
+        ctrl.scatter_plot.titles[0].text = ctrl.stage_details;
+        // also rename label of charts in case of a change
+        ctrl.scatter_plot.valueAxes[0].title = ctrl.incoming_data_type["name"];
+        ctrl.histogram.categoryAxis.title = ctrl.incoming_data_type["name"];
+        // https://docs.amcharts.com/3/javascriptcharts/AmChart, following refers to validateNow(validateData = true, skipEvents = false)
+        ctrl.scatter_plot.ignoreZoomed = true;
+        ctrl.scatter_plot.validateNow(true, false);
+        ctrl.histogram.dataProvider = ctrl.plotService.categorize_data(ctrl.processedData, ctrl.decimal_places);
+        ctrl.histogram.validateData();
+      }
+      ctrl.is_enough_data_for_plots = true;
     } else {
-      // now update (validate) values & threshold value and its guide (line) of the scatter plot & also update title
-      ctrl.scatter_plot.dataProvider = ctrl.processedData;
-      ctrl.scatter_plot.graphs[0].negativeBase = ctrl.initial_threshold_for_scatter_plot;
-      ctrl.scatter_plot.valueAxes[0].guides[0].value = ctrl.initial_threshold_for_scatter_plot;
-      ctrl.scatter_plot.titles[0].text = ctrl.stage_details;
-      // also rename label of charts in case of a change
-      ctrl.scatter_plot.valueAxes[0].title = ctrl.incoming_data_type["name"];
-      ctrl.histogram.categoryAxis.title = ctrl.incoming_data_type["name"];
-      // https://docs.amcharts.com/3/javascriptcharts/AmChart, following refers to validateNow(validateData = true, skipEvents = false)
-      ctrl.scatter_plot.ignoreZoomed = true;
-      ctrl.scatter_plot.validateNow(true, false);
-      ctrl.histogram.dataProvider = ctrl.plotService.categorize_data(ctrl.processedData, ctrl.decimal_places);
-      ctrl.histogram.validateData();
+      ctrl.is_enough_data_for_plots = false;
+      this.notify.error("Cannot retrieve data from server, please restart experiment");
     }
-    ctrl.is_enough_data_for_plots = true;
   }
 
   /** called when stage dropdown (All Stages, Stage 1 [...], Stage 2 [...], ...) in main page is changed */
   stage_changed(selected_stage) {
     if (selected_stage !== null)
       this.selected_stage = selected_stage;
-    if (this.entityService.scale_allowed(this.scale, this.incoming_data_type["scale"])) {
-      this.draw_all_plots();
+    if (!isNullOrUndefined(this.incoming_data_type)) {
+      if (this.entityService.scale_allowed(this.scale, this.incoming_data_type["scale"])) {
+        this.draw_all_plots();
+      } else {
+        // inform user and remove graphs from page for now
+        this.is_enough_data_for_plots = false;
+        this.notify.error(this.scale + " scale cannot be applied to " + this.incoming_data_type["name"]);
+      }
     } else {
-      // inform user and remove graphs from page for now
       this.is_enough_data_for_plots = false;
-      this.notify.error(this.scale + " scale cannot be applied to " + this.incoming_data_type["name"]);
+      this.notify.error("Incoming data type is null, select it from dropdown list");
     }
+
   }
 
   /** called when scale dropdown (Normal, Log) in main page is changed */
@@ -430,16 +441,8 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     return this.entityService.get_keys(object);
   }
 
-  /** optimized_data_types is retrieved from experiment definition.
-   * so, this function checks if given data type was selected for optimization or not
-   */
-  is_optimized(data_type_name) {
-    for (let i = 0; i < this.experiment.optimized_data_types.length; i++) {
-      if (this.experiment.optimized_data_types[i]["name"] === data_type_name) {
-        return true;
-      }
-    }
-    return false;
+  is_considered(data_type_name) {
+    return this.entityService.is_considered(this.experiment.considered_data_types, data_type_name);
   }
 
   // helper function that filters out data above the given threshold
@@ -499,4 +502,6 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
       this.notify.error("Error", errorResp.message);
     });
   }
+
+
 }

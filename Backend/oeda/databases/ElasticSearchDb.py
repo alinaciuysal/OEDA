@@ -109,7 +109,7 @@ class ElasticSearchDb(Database):
             }
         }
 
-        res = self.es.search(index=self.index, doc_type=self.experiment_type_name, body=query)
+        res = self.es.search(index=self.index, doc_type=self.experiment_type_name, body=query, sort='created')
         return [r["_id"] for r in res["hits"]["hits"]], [r["_source"] for r in res["hits"]["hits"]]
 
     def update_experiment_status(self, experiment_id, status):
@@ -224,6 +224,72 @@ class ElasticSearchDb(Database):
             return [r["_source"] for r in res["hits"]["hits"]]
         except ConnectionError:
             error("Error while retrieving data points from elasticsearch. Check connection to elasticsearch.")
+
+    def get_aggregation(self, experiment_id, stage_no, aggregation_name, field):
+        stage_id = self.create_stage_id(experiment_id, stage_no)
+        exact_field_name = "payload" + "." + str(field)
+        query = {
+            "query": {
+                "has_parent": {
+                    "type": "stage",
+                    "query": {
+                        "match": {
+                            "_id": str(stage_id)
+                        }
+                    }
+                }
+            }
+        }
+        query["size"] = 0 # we are not interested in matching data points
+
+        # prepare the aggregation query
+        # https://www.elastic.co/guide/en/elasticsearch/reference/5.5/search-aggregations-metrics-stats-aggregation.html
+        # aggregation name can be extended_stats, stats, percentiles etc.
+        # so aggregation_result_name would be percentiles_overhead, extended_stats_minimalCosts etc.
+        aggregation_key = aggregation_name + "_" + str(field)
+        query["aggs"] = {aggregation_key: {aggregation_name: {"field": exact_field_name} } }
+        try:
+            res = self.es.search(index=self.index, body=query)
+            if aggregation_name == "percentiles":
+                return res["aggregations"][aggregation_key]["values"]
+            else:
+                return res["aggregations"][aggregation_key]
+        except ConnectionError:
+            error("Error while retrieving aggregations from elasticsearch. Check connection to elasticsearch.")
+
+    # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-filter-aggregation.html
+    # can be extended with aggregations using above link
+    # for now we are only interested in the document count
+    # we are interested in the ratio of given field=value / number of all data that includes this field
+    # so, we only return the doc_count here, another query should be issued to get 'count' of all points
+    # if we had used res["hits"]["total"] here, it would be wrong because it also includes data from secondary providers
+    def get_count(self, experiment_id, stage_no, field, value):
+        stage_id = self.create_stage_id(experiment_id, stage_no)
+        exact_field_name = "payload" + "." + str(field)
+        aggregation_key = "count_" + str(field)
+        query = {
+            "query": {
+                "has_parent": {
+                    "type": "stage",
+                    "query": {
+                        "match": {
+                            "_id": str(stage_id)
+                        }
+                    }
+                }
+            },
+            "size": 0,
+            "aggs": {
+                aggregation_key: {
+                    "filter": {"term": {exact_field_name: value} }
+                }
+            }
+        }
+        try:
+            res = self.es.search(index=self.index, body=query)
+            return res["aggregations"][aggregation_key]["doc_count"]
+        except ConnectionError:
+            error("Error while retrieving aggregations from elasticsearch. Check connection to elasticsearch.")
 
     def get_data_points_after(self, experiment_id, stage_no, timestamp):
         stage_id = Database.create_stage_id(experiment_id, stage_no)

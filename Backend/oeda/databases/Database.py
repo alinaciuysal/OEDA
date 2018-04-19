@@ -64,6 +64,16 @@ class Database:
         """ returns data_points that are created after the given timestamp. Data points' parents are the concatenated stage_id (see create_stage_id) """
         pass
 
+    def get_aggregation(self, experiment_id, stage_no, aggregation_name, field):
+        """ returns aggregations for the given aggregation name, stage no, and data field found in the payload
+            supported aggregations are stats (count, min, max, average, sum), extended_stats (more options),
+            and percentiles (1.0, 5.0, 25.0, 50.0 (median), 75.0, 95.0, 99.0 """
+        pass
+
+    def get_count(self, experiment_id, stage_no, field, value):
+        """ returns document count for the given data field and its value """
+        pass
+
     def clear_db(self):
         """ just for testing, it re-creates an index """
         pass

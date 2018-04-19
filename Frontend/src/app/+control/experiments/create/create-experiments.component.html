@@ -20,7 +20,7 @@
           <div class="col-md-3">
             <div class="sub-title">Name</div>
             <div>
-                <select class="form-control" required (change)="firstDropDownChanged($event.target.value)">
+                <select class="form-control" required (change)="targetSystemChanged($event.target.value)">
                   <option disabled>Select target system</option>
                   <option *ngFor="let i of availableTargetSystems;" [ngValue]="i">{{ i.name }}</option>
                 </select>
@@ -315,31 +315,55 @@
         </div>
       </div>
       <div class="panel-body" style="padding-top: 20px">
-        <table class="table table-striped table-bordered table-hover">
-          <thead>
-            <th style="padding-left: 1%">Name</th>
-            <th style="padding-left: 1%">Scale</th>
-            <th style="padding-left: 1%">Description</th>
-            <th style="padding-left: 1%">Data Provider Name</th>
-            <th style="padding-left: 1%">Optimization Criteria</th>
-            <th style="padding-left: 1%">Consider</th>
-          </thead>
-          <tbody>
-          <tr *ngFor="let dataType of targetSystem.incomingDataTypes" style="padding-top: 1%">
-            <td>{{dataType.name}}</td>
-            <td>{{dataType.scale}}</td>
-            <td>{{dataType.description}}</td>
-            <td>{{dataType.dataProviderName}}</td>
-            <td>{{dataType.criteria}}</td>
-            <td>
-              <input type="checkbox" class="form-check-input"
-                     [(ngModel)]="dataType['is_optimized']"
-                     data-toggle="tooltip"
-                     title="Select one incoming data type to be optimized">
-            </td>
-          </tr>
-          </tbody>
-        </table>
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered table-hover">
+            <thead>
+              <th style="padding-left: 1%">Name</th>
+              <th style="padding-left: 1%">Scale</th>
+              <th style="padding-left: 1%">Description</th>
+              <th style="padding-left: 1%">Data Provider Name</th>
+              <th style="padding-left: 1%">Optimization Criteria</th>
+              <th style="padding-left: 1%">Consider</th>
+              <th *ngIf="is_data_type_selected()" style="padding-left: 1%">Aggregation</th>
+              <th *ngIf="is_data_type_selected()" style="padding-left: 1%">Weight</th>
+            </thead>
+            <tbody>
+            <tr *ngFor="let dataType of targetSystem.incomingDataTypes; let i = index" style="padding-top: 1%">
+              <td>{{dataType.name}}</td>
+              <td>{{dataType.scale}}</td>
+              <td>{{dataType.description}}</td>
+              <td>{{dataType.dataProviderName}}</td>
+              <td>{{dataType.criteria}}</td>
+              <td *ngIf="is_data_type_coming_from_primary(i)">
+                <input type="checkbox" class="form-check-input"
+                       (change)="data_type_checkbox_clicked(i)"
+                       data-toggle="tooltip"
+                       title="Select one incoming data type to be optimized">
+              </td>
+              <td *ngIf="dataType['is_considered'] && dataType.scale == 'Metric'">
+                <select [(ngModel)]="dataType['aggregateFunction']" required>
+                  <option *ngFor="let fcn of aggregateFunctionsMetric" [ngValue]="fcn.key">{{fcn.label}}</option>
+                </select>
+              </td>
+              <td *ngIf="dataType['is_considered'] && dataType.scale == 'Nominal'">
+                <select [(ngModel)]="dataType['aggregateFunction']" required>
+                  <option *ngFor="let fcn of aggregateFunctionsNominal" [ngValue]="fcn.key">{{fcn.label}}</option>
+                </select>
+              </td>
+              <td *ngIf="dataType['is_considered']">
+                <input type="number" class="form-check-input"
+                       data-toggle="tooltip"
+                       title="Please give weight of this data type for the final result"
+                       [(ngModel)]="dataType['weight']"
+                       [min]="1"
+                       [max]="100"
+                       required>
+                <span *ngIf="dataType['aggregateFunction'] !== 'percentiles'"><b>%</b></span>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

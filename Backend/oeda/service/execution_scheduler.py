@@ -83,12 +83,12 @@ def kill_experiment(experiment_id):
         return False
 
 
+def oeda_callback(dictionary, experiment_id):
+    """"Custom callback that RTX uses to update us with experiment progress information"""
+    set_dict(dictionary, experiment_id)
+
+
 def rtx_execution(experiment, target_system, oeda_stop_request):
-
-    def oeda_callback(dictionary, experiment_id):
-        """"Custom callback that RTX uses to update us with experiment progress information"""
-        set_dict(dictionary, experiment_id)
-
     try:
         set_experiment_status(experiment["id"], "RUNNING")
         set_target_system_status(experiment["targetSystemId"], "WORKING")

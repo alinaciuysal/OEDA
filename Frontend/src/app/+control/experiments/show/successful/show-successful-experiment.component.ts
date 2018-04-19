@@ -300,16 +300,8 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     }
   }
 
-  /** optimized_data_types are retrieved from experiment definition.
-   * so, this function checks if given data type was selected for optimization or not
-   */
-  is_optimized(data_type_name) {
-    for (let i = 0; i < this.experiment.optimized_data_types.length; i++) {
-      if (this.experiment.optimized_data_types[i]["name"] === data_type_name) {
-        return true;
-      }
-    }
-    return false;
+  is_considered(data_type_name) {
+    return this.entityService.is_considered(this.experiment.considered_data_types, data_type_name);
   }
 
   /** called when selected stage dropdown in QQ JS is changed */

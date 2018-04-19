@@ -5,8 +5,11 @@ import {LayoutService} from "../../../shared/modules/helper/layout.service";
 import {OEDAApiService, Experiment, Target, ExecutionStrategy} from "../../../shared/modules/api/oeda-api.service";
 import * as _ from "lodash.clonedeep";
 import {UUID} from "angular2-uuid";
-import {isNullOrUndefined} from "util";
+import {isNull, isNullOrUndefined} from "util";
 import {TempStorageService} from "../../../shared/modules/helper/temp-storage-service";
+import {forEach} from "@angular/router/src/utils/collection";
+import {EntityService} from "../../../shared/util/entity-service";
+import {hasOwnProperty} from "tslint/lib/utils";
 
 
 @Component({
@@ -25,20 +28,44 @@ export class CreateExperimentsComponent implements OnInit {
   stages_count: any;
   is_collapsed: boolean;
   errorButtonLabel: string;
+  aggregateFunctionsMetric: any;
+  aggregateFunctionsNominal: any;
 
   constructor(private layout: LayoutService, private api: OEDAApiService,
               private router: Router, private notify: NotificationsService,
-              private temp_storage: TempStorageService) {
+              private temp_storage: TempStorageService, private entityService: EntityService) {
     this.availableTargetSystems = [];
     this.initialVariables = [];
 
-    this.targetSystem = this.createTargetSystem();
-    // create an empty experiment and execution strategy
-    this.executionStrategy = this.createExecutionStrategy();
-    this.experiment = this.createExperiment();
+    // create experiment, target system, and execution strategy
+    this.executionStrategy = this.entityService.create_execution_strategy();
+    this.targetSystem = this.entityService.create_target_system();
+    this.experiment = this.entityService.create_experiment(this.executionStrategy);
     this.originalExperiment = _(this.experiment);
     this.stages_count = null;
     this.is_collapsed = true;
+    /** TODO: add support for other scales */
+    this.aggregateFunctionsMetric = [
+      {key:'avg',label:'Average'},
+      {key:'min',label:'Min'},
+      {key:'max',label:'Max'},
+      {key:'count',label:'Count'},
+      {key:'sum',label:'Sum'},
+      {key:'percentiles-1', label:'1st Percentile'},
+      {key:'percentiles-5', label:'5th Percentile'},
+      {key:'percentiles-25', label:'25th Percentile'},
+      {key:'percentiles-50', label:'50th Percentile (median)'},
+      {key:'percentiles-75', label:'75th Percentile'},
+      {key:'percentiles-95', label:'95th Percentile'},
+      {key:'percentiles-99', label:'99th Percentile'},
+      {key:'sum_of_squares', label:'Sum of Squares'},
+      {key:'variance', label:'Variance'},
+      {key:'std_deviation', label:'Std. Deviation'}
+    ];
+    this.aggregateFunctionsNominal = [
+      {key:'ratio-True',label:'True Ratio'},
+      {key:'ratio-False',label:'False Ratio'}
+    ];
   }
 
   ngOnInit(): void {
@@ -59,13 +86,196 @@ export class CreateExperimentsComponent implements OnInit {
     );
   }
 
+  saveExperiment() {
+    if (!this.hasErrors()) {
+      let all_knobs = [];
+      let experiment_type = this.experiment.executionStrategy.type;
+      // push names & default values of target system to executionStrategy for forever strategy if there are no errors
+      if (experiment_type === 'forever') {
+        for (let j = 0; j < this.targetSystem.defaultVariables.length; j++) {
+          let default_knob  = this.targetSystem.defaultVariables[j];
+          let knob = [];
+          knob.push(default_knob["name"]);
+          knob.push(default_knob["default"]);
+          all_knobs.push(knob);
+        }
+      } else {
+        // regular knob creation (name, min, max, step -if applicable-)
+        for (let j = 0; j < this.experiment.changeableVariables.length; j++) {
+          let changeable_variable = this.experiment.changeableVariables[j];
+          const knob = [];
+          knob.push(changeable_variable.name);
+          knob.push(Number(changeable_variable.min));
+          knob.push(Number(changeable_variable.max));
+          if (this.experiment.executionStrategy.type === "step_explorer") {
+            knob.push(Number(changeable_variable.step));
+          }
+          all_knobs.push(knob);
+        }
+        this.experiment.executionStrategy.sample_size = Number(this.experiment.executionStrategy.sample_size);
+        // save experiment stage to executionStrategy, so that it can be used in determining nr of remaining stages and estimated time
+        this.experiment.executionStrategy.stages_count = Number(this.stages_count);
+        if (experiment_type === "random" || experiment_type === "mlr_mbo" || experiment_type === "self_optimizer" || experiment_type === "uncorrelated_self_optimizer") {
+          this.experiment.executionStrategy.optimizer_iterations = Number(this.experiment.executionStrategy.optimizer_iterations);
+          this.experiment.executionStrategy.optimizer_iterations_in_design = Number(this.experiment.executionStrategy.optimizer_iterations_in_design);
+        }
+      }
+      this.experiment.executionStrategy.knobs = all_knobs;
+      // now take the incoming data type labeled as "optimize"
+      for (let item of this.targetSystem.incomingDataTypes) {
+        if (item.is_considered === true) {
+          this.experiment.considered_data_types.push(item);
+        }
+      }
+      this.api.saveExperiment(this.experiment).subscribe(
+        (success) => {
+          this.notify.success("Success", "Experiment saved");
+          this.temp_storage.setNewValue(this.experiment);
+          this.router.navigate(["control/experiments"]);
+        }, (error) => {
+          this.notify.error("Error", error.toString());
+        }
+      )
+    }
+  }
+
+  // called for every div that's bounded to *ngIf=!hasErrors() expression.
+  hasErrors(): boolean {
+    const cond1 = this.targetSystem.status === "WORKING";
+    const cond2 = this.targetSystem.status === "ERROR";
+    if (cond1 || cond2) {
+      this.errorButtonLabel = "Target system is not available";
+      return true;
+    }
+
+    const cond3 = this.experiment.name === null;
+    const cond4 = this.experiment.name.length === 0;
+    if (cond3 || cond4) {
+      this.errorButtonLabel = "Provide experiment name";
+      return true;
+    }
+
+    // check data types to be considered
+    let weight_sum = 0;
+    for (let item of this.targetSystem.incomingDataTypes) {
+      if (item.is_considered) {
+        // check aggregate functions
+        if (isNullOrUndefined(item["aggregateFunction"])) {
+          this.errorButtonLabel = "Provide valid aggregate function(s)";
+          return true;
+        }
+
+        // check weights
+        if (isNullOrUndefined(item["weight"])) {
+          this.errorButtonLabel = "Provide valid weight(s)";
+          return true;
+        } else {
+          if (item["weight"] <= 0 || item["weight"] > 100) {
+            this.errorButtonLabel = "Provide valid weight(s)";
+            return true;
+          }
+          else {
+            weight_sum += item["weight"];
+          }
+        }
+      }
+    }
+    if (this.entityService.get_number_of_considered_data_types(this.targetSystem) == 0) {
+      this.errorButtonLabel = "Provide at least one incoming type to be optimized";
+      return true;
+    }
+
+    // check weights' sum with 3-decimal precision
+    if (weight_sum < 99.999 || weight_sum > 100) {
+      this.errorButtonLabel = "Weights should sum up to 100";
+      return true;
+    }
+
+    if (this.experiment.executionStrategy.type.length === 0) {
+      this.errorButtonLabel = "Provide execution strategy";
+      return true;
+    } else {
+      let execution_strategy_type = this.experiment.executionStrategy.type;
+      if (execution_strategy_type === "step_explorer") {
+        // check inputs for step strategy changeable variables
+        for (let j = 0; j < this.experiment.changeableVariables.length; j++) {
+          let variable = this.experiment.changeableVariables[j];
+          if (variable["step"] <= 0 || variable["min"] >= variable["max"] || variable["step"] > variable["max"] - variable["min"]) {
+            this.errorButtonLabel = "Provide valid inputs for step strategy variable(s)";
+            return true;
+          }
+        }
+      }
+      // for this phase, changeable variables are still accessible at targetSystem.defaultVariables
+      // if everything is ok, it skips this step and we match targetSystem.defaultVariables with experiment.executionStrategy.knobs before saving experiment
+      else if (execution_strategy_type === "forever") {
+        for (let j = 0; j < this.targetSystem.defaultVariables.length; j++) {
+          let variable = this.targetSystem.defaultVariables[j];
+          // TODO: can we have variables less than 0 ? is this correct?
+          if (variable["default"] < 0 || variable["default"] > variable["max"] || variable["default"] < variable["min"]) {
+            this.errorButtonLabel = "Provide valid inputs for forever strategy variable(s)";
+            return true;
+          }
+        }
+      }
+      // TODO: check inputs of sequential strategy after UI updates
+      else if(execution_strategy_type === "sequential") {
+
+      }
+      // now check iteration inputs for respective strategies
+      else if (execution_strategy_type === "random" || execution_strategy_type === "mlr_mbo" || execution_strategy_type === "self_optimizer" || execution_strategy_type === "uncorrelated_self_optimizer") {
+        if (this.experiment.executionStrategy.optimizer_iterations === null || this.experiment.executionStrategy.optimizer_iterations_in_design === null
+          || this.experiment.executionStrategy.optimizer_iterations <= 0 || this.experiment.executionStrategy.optimizer_iterations_in_design < 0) {
+          this.errorButtonLabel = "Provide valid inputs for execution strategy";
+          return true;
+        }
+      }
+
+      // check if initial design of mlr mbo is large enough
+      if (execution_strategy_type === "mlr_mbo") {
+        let minimum_number_of_iterations = this.experiment.changeableVariables.length * 4;
+        if (this.experiment.executionStrategy.optimizer_iterations_in_design < minimum_number_of_iterations) {
+          this.errorButtonLabel = "Number of optimizer iterations in design should be greater than " + minimum_number_of_iterations.toString() + " for " + execution_strategy_type;
+          return true;
+        }
+      } else if (execution_strategy_type === "uncorrelated_self_optimizer" || execution_strategy_type === "self_optimizer") {
+        // check if number of iterations for skopt are enough
+        let minimum_number_of_iterations = 5;
+        if (this.experiment.executionStrategy.optimizer_iterations < minimum_number_of_iterations) {
+          this.errorButtonLabel = "Number of optimizer iterations should be greater than " + minimum_number_of_iterations.toString() + " for " + execution_strategy_type;
+          return true;
+        }
+      }
+      if (execution_strategy_type === "self_optimizer" || execution_strategy_type === "uncorrelated_self_optimizer" || execution_strategy_type === "mlr_mbo") {
+        if (this.experiment.executionStrategy.acquisition_method === null) {
+          this.errorButtonLabel = "Provide valid input for the acquisition method of the selected strategy";
+          return true;
+        }
+      }
+    }
+
+    const cond5 = this.experiment.changeableVariables == null;
+    const cond6 = this.experiment.changeableVariables.length === 0;
+    const cond7 = this.experiment.executionStrategy.type !== 'forever';
+    if ( (cond5 || cond6) && cond7) {
+      this.errorButtonLabel = "Provide at least one changeable variable";
+      return true;
+    }
+
+    if (this.experiment.executionStrategy.sample_size <= 0) {
+      this.errorButtonLabel = "Provide a valid sample size";
+      return true;
+    }
+    return false;
+  }
+
   navigateToTargetSystemPage() {
     this.router.navigate(["control/targets/create"]).then(() => {
       console.log("navigated to target system creation page");
     });
   }
 
-  firstDropDownChanged(targetSystemName: any) {
+  targetSystemChanged(targetSystemName: any) {
     this.selectedTargetSystem = this.availableTargetSystems.find(item => item.name === targetSystemName);
 
     if (this.selectedTargetSystem !== undefined) {
@@ -92,7 +302,6 @@ export class CreateExperimentsComponent implements OnInit {
       this.initialVariables = this.selectedTargetSystem.changeableVariables.slice(0);
 
       this.targetSystem = this.selectedTargetSystem;
-
       // relate target system with experiment now
       this.experiment.targetSystemId = this.selectedTargetSystem.id;
 
@@ -216,209 +425,52 @@ export class CreateExperimentsComponent implements OnInit {
     return JSON.stringify(this.experiment) !== JSON.stringify(this.originalExperiment);
   }
 
-  saveExperiment() {
-    if (!this.hasErrors()) {
-      let all_knobs = [];
-      let experiment_type = this.experiment.executionStrategy.type;
-      // push names & default values of target system to executionStrategy for forever strategy if there are no errors
-      if (experiment_type === 'forever') {
-        for (let j = 0; j < this.targetSystem.defaultVariables.length; j++) {
-          let default_knob  = this.targetSystem.defaultVariables[j];
-          let knob = [];
-          knob.push(default_knob["name"]);
-          knob.push(default_knob["default"]);
-          all_knobs.push(knob);
-        }
-      } else {
-        // regular knob creation (name, min, max, step -if applicable-)
-        for (let j = 0; j < this.experiment.changeableVariables.length; j++) {
-          let changeable_variable = this.experiment.changeableVariables[j];
-          const knob = [];
-          knob.push(changeable_variable.name);
-          knob.push(Number(changeable_variable.min));
-          knob.push(Number(changeable_variable.max));
-          if (this.experiment.executionStrategy.type === "step_explorer") {
-            knob.push(Number(changeable_variable.step));
-          }
-          all_knobs.push(knob);
-        }
-        this.experiment.executionStrategy.sample_size = Number(this.experiment.executionStrategy.sample_size);
-        // save experiment stage to executionStrategy, so that it can be used in determining nr of remaining stages and estimated time
-        this.experiment.executionStrategy.stages_count = Number(this.stages_count);
-        if (experiment_type === "random" || experiment_type === "mlr_mbo" || experiment_type === "self_optimizer" || experiment_type === "uncorrelated_self_optimizer") {
-          this.experiment.executionStrategy.optimizer_iterations = Number(this.experiment.executionStrategy.optimizer_iterations);
-          this.experiment.executionStrategy.optimizer_iterations_in_design = Number(this.experiment.executionStrategy.optimizer_iterations_in_design);
-        }
+  public is_data_type_selected(): boolean {
+    for (let dataType of this.targetSystem.incomingDataTypes) {
+      if (dataType["is_considered"] == true) {
+        return true;
       }
-      this.experiment.executionStrategy.knobs = all_knobs;
-      // now take the incoming data type labeled as "optimize"
-      for (let item of this.targetSystem.incomingDataTypes) {
-        if (item.is_optimized === true) {
-          this.experiment.optimized_data_types.push(item);
-        }
-      }
-      this.api.saveExperiment(this.experiment).subscribe(
-        (success) => {
-          this.notify.success("Success", "Experiment saved");
-          this.temp_storage.setNewValue(this.experiment);
-          this.router.navigate(["control/experiments"]);
-        }, (error) => {
-          this.notify.error("Error", error.toString());
-        }
-      )
-    }
-  }
-
-  // called for every div that's bounded to *ngIf=!hasErrors() expression.
-  hasErrors(): boolean {
-    const cond1 = this.targetSystem.status === "WORKING";
-    const cond2 = this.targetSystem.status === "ERROR";
-    if (cond1 || cond2) {
-      this.errorButtonLabel = "Target system is not available";
-      return true;
-    }
-
-    const cond3 = this.experiment.name === null;
-    const cond4 = this.experiment.name.length === 0;
-    if (cond3 || cond4) {
-      this.errorButtonLabel = "Provide experiment name";
-      return true;
-    }
-
-    // check data types to be optimized (minimize or maximize)
-    let nr_of_incoming_data_types_to_be_optimized = 0;
-    for (let item of this.targetSystem.incomingDataTypes) {
-      if (item.is_optimized) {
-        nr_of_incoming_data_types_to_be_optimized += 1;
-      }
-    }
-    if (nr_of_incoming_data_types_to_be_optimized != 1) {
-      this.errorButtonLabel = "Provide one incoming type to be optimized";
-      return true;
-    }
-
-    if (this.experiment.executionStrategy.type.length === 0) {
-      this.errorButtonLabel = "Provide execution strategy";
-      return true;
-    } else {
-      let execution_strategy_type = this.experiment.executionStrategy.type;
-      if (execution_strategy_type === "step_explorer") {
-        // check inputs for step strategy changeable variables
-        for (let j = 0; j < this.experiment.changeableVariables.length; j++) {
-          let variable = this.experiment.changeableVariables[j];
-          if (variable["step"] <= 0 || variable["min"] >= variable["max"] || variable["step"] > variable["max"] - variable["min"]) {
-            this.errorButtonLabel = "Provide valid inputs for step strategy variable(s)";
-            return true;
-          }
-        }
-      }
-      // for this phase, changeable variables are still accessible at targetSystem.defaultVariables
-      // if everything is ok, it skips this step and we match targetSystem.defaultVariables with experiment.executionStrategy.knobs before saving experiment
-      else if (execution_strategy_type === "forever") {
-        for (let j = 0; j < this.targetSystem.defaultVariables.length; j++) {
-          let variable = this.targetSystem.defaultVariables[j];
-          // TODO: can we have variables less than 0 ? is this correct?
-          if (variable["default"] < 0 || variable["default"] > variable["max"] || variable["default"] < variable["min"]) {
-            this.errorButtonLabel = "Provide valid inputs for forever strategy variable(s)";
-            return true;
-          }
-        }
-      }
-      // TODO: check inputs of sequential strategy after UI updates
-      else if(execution_strategy_type === "sequential") {
-
-      }
-      // now check iteration inputs for respective strategies
-      else if (execution_strategy_type === "random" || execution_strategy_type === "mlr_mbo" || execution_strategy_type === "self_optimizer" || execution_strategy_type === "uncorrelated_self_optimizer") {
-        if (this.experiment.executionStrategy.optimizer_iterations === null || this.experiment.executionStrategy.optimizer_iterations_in_design === null
-            || this.experiment.executionStrategy.optimizer_iterations <= 0 || this.experiment.executionStrategy.optimizer_iterations_in_design < 0) {
-          this.errorButtonLabel = "Provide valid inputs for execution strategy";
-          return true;
-        }
-      }
-
-      // check if initial design of mlr mbo is large enough
-      if (execution_strategy_type === "mlr_mbo") {
-        let minimum_number_of_iterations = this.experiment.changeableVariables.length * 4;
-        if (this.experiment.executionStrategy.optimizer_iterations_in_design < minimum_number_of_iterations) {
-          this.errorButtonLabel = "Number of optimizer iterations in design should be greater than " + minimum_number_of_iterations.toString() + " for " + execution_strategy_type;
-          return true;
-        }
-      } else if (execution_strategy_type === "uncorrelated_self_optimizer" || execution_strategy_type === "self_optimizer") {
-        // check if number of iterations for skopt are enough
-        let minimum_number_of_iterations = 5; // TODO: determined by library, there was a case when this was 10?..
-        if (this.experiment.executionStrategy.optimizer_iterations < minimum_number_of_iterations) {
-          this.errorButtonLabel = "Number of optimizer iterations should be greater than " + minimum_number_of_iterations.toString() + " for " + execution_strategy_type;
-          return true;
-        }
-      }
-      if (execution_strategy_type === "self_optimizer" || execution_strategy_type === "uncorrelated_self_optimizer" || execution_strategy_type === "mlr_mbo") {
-        if (this.experiment.executionStrategy.acquisition_method === null) {
-          this.errorButtonLabel = "Provide valid input for the acquisition method of the selected strategy";
-          return true;
-        }
-      }
-    }
-
-    const cond5 = this.experiment.changeableVariables == null;
-    const cond6 = this.experiment.changeableVariables.length === 0;
-    const cond7 = this.experiment.executionStrategy.type !== 'forever';
-    if ( (cond5 || cond6) && cond7) {
-      this.errorButtonLabel = "Provide at least one changeable variable";
-      return true;
-    }
-
-    if (this.experiment.executionStrategy.sample_size <= 0) {
-      this.errorButtonLabel = "Provide a valid sample size";
-      return true;
     }
     return false;
   }
 
-  createExperiment(): Experiment {
-    return {
-      "id": UUID.UUID(),
-      "name": "",
-      "description": "",
-      "status": "",
-      "targetSystemId": "",
-      "executionStrategy": this.executionStrategy,
-      "changeableVariables": [],
-      "optimized_data_types": []
+  /**
+   * sets respective weights of data types when user clicks
+   */
+  public data_type_checkbox_clicked(data_type_index): void {
+    let data_type = this.targetSystem.incomingDataTypes[data_type_index];
+    // first click
+    if (isNullOrUndefined(data_type["is_considered"])) {
+      data_type["is_considered"] = true;
+      data_type["weight"] = 100 / this.entityService.get_number_of_considered_data_types(this.targetSystem);
+    }
+    // subsequent clicks
+    else {
+      data_type["is_considered"] = !data_type["is_considered"];
+    }
+
+    // adjust weights of all data types
+    for (let i = 0; i < this.targetSystem.incomingDataTypes.length; i++) {
+      let data_type = this.targetSystem.incomingDataTypes[i];
+      if(data_type["is_considered"] == true) {
+        data_type["weight"] = 100 / this.entityService.get_number_of_considered_data_types(this.targetSystem);
+      } else {
+        data_type["weight"] = undefined;
+      }
     }
   }
 
-  createTargetSystem(): Target {
-    return {
-      "id": "",
-      "dataProviders": [],
-      "primaryDataProvider": {
-        "type": "",
-        "ignore_first_n_samples": null
-      },
-      "secondaryDataProviders": [],
-      "changeProvider": {
-        "type": "",
-      },
-      "name": "",
-      "status": "",
-      "description": "",
-      "incomingDataTypes": [],
-      "changeableVariables": [],
-      "defaultVariables": []
+  /**
+   * checks whether given data type is coming from primaryDataProvider of targetSystem
+   */
+  public is_data_type_coming_from_primary(data_type_index): boolean {
+    let data_type_name = this.targetSystem.incomingDataTypes[data_type_index]["name"];
+    for (let data_type of this.targetSystem.primaryDataProvider.incomingDataTypes) {
+      if (data_type["name"] == data_type_name) {
+        return true;
+      }
     }
-  }
-
-  createExecutionStrategy(): ExecutionStrategy {
-    return {
-      type: "",
-      sample_size: 40,
-      knobs: [],
-      stages_count: 0,
-      acquisition_method: "",
-      optimizer_iterations: 10,
-      optimizer_iterations_in_design: 0
-    }
+    return false;
   }
 
 }

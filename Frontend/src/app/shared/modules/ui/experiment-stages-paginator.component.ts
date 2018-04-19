@@ -143,11 +143,13 @@ export class ExperimentStagesPaginatorComponent implements OnInit {
   /** returns true if given variable is being tested in the experiment */
   is_included_in_experiment(knob_key_name: string): boolean {
     let found: boolean = false;
-    this.experiment.changeableVariables.forEach(function(ch_var) {
-      if (ch_var["name"] == knob_key_name && !found) {
-        found = true;
-      }
-    });
+    if (!isNullOrUndefined(this.experiment.changeableVariables)) {
+      this.experiment.changeableVariables.forEach(function(ch_var) {
+        if (ch_var["name"] == knob_key_name && !found) {
+          found = true;
+        }
+      });
+    }
     return found;
   }
 

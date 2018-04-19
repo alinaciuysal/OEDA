@@ -1,8 +1,10 @@
 import {NotificationsService} from "angular2-notifications";
 import {LoggerService} from "../modules/helper/logger.service";
 import {Injectable} from "@angular/core";
-import {StageEntity, Experiment, OedaCallbackEntity, UserEntity} from "../modules/api/oeda-api.service";
+import {StageEntity, Experiment, OedaCallbackEntity, UserEntity, Target, ExecutionStrategy} from "../modules/api/oeda-api.service";
+
 import {isNullOrUndefined} from "util";
+import {UUID} from "angular2-uuid";
 
 @Injectable()
 /** This class provides methods related with experiment data object(s) that are retrieved from backend */
@@ -142,6 +144,52 @@ export class EntityService {
     return all_data;
   }
 
+  public create_experiment(execution_strategy): Experiment {
+      return {
+        "id": UUID.UUID(),
+        "name": "",
+        "description": "",
+        "status": "",
+        "targetSystemId": "",
+        "executionStrategy": execution_strategy,
+        "changeableVariables": [], // used while creating an experiment
+        "considered_data_types": []
+      }
+  }
+
+  public create_target_system(): Target {
+    return {
+      "id": "",
+      "dataProviders": [],
+      "primaryDataProvider": {
+        "type": "",
+        "ignore_first_n_samples": null
+      },
+      "secondaryDataProviders": [],
+      "changeProvider": {
+        "type": "",
+      },
+      "name": "",
+      "status": "",
+      "description": "",
+      "incomingDataTypes": [],
+      "changeableVariables": [], // used while creating a target system
+      "defaultVariables": []
+    }
+  }
+
+  public create_execution_strategy(): ExecutionStrategy {
+    return {
+      type: "",
+      sample_size: 40,
+      knobs: [],
+      stages_count: 0,
+      acquisition_method: "",
+      optimizer_iterations: 10,
+      optimizer_iterations_in_design: 0
+    }
+  }
+
   public create_oeda_callback_entity(): OedaCallbackEntity {
     return {
       status: "Initializing...",
@@ -211,9 +259,9 @@ export class EntityService {
     }
 
     // first check if we can get one of the optimized data types from payload
-    for (let k = 0; k < experiment.optimized_data_types.length; k++) {
-      const candidate_incoming_optimized_data_type = experiment.optimized_data_types[k];
-      if (candidate_incoming_optimized_data_type["is_optimized"] === true) {
+    for (let k = 0; k < experiment.considered_data_types.length; k++) {
+      const candidate_incoming_optimized_data_type = experiment.considered_data_types[k];
+      if (candidate_incoming_optimized_data_type["is_considered"] === true) {
         if (this.is_data_type_retrieved(first_stage_data, candidate_incoming_optimized_data_type)) {
           return candidate_incoming_optimized_data_type;
         }
@@ -297,6 +345,32 @@ export class EntityService {
       });
     }
     return stageKnobs
+  }
+
+  /**
+   * checks if given data type was selected (considered) or not
+   */
+  public is_considered(considered_data_types, data_type_name): boolean {
+    for (let i = 0; i < considered_data_types.length; i++) {
+      if (considered_data_types["name"] === data_type_name) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * returns number of considered data types
+   */
+  public get_number_of_considered_data_types(targetSystem): number {
+    let number_of_considered_data_types = 0;
+    for (let i = 0; i < targetSystem.incomingDataTypes.length; i++) {
+      let data_type = targetSystem.incomingDataTypes[i];
+      if (data_type["is_considered"] == true) {
+        number_of_considered_data_types += 1
+      }
+    }
+    return number_of_considered_data_types;
   }
 
   /**

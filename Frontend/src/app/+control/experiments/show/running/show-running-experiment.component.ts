@@ -327,7 +327,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
         if (Number(index) == response.length - 1) {
           let data_point_length = parsed_json_object['values'].length;
           if (data_point_length > 0) {
-            ctrl.timestamp = parsed_json_object.values[data_point_length - 1]['created'];
+            ctrl.timestamp = parsed_json_object.values[data_point_length - 1]['createdDate'];
             return true;
           }
         }

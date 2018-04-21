@@ -49,7 +49,7 @@ export class EntityService {
             }
             if (xAttribute !== null && yAttribute !== null) {
               const newElement = {};
-              newElement[xAttribute] = data_point["created"];
+              newElement[xAttribute] = data_point["createdDate"];
 
               if (scale === "Log") {
                 newElement[yAttribute] = Number(Math.log(data_point["payload"][incoming_data_type_name]).toFixed(ctrl.decimal_places));
@@ -135,7 +135,7 @@ export class EntityService {
         new_entity.number = parsed_json_object['number'].toString();
         new_entity.values = parsed_json_object['values'];
         new_entity.knobs = parsed_json_object['knobs'];
-        // important assumption here: we retrieve stages and data points in a sorted manner with respect to created field
+        // important assumption here: we retrieve stages and data points in a sorted manner with respect to createdDate field
         // thus, pushed new_entity will have a key of its "number" with this assumption
         // e.g. [ 0: {number: 1, values: ..., knobs: [...]}, 1: {number: 2, values: ..., knobs: [...] }...]
         all_data.push(new_entity);
@@ -221,9 +221,9 @@ export class EntityService {
     }
   }
 
-  /** we do not allow user to take Log of Nominal data */
+  /** we do not allow user to take Log of Boolean (Nominal) data */
   public scale_allowed(user_selected_scale, data_scale) {
-    if (user_selected_scale === "Log" && data_scale === "Nominal") {
+    if (user_selected_scale === "Log" && data_scale === "Boolean") {
       return false;
     }
     return true;

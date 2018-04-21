@@ -1,7 +1,7 @@
 from oeda.databases import db
-import numpy as np
 from math import isnan
 from oeda.log import *
+from oeda.utilities.MathUtility import take_inverse
 
 class RTXDefinition:
 
@@ -73,7 +73,6 @@ class RTXDefinition:
         new_data is sth like {'overhead' : 1.22253, 'minimalCosts': '200.2522', ...} but count is same for all keys """
     @staticmethod
     def primary_data_reducer(new_data, wf):
-        info("index of primary data " + str(wf.primary_data_counter) + str(new_data))
         db().save_data_point(new_data, wf.primary_data_counter, wf.id, wf.stage_counter, None)
         wf.primary_data_counter += 1
         # for index, (data_type_name, data_type_value) in enumerate(new_data.items()):
@@ -94,7 +93,6 @@ class RTXDefinition:
         declare another secondary data provider for this purpose """
     @staticmethod
     def secondary_data_reducer(new_data, wf, idx):
-        info("index of secondary data " + str(wf.secondary_data_counter) + str(new_data))
         db().save_data_point(new_data, wf.secondary_data_counter, wf.id, wf.stage_counter, idx)
         wf.secondary_data_counter += 1
         # for index, (data_type_name, data_type_value) in enumerate(new_data.items()):
@@ -131,15 +129,14 @@ class RTXDefinition:
         db().save_stage(wf.stage_counter, stage_knob, wf.id)
 
     @staticmethod
-    def calculate_result(state, wf):
+    def calculate_result(wf):
         weighted_sum = 0
         for data_type in wf.considered_data_types:
             data_type_name = data_type["name"]
             data_type_aggregate_function = str(data_type['aggregateFunction'])
             aggs = db().get_aggregation(wf.id, wf.stage_counter, "stats", data_type_name)
-            print(aggs)
-            # distinction between nominal scale TODO: more scale will be added
-            if data_type["scale"] == "Nominal":
+            # distinction between boolean (nominal) scale TODO: more scale will be added
+            if data_type["scale"] == "Boolean":
                 # now data_type_aggregate_function is either count-True or count-False
                 field_value = data_type_aggregate_function.split("-")[1] # fetch value
                 field_value = 1 if field_value == 'True' else 0 # because we store them in binary, not in True/False
@@ -158,26 +155,23 @@ class RTXDefinition:
                         aggregate_function = "extended_stats"
                     values = db().get_aggregation(wf.id, wf.stage_counter, aggregate_function, data_type_name)
                     value = values[data_type_aggregate_function] # retrieve exact value from response
-                print("retrieved value", value)
             if value is not None and isnan(float(value)) is False:
                 # maximization criteria before calculating the result
                 if data_type["criteria"] == "Maximize":
-                    print("value before ", value)
-                    value = np.reciprocal(value)
-                    print("value after ", value)
+                    value = take_inverse(value)
                 weighted_sum += value * float(data_type["weight"]) / 100
             info("data_type_name: " + data_type_name + " value: " + str(value) + " weight: " + str(data_type["weight"]) + " weighted_sum: " + str(weighted_sum))
-        state["result"] = weighted_sum / len(wf.considered_data_types)
-        return state
+        result = weighted_sum
+        return result
 
     @staticmethod
-    def evaluator(state, wf):
-        wf.stage_counter += 1
+    def evaluator(wf):
         # do the actual calculation of output variable (y)
-        state = RTXDefinition.calculate_result(state, wf)
+        result = RTXDefinition.calculate_result(wf)
         info("---------------- result")
-        info(state["result"])
-        return state["result"]
+        info(result)
+        wf.stage_counter += 1 # this must be done after all calculations
+        return result
 
 def get_experiment_list(strategy_type, knobs):
 

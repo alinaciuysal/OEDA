@@ -5,10 +5,7 @@ from oeda.databases import db
 import json as json
 import traceback
 from oeda.controller.experiment_results import get_all_stage_data
-from oeda.log import *
-
-globalDict = dict()
-
+import oeda.controller.callback as cb
 
 class RunningAllStageResultsWithExperimentIdController(Resource):
 
@@ -50,12 +47,6 @@ def get_all_stage_data_after(experiment_id, timestamp):
             all_stage_data.append(json_data)
     return all_stage_data
 
-
-def set_dict(dictionary, experiment_id):
-    global globalDict
-    globalDict[experiment_id] = dictionary
-
-
 # returns _oedaCallback as an API
 class OEDACallbackController(Resource):
 
@@ -65,13 +56,11 @@ class OEDACallbackController(Resource):
             if experiment_id is None:
                 return {"error": "experiment_id should not be null"}, 404
 
-            global globalDict
-            if experiment_id not in globalDict:
+            if cb.get_dict(experiment_id) is None:
                 resp = jsonify({"status": "PROCESSING", "message": "OEDA callback for this experiment has not been processed yet..."})
             else:
                 # should return the dict to user after callback is received
-                resp = jsonify(globalDict[experiment_id])
-                # info("> globalDict[experiment_id]     | " + str(globalDict[experiment_id]))
+                resp = jsonify(cb.get_dict(experiment_id))
 
             resp.status_code = 200
             return resp

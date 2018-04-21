@@ -29,7 +29,7 @@ export class CreateExperimentsComponent implements OnInit {
   is_collapsed: boolean;
   errorButtonLabel: string;
   aggregateFunctionsMetric: any;
-  aggregateFunctionsNominal: any;
+  aggregateFunctionsBoolean: any;
 
   constructor(private layout: LayoutService, private api: OEDAApiService,
               private router: Router, private notify: NotificationsService,
@@ -62,7 +62,7 @@ export class CreateExperimentsComponent implements OnInit {
       {key:'variance', label:'Variance'},
       {key:'std_deviation', label:'Std. Deviation'}
     ];
-    this.aggregateFunctionsNominal = [
+    this.aggregateFunctionsBoolean = [
       {key:'ratio-True',label:'True Ratio'},
       {key:'ratio-False',label:'False Ratio'}
     ];
@@ -277,7 +277,6 @@ export class CreateExperimentsComponent implements OnInit {
 
   targetSystemChanged(targetSystemName: any) {
     this.selectedTargetSystem = this.availableTargetSystems.find(item => item.name === targetSystemName);
-
     if (this.selectedTargetSystem !== undefined) {
       if (this.selectedTargetSystem.changeableVariables.length === 0) {
         this.notify.error("Error", "Target does not contain a changeable variable.");

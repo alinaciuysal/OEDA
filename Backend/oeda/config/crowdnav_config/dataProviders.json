@@ -16,7 +16,7 @@
       }, {
         "name": "complaint",
         "description": "indicates complaint (in a uniformly distributed manner) if overhead of a trip is greater than 2.5",
-        "scale": "Nominal",
+        "scale": "Boolean",
         "dataProviderName": "Trips",
         "criteria": "Minimize"
       }, {

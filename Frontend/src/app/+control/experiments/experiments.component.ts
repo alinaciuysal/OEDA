@@ -59,7 +59,7 @@ export class ExperimentsComponent {
             this.temp_storage.clearNewValue();
           }
           // parse date field of experiments
-          this.experiments = this.utilService.format_date(data, "created", null);
+          this.experiments = this.utilService.format_date(data, "createdDate", null);
 
           // and now, get target system information by using targetSystemId
           for (let i = 0; i < this.experiments.length; i++) {

@@ -41,7 +41,7 @@ export class TargetsComponent implements OnInit {
             this.temp_storage.clearNewValue();
           }
           // parse date field of targets
-          this.targets = this.utilService.format_date(data, "created", null);
+          this.targets = this.utilService.format_date(data, "createdDate", null);
         }
       )
     }

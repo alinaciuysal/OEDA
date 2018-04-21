@@ -63,7 +63,7 @@ class ElasticSearchDb(Database):
             raise err1
 
     def save_target(self, target_system_id, target_system_data):
-        target_system_data["created"] = datetime.now().isoformat(' ')
+        target_system_data["createdDate"] = datetime.now().isoformat(' ')
         del target_system_data["id"]
         try:
             self.es.index(index=self.index, doc_type=self.target_system_type_name, id=target_system_id, body=target_system_data)
@@ -90,7 +90,7 @@ class ElasticSearchDb(Database):
 
     def save_experiment(self, experiment_id, experiment_data):
         experiment_data["status"] = "OPEN"
-        experiment_data["created"] = datetime.now().isoformat(' ')
+        experiment_data["createdDate"] = datetime.now().isoformat(' ')
         del experiment_data["id"]
         try:
             self.es.index(index=self.index, doc_type=self.experiment_type_name, body=experiment_data, id=experiment_id)
@@ -109,7 +109,7 @@ class ElasticSearchDb(Database):
             }
         }
 
-        res = self.es.search(index=self.index, doc_type=self.experiment_type_name, body=query, sort='created')
+        res = self.es.search(index=self.index, doc_type=self.experiment_type_name, body=query, sort='createdDate')
         return [r["_id"] for r in res["hits"]["hits"]], [r["_source"] for r in res["hits"]["hits"]]
 
     def update_experiment_status(self, experiment_id, status):
@@ -138,7 +138,7 @@ class ElasticSearchDb(Database):
         body = dict()
         body["number"] = stage_no
         body["knobs"] = knobs
-        body["created"] = datetime.now().isoformat(' ')
+        body["createdDate"] = datetime.now().isoformat(' ')
         try:
             self.es.index(index=self.index, doc_type=self.stage_type_name, body=body, id=stage_id, parent=experiment_id)
         except ConnectionError:
@@ -159,7 +159,7 @@ class ElasticSearchDb(Database):
         }
 
         try:
-            res = self.es.search(index=self.index, doc_type=self.stage_type_name, body=query, size=10000, sort='created')
+            res = self.es.search(index=self.index, doc_type=self.stage_type_name, body=query, size=10000, sort='createdDate')
             return [r["_id"] for r in res["hits"]["hits"]], [r["_source"] for r in res["hits"]["hits"]]
         except ConnectionError:
             error("Error while getting stages from elasticsearch. Check connection to elasticsearch.")
@@ -178,7 +178,7 @@ class ElasticSearchDb(Database):
             },
             "post_filter": {
                 "range": {
-                    "created": {
+                    "createdDate": {
                         "gt": timestamp,
                         "format": "yyyy-MM-dd HH:mm:ss.SSSSSS"
                     }
@@ -187,7 +187,7 @@ class ElasticSearchDb(Database):
         }
 
         try:
-            res = self.es.search(index=self.index, doc_type=self.stage_type_name, body=query, sort='created')
+            res = self.es.search(index=self.index, doc_type=self.stage_type_name, body=query, sort='createdDate')
             return [r["_id"] for r in res["hits"]["hits"]], [r["_source"] for r in res["hits"]["hits"]]
         except ConnectionError:
             error("Error while getting stage data from elasticsearch. Check connection to elasticsearch.")
@@ -197,7 +197,7 @@ class ElasticSearchDb(Database):
         stage_id = Database.create_stage_id(experiment_id, stage_no)
         body = dict()
         body["payload"] = payload
-        body["created"] = datetime.now().isoformat(' ')  # used to replace 'T' with ' '
+        body["createdDate"] = datetime.now().isoformat(' ')  # used to replace 'T' with ' '
         try:
             self.es.index(index=self.index, doc_type=self.data_point_type_name, body=body, id=data_point_id, parent=stage_id)
         except ConnectionError:
@@ -220,7 +220,7 @@ class ElasticSearchDb(Database):
         try:
             # https://stackoverflow.com/questions/9084536/sorting-by-multiple-params-in-pyes-and-elasticsearch
             # sorting is required for proper visualization of data
-            res = self.es.search(index=self.index, body=query, size=10000, sort='created')
+            res = self.es.search(index=self.index, body=query, size=10000, sort='createdDate')
             return [r["_source"] for r in res["hits"]["hits"]]
         except ConnectionError:
             error("Error while retrieving data points from elasticsearch. Check connection to elasticsearch.")
@@ -319,7 +319,7 @@ class ElasticSearchDb(Database):
             },
             "post_filter": {
                 "range": {
-                    "created": {
+                    "createdDate": {
                         "gt": timestamp,
                         "format": "yyyy-MM-dd HH:mm:ss.SSSSSS"
                     }
@@ -335,7 +335,7 @@ class ElasticSearchDb(Database):
 
             # https://stackoverflow.com/questions/9084536/sorting-by-multiple-params-in-pyes-and-elasticsearch
             # sorting is required for proper visualization of data
-            res = self.es.search(index=self.index, doc_type=self.data_point_type_name, body=query2, size=10000, sort='created')
+            res = self.es.search(index=self.index, doc_type=self.data_point_type_name, body=query2, size=10000, sort='createdDate')
             return [r["_source"] for r in res["hits"]["hits"]]
         except ConnectionError:
             error("Error while retrieving data points from elasticsearch. Check connection to elasticsearch.")

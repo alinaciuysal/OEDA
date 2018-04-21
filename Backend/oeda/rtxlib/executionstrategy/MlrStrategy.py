@@ -70,7 +70,7 @@ def initiate_mlr_mbo(wf, request_body):
                 exp = create_experiment_tuple(wf, knob)
                 wf.setup_stage(wf, exp["knobs"])
                 value = float(experimentFunction(wf, exp))
-                # value = random.uniform(1, 4) # TODO: will be replaced by actual implementation
+                # value = random.uniform(1, 4)
                 initial_design_values.append(value)
             # now update the design with calculated outputs
             return update_initial_design(wf, initial_design_values)
@@ -126,11 +126,11 @@ def create_artifacts(wf):
                 info("> ExecStrategy   | mlrMBO artifacts created successfully", Fore.CYAN)
                 iteration_index = 0
                 successful_update = True
+                info("optimizer_iterations | " + str(wf.execution_strategy["optimizer_iterations"]))
                 while iteration_index < wf.execution_strategy["optimizer_iterations"]:
                     if successful_update is True:
                         proposed_points = get_proposed_points(wf)
                         if proposed_points:
-                            info("> Proposed points  | " + str(proposed_points))
                             # value = random.uniform(1, 4) # TODO: will be replaced by actual implementation
                             exp = create_experiment_tuple(wf, proposed_points)
                             wf.setup_stage(wf, exp["knobs"])

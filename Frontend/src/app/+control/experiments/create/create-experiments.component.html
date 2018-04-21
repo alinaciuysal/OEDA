@@ -345,9 +345,9 @@
                   <option *ngFor="let fcn of aggregateFunctionsMetric" [ngValue]="fcn.key">{{fcn.label}}</option>
                 </select>
               </td>
-              <td *ngIf="dataType['is_considered'] && dataType.scale == 'Nominal'">
+              <td *ngIf="dataType['is_considered'] && dataType.scale == 'Boolean'">
                 <select [(ngModel)]="dataType['aggregateFunction']" required>
-                  <option *ngFor="let fcn of aggregateFunctionsNominal" [ngValue]="fcn.key">{{fcn.label}}</option>
+                  <option *ngFor="let fcn of aggregateFunctionsBoolean" [ngValue]="fcn.key">{{fcn.label}}</option>
                 </select>
               </td>
               <td *ngIf="dataType['is_considered']">

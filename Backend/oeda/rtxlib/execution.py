@@ -1,4 +1,5 @@
 from oeda.log import *
+from colorama import Fore
 import traceback
 
 def _defaultChangeProvider(variables,wf):
@@ -29,7 +30,7 @@ def experimentFunction(wf, exp):
     info(">")
     info("> KnobValues     | " + str(exp["knobs"]))
     # create new state
-    exp["state"] = wf.state_initializer(dict(), wf)
+    # exp["state"] = wf.state_initializer(dict(), wf)
 
     try:
         wf.change_provider["instance"].applyChange(change_creator(exp["knobs"], wf))
@@ -82,12 +83,13 @@ def experimentFunction(wf, exp):
                     error("Could not reduce data set: " + str(new_data))
                 i += 1
                 process("CollectSamples | ", i, sample_size)
+
             # now we use returnDataListNonBlocking on all secondary data providers
             if hasattr(wf, "secondary_data_providers"):
                 for cp in wf.secondary_data_providers:
                     new_data = cp["instance"].returnDataListNonBlocking()
                     idx = wf.secondary_data_providers.index(cp)
-                    # just get the name of the variable from (cp) and pass it to (exp["state"], nd, wf, idx)
+                    # just get the name of the variable from (cp) and pass it to (nd, wf, idx)
                     for nd in new_data:
                         try:
                             wf = cp["data_reducer"](nd, wf, idx)
@@ -103,7 +105,7 @@ def experimentFunction(wf, exp):
         # this iteration should stop asap
         error("This stage got stopped as requested by the StopIteration exception:" + str(e))
     try:
-        result = wf.evaluator(exp["state"], wf)
+        result = wf.evaluator(wf)
     except Exception as e:
         tb = traceback.format_exc()
         result = 0
@@ -126,7 +128,7 @@ def experimentFunction(wf, exp):
     if wf.totalExperiments > 0:
         info("> Statistics     | " + str(wf.experimentCounter) + "/" + str(wf.totalExperiments)
              + " took " + str(duration) + "ms" + " - remaining ~" + wf.remaining_time_and_stages['remaining_time'] + "sec")
-    info("> FullState      | " + str(exp["state"]))
+    # info("> FullState      | " + str(exp["state"]))
     info("> ResultValue    | " + str(result))
     # log the result values into a csv file
     # @todo disabled (!) log_results(wf.folder, exp["knobs"].values() + [result])

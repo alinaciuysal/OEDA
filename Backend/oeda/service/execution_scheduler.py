@@ -5,7 +5,7 @@ from oeda.rtxlib.workflow import execute_workflow
 from oeda.service.rtx_definition import *
 from oeda.databases import db
 import traceback
-from oeda.controller.running_experiment_results import set_dict as set_dict
+from oeda.controller.callback import set_dict as set_dict
 
 execution_scheduler_timer = None
 

@@ -101,7 +101,7 @@ export class PlotService {
         "enabled": true,
         "position": "bottom-left"
       },
-      // an initial guide is created here because we cannot inject new Guide() in AmChartsService class for now
+      // an initial guide is createdDate here because we cannot inject new Guide() in AmChartsService class for now
       "guides": [{
         "id": "guideID",
         "value": initial_threshold_for_scatter_plot,

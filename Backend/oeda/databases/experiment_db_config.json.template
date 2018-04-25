@@ -28,11 +28,12 @@
   "stage_type": {
     "name": "stage",
     "mapping": {
-      "_parent":    { "type": "experiment"},
-      "properties": {
-        "number":     { "type": "integer" },
-        "knobs":      { "type": "object"  },
-        "createdDate":    { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"}
+      "_parent":        { "type": "experiment"},
+      "properties":     {
+        "number":       { "type": "integer" },
+        "knobs":        { "type": "object"  },
+        "createdDate":  { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"},
+        "stage_result": { "type": "float" }
       }
     }
   },

@@ -99,7 +99,8 @@ export interface Experiment {
 export interface StageEntity {
   number: string,
   values: object[],
-  knobs: any
+  knobs: any,
+  stage_result: number
 }
 
 

@@ -140,9 +140,17 @@ class ElasticSearchDb(Database):
         body["knobs"] = knobs
         body["createdDate"] = datetime.now().isoformat(' ')
         try:
-            self.es.index(index=self.index, doc_type=self.stage_type_name, body=body, id=stage_id, parent=experiment_id)
+            self.es.index(index=self.index, doc_type=self.stage_type_name, id=stage_id, body=body, parent=experiment_id)
         except ConnectionError:
             error("Error while saving stage in elasticsearch. Check connection to elasticsearch.")
+
+    def update_stage(self, experiment_id, stage_no, stage_result):
+        stage_id = self.create_stage_id(experiment_id, str(stage_no))
+        body = {"doc": {"stage_result": stage_result}}
+        try:
+            self.es.update(index=self.index, doc_type=self.stage_type_name, id=stage_id, body=body, parent=experiment_id)
+        except ConnectionError:
+            error("Error while updating stage result in elasticsearch. Check connection to elasticsearch.")
 
     def get_stages(self, experiment_id):
         query = {

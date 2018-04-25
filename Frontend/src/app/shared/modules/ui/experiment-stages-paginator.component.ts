@@ -39,11 +39,14 @@ import * as _ from "lodash";
                    [mfRowsOnPage]="3">
               <thead>
               <tr>
-                <th style="width:5%">
+                <th>
                   Stage
                 </th>
+                <th *ngIf="for_successful_experiment">
+                  Result
+                </th>
                 <!-- Default Knobs Header (this is always in the same order because we retrieve it from config)-->
-                <th style="width: 3%" *ngFor="let default_knob of targetSystem.defaultVariables"> 
+                <th *ngFor="let default_knob of targetSystem.defaultVariables"> 
                   {{default_knob.name}}
                 </th>
               </tr>
@@ -58,6 +61,12 @@ import * as _ from "lodash";
                   </td>
                   <td *ngIf="item.number !== -1" data-toggle="tooltip" title="Click to draw plots">
                     {{item.number}}
+                  </td>
+                  <td *ngIf="for_successful_experiment && (item.number === -1 || item.stage_result == null)" data-toggle="tooltip" title="Result cannot be shown">
+                    <!--a font or null value can be shown here-->
+                  </td>
+                  <td *ngIf="for_successful_experiment && item.number !== -1 && item.stage_result != null" data-toggle="tooltip" title="Shows result of the stage">
+                    {{item.stage_result}}
                   </td>
                   <td *ngFor="let knob_key_name of ordered_keys" data-toggle="tooltip" title="Click to draw plots">
                     <!-- all stage variables that we make experiment with (if strategy is not forever) -- format: [min, max]-->

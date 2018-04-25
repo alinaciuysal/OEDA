@@ -110,15 +110,17 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
                 // retrieve stages
                 this.apiService.loadAvailableStagesWithExperimentId(this.experiment_id).subscribe(stages => {
                   if (!isNullOrUndefined(stages)) {
+                    console.log(stages);
                     // initially selected stage is "All Stages"
                     this.selected_stage = {"number": -1, "knobs": {}};
                     this.selected_stage.knobs = this.entityService.populate_knob_objects_with_variables(this.selected_stage.knobs, this.targetSystem.defaultVariables, true, this.experiment.executionStrategy.type);
                     this.available_stages.push(this.selected_stage);
                     for (let j = 0; j < stages.length; j++) {
-                      // if there are any existing stages, round their knob values of stages to provided decimals
+                      // if there are any existing stages, round their values of stages to provided decimal places
                       if (!isNullOrUndefined(stages[j]["knobs"])) {
-                        stages[j]["knobs"] = this.entityService.round_knob_values(stages[j]["knobs"], 3);
+                        stages[j]["knobs"] = this.entityService.round_knob_values(stages[j]["knobs"], this.decimal_places);
                         stages[j]["knobs"] = this.entityService.populate_knob_objects_with_variables(stages[j]["knobs"], this.targetSystem.defaultVariables, false, this.experiment.executionStrategy.type);
+                        stages[j]["stage_result"] = Number(stages[j]["stage_result"].toFixed(this.decimal_places));
                       }
                       this.available_stages.push(stages[j]);
                     }

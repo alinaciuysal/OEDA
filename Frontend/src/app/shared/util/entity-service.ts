@@ -135,7 +135,7 @@ export class EntityService {
         new_entity.number = parsed_json_object['number'].toString();
         new_entity.values = parsed_json_object['values'];
         new_entity.knobs = parsed_json_object['knobs'];
-        // important assumption here: we retrieve stages and data points in a sorted manner with respect to createdDate field
+        // important assumption here: we retrieve stages and data points in a sorted manner with respect to created field
         // thus, pushed new_entity will have a key of its "number" with this assumption
         // e.g. [ 0: {number: 1, values: ..., knobs: [...]}, 1: {number: 2, values: ..., knobs: [...] }...]
         all_data.push(new_entity);
@@ -217,7 +217,8 @@ export class EntityService {
     return {
       number: "",
       values: [],
-      knobs: null
+      knobs: null,
+      stage_result: null
     }
   }
 

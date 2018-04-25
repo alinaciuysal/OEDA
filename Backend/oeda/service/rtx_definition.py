@@ -170,6 +170,7 @@ class RTXDefinition:
         result = RTXDefinition.calculate_result(wf)
         info("---------------- result")
         info(result)
+        db().update_stage(wf.id, wf.stage_counter, result)
         wf.stage_counter += 1 # this must be done after all calculations
         return result
 

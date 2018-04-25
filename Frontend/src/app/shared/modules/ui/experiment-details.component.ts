@@ -314,7 +314,7 @@ import {isNullOrUndefined} from "util";
                   <td *ngIf="is_considered(dataType.name)">Yes</td>
                   <td *ngIf="!is_considered(dataType.name)">No</td>
                   <td>{{dataType.aggregateFunction}}</td>
-                  <td>{{dataType.weight}}</td>
+                  <td>{{dataType.weight}}<span *ngIf="dataType.weight !== undefined">%</span></td>
                 </tr>
                 </tbody>
               </table>

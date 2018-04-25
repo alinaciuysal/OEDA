@@ -9,6 +9,7 @@ header = {"content-type": "application/json"}
 host_with_port = "http://" + str(Config.plumber_host) + ":" + str(Config.plumber_port)
 connection_err_msg = {"error": "Connection with R server is failed"}
 
+
 def start_mlr_mbo_strategy(wf):
     """ executes a self optimizing strategy """
     info("> ExecStrategy   | MLR", Fore.CYAN)
@@ -27,8 +28,8 @@ def start_mlr_mbo_strategy(wf):
     for key in knobs:
         knob_object = dict()
         knob_object["name"] = key
-        knob_object["min"] = knobs[key][0]
-        knob_object["max"] = knobs[key][1]
+        knob_object["min"] = float(knobs[key][0])
+        knob_object["max"] = float(knobs[key][1])
         json_array.append(knob_object)
 
     request_body = dict(
@@ -109,6 +110,7 @@ def update_initial_design(wf, initial_design_values):
         error(connection_err_msg)
         return None
 
+
 ''' triggers R side to create acquisition criteria & MBO controll and calls initSMBO function '''
 def create_artifacts(wf):
     try:
@@ -131,7 +133,6 @@ def create_artifacts(wf):
                     if successful_update is True:
                         proposed_points = get_proposed_points(wf)
                         if proposed_points:
-                            # value = random.uniform(1, 4) # TODO: will be replaced by actual implementation
                             exp = create_experiment_tuple(wf, proposed_points)
                             wf.setup_stage(wf, exp["knobs"])
                             value = float(experimentFunction(wf, exp))
@@ -154,6 +155,7 @@ def create_artifacts(wf):
         error(connection_err_msg)
         return None
 
+
 def update_mbo_state(wf, proposed_points, value):
     try:
         body = dict(
@@ -174,6 +176,7 @@ def update_mbo_state(wf, proposed_points, value):
     except requests.ConnectionError as e:
         error(connection_err_msg)
         return None
+
 
 def get_proposed_points(wf):
     try:

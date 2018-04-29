@@ -14,4 +14,4 @@
 #### [Instructions to Use](https://github.com/alinaciuysal/OEDA/wiki/Instructions-to-Use)
 
 #### _Contact_ 
-[Ali Naci Uysal](https://github.com/alinaciuysal) or [Dr. Ilias Gerostathopoulos](http://www4.in.tum.de/~gerostat/)
+[Ali Naci Uysal](mailto:ali.uysal@tum.de) or [Dr. Ilias Gerostathopoulos](http://www4.in.tum.de/~gerostat/)

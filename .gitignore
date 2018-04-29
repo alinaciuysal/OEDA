@@ -6,6 +6,7 @@ Build/app/**
 Backend/build/**
 Backend/OEDA_Backend.egg-info/**
 Backend/tools/**
+Backend/tests/http-test-server/node_modules
 # Templates for database configuration
 Backend/oeda/databases/experiment_db_config.json
 Backend/oeda/databases/user_db_config.json

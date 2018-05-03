@@ -116,11 +116,13 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
                     this.selected_stage.knobs = this.entityService.populate_knob_objects_with_variables(this.selected_stage.knobs, this.targetSystem.defaultVariables, true, this.experiment.executionStrategy.type);
                     this.available_stages.push(this.selected_stage);
                     for (let j = 0; j < stages.length; j++) {
-                      // if there are any existing stages, round their values of stages to provided decimal places
+                      // if there are any existing stages, round their values to provided decimal places
                       if (!isNullOrUndefined(stages[j]["knobs"])) {
                         stages[j]["knobs"] = this.entityService.round_knob_values(stages[j]["knobs"], this.decimal_places);
                         stages[j]["knobs"] = this.entityService.populate_knob_objects_with_variables(stages[j]["knobs"], this.targetSystem.defaultVariables, false, this.experiment.executionStrategy.type);
-                        stages[j]["stage_result"] = Number(stages[j]["stage_result"].toFixed(this.decimal_places));
+                        if (!isNullOrUndefined(stages[j]["stage_result"] ) ) {
+                          stages[j]["stage_result"] = Number(stages[j]["stage_result"].toFixed(this.decimal_places));
+                        }
                       }
                       this.available_stages.push(stages[j]);
                     }

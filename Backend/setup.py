@@ -25,6 +25,6 @@ setup(
         'backports.ssl_match_hostname',
         'scikit-optimize',
         'kafka',
-        'paho-mqtt',
+        'paho-mqtt'
     ]
 )

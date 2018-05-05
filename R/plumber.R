@@ -135,6 +135,12 @@ function(req, res, id){
   }
 }
 
+#' @get /
+function() {
+  msg <- "Plumber API is running"
+  list(jsonlite::unbox(msg))
+}
+
 create_initial_design <- function(id){
   create_knobs(id)
   wf = workflow_table$get(id)

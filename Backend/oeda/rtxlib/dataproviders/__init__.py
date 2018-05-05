@@ -25,4 +25,5 @@ def createInstance(wf, cp):
     elif cp["type"] == "interval":
         cp["instance"] = IntervalDataProvider(wf, cp)
     else:
+        cp["instance"] = None
         error("Not a valid data_provider")

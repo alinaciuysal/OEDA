@@ -1,4 +1,7 @@
 {
+  "db_type": "elasticsearch",
+  "host": "localhost",
+  "port": 9200,
   "index": {
     "name": "oeda",
     "settings" : {

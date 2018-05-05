@@ -3,7 +3,6 @@ from oeda.rtxlib.execution import experimentFunction
 from oeda.config.R_config import Config
 import json
 import requests
-import random
 
 header = {"content-type": "application/json"}
 host_with_port = "http://" + str(Config.plumber_host) + ":" + str(Config.plumber_port)

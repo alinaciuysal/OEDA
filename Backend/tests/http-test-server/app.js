@@ -47,5 +47,5 @@ app.post('/', function (req, res) {
 });
 
 app.listen(3003, function () {
-    console.log('OEDA HTTP test app listening on port 3000!');
+    console.log('OEDA HTTP test app listening on port 3003!');
 });

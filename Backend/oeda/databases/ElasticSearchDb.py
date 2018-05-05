@@ -62,6 +62,9 @@ class ElasticSearchDb(Database):
             error("Error while creating elasticsearch for experiments. Check type mappings for experiments in experiment_db_config.json.")
             raise err1
 
+    def get_instance(self):
+        return self.es
+
     def save_target(self, target_system_id, target_system_data):
         target_system_data["createdDate"] = datetime.now().isoformat(' ')
         del target_system_data["id"]

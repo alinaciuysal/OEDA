@@ -1,12 +1,15 @@
 from oeda.databases.__init__ import setup_experiment_database, db
 from oeda.rtxlib.dataproviders.__init__ import createInstance
-from oeda.utilities.TestUtility import parse_config, create_experiment
+from oeda.utilities.TestUtility import parse_config
 from oeda.config.R_config import Config
 from oeda.log import *
 from tests.backend import initiate
+from sumolib import checkBinary
 
 import requests
 import unittest
+import os, sys
+
 
 # Sim. systems should be running in the background
 # names of test cases are important
@@ -88,6 +91,19 @@ class IntegrationTest(unittest.TestCase):
                 self.assertTrue(point["payload"])
                 self.assertTrue(point["created"])
         info("Data points are valid, finished integration test", Fore.CYAN)
+
+    def test_sumo(self):
+        try:
+            var = os.environ.get("SUMO_HOME")
+            self.assertTrue(var)
+            sys.path.append(var)
+            sumoGuiBinary = checkBinary('sumo-gui')
+            self.assertTrue(sumoGuiBinary)
+            sumoBinary = checkBinary('sumo')
+            self.assertTrue(sumoBinary)
+        except ImportError:
+            sys.exit("please declare environment variable 'SUMO_HOME' as the root directory"
+                     " of your sumo installation (it should contain folders 'bin', 'tools' and 'docs')")
 
 if __name__ == '__main__':
     unittest.main()

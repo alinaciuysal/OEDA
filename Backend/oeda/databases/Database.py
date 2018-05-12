@@ -8,8 +8,8 @@ class Database:
     def __init__(self):
         pass
 
-    def save_target(self, target_system_id, target_system_data):
-        """ saves the data of an OEDA target system with the provided id """
+    def save_target(self, target_system_data):
+        """ saves the data of an OEDA target system, id is retrieved from data """
         pass
 
     def get_target(self, target_system_id):
@@ -20,8 +20,8 @@ class Database:
         """ returns all the target systems """
         pass
 
-    def save_experiment(self, experiment_id, experiment_data):
-        """ saves the data of an OEDA experiment with the provided id """
+    def save_experiment(self, experiment_data):
+        """ saves the data of an OEDA experiment, id is retrieved from data """
         pass
 
     def get_experiment(self, experiment_id):

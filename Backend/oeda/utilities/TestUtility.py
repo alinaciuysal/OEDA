@@ -1,10 +1,15 @@
-
 import os.path
 import json
 import io
 import copy
 from random import randint
 from uuid import uuid4
+from oeda.controller.callback import set_dict as set_dict
+from oeda.service.rtx_definition import RTXDefinition
+from threading import Event
+from oeda.service.execution_scheduler import set_experiment_status
+from oeda.service.execution_scheduler import set_target_system_status
+from oeda.rtxlib.workflow import execute_workflow
 
 # reads json file located in provided folders
 # folder_names should be an array and should start with "oeda"
@@ -24,14 +29,14 @@ def parse_config(folder_names, config_file_name):
 
 
 # usable strategy_names are sequential, self_optimizer, uncorrelated_self_optimizer, step_explorer, forever, random, mlr_mbo
-def create_experiment(strategy_name, sample_size, knobs, optimizer_iterations_in_design, acquisition_method="ei", optimizer_iterations=5):
+def create_experiment(strategy_name, sample_size, knobs, considered_data_types, optimizer_iterations_in_design, acquisition_method="ei", optimizer_iterations=5):
     num = randint(0, 100)
     id = str(uuid4())
     experiment = dict(
         id=id,
         name="test_experiment_" + str(num),
         description="test_experiment_" + str(num),
-        considered_data_types=[],
+        considered_data_types=considered_data_types,
         changeableVariables=[],
         executionStrategy=dict(
             type=strategy_name,
@@ -47,7 +52,7 @@ def create_experiment(strategy_name, sample_size, knobs, optimizer_iterations_in
     return experiment
 
 
-def create_target_system(experiment, data_providers, default_variables, ignore_first_n_samples):
+def create_target_system(data_providers, default_variables, ignore_first_n_samples):
     num = randint(0, 100)
     id = str(uuid4())
     target = dict(
@@ -68,25 +73,21 @@ def create_target_system(experiment, data_providers, default_variables, ignore_f
         defaultVariables=default_variables,
         changeableVariables=default_variables
     )
+    # prepare data providers for target system
     for dp in data_providers:
         if dp["name"] == "Trips":
             dp["is_primary"] = True
             target["primaryDataProvider"] = dp
             target["primaryDataProvider"]["ignore_first_n_samples"] = ignore_first_n_samples
-            considered_data_types = adjust_functions_and_weights(dp["incomingDataTypes"])
-            experiment["considered_data_types"] = considered_data_types
         else:
             target["secondaryDataProviders"].append(dp)
 
         for data_type in dp["incomingDataTypes"]:
             target["incomingDataTypes"].append(data_type)
 
-    for var in default_variables:
-        if var["name"] == "route_random_sigma" or var["name"] == "max_speed_and_length_factor":
-            experiment["changeableVariables"].append(var)
     return target
 
-# this function can be agjusted to select different data providers
+# this function can be adjusted to select different data providers in the future
 # deep copy is needed because otherwise incoming_data_types is modified (which is not the desired behavior)
 def adjust_functions_and_weights(incoming_data_types):
     dict2 = copy.deepcopy(incoming_data_types)
@@ -108,3 +109,24 @@ def adjust_functions_and_weights(incoming_data_types):
         #     data_type["aggregateFunction"] = "max"
         #     considered_data_types.append(data_type)
     return considered_data_types
+
+
+def create_knobs():
+    # return dict(
+    #     route_random_sigma=(0, 0.2),
+    #     exploration_percentage=(2, 2.7)
+    # )
+    return dict(
+        route_random_sigma=(0, 0.2)
+    )
+
+
+def rtx_execution(experiment, target):
+    set_experiment_status(experiment["id"], "RUNNING")
+    set_target_system_status(experiment["targetSystemId"], "WORKING")
+    # set_dict(experiment["id"], None)
+    wf = RTXDefinition(oeda_experiment=experiment, oeda_target=target, oeda_callback=set_dict, oeda_stop_request=Event())
+    execute_workflow(wf)
+    set_experiment_status(experiment["id"], "SUCCESS")
+    set_target_system_status(experiment["targetSystemId"], "READY")
+    return wf

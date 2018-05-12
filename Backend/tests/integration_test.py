@@ -1,110 +1,111 @@
-from oeda.databases.__init__ import setup_experiment_database, db
-from oeda.rtxlib.dataproviders.__init__ import createInstance
-from oeda.utilities.TestUtility import parse_config
-from oeda.config.R_config import Config
+from oeda.databases import setup_experiment_database, db
 from oeda.log import *
-from tests.backend import initiate
-from sumolib import checkBinary
-
-import requests
+from oeda.utilities.TestUtility import create_experiment, create_target_system, rtx_execution
+from tests.unit_test import UnitTest
 import unittest
-import os, sys
 
 
-# Sim. systems should be running in the background
-# names of test cases are important
-# see https://stackoverflow.com/questions/5387299/python-unittest-testcase-execution-order/5387956#5387956 and
-# https://docs.python.org/2/library/unittest.html#unittest.TestLoader.sortTestMethodsUsing
+''' Simulation systems should be running in the background
+    see https://stackoverflow.com/questions/5387299/python-unittest-testcase-execution-order/5387956#5387956 and
+    https://docs.python.org/2/library/unittest.html#unittest.TestLoader.sortTestMethodsUsing
+    also, self.assertTrue(param) function checks if bool(x) is True, we use it for assertIsNotNone() - which is available 
+    in Python >=3.1 - 
+    
+    names of test cases are important because of the default ordering of the unittest framework
+    so, tests are named according to this pattern: test_<order>_<name>. 
+    
+    main method contains a test suite that first executes unit tests and then executes test cases of this class 
+'''
 class IntegrationTest(unittest.TestCase):
+    for_tests = True
+    knobs = None
+    considered_data_types = None # these are subset of all data types, but they account for the weight in overall result
+    data_providers = None
+    target_system = None
     experiment = None
     stage_ids = None
 
-    for_tests = True
-    # docker without http authentication can be used
-    # elasticsearch_ip = "192.168.99.100"
-    elasticsearch_ip = None
-    elasticsearch_port = None
+    def test_e_data_provider(self):
+        self.assertTrue(UnitTest.data_providers)
+        IntegrationTest.data_providers = UnitTest.data_providers
 
-    def setUp(self):
-        config = parse_config(["oeda", "databases"], "experiment_db_config")
-        self.assertTrue(config)
-        self.assertTrue(config["host"])
-        self.assertTrue(config["port"])
-        IntegrationTest.elasticsearch_ip = str(config["host"])
-        IntegrationTest.elasticsearch_port = str(config["port"])
-        setup_experiment_database("elasticsearch", IntegrationTest.elasticsearch_ip, IntegrationTest.elasticsearch_port, for_tests=IntegrationTest.for_tests)
+    def test_f_considered_data_types(self):
+        self.assertTrue(UnitTest.considered_data_types)
+        IntegrationTest.considered_data_types = UnitTest.considered_data_types
 
-    def test_db(self):
-        es = db().get_instance()
-        health = es.cluster.health()
-        # yellow means that the primary shard is allocated but replicas are not
-        # and green means that all shards are allocated
-        self.assertEqual('yellow', health["status"])
+    def test_h_create_knobs(self):
+        self.assertTrue(UnitTest.knobs)
+        IntegrationTest.knobs = UnitTest.knobs
 
-    # use a regular http GET request
-    def test_db_2(self):
-        res = requests.get("http://" + IntegrationTest.elasticsearch_ip + ":" + IntegrationTest.elasticsearch_port).json()
-        self.assertTrue(res["cluster_name"])
-        self.assertTrue(res["cluster_uuid"])
+    # this case must be executed before the rest below
+    def test_i_create_target_system(self):
+        target_system = create_target_system(data_providers=IntegrationTest.data_providers,
+                                             default_variables=IntegrationTest.knobs,
+                                             ignore_first_n_samples=30)
+        self.assertTrue(target_system)
+        db().save_target(target_system)
+        IntegrationTest.target_system = target_system
 
-    # as we're only using crowdnav_config for now,
-    # make sure right values have been set in dataProviders.json file under oeda/crowdnav_config folder
-    # also you need to add 127.0.0.1 kafka entry to /etc/hosts file because we're using kafka:9092
-    def test_data_provider(self):
-        data_providers = parse_config(["oeda", "config", "crowdnav_config"], "dataProviders")
-        default_variables = parse_config(["oeda", "config", "crowdnav_config"], "knobs")
-        self.assertTrue(data_providers)
-        self.assertTrue(default_variables)
-
-        for dp in data_providers:
-            self.assertTrue(dp["type"])
-            self.assertTrue(dp["serializer"])
-            createInstance(wf=None, cp=dp)
-            self.assertTrue(dp["instance"])
-
-    def test_r_connection(self):
-        self.assertTrue(Config.plumber_host)
-        self.assertTrue(Config.plumber_port)
-        # res should be [u'Plumber API is running']
-        res = requests.get("http://" + Config.plumber_host + ":" + str(Config.plumber_port)).json()
-        info(res[0], Fore.CYAN)
-        self.assertTrue(res[0])
-
-    # this must be executed before the rest below
-    def test_a_initiate(self):
-        experiment = initiate()
+    def test_j_create_experiment(self):
+        experiment = create_experiment(strategy_name="mlr_mbo",
+                                       sample_size=20,
+                                       knobs=IntegrationTest.knobs,
+                                       considered_data_types=IntegrationTest.considered_data_types,
+                                       optimizer_iterations_in_design=len(IntegrationTest.knobs)*4,
+                                       acquisition_method="ei")
         self.assertTrue(experiment)
+        self.assertTrue(experiment["id"])
+        experiment["targetSystemId"] = IntegrationTest.target_system["id"]
+        db().save_experiment(experiment)
+        saved_experiment = db().get_experiment(experiment["id"])
+        self.assertTrue(saved_experiment)
         IntegrationTest.experiment = experiment
 
-    def test_b_stages(self):
+    def test_k_execution(self):
+        executed_workflow = rtx_execution(experiment=IntegrationTest.experiment, target=IntegrationTest.target_system)
+        self.assertTrue(executed_workflow)
+        target_status = db().get_target(IntegrationTest.target_system["id"])["status"]
+        self.assertEqual(target_status, "READY")
+        experiment_status = db().get_experiment(IntegrationTest.experiment["id"])["status"]
+        self.assertEqual(experiment_status, "SUCCESS")
+        self.stage_test()
+        self.data_point_test()
+        self.delete_index_test()
+
+    # following three should not start with test_ because they need to wait for test_k_execution method to end
+    def stage_test(self):
         experiment_id = IntegrationTest.experiment["id"]
         self.assertTrue(experiment_id)
         stage_ids = db().get_stages(experiment_id)[0] # 0 = _id, 1 = _source
         self.assertTrue(stage_ids)
         IntegrationTest.stage_ids = stage_ids
 
-    def test_c_data_points(self):
+    def data_point_test(self):
         for stage_id in IntegrationTest.stage_ids:
             self.assertTrue(stage_id)
             data_points = db().get_data_points(IntegrationTest.experiment["id"], stage_id)
             for point in data_points:
                 self.assertTrue(point["payload"])
                 self.assertTrue(point["created"])
-        info("Data points are valid, finished integration test", Fore.CYAN)
 
-    def test_sumo(self):
-        try:
-            var = os.environ.get("SUMO_HOME")
-            self.assertTrue(var)
-            sys.path.append(var)
-            sumoGuiBinary = checkBinary('sumo-gui')
-            self.assertTrue(sumoGuiBinary)
-            sumoBinary = checkBinary('sumo')
-            self.assertTrue(sumoBinary)
-        except ImportError:
-            sys.exit("please declare environment variable 'SUMO_HOME' as the root directory"
-                     " of your sumo installation (it should contain folders 'bin', 'tools' and 'docs')")
+    def delete_index_test(self):
+        db().indices_client.delete(index=UnitTest.elasticsearch_index, ignore=[400, 404]) # remove all records
+        available_indices = db().indices_client.get('*')  # uses wild-card
+        self.assertTrue(UnitTest.elasticsearch_index not in available_indices)
+        info("Data points were valid, deleting index.", Fore.CYAN)
+
+def suite():
+    """
+        Gather all the tests from this module in a test suite.
+    """
+    test_suite = unittest.TestSuite()
+    test_suite.addTest(unittest.makeSuite(UnitTest))
+    test_suite.addTest(unittest.makeSuite(IntegrationTest))
+    return test_suite
 
 if __name__ == '__main__':
-    unittest.main()
+    # ref https://stackoverflow.com/questions/12011091/trying-to-implement-python-testsuite
+    mySuit=suite()
+    runner=unittest.TextTestRunner()
+    runner.run(mySuit)
     exit(1)

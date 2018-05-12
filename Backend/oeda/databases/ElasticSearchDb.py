@@ -1,10 +1,11 @@
-import traceback
 import logging
 from datetime import datetime
+
 from elasticsearch.exceptions import ConnectionError
+from elasticsearch.exceptions import TransportError
+
 from elasticsearch import Elasticsearch
 from elasticsearch.client import IndicesClient
-from elasticsearch.exceptions import TransportError
 
 from Database import Database
 from oeda.log import *
@@ -59,50 +60,71 @@ class ElasticSearchDb(Database):
             else:
                 raise ConnectionError("Host/port values are not valid")
         except TransportError as err1:
-            error("Error while creating elasticsearch for experiments. Check type mappings for experiments in experiment_db_config.json.")
+            error("TransportError while creating elasticsearch instance for experiments. Check type mappings in experiment_db_config.json.")
             raise err1
 
-    def get_instance(self):
-        return self.es
-
-    def save_target(self, target_system_id, target_system_data):
+    def save_target(self, target_system_data):
         target_system_data["createdDate"] = datetime.now().isoformat(' ')
-        del target_system_data["id"]
+        target_system_id = target_system_data["id"]
         try:
             self.es.index(index=self.index, doc_type=self.target_system_type_name, id=target_system_id, body=target_system_data)
-        except ConnectionError:
-            error("Error while saving target system in elasticsearch. Check connection to elasticsearch and restart.")
-        except TransportError:
-            error("Error while saving target system in elasticsearch. Check type mappings in experiment_db_config.json.")
-            print(traceback.format_exc())
-        return target_system_data
+            return target_system_data
+        except ConnectionError as err1:
+            error("ConnectionError while saving target system. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while saving target system. Check type mappings in experiment_db_config.json.")
+            raise err2
+
 
     def get_target(self, target_system_id):
-        res = self.es.get(index=self.index, doc_type=self.target_system_type_name, id=target_system_id)
-        return res["_source"]
+        try :
+            res = self.es.get(index=self.index, doc_type=self.target_system_type_name, id=target_system_id)
+            return res["_source"]
+        except ConnectionError as err1:
+            error("ConnectionError while retrieving target. Check connection to elasticsearch.")
+            raise err1
 
     def get_targets(self):
-        query = {
-            "size" : 1000,
-            "query": {
-                "match_all": {}
+        try:
+            query = {
+                "size" : 1000,
+                "query": {
+                    "match_all": {}
+                }
             }
-        }
-        res = self.es.search(index=self.index, doc_type=self.target_system_type_name, body=query)
-        return [r["_id"] for r in res["hits"]["hits"]], [r["_source"] for r in res["hits"]["hits"]]
+            res = self.es.search(index=self.index, doc_type=self.target_system_type_name, body=query)
+            return [r["_id"] for r in res["hits"]["hits"]], [r["_source"] for r in res["hits"]["hits"]]
+        except ConnectionError as err1:
+            error("ConnectionError while retrieving targets. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while retrieving targets. Check type mappings in experiment_db_config.json.")
+            raise err2
 
-    def save_experiment(self, experiment_id, experiment_data):
+    def save_experiment(self, experiment_data):
         experiment_data["status"] = "OPEN"
         experiment_data["createdDate"] = datetime.now().isoformat(' ')
-        del experiment_data["id"]
+        experiment_id = experiment_data["id"]
         try:
             self.es.index(index=self.index, doc_type=self.experiment_type_name, body=experiment_data, id=experiment_id)
-        except ConnectionError:
-            error("Error while saving experiment data in elasticsearch. Check connection to elasticsearch and restart.")
+        except ConnectionError as err1:
+            error("ConnectionError while saving experiment data. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while saving experiment data. Check type mappings in experiment_db_config.json.")
+            raise err2
 
     def get_experiment(self, experiment_id):
-        res = self.es.get(index=self.index, doc_type=self.experiment_type_name, id=experiment_id)
-        return res["_source"]
+        try:
+            res = self.es.get(index=self.index, doc_type=self.experiment_type_name, id=experiment_id)
+            return res["_source"]
+        except ConnectionError as err1:
+            error("ConnectionError while retrieving an experiment. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while retrieving an experiment. Check type mappings in experiment_db_config.json.")
+            raise err2
 
     def get_experiments(self):
         query = {
@@ -111,30 +133,48 @@ class ElasticSearchDb(Database):
                 "match_all": {}
             }
         }
-
-        res = self.es.search(index=self.index, doc_type=self.experiment_type_name, body=query, sort='createdDate')
-        return [r["_id"] for r in res["hits"]["hits"]], [r["_source"] for r in res["hits"]["hits"]]
+        try:
+            res = self.es.search(index=self.index, doc_type=self.experiment_type_name, body=query, sort='createdDate')
+            return [r["_id"] for r in res["hits"]["hits"]], [r["_source"] for r in res["hits"]["hits"]]
+        except ConnectionError as err1:
+            error("ConnectionError while getting experiments. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while retrieving experiments. Check type mappings in experiment_db_config.json.")
+            raise err2
 
     def update_experiment_status(self, experiment_id, status):
         body = {"doc": {"status": status}}
         try:
             self.es.update(index=self.index, doc_type=self.experiment_type_name, id=experiment_id, body=body)
-        except ConnectionError:
-            error("Error while updating experiment's status in elasticsearch. Check connection to elasticsearch.")
+        except ConnectionError as err:
+            error("ConnectionError while updating experiment status. Check connection to elasticsearch.")
+            raise err
+        except TransportError as err2:
+            error("TransportError while updating experiment status. Check type mappings in experiment_db_config.json.")
+            raise err2
 
     def update_target_system_status(self, target_system_id, status):
         body = {"doc": {"status": status}}
         try:
             self.es.update(index=self.index, doc_type=self.target_system_type_name, id=target_system_id, body=body)
-        except ConnectionError:
-            error("Error while updating target system in_use flag in elasticsearch. Check connection to elasticsearch.")
+        except ConnectionError as err1:
+            error("ConnectionError while updating target system status. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while updating target system status. Check type mappings in experiment_db_config.json.")
+            raise err2
 
     def update_data_point(self, experiment_id, status):
         body = {"doc": {"status": status}}
         try:
             self.es.update(index=self.index, doc_type=self.experiment_type_name, id=experiment_id, body=body)
-        except ConnectionError:
-            error("Error while updating experiment's status in elasticsearch. Check connection to elasticsearch.")
+        except ConnectionError as err1:
+            error("ConnectionError while updating experiment status. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while updating experiment status. Check type mappings in experiment_db_config.json.")
+            raise err2
 
     def save_stage(self, stage_no, knobs, experiment_id):
         stage_id = self.create_stage_id(experiment_id, str(stage_no))
@@ -144,16 +184,24 @@ class ElasticSearchDb(Database):
         body["createdDate"] = datetime.now().isoformat(' ')
         try:
             self.es.index(index=self.index, doc_type=self.stage_type_name, id=stage_id, body=body, parent=experiment_id)
-        except ConnectionError:
-            error("Error while saving stage in elasticsearch. Check connection to elasticsearch.")
+        except ConnectionError as err1:
+            error("ConnectionError while saving stage. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while saving stage. Check type mappings in experiment_db_config.json.")
+            raise err2
 
     def update_stage(self, experiment_id, stage_no, stage_result):
         stage_id = self.create_stage_id(experiment_id, str(stage_no))
         body = {"doc": {"stage_result": stage_result}}
         try:
             self.es.update(index=self.index, doc_type=self.stage_type_name, id=stage_id, body=body, parent=experiment_id)
-        except ConnectionError:
-            error("Error while updating stage result in elasticsearch. Check connection to elasticsearch.")
+        except ConnectionError as err1:
+            error("ConnectionError while updating stage result. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while updating stage result. Check type mappings in experiment_db_config.json.")
+            raise err2
 
     def get_stages(self, experiment_id):
         query = {
@@ -172,8 +220,12 @@ class ElasticSearchDb(Database):
         try:
             res = self.es.search(index=self.index, doc_type=self.stage_type_name, body=query, size=10000, sort='createdDate')
             return [r["_id"] for r in res["hits"]["hits"]], [r["_source"] for r in res["hits"]["hits"]]
-        except ConnectionError:
-            error("Error while getting stages from elasticsearch. Check connection to elasticsearch.")
+        except ConnectionError as err1:
+            error("ConnectionError while retrieving stages. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while retrieving stages. Check type mappings in experiment_db_config.json.")
+            raise err2
 
     def get_stages_after(self, experiment_id, timestamp):
         query = {
@@ -200,8 +252,12 @@ class ElasticSearchDb(Database):
         try:
             res = self.es.search(index=self.index, doc_type=self.stage_type_name, body=query, sort='createdDate')
             return [r["_id"] for r in res["hits"]["hits"]], [r["_source"] for r in res["hits"]["hits"]]
-        except ConnectionError:
-            error("Error while getting stage data from elasticsearch. Check connection to elasticsearch.")
+        except ConnectionError as err1:
+            error("ConnectionError while getting stage data. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while getting stage data. Check type mappings in experiment_db_config.json.")
+            raise err2
 
     def save_data_point(self, payload, data_point_count, experiment_id, stage_no, secondary_data_provider_index):
         data_point_id = Database.create_data_point_id(experiment_id, stage_no, data_point_count, secondary_data_provider_index)
@@ -211,8 +267,12 @@ class ElasticSearchDb(Database):
         body["createdDate"] = datetime.now().isoformat(' ')  # used to replace 'T' with ' '
         try:
             self.es.index(index=self.index, doc_type=self.data_point_type_name, body=body, id=data_point_id, parent=stage_id)
-        except ConnectionError:
-            error("Error while saving data point data in elasticsearch. Check connection to elasticsearch.")
+        except ConnectionError as err1:
+            error("ConnectionError while saving data point. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while saving data point. Check type mappings in experiment_db_config.json.")
+            raise err2
 
     def get_data_points(self, experiment_id, stage_no):
         stage_id = Database.create_stage_id(experiment_id, stage_no)
@@ -233,8 +293,12 @@ class ElasticSearchDb(Database):
             # sorting is required for proper visualization of data
             res = self.es.search(index=self.index, body=query, size=10000, sort='createdDate')
             return [r["_source"] for r in res["hits"]["hits"]]
-        except ConnectionError:
-            error("Error while retrieving data points from elasticsearch. Check connection to elasticsearch.")
+        except ConnectionError as err1:
+            error("ConnectionError while retrieving data points. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while retrieving data points. Check type mappings in experiment_db_config.json.")
+            raise err2
 
     def get_aggregation(self, experiment_id, stage_no, aggregation_name, field):
         stage_id = self.create_stage_id(experiment_id, stage_no)
@@ -265,8 +329,12 @@ class ElasticSearchDb(Database):
                 return res["aggregations"][aggregation_key]["values"]
             else:
                 return res["aggregations"][aggregation_key]
-        except ConnectionError:
-            error("Error while retrieving aggregations from elasticsearch. Check connection to elasticsearch.")
+        except ConnectionError as err1:
+            error("ConnectionError while retrieving aggregations. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while retrieving aggregations. Check type mappings in experiment_db_config.json.")
+            raise err2
 
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-filter-aggregation.html
     # can be extended with aggregations using above link
@@ -299,8 +367,12 @@ class ElasticSearchDb(Database):
         try:
             res = self.es.search(index=self.index, body=query)
             return res["aggregations"][aggregation_key]["doc_count"]
-        except ConnectionError:
-            error("Error while retrieving aggregations from elasticsearch. Check connection to elasticsearch.")
+        except ConnectionError as err1:
+            error("ConnectionError while retrieving aggregations from elasticsearch. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while retrieving aggregations. Check type mappings for experiments in experiment_db_config.json.")
+            raise err2
 
     def get_data_points_after(self, experiment_id, stage_no, timestamp):
         stage_id = Database.create_stage_id(experiment_id, stage_no)
@@ -348,15 +420,21 @@ class ElasticSearchDb(Database):
             # sorting is required for proper visualization of data
             res = self.es.search(index=self.index, doc_type=self.data_point_type_name, body=query2, size=10000, sort='createdDate')
             return [r["_source"] for r in res["hits"]["hits"]]
-        except ConnectionError:
-            error("Error while retrieving data points from elasticsearch. Check connection to elasticsearch.")
+        except ConnectionError as err1:
+            error("ConnectionError while retrieving data points from elasticsearch. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while retrieving data points. Check type mappings for experiments in experiment_db_config.json.")
+            raise err2
 
     def clear_db(self):
         try:
             if self.es.ping():
                 self.indices_client.delete(index=self.index, ignore=[400, 404])  # remove all records
                 self.indices_client.create(index=self.index, body=self.body)
-        except TransportError as err1:
-            error("Error while creating elasticsearch for experiments. Check type mappings for experiments in experiment_db_config.json.")
+        except ConnectionError as err1:
+            error("ConnectionError while clearing database. Check connection to elasticsearch.")
             raise err1
-
+        except TransportError as err2:
+            error("TransportError while clearing database. Check type mappings for experiments in experiment_db_config.json.")
+            raise err2

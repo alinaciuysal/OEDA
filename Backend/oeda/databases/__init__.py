@@ -56,11 +56,12 @@ def setup_experiment_database(db_type, host, port, for_tests=False):
     with open(file_path) as json_data_file:
         try:
             config_data = load(json_data_file)
-            experiment_db = create_db_instance_for_experiments(db_type, host, port, config_data)
             if for_tests:
-                TestDatabase.db = experiment_db
+                # change the index
+                config_data["index"]["name"] += str("_test")
+                TestDatabase.db = create_db_instance_for_experiments(db_type, host, port, config_data)
             else:
-                ExperimentDatabase.db = experiment_db
+                ExperimentDatabase.db = create_db_instance_for_experiments(db_type, host, port, config_data)
         except ValueError as ve:
             print(ve)
             error("> You need to specify the user database configuration in databases/experiment_db_config.json")

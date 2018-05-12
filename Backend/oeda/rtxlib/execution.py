@@ -107,8 +107,9 @@ def experimentFunction(wf, exp):
     try:
         result = wf.evaluator(wf)
     except Exception as e:
-        tb = traceback.format_exc()
         result = 0
+        error("Exception in workflow evaluator", str(e))
+        tb = traceback.format_exc()
         error("Evaluator failed", str(tb))
     # we store the counter of this experiment in the workflow
     if hasattr(wf, "experimentCounter"):

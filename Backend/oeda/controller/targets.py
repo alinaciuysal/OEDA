@@ -16,18 +16,16 @@ class TargetController(Resource):
     @staticmethod
     def post(target_id):
         try:
-            content = request.get_json()
+            target_system = request.get_json()
             # check if given name is unique
             ids, targets = db().get_targets()
 
             for target in targets:
-                if target['name'] == content['name']:
+                if target['name'] == target_system['name']:
                     return {"message": "Duplicate target system names"}, 409
 
-            content["status"] = "READY"
-            new_target = db().save_target(target_id, content)
-            new_target["id"] = target_id
-            return new_target
+            target_system["status"] = "READY"
+            db().save_target(target_system)
         except Exception as e:
             tb = traceback.format_exc()
             print(tb)

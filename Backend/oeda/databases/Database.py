@@ -82,6 +82,15 @@ class Database:
         """ just for testing, it re-creates an index """
         pass
 
+    def get_stages_count(self, experiment_id):
+        """ returns the stages count parameter of the experiment specified by its id """
+        pass
+
+    def get_data_for_analysis(self, experiment_id):
+        """ returns data_points (key-value pair),
+            knobs and experiment_count of the experiment for statistical analysis """
+        pass
+
     @staticmethod
     def create_stage_id(experiment_id, stage_no):
         return str(experiment_id) + "#" + str(stage_no)
@@ -92,6 +101,8 @@ class Database:
         if secondary_data_provider_index:
             return str(experiment_id) + "#" + str(stage_no) + "_" + str(data_point_count) + "-" + str(secondary_data_provider_index)
         return str(experiment_id) + "#" + str(stage_no) + "_" + str(data_point_count)
+
+
 
 class TargetSystemNotFoundException(Exception):
     pass

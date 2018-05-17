@@ -10,21 +10,25 @@ setup(
     zip_safe=False,
     install_requires=[
         'Tempita',
-        'colorama',
+        'colorama', # color on the console
         'tornado',
         'flask_restful',
         'flask_cors',
-        'elasticsearch',
-        'statsmodels',
-        'numpy',
-        'requests',
+        'elasticsearch', # elasticsearch integration
+        'statsmodels', # statistics and statistical testing
+        'numpy', # scientific computing
+        'requests', # http integreation
         'freetype-py',
         'pypng',
         'matplotlib',
         'pyjwt',
         'backports.ssl_match_hostname',
-        'scikit-optimize',
-        'kafka',
-        'paho-mqtt'
+        'scikit-optimize', # gauss optimizer
+        'kafka', # integration with kafka
+        'paho-mqtt',
+        'pandas',
+        'seaborn',  # plotting lib
+        'paho-mqtt',  # mqtt integration
+        'scipy' # numerics and statistics
     ]
 )

@@ -1,6 +1,6 @@
 from oeda.databases import setup_experiment_database, db
 from oeda.log import *
-from oeda.utilities.TestUtility import create_experiment, create_target_system, rtx_execution
+from oeda.utilities.TestUtility import create_experiment_with_mlr_mbo, create_target_system, rtx_execution
 from tests.unit_test import UnitTest
 import unittest
 
@@ -47,12 +47,12 @@ class IntegrationTest(unittest.TestCase):
         IntegrationTest.target_system = target_system
 
     def test_j_create_experiment(self):
-        experiment = create_experiment(strategy_name="mlr_mbo",
-                                       sample_size=20,
-                                       knobs=IntegrationTest.knobs,
-                                       considered_data_types=IntegrationTest.considered_data_types,
-                                       optimizer_iterations_in_design=len(IntegrationTest.knobs)*4,
-                                       acquisition_method="ei")
+        experiment = create_experiment_with_mlr_mbo(strategy_name="mlr_mbo",
+                                                    sample_size=20,
+                                                    knobs=IntegrationTest.knobs,
+                                                    considered_data_types=IntegrationTest.considered_data_types,
+                                                    optimizer_iterations_in_design=len(IntegrationTest.knobs)*4,
+                                                    acquisition_method="ei")
         self.assertTrue(experiment)
         self.assertTrue(experiment["id"])
         experiment["targetSystemId"] = IntegrationTest.target_system["id"]

@@ -112,13 +112,14 @@ export class CreateExperimentsComponent implements OnInit {
           }
           all_knobs.push(knob);
         }
-        this.experiment.executionStrategy.sample_size = Number(this.experiment.executionStrategy.sample_size);
-        // save experiment stage to executionStrategy, so that it can be used in determining nr of remaining stages and estimated time
-        this.experiment.executionStrategy.stages_count = Number(this.stages_count);
+        // prepare other attributes
         if (experiment_type === "random" || experiment_type === "mlr_mbo" || experiment_type === "self_optimizer" || experiment_type === "uncorrelated_self_optimizer") {
           this.experiment.executionStrategy.optimizer_iterations = Number(this.experiment.executionStrategy.optimizer_iterations);
           this.experiment.executionStrategy.optimizer_iterations_in_design = Number(this.experiment.executionStrategy.optimizer_iterations_in_design);
         }
+        this.experiment.executionStrategy.sample_size = Number(this.experiment.executionStrategy.sample_size);
+        this.calculateTotalNrOfStages();
+        this.experiment.executionStrategy.stages_count = Number(this.stages_count);
       }
       this.experiment.executionStrategy.knobs = all_knobs;
       // now take the incoming data type labeled as "optimize"
@@ -382,6 +383,7 @@ export class CreateExperimentsComponent implements OnInit {
   }
 
   // returns number of stages using min, max, step size if the selected strategy is step_explorer
+  // or sets stage_counts to sum of optimizer_iterations and optimizer_iterations in design for bayesian opt. methods & random method
   calculateTotalNrOfStages() {
     this.stages_count = null;
     if (this.experiment.executionStrategy.type === 'step_explorer') {
@@ -406,8 +408,12 @@ export class CreateExperimentsComponent implements OnInit {
         const sum = stage_counts.reduce(function(a, b) {return a * b; } );
         this.stages_count = sum;
       }
+    } else if (this.experiment.executionStrategy.type === 'mlr_mbo'
+      || this.experiment.executionStrategy.type === 'self_optimizer'
+      || this.experiment.executionStrategy.type === 'uncorrelated_self_optimizer'
+      || this.experiment.executionStrategy.type === 'random') {
+      this.stages_count = this.experiment.executionStrategy.optimizer_iterations + this.experiment.executionStrategy.optimizer_iterations_in_design;
     }
-
   }
 
   removeChangeableVariable(index) {

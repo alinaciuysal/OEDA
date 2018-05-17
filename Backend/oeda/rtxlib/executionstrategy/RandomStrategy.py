@@ -1,6 +1,5 @@
 from oeda.log import *
 from oeda.rtxlib.execution import experimentFunction
-from oeda.analysis import blackbox as bb
 from skopt import gp_minimize
 
 def random_execution(wf, optimum_values, variables):
@@ -38,20 +37,6 @@ def start_random_strategy(wf):
     info("> RandomStrategy   | wf.totalExperiments" + str(wf.totalExperiments), Fore.CYAN)
     info("> RandomStrategy   | knobs" + str(knobs), Fore.CYAN)
     info("> RandomStrategy   | range_tuples" + str(range_tuples), Fore.CYAN)
-
-    # we give the minimization function a callback to execute
-    # it uses the return value (it tries to minimize it) to select new knobs to test
-    # TODO: use mlrMBO or https://github.com/fmfn/BayesianOptimization
-    # TODO: or https://github.com/thuijskens/bayesian-optimization
-    # TODO: or https://github.com/paulknysh/blackbox/blob/master/blackbox.py
-    # TODO: or https://github.com/adebayoj/fairml
-    # optimizer_result = bb.search(
-    #     lambda optimum_values: random_execution(wf, optimum_values, variables), # given function
-    #     box=range_tuples, # range of values for each parameter
-    #     n=wf.totalExperiments, # number of function calls on initial stage (global search)
-    #     m=optimizer_iterations_in_design, # number of function calls on subsequent stage (local search)
-    #     batch=4,  # number of calls that will be evaluated in parallel
-    #     resfile='output.csv') # text file where results will be saved
 
     optimizer_result = gp_minimize(lambda opti_values: random_execution(wf, opti_values, variables),
                                    range_tuples, n_calls=wf.totalExperiments, n_random_starts=optimizer_iterations_in_design)

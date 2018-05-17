@@ -155,7 +155,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
                     this.dataAvailable = true;
 
                     // polling using Timer (2 sec interval) for real-time data visualization
-                    this.timer = Observable.timer(1000, 2000);
+                    this.timer = Observable.timer(1000, 4000);
                     this.subscription = this.timer.subscribe(() => {
                       this.fetch_oeda_callback();
                     });

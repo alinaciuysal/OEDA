@@ -29,7 +29,7 @@ def parse_config(folder_names, config_file_name):
 
 
 # usable strategy_names are sequential, self_optimizer, uncorrelated_self_optimizer, step_explorer, forever, random, mlr_mbo
-def create_experiment(strategy_name, sample_size, knobs, considered_data_types, optimizer_iterations_in_design, acquisition_method="ei", optimizer_iterations=5):
+def create_experiment_with_mlr_mbo(strategy_name, sample_size, knobs, considered_data_types, optimizer_iterations_in_design, acquisition_method="ei", optimizer_iterations=5):
     num = randint(0, 100)
     id = str(uuid4())
     experiment = dict(
@@ -41,7 +41,8 @@ def create_experiment(strategy_name, sample_size, knobs, considered_data_types, 
         executionStrategy=dict(
             type=strategy_name,
             sample_size=sample_size,
-            knobs=knobs
+            knobs=knobs,
+            stages_count=optimizer_iterations + optimizer_iterations_in_design
         )
     )
     if strategy_name in ["self_optimizer", "uncorrelated_self_optimizer", "mlr_mbo"]:

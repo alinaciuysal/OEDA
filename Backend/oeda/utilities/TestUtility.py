@@ -111,16 +111,12 @@ def adjust_functions_and_weights(incoming_data_types):
         #     considered_data_types.append(data_type)
     return considered_data_types
 
-
+# at least 2 factors should present if we want to use two-way-anova
 def create_knobs():
-    # return dict(
-    #     route_random_sigma=(0, 0.2),
-    #     exploration_percentage=(2, 2.7)
-    # )
     return dict(
-        route_random_sigma=(0, 0.2)
+        route_random_sigma=(0, 0.2),
+        exploration_percentage=(2, 2.7)
     )
-
 
 def rtx_execution(experiment, target):
     set_experiment_status(experiment["id"], "RUNNING")

@@ -15,6 +15,9 @@ import unittest
     so, tests are named according to this pattern: test_<order>_<name>. 
     
     main method contains a test suite that first executes unit tests and then executes test cases of this class 
+    
+    analysis_tests_included is initially set to False to make this test self-executable
+    we set it to True when we run analysis tests
 '''
 class IntegrationTest(unittest.TestCase):
     for_tests = True
@@ -24,6 +27,7 @@ class IntegrationTest(unittest.TestCase):
     target_system = None
     experiment = None
     stage_ids = None
+    analysis_tests_included = False
 
     def test_e_data_provider(self):
         self.assertTrue(UnitTest.data_providers)
@@ -70,7 +74,8 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(experiment_status, "SUCCESS")
         self.stage_test()
         self.data_point_test()
-        self.delete_index_test()
+        if IntegrationTest.analysis_tests_included is False:
+            self.delete_index_test()
 
     # following three should not start with test_ because they need to wait for test_k_execution method to end
     def stage_test(self):
@@ -105,7 +110,7 @@ def suite():
 
 if __name__ == '__main__':
     # ref https://stackoverflow.com/questions/12011091/trying-to-implement-python-testsuite
-    mySuit=suite()
-    runner=unittest.TextTestRunner()
+    mySuit = suite()
+    runner = unittest.TextTestRunner()
     runner.run(mySuit)
     exit(1)

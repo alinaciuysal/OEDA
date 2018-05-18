@@ -450,13 +450,17 @@ class ElasticSearchDb(Database):
         data = dict()
         knobs = dict()
         stages = self.get_stages(experiment_id=experiment_id)
-        stage_ids = stages[0]
-        sources = stages[1]
-        for idx, stage_id in enumerate(stage_ids):
-            data_points = self.get_data_points(experiment_id=experiment_id, stage_no=idx)
-            if len(data_points) > 0:
-                data[stage_id] = [d for d in data_points]
-                knobs[stage_id] = sources[idx]["knobs"]
-        # return value 1 (data): is a key-value pair where key is stage_id and value is array of all data points of that stage,
-        # return value 2 (knobs): is a key-value pair where key is stage_id and value is knob object of that stage
-        return data, knobs
+        print("retrieved_stages", stages)
+        if len(stages[0]) > 0 and len(stages[1]) > 0:
+            stage_ids = stages[0]
+            sources = stages[1]
+            for idx, stage_id in enumerate(stage_ids):
+                data_points = self.get_data_points(experiment_id=experiment_id, stage_no=idx)
+                if len(data_points) > 1:
+                    print("data_points", data_points)
+                    data[stage_id] = [d for d in data_points]
+                    knobs[stage_id] = sources[idx]["knobs"]
+            # return value 1 (data): is a key-value pair where key is stage_id and value is array of all data points of that stage,
+            # return value 2 (knobs): is a key-value pair where key is stage_id and value is knob object of that stage
+            return data, knobs
+        raise Exception("Cannot retrieve stage and data from db, please restart")

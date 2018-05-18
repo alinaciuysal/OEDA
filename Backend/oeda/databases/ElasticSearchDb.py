@@ -128,7 +128,7 @@ class ElasticSearchDb(Database):
 
     def get_experiments(self):
         query = {
-            "size": 1000,
+            "size": 10000,
             "query": {
                 "match_all": {}
             }
@@ -457,10 +457,37 @@ class ElasticSearchDb(Database):
             for idx, stage_id in enumerate(stage_ids):
                 data_points = self.get_data_points(experiment_id=experiment_id, stage_no=idx)
                 if len(data_points) > 1:
-                    print("data_points", data_points)
                     data[stage_id] = [d for d in data_points]
                     knobs[stage_id] = sources[idx]["knobs"]
             # return value 1 (data): is a key-value pair where key is stage_id and value is array of all data points of that stage,
             # return value 2 (knobs): is a key-value pair where key is stage_id and value is knob object of that stage
             return data, knobs
         raise Exception("Cannot retrieve stage and data from db, please restart")
+
+    def save_analysis(self, stage_ids, analysis_name, result):
+        analysis_id = Database.create_analysis_id(stage_ids, analysis_name)
+        body = dict()
+        body["stage_ids"] = stage_ids
+        body["name"] = analysis_name
+        body["result"] = result
+        body["created"] = datetime.now()
+        try:
+            self.es.index(index=self.index, doc_type=self.analysis_type_name, body=body, id=analysis_id)
+        except ConnectionError as err1:
+            error("Error while saving analysis in elasticsearch. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while saving analysis. Check type mappings for analysis in experiment_db_config.json.")
+            raise err2
+
+    def get_analysis(self, stage_ids, analysis_name):
+        try:
+            analysis_id = Database.create_analysis_id(stage_ids, analysis_name)
+            res = self.es.get(index=self.index, doc_type=self.analysis_type_name, id=analysis_id)
+            return res["_source"]
+        except ConnectionError as err1:
+            error("Error while retrieving analysis in elasticsearch. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while retrieving analysis. Check type mappings for analysis in experiment_db_config.json.")
+            raise err2

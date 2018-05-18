@@ -9,12 +9,13 @@ from analysis_lib import Analysis
 
 class OneSampleTest(Analysis):
 
-    def run(self, data, knobs):
-        if len(data) > 1:
-            warn("Cannot run " + self.name + " on more than one sample.")
-            warn("Running only for first sample.")
+    def run(self, y1, knobs):
+        # if len(data) > 1:
+        #     warn("Cannot run " + self.name + " on more than one sample.")
+        #     warn("Running only for first sample.")
 
-        self.y1 = [d[self.y_key] for d in data[0]]
+        # self.y1 = [d[self.y_key] for d in data[0]]
+        self.y1 = y1
 
 
 class NormalityTest(OneSampleTest):
@@ -22,8 +23,8 @@ class NormalityTest(OneSampleTest):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, experiment_ids, y_key, alpha=0.05):
-        super(NormalityTest, self).__init__(experiment_ids, y_key)
+    def __init__(self, stage_ids, y_key, alpha=0.05):
+        super(NormalityTest, self).__init__(stage_ids, y_key)
         self.alpha = alpha
 
     def run(self, data, knobs):
@@ -64,8 +65,8 @@ class AndersonDarling(NormalityTest):
 
     name = "anderson-darling"
 
-    def __init__(self, experiment_ids, y_key, alpha=0.05):
-        super(self.__class__, self).__init__(experiment_ids, y_key)
+    def __init__(self, stage_ids, y_key, alpha=0.05):
+        super(self.__class__, self).__init__(stage_ids, y_key)
         if alpha not in [0.15, 0.10, 0.05, 0.02, 0.01]:
             error("For Anderson-Darling test, please select as alpha one of 0.15, 0.10, 0.05, 0.02, or 0.01. "
                   "Falling back to default value of alpha = 0.05")

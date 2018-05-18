@@ -91,6 +91,14 @@ class Database:
             knobs and experiment_count of the experiment for statistical analysis """
         pass
 
+    def save_analysis(self, stage_ids, analysis_name, result):
+        """ saves data retrieved from analysis stage for given stages """
+        pass
+
+    def get_analysis(self, stage_ids, analysis_name):
+        """ returns analysis result for the given stages & analysis name """
+        pass
+
     @staticmethod
     def create_stage_id(experiment_id, stage_no):
         return str(experiment_id) + "#" + str(stage_no)
@@ -102,6 +110,13 @@ class Database:
             return str(experiment_id) + "#" + str(stage_no) + "_" + str(data_point_count) + "-" + str(secondary_data_provider_index)
         return str(experiment_id) + "#" + str(stage_no) + "_" + str(data_point_count)
 
+    @staticmethod
+    def create_analysis_id(stage_ids, analysis_name):
+        res = ""
+        for idx, stage_id in enumerate(stage_ids):
+            res += stage_id
+        res += analysis_name
+        return res
 
 
 class TargetSystemNotFoundException(Exception):

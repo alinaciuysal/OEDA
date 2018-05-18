@@ -31,8 +31,8 @@ class Ttest(TwoSampleTest):
 
     name = "t-test"
 
-    def __init__(self, experiment_ids, y_key, alpha=0.05):
-        super(self.__class__, self).__init__(experiment_ids, y_key)
+    def __init__(self, stage_ids, y_key, alpha=0.05):
+        super(self.__class__, self).__init__(stage_ids, y_key)
         self.alpha = alpha
 
     def run(self, data, knobs):
@@ -64,8 +64,8 @@ class TtestPower(TwoSampleTest):
 
     name = "t-test-power"
 
-    def __init__(self, experiment_ids, y_key, effect_size, alpha=0.05, alternative='two-sided'):
-        super(self.__class__, self).__init__(experiment_ids, y_key)
+    def __init__(self, stage_ids, y_key, effect_size, alpha=0.05, alternative='two-sided'):
+        super(self.__class__, self).__init__(stage_ids, y_key)
         self.alpha = alpha
         self.effect_size = effect_size
         self.alternative = alternative
@@ -98,8 +98,8 @@ class TtestSampleSizeEstimation(TwoSampleTest):
 
     name = "t-test-sample-estimation"
 
-    def __init__(self, experiment_ids, y_key, effect_size, mean_diff, alpha=0.05, power=0.8, alternative='two-sided'):
-        super(self.__class__, self).__init__(experiment_ids, y_key)
+    def __init__(self, stage_ids, y_key, effect_size, mean_diff, alpha=0.05, power=0.8, alternative='two-sided'):
+        super(self.__class__, self).__init__(stage_ids, y_key)
         self.alpha = alpha
         self.power = power
         self.effect_size = effect_size

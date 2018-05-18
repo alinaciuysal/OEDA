@@ -44,7 +44,7 @@
     "name": "analysis",
     "mapping": {
       "properties": {
-        "experiment_ids":   { "type": "keyword" },
+        "stage_ids":   { "type": "keyword" },
         "name":          { "type": "keyword" },
         "result":        { "type": "object"  },
         "createdDate":       { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"}

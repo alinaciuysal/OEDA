@@ -16,7 +16,7 @@ class NSampleTest(Analysis):
             error("Cannot run " + self.name + " on less than two samples.")
             return False
 
-        self.y = [[d[self.y_key] for d in data[i]] for i in range(self.stages_count)]
+        self.y = [[d for d in data[i]] for i in range(self.stages_count)]
 
         return True
 
@@ -25,8 +25,8 @@ class DifferentDistributionsTest(NSampleTest):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, experiment_ids, y_key, alpha=0.05):
-        super(DifferentDistributionsTest, self).__init__(experiment_ids, y_key)
+    def __init__(self, stage_ids, y_key, alpha=0.05):
+        super(DifferentDistributionsTest, self).__init__(stage_ids, y_key)
         self.alpha = alpha
 
     def run(self, data, knobs):
@@ -88,8 +88,8 @@ class EqualVarianceTest(NSampleTest):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, experiment_ids, y_key, alpha=0.05):
-        super(EqualVarianceTest, self).__init__(experiment_ids, y_key)
+    def __init__(self, stage_ids, y_key, alpha=0.05):
+        super(EqualVarianceTest, self).__init__(stage_ids, y_key)
         self.alpha = alpha
 
     def run(self, data, knobs):

@@ -19,8 +19,8 @@ class FactorialAnova(Analysis):
 
     name = "two-way-anova"
 
-    def __init__(self, experiment_ids, y_key, knob_keys, stages_count):
-        super(FactorialAnova, self).__init__(experiment_ids, y_key)
+    def __init__(self, stage_ids, y_key, knob_keys, stages_count):
+        super(FactorialAnova, self).__init__(stage_ids, y_key)
         self.knob_keys = knob_keys
         self.stages_count = stages_count
 

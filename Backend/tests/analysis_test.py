@@ -34,6 +34,7 @@ class AnalysisTest(unittest.TestCase):
     outer_key = "payload"
     key = "overhead"
     mean_diff = 0.1 # as in crowdnav-elastic-ttest-sample-size/definition.py
+    n = 2 # for n-sample tests
 
     def test_a_db_1(self):
         config = parse_config(["oeda", "databases"], "experiment_db_config")
@@ -139,7 +140,7 @@ class AnalysisTest(unittest.TestCase):
     # pass both stage_ids to db().save_analysis() method
     #########################
     def test_k_Ttest(self):
-        stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
+        stage_ids, samples, knobs = AnalysisTest.get_data_for_tests()
         test = Ttest(stage_ids=stage_ids, y_key=AnalysisTest.key)
         result = test.run(data=samples, knobs=knobs)
         self.assertTrue(result)
@@ -150,7 +151,7 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(retrieved)
 
     def test_l_TtestPower(self):
-        stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
+        stage_ids, samples, knobs = AnalysisTest.get_data_for_tests()
         x1 = samples[0]
         x2 = samples[1]
         pooled_std = sqrt((np.var(x1) + np.var(x2)) / 2)
@@ -165,7 +166,7 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(retrieved)
 
     def test_m_TtestSampleSizeEstimation(self):
-        stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
+        stage_ids, samples, knobs = AnalysisTest.get_data_for_tests()
         test = TtestSampleSizeEstimation(stage_ids=stage_ids, y_key=AnalysisTest.key, effect_size=None, mean_diff=AnalysisTest.mean_diff)
         result = test.run(data=samples, knobs=knobs)
         self.assertTrue(result)
@@ -180,7 +181,7 @@ class AnalysisTest(unittest.TestCase):
     # pass necessary stage_ids to db().save_analysis() method
     #########################
     def test_n_OneWayAnova(self):
-        stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
+        stage_ids, samples, knobs = AnalysisTest.get_data_for_tests()
         test = OneWayAnova(stage_ids=stage_ids, y_key=AnalysisTest.key)
         result = test.run(data=samples, knobs=knobs)
         self.assertTrue(result)
@@ -191,7 +192,7 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(retrieved)
 
     def test_o_KruskalWallis(self):
-        stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
+        stage_ids, samples, knobs = AnalysisTest.get_data_for_tests()
         test = KruskalWallis(stage_ids=stage_ids, y_key=AnalysisTest.key)
         result = test.run(data=samples, knobs=knobs)
         self.assertTrue(result)
@@ -206,7 +207,7 @@ class AnalysisTest(unittest.TestCase):
     ## Equal variance tests
     ##########################
     def test_p_Levene(self):
-        stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
+        stage_ids, samples, knobs = AnalysisTest.get_data_for_tests()
         test = Levene(stage_ids=stage_ids, y_key=AnalysisTest.key)
         result = test.run(data=samples, knobs=knobs)
         self.assertTrue(result)
@@ -217,7 +218,7 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(retrieved)
 
     def test_q_Bartlett(self):
-        stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
+        stage_ids, samples, knobs = AnalysisTest.get_data_for_tests()
         test = Bartlett(stage_ids=stage_ids, y_key=AnalysisTest.key)
         result = test.run(data=samples, knobs=knobs)
         self.assertTrue(result)
@@ -228,7 +229,7 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(retrieved)
 
     def test_r_FlignerKilleen(self):
-        stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
+        stage_ids, samples, knobs = AnalysisTest.get_data_for_tests()
         test = FlignerKilleen(stage_ids=stage_ids, y_key=AnalysisTest.key)
         result = test.run(data=samples, knobs=knobs)
         self.assertTrue(result)
@@ -239,21 +240,26 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(retrieved)
 
 
-    # ##########################
-    # ## Two-way anova
-    # ##########################
-    # def test_s_FactorialAnova(self):
-    #     stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
-    #     try:
-    #         table = FactorialAnova(stage_ids=stage_ids, y_key=AnalysisTest.key, knob_keys=None, stages_count=len(stage_ids)).run(data=samples, knobs=knobs)
-    #         self.assertTrue(table is not None)
-    #     except Exception as e:
-    #         error_name = type(e).__name__
-    #         self.assertTrue(error_name == "LinAlgError" or error_name == "ValueError")
+    ##########################
+    ## Two-way anova
+    ##########################
+    def test_s_FactorialAnova(self):
+        try:
+            stage_ids, samples, knobs = AnalysisTest.get_data_for_tests()
+            test = FactorialAnova(stage_ids=stage_ids, y_key=AnalysisTest.key, knob_keys=None, stages_count=len(stage_ids))
+            result = test.run(data=samples, knobs=knobs)
+            self.assertTrue(result is not None)
+            # TODO: Ilias, how can we save Factorial Analysis table to DB?
+            # db().save_analysis(AnalysisTest.stage_ids, test.name, result)
+            # retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
+            # self.assertTrue(retrieved)
+        except Exception as e:
+            error_name = type(e).__name__
+            self.assertTrue(error_name == "LinAlgError" or error_name == "ValueError")
 
     """ helper fcn for two and n-sample tests """
     @staticmethod
-    def get_data_for_two_sample_tests():
+    def get_data_for_tests():
         stage_id_1 = AnalysisTest.stage_ids[0]
         stage_id_2 = AnalysisTest.stage_ids[1]
         stage_ids = [stage_id_1, stage_id_2]

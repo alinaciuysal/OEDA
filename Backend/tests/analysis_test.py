@@ -7,6 +7,7 @@ from oeda.analysis.two_sample_tests import Ttest, TtestPower, TtestSampleSizeEst
 from oeda.analysis.one_sample_tests import DAgostinoPearson, AndersonDarling, KolmogorovSmirnov, ShapiroWilk
 from oeda.analysis.n_sample_tests import Bartlett, FlignerKilleen, KruskalWallis, Levene, OneWayAnova
 from oeda.analysis.factorial_tests import FactorialAnova
+from oeda.analysis import Analysis
 from math import sqrt
 import numpy as np
 
@@ -103,7 +104,6 @@ class AnalysisTest(unittest.TestCase):
         retrieved = db().get_analysis(AnalysisTest.stage_id, test.name)
         self.assertTrue(retrieved)
 
-
     def test_h_dagostino(self):
         test = DAgostinoPearson(AnalysisTest.experiment_id, AnalysisTest.key, alpha=0.05)
         result = test.run(data=AnalysisTest.data[AnalysisTest.stage_id], knobs=AnalysisTest.knobs[AnalysisTest.stage_id])
@@ -175,57 +175,70 @@ class AnalysisTest(unittest.TestCase):
         retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
         self.assertTrue(retrieved)
 
-    # #########################
-    # # Different distributions tests
+    #########################
+    # Different distributions tests
     # pass necessary stage_ids to db().save_analysis() method
-    # #########################
-    # def test_n_OneWayAnova(self):
-    #     stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
-    #     test = OneWayAnova(stage_ids=stage_ids, y_key=AnalysisTest.key)
-    #     result = test.run(data=samples, knobs=knobs)
-    #     self.assertTrue(result)
-    #     for key in result:
-    #         self.assertTrue(result[key] is not None)
-    #     db().save_analysis(AnalysisTest.stage_ids, test.name, result)
-    #     retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
-    #     self.assertTrue(retrieved)
-    #
-    # def test_o_KruskalWallis(self):
-    #     stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
-    #     test = KruskalWallis(stage_ids=stage_ids, y_key=AnalysisTest.key)
-    #     result = test.run(data=samples, knobs=knobs)
-    #     self.assertTrue(result)
-    #     for key in result:
-    #         self.assertTrue(result[key] is not None)
-    #     db().save_analysis(AnalysisTest.stage_ids, test.name, result)
-    #     retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
-    #     self.assertTrue(retrieved)
+    #########################
+    def test_n_OneWayAnova(self):
+        stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
+        test = OneWayAnova(stage_ids=stage_ids, y_key=AnalysisTest.key)
+        result = test.run(data=samples, knobs=knobs)
+        self.assertTrue(result)
+        for key in result:
+            self.assertTrue(result[key] is not None)
+        db().save_analysis(AnalysisTest.stage_ids, test.name, result)
+        retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
+        self.assertTrue(retrieved)
+
+    def test_o_KruskalWallis(self):
+        stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
+        test = KruskalWallis(stage_ids=stage_ids, y_key=AnalysisTest.key)
+        result = test.run(data=samples, knobs=knobs)
+        self.assertTrue(result)
+        print("result", result)
+        for key in result:
+            self.assertTrue(result[key] is not None)
+        db().save_analysis(AnalysisTest.stage_ids, test.name, result)
+        retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
+        self.assertTrue(retrieved)
+
+    ##########################
+    ## Equal variance tests
+    ##########################
+    def test_p_Levene(self):
+        stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
+        test = Levene(stage_ids=stage_ids, y_key=AnalysisTest.key)
+        result = test.run(data=samples, knobs=knobs)
+        self.assertTrue(result)
+        for key in result:
+            self.assertTrue(result[key] is not None)
+        db().save_analysis(AnalysisTest.stage_ids, test.name, result)
+        retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
+        self.assertTrue(retrieved)
+
+    def test_q_Bartlett(self):
+        stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
+        test = Bartlett(stage_ids=stage_ids, y_key=AnalysisTest.key)
+        result = test.run(data=samples, knobs=knobs)
+        self.assertTrue(result)
+        for key in result:
+            self.assertTrue(result[key] is not None)
+        db().save_analysis(AnalysisTest.stage_ids, test.name, result)
+        retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
+        self.assertTrue(retrieved)
+
+    def test_r_FlignerKilleen(self):
+        stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
+        test = FlignerKilleen(stage_ids=stage_ids, y_key=AnalysisTest.key)
+        result = test.run(data=samples, knobs=knobs)
+        self.assertTrue(result)
+        for key in result:
+            self.assertTrue(result[key] is not None)
+        db().save_analysis(AnalysisTest.stage_ids, test.name, result)
+        retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
+        self.assertTrue(retrieved)
 
 
-    # ##########################
-    # ## Equal variance tests
-    # ##########################
-    # def test_p_Levene(self):
-    #     stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
-    #     stats, pvalue = Levene(stage_ids=stage_ids, y_key=AnalysisTest.key).get_statistic_and_pvalue(y=samples)
-    #     # print("Levene", stats, pvalue)
-    #     self.assertTrue(stats)
-    #     self.assertTrue(pvalue)
-    #
-    # def test_q_Bartlett(self):
-    #     stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
-    #     stats, pvalue = Bartlett(stage_ids=stage_ids, y_key=AnalysisTest.key).get_statistic_and_pvalue(y=samples)
-    #     # print("Bartlett", stats, pvalue)
-    #     self.assertTrue(stats)
-    #     self.assertTrue(pvalue)
-    #
-    # def test_r_FlignerKilleen(self):
-    #     stage_ids, samples, knobs = AnalysisTest.get_data_for_two_sample_tests()
-    #     stats, pvalue = FlignerKilleen(stage_ids=stage_ids, y_key=AnalysisTest.key).get_statistic_and_pvalue(y=samples)
-    #     # print("FlignerKilleen", stats, pvalue)
-    #     self.assertTrue(stats)
-    #     self.assertTrue(pvalue)
-    #
     # ##########################
     # ## Two-way anova
     # ##########################

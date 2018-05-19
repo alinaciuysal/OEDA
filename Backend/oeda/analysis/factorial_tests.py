@@ -3,8 +3,8 @@ import pandas as pd
 from itertools import combinations
 from statsmodels.formula.api import ols
 from statsmodels.stats.anova import anova_lm
-from rtxlib import error
-from analysis_lib import Analysis
+from oeda.log import error
+from oeda.analysis import Analysis
 
 
 class FactorialAnova(Analysis):

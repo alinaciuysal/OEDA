@@ -3,8 +3,8 @@ from scipy.stats import normaltest
 from scipy.stats import anderson
 from scipy.stats import kstest
 from scipy.stats import shapiro
-from rtxlib import warn, error
-from analysis_lib import Analysis
+from oeda.log import warn, error
+from oeda.analysis import Analysis
 
 
 class OneSampleTest(Analysis):

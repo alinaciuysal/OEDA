@@ -4,8 +4,8 @@ from scipy.stats import kruskal
 from scipy.stats import levene
 from scipy.stats import fligner
 from scipy.stats import bartlett
-from rtxlib import error
-from analysis_lib import Analysis
+from oeda.log import error
+from oeda.analysis import Analysis
 
 
 class NSampleTest(Analysis):
@@ -15,8 +15,7 @@ class NSampleTest(Analysis):
         if len(data) < 2:
             error("Cannot run " + self.name + " on less than two samples.")
             return False
-
-        self.y = [[d for d in data[i]] for i in range(self.stages_count)]
+        self.y = [[d for d in data[i]] for i in range(len(self.stage_ids))]
 
         return True
 

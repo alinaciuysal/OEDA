@@ -3,7 +3,7 @@ from numpy import var
 from scipy.stats import ttest_ind
 from statsmodels.stats.power import tt_ind_solve_power
 from rtxlib import warn, error
-from analysis_lib import Analysis
+from oeda.analysis import Analysis
 from numpy import mean
 
 

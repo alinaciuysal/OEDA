@@ -34,7 +34,8 @@ class AnalysisTest(unittest.TestCase):
     outer_key = "payload"
     key = "overhead"
     mean_diff = 0.1 # as in crowdnav-elastic-ttest-sample-size/definition.py
-    n = 2 # for n-sample tests
+    # for n-sample tests,
+    n = 2 # if n > 2, two-sample tests only use first two samples, and most probably FactorialAnova gives SingularMatrix error
 
     def test_a_db_1(self):
         config = parse_config(["oeda", "databases"], "experiment_db_config")
@@ -53,14 +54,13 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(experiment_ids)
         random_experiment_id = random.choice(experiment_ids)
         self.assertTrue(random_experiment_id)
-        # tries to sample an experiment with number of stages >= 2
-        # TODO: can be problematic if there are 2 stages but experiment is interrupted somehow
-        # TODO: and there are no data points in one of the stages
-        while db().get_stages_count(experiment_id=random_experiment_id) < 2:
+        # tries to sample an experiment with number of stages >= n
+        # TODO: can be problematic if there are n stages but experiment is somehow interrupted
+        # TODO: and there are no data points in one or more of the stages
+        while db().get_stages_count(experiment_id=random_experiment_id) < AnalysisTest.n:
             random_experiment_id = random.choice(experiment_ids)
         self.assertTrue(random_experiment_id)
         AnalysisTest.experiment_id = random_experiment_id
-        print("experiment_id for analysis", AnalysisTest.experiment_id)
 
     def test_c_data_points(self):
         data, knobs = db().get_data_for_analysis(AnalysisTest.experiment_id)
@@ -72,10 +72,10 @@ class AnalysisTest(unittest.TestCase):
     def test_d_random_stage(self):
         stage_ids = AnalysisTest.data.keys()
         self.assertTrue(stage_ids)
-        random_stage_ids = random.sample(stage_ids, 2)
+        random_stage_ids = random.sample(stage_ids, AnalysisTest.n)
         self.assertTrue(random_stage_ids)
         AnalysisTest.stage_ids = random_stage_ids
-        AnalysisTest.stage_id = AnalysisTest.stage_ids[0]
+        AnalysisTest.stage_id = AnalysisTest.stage_ids[0] # this can also be randomized
 
     def test_f_convert_outer_payload(self):
         if AnalysisTest.outer_key is not None:
@@ -196,7 +196,6 @@ class AnalysisTest(unittest.TestCase):
         test = KruskalWallis(stage_ids=stage_ids, y_key=AnalysisTest.key)
         result = test.run(data=samples, knobs=knobs)
         self.assertTrue(result)
-        print("result", result)
         for key in result:
             self.assertTrue(result[key] is not None)
         db().save_analysis(AnalysisTest.stage_ids, test.name, result)
@@ -260,17 +259,10 @@ class AnalysisTest(unittest.TestCase):
     """ helper fcn for two and n-sample tests """
     @staticmethod
     def get_data_for_tests():
-        stage_id_1 = AnalysisTest.stage_ids[0]
-        stage_id_2 = AnalysisTest.stage_ids[1]
-        stage_ids = [stage_id_1, stage_id_2]
-
-        sample_1 = AnalysisTest.data[stage_id_1]
-        sample_2 = AnalysisTest.data[stage_id_2]
-        samples = [sample_1, sample_2]
-
-        knob_1 = AnalysisTest.knobs[stage_id_1]
-        knob_2 = AnalysisTest.knobs[stage_id_2]
-        knobs = [knob_1, knob_2]
+        stage_ids = AnalysisTest.stage_ids
+        # uses stage_ids that have been randomized before to get samples and respective knobs
+        samples = [AnalysisTest.data[stage_id] for stage_id in stage_ids]
+        knobs = [AnalysisTest.knobs[stage_id] for stage_id in stage_ids]
         return stage_ids, samples, knobs
 
 def suite():

@@ -450,7 +450,6 @@ class ElasticSearchDb(Database):
         data = dict()
         knobs = dict()
         stages = self.get_stages(experiment_id=experiment_id)
-        print("retrieved_stages", stages)
         if len(stages[0]) > 0 and len(stages[1]) > 0:
             stage_ids = stages[0]
             sources = stages[1]

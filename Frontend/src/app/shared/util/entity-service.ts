@@ -153,7 +153,8 @@ export class EntityService {
         "targetSystemId": "",
         "executionStrategy": execution_strategy,
         "changeableVariables": [], // used while creating an experiment
-        "considered_data_types": []
+        "considered_data_types": [],
+        "analysis": {}
       }
   }
 
@@ -308,7 +309,7 @@ export class EntityService {
   }
 
   /** returns keys of the given map */
-  get_keys(object) : Array<string> {
+  public get_keys(object) : Array<string> {
     if (!isNullOrUndefined(object)) {
       return Object.keys(object);
     }

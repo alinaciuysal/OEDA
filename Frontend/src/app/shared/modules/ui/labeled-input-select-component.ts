@@ -8,7 +8,8 @@ import {Component, Input, Output, EventEmitter} from "@angular/core";
       <div class="sub-title">{{name}}</div>
       <div>
         <select class="form-control" id="{{name}}Edit" name="{{name}}Edit"
-                [(ngModel)]="model[key]" (ngModelChange)="onModelChange($event)" size="1">
+                [(ngModel)]="model[key]" (ngModelChange)="onModelChange($event)" size="1"
+                data-toggle="tooltip" title="{{tooltipTitle}}">
           <option *ngFor="let i of options; let ind = index;" value="{{i.key}}" selected="ind == 0">{{i.label}}</option>
         </select>
       </div>
@@ -26,5 +27,6 @@ export class LabeledInputSelectComponent {
   @Input() name: any;
   @Input() model: any;
   @Input() key: string;
-  @Input() options = []
+  @Input() options = [];
+  @Input() tooltipTitle = "";
 }

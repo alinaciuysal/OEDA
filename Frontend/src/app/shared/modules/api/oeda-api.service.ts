@@ -93,7 +93,8 @@ export interface Experiment {
   targetSystemId: string,
   changeableVariables: any,
   executionStrategy: ExecutionStrategy,
-  considered_data_types: object[]
+  considered_data_types: object[],
+  analysis: any
 }
 
 export interface StageEntity {

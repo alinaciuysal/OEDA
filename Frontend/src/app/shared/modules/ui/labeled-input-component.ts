@@ -8,14 +8,18 @@ import {Component, Input, EventEmitter, Output, OnChanges, SimpleChanges} from "
       <div>
         <input (ngModelChange)="onModelChange($event)" *ngIf="inputType == 'number'" class="form-control" type="number"
                id="{{name}}Edit" name="{{name}}-{{key}}"
-               [(ngModel)]="model[key]" [min]="minNumber" [max]="maxNumber" disabled="{{disabled}}">
+               [(ngModel)]="model[key]" [min]="minNumber" [max]="maxNumber" disabled="{{disabled}}"
+               data-toggle="tooltip" title="{{tooltipTitle}}">
+               
         <input (ngModelChange)="onModelChange($event)" *ngIf="inputType == 'text'" class="form-control" type="text"
                id="{{name}}Edit" name="{{name}}-{{key}}"
-               [(ngModel)]="model[key]" placeholder="{{placeholder}}" disabled="{{disabled}}">
+               [(ngModel)]="model[key]" placeholder="{{placeholder}}" disabled="{{disabled}}"
+               data-toggle="tooltip" title="{{tooltipTitle}}">
         
         <input (ngModelChange)="onModelChange($event)" *ngIf="inputType == 'checkbox'" class="form-check-input" type="checkbox"
                id="{{name}}Edit" name="{{name}}-{{key}}"
-               [(ngModel)]="model[key]" placeholder="{{placeholder}}">
+               [(ngModel)]="model[key]" placeholder="{{placeholder}}"
+               data-toggle="tooltip" title="{{tooltipTitle}}">
 
         <!--<input (ngModelChange)="onModelChange($event)" type="number" *ngIf="inputType == 'float'" -->
                <!--class="form-control" name="{{name}}-{{key}}" placeholder="{{placeholder}}" [(ngModel)]="model[key]"-->
@@ -42,6 +46,7 @@ export class LabeledInputComponent implements OnChanges {
   @Input() key: string;
   @Input() placeholder = "";
   @Input() disabled = false;
+  @Input() tooltipTitle = "";
 
 
   @Input() required = true;

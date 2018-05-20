@@ -19,8 +19,9 @@ import {hasOwnProperty} from "tslint/lib/utils";
 export class CreateExperimentsComponent implements OnInit {
   experiment: Experiment;
   originalExperiment: Experiment;
+  targetSystem: Target;
+  originalTargetSystem: Target;
   availableTargetSystems: any;
-  targetSystem: any;
   executionStrategy: any;
   variable: any;
   initialVariables: any;
@@ -28,6 +29,7 @@ export class CreateExperimentsComponent implements OnInit {
   stages_count: any;
   is_collapsed: boolean;
   errorButtonLabel: string;
+  errorButtonLabelChangeableVariables: string;
   aggregateFunctionsMetric: any;
   aggregateFunctionsBoolean: any;
 
@@ -42,6 +44,7 @@ export class CreateExperimentsComponent implements OnInit {
     this.targetSystem = this.entityService.create_target_system();
     this.experiment = this.entityService.create_experiment(this.executionStrategy);
     this.originalExperiment = _(this.experiment);
+
     this.stages_count = null;
     this.is_collapsed = true;
     /** TODO: add support for other scales */
@@ -113,12 +116,12 @@ export class CreateExperimentsComponent implements OnInit {
           all_knobs.push(knob);
         }
         // prepare other attributes
-        if (experiment_type === "random" || experiment_type === "mlr_mbo" || experiment_type === "self_optimizer" || experiment_type === "uncorrelated_self_optimizer") {
+        if (experiment_type === "mlr_mbo" || experiment_type === "self_optimizer" || experiment_type === "uncorrelated_self_optimizer") {
           this.experiment.executionStrategy.optimizer_iterations = Number(this.experiment.executionStrategy.optimizer_iterations);
           this.experiment.executionStrategy.optimizer_iterations_in_design = Number(this.experiment.executionStrategy.optimizer_iterations_in_design);
         }
         this.experiment.executionStrategy.sample_size = Number(this.experiment.executionStrategy.sample_size);
-        this.calculateTotalNrOfStages();
+        // this.calculateTotalNrOfStages();
         this.experiment.executionStrategy.stages_count = Number(this.stages_count);
       }
       this.experiment.executionStrategy.knobs = all_knobs;
@@ -302,6 +305,9 @@ export class CreateExperimentsComponent implements OnInit {
       this.initialVariables = this.selectedTargetSystem.changeableVariables.slice(0);
 
       this.targetSystem = this.selectedTargetSystem;
+      // also make a copy of original ts for changes in analysis etc.
+      this.originalTargetSystem = _(this.targetSystem);
+
       // relate target system with experiment now
       this.experiment.targetSystemId = this.selectedTargetSystem.id;
 
@@ -313,15 +319,78 @@ export class CreateExperimentsComponent implements OnInit {
 
   addChangeableVariable(variable) {
     const ctrl = this;
-    if (!isNullOrUndefined(variable)) {
+    if (ctrl.experiment.analysis.type === 't_test') {
+      if (isNullOrUndefined(variable.target)) {
+        ctrl.notify.error("Error", "Provide target value for changeable variable(s)");
+      } else {
+        // check number of already-added variables for different analysis options
+        if (ctrl.experiment.analysis.method === 'one_factor_two_values') {
+
+          if (ctrl.experiment.changeableVariables.length == 1 && ctrl.experiment.changeableVariables[0].name == variable.name) {
+            // there is one variable that was added, so check if new one is same with that one
+            // also check if user tries to add same target twice
+            if (ctrl.experiment.changeableVariables[0].target == variable.target) {
+              ctrl.notify.error("Error", "You can't add two variables with same value for T-test (One Variable Two Factors)");
+            } else {
+              ctrl.experiment.changeableVariables.push(_(variable));
+            }
+          } else if (ctrl.experiment.changeableVariables.length == 0 && !isNullOrUndefined(variable.target)) {
+            // ch. var is empty, just push
+            ctrl.experiment.changeableVariables.push(_(variable));
+          } else if (ctrl.experiment.changeableVariables.length == 2) {
+            ctrl.notify.error("Error", "2 factors have already been specified for T-test (One Variable Two Factors)");
+          } else {
+            ctrl.notify.error("Error", "You can't add two different variables for T-test (One Variable Two Factors)");
+          }
+        }
+        // two_factors_one_value option is handled via addVariablesForTtestTwoVars() fcn
+      }
+    }
+    else if (ctrl.experiment.analysis.type === 'anova' ) {
+      // TODO:
+      ctrl.notify.error("Error", "TODO");
+    } else {
+      // legacy part
       if (ctrl.experiment.changeableVariables.some(item => item.name === variable.name) ) {
         ctrl.notify.error("Error", "This variable is already added");
       } else {
         ctrl.experiment.changeableVariables.push(_(variable));
-        this.preCalculateStepSize();
-        this.calculateTotalNrOfStages();
+        ctrl.preCalculateStepSize();
+        ctrl.calculateTotalNrOfStages();
       }
     }
+  }
+
+  // assuming that user has provided different configurations for variables and wants them to use for the selected analysis test
+  // for T-test (one_factor_two_values) -> n = 2; for anova n is determined by user accordingly
+  addVariablesForTest() {
+    let number_of_desired_variables: number;
+
+    if (this.experiment.analysis.method === 'two_factors_one_value') {
+      number_of_desired_variables = 2;
+      if (this.experiment.changeableVariables.length >= number_of_desired_variables)
+        this.notify.error("Error", "You can't exceed " + number_of_desired_variables + " variables for this test");
+      else {
+        let knob = {};
+        for (let chVar of this.targetSystem.changeableVariables) {
+          console.log("chVar", chVar);
+          if (chVar["is_selected"] == true && !isNullOrUndefined(chVar.target)) {
+            // push an array of k-v pairs instead of pushing variables directly (as in legacy case)
+            let key = chVar.name;
+            knob[key] = chVar.target;
+            // knob["name"] = chVar["name"];
+            // knob["min"] = chVar["min"];
+            // knob["max"] = chVar["max"];
+            // knob["target"] = chVar["target"];
+            // knobArr.push(knob);
+          }
+        }
+        this.experiment.changeableVariables.push(knob);
+      }
+      console.log("this.experiment.changeableVariables", this.experiment.changeableVariables);
+    }
+    // TODO: new if case for anova with user-defined "N"
+
   }
 
   addAllChangeableVariables() {
@@ -343,8 +412,8 @@ export class CreateExperimentsComponent implements OnInit {
     }
   }
 
-  // if one of min and max is not valid, sets stages_count to null, so that it will get hidden
-  minMaxModelsChanged(value) {
+  // if one of the parameters in executionStrategy is not valid, sets stages_count to null, so that it will get hidden
+  strategyParametesChanged(value) {
     if (isNullOrUndefined(value)) {
       this.stages_count = null;
     } else {
@@ -360,9 +429,44 @@ export class CreateExperimentsComponent implements OnInit {
       this.calculateTotalNrOfStages();
     } else if (execution_strategy_key === 'mlr_mbo') {
       this.acquisitionMethodChanged("ei");
+      this.calculateTotalNrOfStages();
     } else if (execution_strategy_key === 'self_optimizer' || execution_strategy_key === 'uncorrelated_self_optimizer') {
       this.acquisitionMethodChanged("gp_hedge");
+      this.calculateTotalNrOfStages();
     }
+  }
+
+  // User can select analysis type while creating an experiment
+  analysisTypeChanged(key) {
+    // refresh previously-created tuples if there are any
+    if (!isNullOrUndefined(this.experiment.analysis.type)) {
+      this.experiment.executionStrategy = this.entityService.create_execution_strategy();
+      this.stages_count = null;
+      this.experiment.changeableVariables = [];
+    }
+    this.experiment.analysis.type = key;
+  }
+
+  // User can select specific method for the selected analysis type
+  analysisMethodChanged(method){
+    // refresh previously-added changeable variables (if there are any)
+    this.experiment.changeableVariables = [];
+    // also refresh original variables of target system (in case any changes have been made previously)
+    this.targetSystem.changeableVariables = _(this.originalTargetSystem.changeableVariables);
+
+    // set executionStrategy
+    if (this.experiment.analysis.type === 't_test') {
+      // check if target system has enough factors for t-test with 2 factors
+      if (this.targetSystem.changeableVariables.length < 2 && method == 'two_factors_one_value') {
+        this.notify.error("Error", "This target system definition does not have two changeable variables");
+        return;
+      }
+      this.experiment.executionStrategy.type = "sequential";
+    } else if (this.experiment.analysis.type === 'bayesian_opt') {
+      // same names are used for bayesian opt, so set executionStrategy like this
+      this.executionStrategyModelChanged(method);
+    }
+    this.experiment.analysis.method = method;
   }
 
   // User can select acquisition function for respective strategies
@@ -370,7 +474,7 @@ export class CreateExperimentsComponent implements OnInit {
     this.experiment.executionStrategy.acquisition_method = acquisition_method_key;
   }
 
-  // pre-determines step size of all added variables if selected execution strategy is step_explorer
+  // calculates step size of all added variables if strategy is step_explorer
   preCalculateStepSize() {
     if (this.experiment.executionStrategy.type === 'step_explorer') {
       for (var j = 0; j < this.experiment["changeableVariables"].length; j++) {
@@ -383,7 +487,7 @@ export class CreateExperimentsComponent implements OnInit {
   }
 
   // returns number of stages using min, max, step size if the selected strategy is step_explorer
-  // or sets stage_counts to sum of optimizer_iterations and optimizer_iterations in design for bayesian opt. methods & random method
+  // or sets stage_counts to sum of optimizer_iterations and optimizer_iterations in design for bayesian opt. methods
   calculateTotalNrOfStages() {
     this.stages_count = null;
     if (this.experiment.executionStrategy.type === 'step_explorer') {
@@ -410,13 +514,12 @@ export class CreateExperimentsComponent implements OnInit {
       }
     } else if (this.experiment.executionStrategy.type === 'mlr_mbo'
       || this.experiment.executionStrategy.type === 'self_optimizer'
-      || this.experiment.executionStrategy.type === 'uncorrelated_self_optimizer'
-      || this.experiment.executionStrategy.type === 'random') {
+      || this.experiment.executionStrategy.type === 'uncorrelated_self_optimizer') {
       this.stages_count = this.experiment.executionStrategy.optimizer_iterations + this.experiment.executionStrategy.optimizer_iterations_in_design;
     }
   }
 
-  removeChangeableVariable(index) {
+  removeChangeableVariable(index: number) {
     this.experiment.changeableVariables.splice(index, 1);
     this.calculateTotalNrOfStages();
   }
@@ -433,6 +536,15 @@ export class CreateExperimentsComponent implements OnInit {
   public is_data_type_selected(): boolean {
     for (let dataType of this.targetSystem.incomingDataTypes) {
       if (dataType["is_considered"] == true) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public is_changeable_variable_selected(): boolean {
+    for (let changeableVariable of this.targetSystem.changeableVariables) {
+      if (changeableVariable["is_selected"] == true) {
         return true;
       }
     }
@@ -466,6 +578,21 @@ export class CreateExperimentsComponent implements OnInit {
   }
 
   /**
+   * sets is_selected flag of changeableVariables for analysis options
+   */
+  public changeable_variable_checkbox_clicked(changeableVariable_index): void {
+    let changeableVariable = this.targetSystem.changeableVariables[changeableVariable_index];
+    if (isNullOrUndefined(changeableVariable["is_selected"])) {
+      // first click
+      changeableVariable["is_selected"] = true;
+    } else {
+      // subsequent clicks
+      changeableVariable["is_selected"] = !changeableVariable["is_selected"];
+      changeableVariable["target"] = null;
+    }
+  }
+
+  /**
    * checks whether given data type is coming from primaryDataProvider of targetSystem
    */
   public is_data_type_coming_from_primary(data_type_index): boolean {
@@ -476,6 +603,33 @@ export class CreateExperimentsComponent implements OnInit {
       }
     }
     return false;
+  }
+
+  public hasErrorsChVar() {
+    if (this.experiment.analysis.method == 'two_factors_one_value') {
+      let number_of_desired_variables = 2;
+      let nr = 0;
+      for (let chVar of this.targetSystem.changeableVariables) {
+        if (chVar["is_selected"] == true && !isNullOrUndefined(chVar["target"]))
+          nr += 1
+      }
+      if (nr < number_of_desired_variables || nr > number_of_desired_variables) {
+        this.errorButtonLabelChangeableVariables = "Select and provide values for " + number_of_desired_variables + " different variables";
+        return true;
+      }
+      return false;
+    } else if (this.experiment.analysis.method == 'one_factor_two_values') {
+      let number_of_desired_variables = 1;
+
+    } else if (this.experiment.analysis.type == 'anova') {
+      let number_of_desired_variables = 2; // TODO: should be taken from user
+    } else {
+      return false;
+    }
+  }
+
+  public get_keys(obj) {
+    return this.entityService.get_keys(obj);
   }
 
 }

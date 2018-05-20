@@ -34,8 +34,8 @@ def run_execution_strategy(wf):
     elif wf.execution_strategy["type"] == "forever":
         start_forever_strategy(wf)
 
-    elif wf.execution_strategy["type"] == "random":
-        start_random_strategy(wf)
+    # elif wf.execution_strategy["type"] == "random":
+    #     start_random_strategy(wf)
 
     elif wf.execution_strategy["type"] == "mlr_mbo":
         start_mlr_mbo_strategy(wf)

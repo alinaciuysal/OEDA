@@ -2,15 +2,11 @@ import {OnInit, Component} from "@angular/core";
 import {NotificationsService} from "angular2-notifications";
 import {Router} from "@angular/router";
 import {LayoutService} from "../../../shared/modules/helper/layout.service";
-import {OEDAApiService, Experiment, Target, ExecutionStrategy} from "../../../shared/modules/api/oeda-api.service";
+import {OEDAApiService, Experiment, Target} from "../../../shared/modules/api/oeda-api.service";
 import * as _ from "lodash.clonedeep";
-import {UUID} from "angular2-uuid";
-import {isNull, isNullOrUndefined} from "util";
+import {isNullOrUndefined} from "util";
 import {TempStorageService} from "../../../shared/modules/helper/temp-storage-service";
-import {forEach} from "@angular/router/src/utils/collection";
 import {EntityService} from "../../../shared/util/entity-service";
-import {hasOwnProperty} from "tslint/lib/utils";
-
 
 @Component({
   selector: 'control-experiments',
@@ -90,7 +86,7 @@ export class CreateExperimentsComponent implements OnInit {
   }
 
   saveExperiment() {
-    if (!this.hasErrors()) {
+    if (!this.hasErrors() && this.hasErrorsChVar()) {
       let all_knobs = [];
       let experiment_type = this.experiment.executionStrategy.type;
       // push names & default values of target system to executionStrategy for forever strategy if there are no errors
@@ -200,12 +196,14 @@ export class CreateExperimentsComponent implements OnInit {
       return true;
     } else {
       let execution_strategy_type = this.experiment.executionStrategy.type;
-      if (execution_strategy_type === "step_explorer") {
+      let analysis_type = this.experiment.analysis.type;
+
+      if (execution_strategy_type === "step_explorer" || analysis_type === 'anova') {
         // check inputs for step strategy changeable variables
         for (let j = 0; j < this.experiment.changeableVariables.length; j++) {
           let variable = this.experiment.changeableVariables[j];
           if (variable["step"] <= 0 || variable["min"] >= variable["max"] || variable["step"] > variable["max"] - variable["min"]) {
-            this.errorButtonLabel = "Provide valid inputs for step strategy variable(s)";
+            this.errorButtonLabel = "Provide valid inputs for variable(s)";
             return true;
           }
         }
@@ -343,13 +341,32 @@ export class CreateExperimentsComponent implements OnInit {
             ctrl.notify.error("Error", "You can't add two different variables for T-test (One Variable Two Factors)");
           }
         }
-        // two_factors_one_value option is handled via addVariablesForTtestTwoVars() fcn
+        // two_factors_one_value option is handled via addVariablesForTest() fcn
       }
-    }
-    else if (ctrl.experiment.analysis.type === 'anova' ) {
-      // TODO:
-      ctrl.notify.error("Error", "TODO");
     } else {
+      // because anova is similar to step, we handle it here
+      // check N
+      if (this.experiment.analysis.type == 'anova') {
+        if (this.experiment.analysis.n > this.targetSystem.changeableVariables.length) {
+          this.notify.error("Error", "N should be less than or equal to " + this.targetSystem.changeableVariables.length);
+          return;
+        }
+        // also check previously-added variables if they match with N
+        let number_of_desired_variables = this.experiment.analysis.n;
+        if (this.experiment.changeableVariables.length >= number_of_desired_variables) {
+          this.notify.error("Error", "You can't exceed " + number_of_desired_variables + " variable(s) for this test");
+          return;
+        }
+        // check if provided step value(s) are null or not
+        for (let i = 0; i < this.targetSystem.changeableVariables.length; i++) {
+          let variable = this.targetSystem.changeableVariables[i];
+          if (variable["is_selected"] && (isNullOrUndefined(variable.step) || !variable.hasOwnProperty("step"))) {
+            this.notify.error("Error", "Provide valid values for variable(s)");
+            return;
+          }
+        }
+        // everything is ok, push to experiment.changeableVariables array in next statements
+      }
       // legacy part
       if (ctrl.experiment.changeableVariables.some(item => item.name === variable.name) ) {
         ctrl.notify.error("Error", "This variable is already added");
@@ -362,35 +379,36 @@ export class CreateExperimentsComponent implements OnInit {
   }
 
   // assuming that user has provided different configurations for variables and wants them to use for the selected analysis test
-  // for T-test (one_factor_two_values) -> n = 2; for anova n is determined by user accordingly
+  // for T-test (one_factor_two_values) -> n = 2;
   addVariablesForTest() {
     let number_of_desired_variables: number;
-
     if (this.experiment.analysis.method === 'two_factors_one_value') {
       number_of_desired_variables = 2;
-      if (this.experiment.changeableVariables.length >= number_of_desired_variables)
+      if (this.experiment.changeableVariables.length >= number_of_desired_variables) {
         this.notify.error("Error", "You can't exceed " + number_of_desired_variables + " variables for this test");
-      else {
-        let knob = {};
-        for (let chVar of this.targetSystem.changeableVariables) {
-          console.log("chVar", chVar);
-          if (chVar["is_selected"] == true && !isNullOrUndefined(chVar.target)) {
-            // push an array of k-v pairs instead of pushing variables directly (as in legacy case)
-            let key = chVar.name;
-            knob[key] = chVar.target;
-            // knob["name"] = chVar["name"];
-            // knob["min"] = chVar["min"];
-            // knob["max"] = chVar["max"];
-            // knob["target"] = chVar["target"];
-            // knobArr.push(knob);
-          }
-        }
-        this.experiment.changeableVariables.push(knob);
+        return;
       }
-      console.log("this.experiment.changeableVariables", this.experiment.changeableVariables);
     }
-    // TODO: new if case for anova with user-defined "N"
 
+    // everything is ok, push to experiment.changeableVariables array
+    let knob = {};
+    for (let variable of this.targetSystem.changeableVariables) {
+      if (variable["is_selected"] == true) {
+        if ( this.experiment.analysis.method == 'two_factors_one_value' && !isNullOrUndefined(variable.target) ) {
+          // push an array of k-v pairs instead of pushing variables directly
+          let key = variable.name;
+          let value: any = {};
+          value.min = variable.min;
+          value.max = variable.max;
+          value.target = variable.target;
+          knob[key] = value;
+        } else {
+          this.notify.error("Error", "Please specify valid values for the selected changeable variables");
+          return;
+        }
+      }
+    }
+    this.experiment.changeableVariables.push(knob);
   }
 
   addAllChangeableVariables() {
@@ -438,13 +456,18 @@ export class CreateExperimentsComponent implements OnInit {
 
   // User can select analysis type while creating an experiment
   analysisTypeChanged(key) {
-    // refresh previously-created tuples if there are any
-    if (!isNullOrUndefined(this.experiment.analysis.type)) {
-      this.experiment.executionStrategy = this.entityService.create_execution_strategy();
-      this.stages_count = null;
-      this.experiment.changeableVariables = [];
+    // refresh previously-created tuples
+    this.experiment.executionStrategy = this.entityService.create_execution_strategy();
+    this.stages_count = null;
+    this.experiment.changeableVariables = [];
+    this.experiment.analysis.method = null;
+
+    // set executionStrategy
+    if (this.experiment.analysis.type == 't_test') {
+      this.experiment.executionStrategy.type = "sequential"; // TODO: this might be removed depending on backend logic
+    } else if (this.experiment.analysis.type == 'anova') {
+      this.experiment.executionStrategy.type = "step";  // TODO: this might be removed depending on backend logic
     }
-    this.experiment.analysis.type = key;
   }
 
   // User can select specific method for the selected analysis type
@@ -454,15 +477,13 @@ export class CreateExperimentsComponent implements OnInit {
     // also refresh original variables of target system (in case any changes have been made previously)
     this.targetSystem.changeableVariables = _(this.originalTargetSystem.changeableVariables);
 
-    // set executionStrategy
-    if (this.experiment.analysis.type === 't_test') {
+    if (this.experiment.analysis.type == 't_test') {
       // check if target system has enough factors for t-test with 2 factors
       if (this.targetSystem.changeableVariables.length < 2 && method == 'two_factors_one_value') {
         this.notify.error("Error", "This target system definition does not have two changeable variables");
         return;
       }
-      this.experiment.executionStrategy.type = "sequential";
-    } else if (this.experiment.analysis.type === 'bayesian_opt') {
+    } else if (this.experiment.analysis.type == 'bayesian_opt') {
       // same names are used for bayesian opt, so set executionStrategy like this
       this.executionStrategyModelChanged(method);
     }
@@ -542,11 +563,21 @@ export class CreateExperimentsComponent implements OnInit {
     return false;
   }
 
-  public is_changeable_variable_selected(): boolean {
-    for (let changeableVariable of this.targetSystem.changeableVariables) {
-      if (changeableVariable["is_selected"] == true) {
-        return true;
+  public is_changeable_variable_selected(i): boolean {
+
+    // checks if at least one variable is selected for proper visualization of tables
+    if (isNullOrUndefined(i)) {
+      for (let changeableVariable of this.targetSystem.changeableVariables) {
+        if (changeableVariable["is_selected"] == true) {
+          return true;
+        }
       }
+      return false;
+    } else {
+      // just checks if variable in given index is selected or not
+      let variable = this.targetSystem.changeableVariables[i];
+      if (variable["is_selected"] == true)
+        return true;
     }
     return false;
   }
@@ -622,10 +653,12 @@ export class CreateExperimentsComponent implements OnInit {
       let number_of_desired_variables = 1;
 
     } else if (this.experiment.analysis.type == 'anova') {
-      let number_of_desired_variables = 2; // TODO: should be taken from user
-    } else {
-      return false;
+      if (this.experiment.analysis.n > this.targetSystem.changeableVariables.length) {
+        this.errorButtonLabelChangeableVariables = "N should be less than or equal to number of changeable variables of target system (" + this.targetSystem.changeableVariables.length + ")";
+        return true;
+      }
     }
+    return false;
   }
 
   public get_keys(obj) {

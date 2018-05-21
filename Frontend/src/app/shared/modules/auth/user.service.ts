@@ -74,7 +74,14 @@ export class UserService {
         return true;
       })
       .catch((error: any) => {
-        const errorMsg = JSON.parse(error._body);
+        let errorMsg: any = {};
+        // server is not running
+        if (typeof(error._body) == 'object') {
+          errorMsg.message = "Server is not running";
+        } else {
+          // server is running and returned a json string
+          errorMsg = JSON.parse(error._body);
+        }
         this.notify.error("Error", errorMsg.error || errorMsg.message);
         return Observable.throw(error || 'Server error');
       })

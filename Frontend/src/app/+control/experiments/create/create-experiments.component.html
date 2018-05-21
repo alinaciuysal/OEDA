@@ -383,7 +383,7 @@
           </div>
         </div>
         <div class="panel-body" style="padding-top: 20px">
-          <labeled-input-select name="Type" [model]="experiment.analysis" key="type" [colSize]="12"
+          <labeled-input-select name="Type" [model]="experiment.analysis" key="type" [colSize]="6"
                                 [options]="[
                                     {key:'t_test',label:'T-Test'},
                                     {key:'anova',label:'Analysis of Variance'},
@@ -392,7 +392,7 @@
                                 (modelChanged)="analysisTypeChanged($event)">
           </labeled-input-select>
           <div *ngIf="experiment.analysis.type == 't_test'">
-            <labeled-input-select name="Specific Method" [model]="experiment.analysis" key="method" [colSize]="12"
+            <labeled-input-select name="Specific Method" [model]="experiment.analysis" key="method" [colSize]="6"
                                   [options]="[
                                     {key:'one_factor_two_values',label:'1 Factor & 2 Values'},
                                     {key:'two_factors_one_value',label:'2 Factors & 1 Value'}]"
@@ -401,11 +401,17 @@
           </div>
 
           <div *ngIf="experiment.analysis.type == 'anova'">
-            !! TODO
+            <labeled-input inputType="number" name="N"
+                           [model]="experiment.analysis" key="n" [colSize]="6"
+                           [minNumber]="1"
+                           [maxNumber]="2"
+                           tooltipTitle='Number of experiments to be passed to n-sample tests. It must be less than or equal to number of changeable variables of the target system'>
+            </labeled-input>
+
           </div>
 
           <div *ngIf="experiment.analysis.type == 'bayesian_opt'">
-            <labeled-input-select name="Specific Method" [model]="experiment.analysis" key="inner_type" [colSize]="12"
+            <labeled-input-select name="Specific Method" [model]="experiment.analysis" key="inner_type" [colSize]="6"
                                   [options]="[
                                     {key:'mlr_mbo',label:'mlrMBO'},
                                     {key:'self_optimizer',label:'Self Optimizer Strategy'},
@@ -430,7 +436,7 @@
         </div>
         <div class="panel-body" style="padding-top: 20px">
           <!-- Show regular executionStrategy fields if no analysis is specified -->
-          <labeled-input-select *ngIf="experiment.analysis.type=='no_analysis'" name="Type" [model]="experiment.executionStrategy" key="type" [colSize]="12"
+          <labeled-input-select *ngIf="experiment.analysis.type=='no_analysis'" name="Type" [model]="experiment.executionStrategy" key="type" [colSize]="6"
                                 [options]="[
                                     {key:'step_explorer',label:'Step Strategy'},
                                     {key:'self_optimizer',label:'Self Optimizer Strategy'},
@@ -441,13 +447,13 @@
                                 tooltipTitle="Defines the experimentation process"
                                 (modelChanged)="executionStrategyModelChanged($event)">
           </labeled-input-select>
-          <labeled-input inputType="number" name="Sample Size" [model]="experiment.executionStrategy" key="sample_size" [colSize]="12" [minNumber]="1" tooltipTitle='Number of samples to be collected from each experiment'></labeled-input>
+          <labeled-input inputType="number" name="Sample Size" [model]="experiment.executionStrategy" key="sample_size" [colSize]="6" [minNumber]="1" tooltipTitle='Number of samples to be collected from each experiment'></labeled-input>
           <div *ngIf="experiment.executionStrategy.type == 'mlr_mbo' || experiment.executionStrategy.type == 'self_optimizer' || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'" >
-            <labeled-input inputType="number" name="Optimizer Iterations" [model]="experiment.executionStrategy" key="optimizer_iterations" [colSize]="12" [minNumber]="1" (modelChanged)="strategyParametesChanged($event)"></labeled-input>
-            <labeled-input inputType="number" name="Optimizer Iterations in Design" [model]="experiment.executionStrategy" key="optimizer_iterations_in_design" [colSize]="12" [minNumber]="0" (modelChanged)="strategyParametesChanged($event)"></labeled-input>
+            <labeled-input inputType="number" name="Optimizer Iterations" [model]="experiment.executionStrategy" key="optimizer_iterations" [colSize]="6" [minNumber]="1" (modelChanged)="strategyParametesChanged($event)"></labeled-input>
+            <labeled-input inputType="number" name="Optimizer Iterations in Design" [model]="experiment.executionStrategy" key="optimizer_iterations_in_design" [colSize]="6" [minNumber]="0" (modelChanged)="strategyParametesChanged($event)"></labeled-input>
           </div>
           <div *ngIf="experiment.executionStrategy.type == 'self_optimizer' || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">
-            <labeled-input-select name="Acquisition Method" [model]="experiment.executionStrategy" key="acquisition_method" [colSize]="12"
+            <labeled-input-select name="Acquisition Method" [model]="experiment.executionStrategy" key="acquisition_method" [colSize]="6"
                                   [options]="[
                                     {key:'LCB',label:'Lower Confidence Bound'},
                                     {key:'EI',label:'Negative Expected Improvement'},
@@ -458,7 +464,7 @@
                                   (modelChanged)="acquisitionMethodChanged($event)"></labeled-input-select>
           </div>
           <div *ngIf="experiment.executionStrategy.type == 'mlr_mbo'">
-            <labeled-input-select name="Acquisition Method" [model]="experiment.executionStrategy" key="acquisition_method" [colSize]="12"
+            <labeled-input-select name="Acquisition Method" [model]="experiment.executionStrategy" key="acquisition_method" [colSize]="6"
                                   [options]="[
                                     {key:'ei',label:'Expected Improvement'},
                                     {key:'mr',label:'Mean Error'},
@@ -469,7 +475,7 @@
                                   (modelChanged)="acquisitionMethodChanged($event)"></labeled-input-select>
           </div>
           <div *ngIf="experiment.executionStrategy.type !== 'forever' && stages_count !== null">
-            <div class="col-md-12">
+            <div class="col-md-6">
               <div class="sub-title">Total Number of Stages</div>
               <div>
                 <input class="form-control" type="number" [disabled]="true" [value]=stages_count>
@@ -562,9 +568,11 @@
                 <th style="padding-left: 1%">Min</th>
                 <th style="padding-left: 1%">Max</th>
                 <th style="padding-left: 1%">Default</th>
-                <th style="padding-left: 1%">Select</th>
-                <th style="padding-left: 1%" *ngIf="is_changeable_variable_selected()">Target</th>
-                <th style="padding-left: 1%" *ngIf="is_changeable_variable_selected() && experiment.analysis.method == 'one_factor_two_values'">Action</th>
+                <th style="padding-left: 1%" *ngIf="experiment.analysis.type=='t_test' || experiment.analysis.type=='anova'">Select</th>
+                <th style="padding-left: 1%" *ngIf="is_changeable_variable_selected(null) && experiment.analysis.type=='t_test'">Target</th>
+                <th style="padding-left: 1%" *ngIf="is_changeable_variable_selected(null) && experiment.analysis.type=='anova'">Step</th>
+                <th style="padding-left: 1%" *ngIf="(is_changeable_variable_selected(null) && (experiment.analysis.method == 'one_factor_two_values' || experiment.analysis.type =='anova'))
+                                        || experiment.analysis.type =='bayesian_opt'">Action</th>
               </thead>
               <tbody>
               <tr *ngFor="let changeableVariable of targetSystem.changeableVariables; let i = index" style="padding-top: 1%">
@@ -574,12 +582,12 @@
                 <td>{{changeableVariable.min}}</td>
                 <td>{{changeableVariable.max}}</td>
                 <td>{{changeableVariable.default}}</td>
-                <td>
+                <td *ngIf="experiment.analysis.type=='t_test' || experiment.analysis.type=='anova'">
                   <input type="checkbox" class="form-check-input"
                          (change)="changeable_variable_checkbox_clicked(i)" data-toggle="tooltip"
                          title="Select changeable variable(s) suitable for the analysis">
                 </td>
-                <td *ngIf="is_changeable_variable_selected()">
+                <td *ngIf="is_changeable_variable_selected(i) && experiment.analysis.type=='t_test'">
                   <input type="number" class="form-check-input"
                          data-toggle="tooltip"
                          title="Please provide value for this variable to be used in the analysis"
@@ -588,12 +596,27 @@
                          [max]="changeableVariable.max"
                          required>
                 </td>
-                <td *ngIf="experiment.analysis.method !== 'two_factors_one_value' && is_changeable_variable_selected()">
-                  <div class="btn btn-xs btn-orange" (click)="addChangeableVariable(changeableVariable)"
-                       *ngIf="targetSystem.changeableVariables.length > 0 && changeableVariable['is_selected']">
+                <td *ngIf="is_changeable_variable_selected(i) && experiment.analysis.type=='anova'">
+                  <input type="number" class="form-check-input"
+                         data-toggle="tooltip"
+                         title="Please provide step size for this variable to be used in anova analysis. If you want to do analysis with lower and upper bounds of the variable(s), set step size to Max - Min"
+                         [(ngModel)]="changeableVariable['step']"
+                         [min]="changeableVariable.min"
+                         [max]="changeableVariable.max"
+                         required>
+                </td>
+                <td *ngIf="(is_changeable_variable_selected(i) && (experiment.analysis.method == 'one_factor_two_values' || experiment.analysis.type =='anova'))
+                                        || experiment.analysis.type =='bayesian_opt'">
+                  <div class="btn btn-xs btn-orange" (click)="addChangeableVariable(changeableVariable)">
                     <i class="fa fa-plus push-5-r"></i> Add
                   </div>
                 </td>
+                <!--<td *ngIf="experiment.analysis.type == 'bayesian_opt' || experiment.analysis.type == 'anova'">-->
+                  <!--<div class="btn btn-xs btn-orange" (click)="addChangeableVariable(changeableVariable)"-->
+                       <!--*ngIf="targetSystem.changeableVariables.length > 0">-->
+                    <!--<i class="fa fa-plus push-5-r"></i> Add-->
+                  <!--</div>-->
+                <!--</td>-->
               </tr>
               </tbody>
             </table>
@@ -621,16 +644,16 @@
         </div>
       </div>
 
-      <!-- Regular changeable variable summary if analysis type is not anova or analysis method is two_factors_one_value -->
-      <div class="panel-body" style="padding-top: 20px" *ngIf="experiment.analysis.method !== 'two_factors_one_value' && experiment.analysis.type !== 'anova'">
+      <!-- Regular changeable variable summary -->
+      <div class="panel-body" style="padding-top: 20px" *ngIf="experiment.analysis.method !== 'two_factors_one_value'">
         <div class="row" *ngFor="let input of experiment.changeableVariables; let i = index">
             <div class="row" style="padding-left: 3%">
               <labeled-input name="Name" [model]="input" key="name" [colSize]="3" disabled="true"></labeled-input>
               <labeled-input inputType="number" name="Min" [model]="input" key="min" [colSize]="2" (modelChanged)="strategyParametesChanged($event)"></labeled-input>
               <labeled-input inputType="number" name="Max" [model]="input" key="max" [colSize]="2" (modelChanged)="strategyParametesChanged($event)"></labeled-input>
               <labeled-input inputType="number" name="Default" [model]="input" key="default" [colSize]="2" disabled="true"></labeled-input>
-              <labeled-input *ngIf="experiment.analysis.type !== 'no_analysis'" inputType="number" name="Target" [model]="input" key="target" [colSize]="2" disabled="true"></labeled-input>
-              <labeled-input *ngIf="experiment.executionStrategy.type == 'step_explorer'" inputType="number" name="Step Size" [model]="input" key="step" [colSize]="2" (modelChanged)="stepSizeChanged($event)"></labeled-input>
+              <labeled-input *ngIf="experiment.analysis.type == 'one_factor_two_values'" inputType="number" name="Target" [model]="input" key="target" [colSize]="2" disabled="true"></labeled-input>
+              <labeled-input *ngIf="experiment.executionStrategy.type == 'step_explorer' || experiment.analysis.type == 'anova'" inputType="number" name="Step Size" [model]="input" key="step" [colSize]="2" (modelChanged)="stepSizeChanged($event)"></labeled-input>
               <div class="col-sm-1">
                 <div class="sub-title">
                   <div>
@@ -643,29 +666,39 @@
         </div>
       </div>
 
-      <!-- Specific changeable variable summary if analysis type is anova or analysis method is two_factors_one_value -->
-      <div class="panel-body" style="padding-top: 20px" *ngIf="experiment.analysis.method === 'two_factors_one_value' || experiment.analysis.type === 'anova'">
+      <!-- Specific summary if analysis method is two_factors_one_value or sequential (TODO: WILL BE UPDATED for seq. str.)-->
+      <div class="panel-body" style="padding-top: 20px" *ngIf="experiment.analysis.method === 'two_factors_one_value'">
         <div class="row" *ngFor="let knob of experiment.changeableVariables; let i = index">
           <div class="row" style="padding-left: 3%; padding-right: 3%">
             <div class="row" *ngFor="let variableName of get_keys(knob)">
-              <div class="col-md-6">
+              <div class="col-md-3">
                 <div class="sub-title">Name</div>
                   <div>
                     <input class="form-control" type="text" [disabled]="true" [value]="variableName">
                   </div>
               </div>
-              <div class="col-md-6">
+              <div class="col-md-2">
+                <div class="sub-title">Min</div>
+                <div>
+                  <input class="form-control" type="number" [value]="knob[variableName]['min']">
+                </div>
+              </div>
+              <div class="col-md-2">
+                <div class="sub-title">Max</div>
+                <div>
+                  <input class="form-control" type="number" [value]="knob[variableName]['max']">
+                </div>
+              </div>
+              <div class="col-md-2" *ngIf="experiment.analysis.method === 'two_factors_one_value'">
                 <div class="sub-title">Target</div>
                 <div>
-                  <input class="form-control" type="number" [disabled]="true" [value]="knob[variableName]">
+                  <input class="form-control" type="number" [value]="knob[variableName]['target']">
                 </div>
               </div>
             </div>
             <div class="col-sm-1">
-              <div (click)="removeChangeableVariable(i)" class="btn btn-xs btn-primary"><i class="fa fa-remove"></i>Remove Variables</div>
+              <div (click)="removeChangeableVariable(i)" class="btn btn-xs btn-primary"><i class="fa fa-remove"></i>Remove Configuration</div>
             </div>
-
-
           </div>
           <hr class="col-md-12">
         </div>

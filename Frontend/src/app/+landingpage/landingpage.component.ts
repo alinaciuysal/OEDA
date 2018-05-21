@@ -41,8 +41,11 @@ export class LandingpageComponent {
   public submitRegistration() {
     if (this.user.name.length !== 0 && this.user.password.length !== 0) {
       this.api.registerUser(this.user).subscribe(
-        () => {
+        (result) => {
           this.notify.success("Success", "You are registered successfully.");
+        }, error1 => {
+          if (!error1.hasOwnProperty("_body"))
+            this.notify.error("Error", "Server is not running.");
         }
       )
     } else {

@@ -91,11 +91,11 @@ class Database:
             knobs and experiment_count of the experiment for statistical analysis """
         pass
 
-    def save_analysis(self, stage_ids, analysis_name, result):
-        """ saves data retrieved from analysis stage for given stages """
+    def save_analysis(self, experiment_id, stage_ids, analysis_name, result, anova_result):
+        """ saves data retrieved from different analysis types for given stages """
         pass
 
-    def get_analysis(self, stage_ids, analysis_name):
+    def get_analysis(self, experiment_id, stage_ids, analysis_name):
         """ returns analysis result for the given stages & analysis name """
         pass
 
@@ -111,10 +111,13 @@ class Database:
         return str(experiment_id) + "#" + str(stage_no) + "_" + str(data_point_count)
 
     @staticmethod
-    def create_analysis_id(stage_ids, analysis_name):
-        res = ""
+    def create_analysis_id(experiment_id, stage_ids, analysis_name):
+        """ e.g. a6d30adf-0bdb-7d84-e82b-252473e11699*1*2*anova """
+        res = str(experiment_id) + "*"
         for idx, stage_id in enumerate(stage_ids):
-            res += stage_id
+            stage_no = str.split(str(stage_id), "#")[1]
+            res += stage_no
+            res += "*"
         res += analysis_name
         return res
 

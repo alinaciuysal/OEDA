@@ -1,17 +1,16 @@
-import json
 import pandas as pd
 from itertools import combinations
 from statsmodels.formula.api import ols
 from statsmodels.stats.anova import anova_lm
 from oeda.log import error
 from oeda.analysis import Analysis
-
+from copy import deepcopy
 
 class FactorialAnova(Analysis):
     """ For explanation of the different types of ANOVA check:
     https://mcfromnz.wordpress.com/2011/03/02/anova-type-iiiiii-ss-explained/
 
-    Some errors that can occur: TODO: investigate them & think how to show in UI
+    Some errors that can occur:
         1) raise LinAlgError("Singular matrix")
         2) raise ValueError("must have at least one row in constraint matrix")
     """
@@ -31,7 +30,7 @@ class FactorialAnova(Analysis):
         dataframe_data[self.y_key] = y_values
 
         # NEW: alter knob_keys to fit for the previous logic
-        # IMPORTANT ASSUMPTION HERE: as discussed before we apply these analysis tests to stages of the same experiment
+        # IMPORTANT ASSUMPTION HERE: as discussed before, we apply these analysis tests to stages of the same experiment
         # so, knobs[0].keys() == knobs[1].keys() == knobs[2].keys() == global keys
         if not self.knob_keys:
             self.knob_keys = knobs[0].keys()
@@ -68,13 +67,17 @@ class FactorialAnova(Analysis):
         # print "------------------"
 
         aov_table = anova_lm(data_lm, typ=2)
-        self.eta_squared(aov_table)
-        self.omega_squared(aov_table)
+        aov_table_sqr= deepcopy(aov_table)
+        self.eta_squared(aov_table_sqr)
+        self.omega_squared(aov_table_sqr)
         # with pd.option_context('display.max_rows', self.stages_count, 'display.max_columns', 6, 'max_colwidth', 10000):
-            # print(aov_table)
+        #     print(aov_table)
         # print "------------------"
 
-        return aov_table
+        # remove same cols, see: https://stackoverflow.com/questions/13411544/delete-column-from-pandas-dataframe-using-del-df-column-name
+        columns = ['sum_sq', 'df', 'F', 'PR(>F)']
+        aov_table_sqr.drop(columns, inplace=True, axis=1)
+        return aov_table, aov_table_sqr
 
     def create_formula(self):
         """Example for 3 factors:

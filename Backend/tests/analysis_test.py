@@ -7,7 +7,6 @@ from oeda.analysis.two_sample_tests import Ttest, TtestPower, TtestSampleSizeEst
 from oeda.analysis.one_sample_tests import DAgostinoPearson, AndersonDarling, KolmogorovSmirnov, ShapiroWilk
 from oeda.analysis.n_sample_tests import Bartlett, FlignerKilleen, KruskalWallis, Levene, OneWayAnova
 from oeda.analysis.factorial_tests import FactorialAnova
-from oeda.analysis import Analysis
 from math import sqrt
 import numpy as np
 
@@ -35,7 +34,7 @@ class AnalysisTest(unittest.TestCase):
     key = "overhead"
     mean_diff = 0.1 # as in crowdnav-elastic-ttest-sample-size/definition.py
     # for n-sample tests,
-    n = 2 # if n > 2, two-sample tests only use first two samples, and most probably FactorialAnova gives SingularMatrix error
+    n = 2 # if n > 2, two-sample tests only use first two samples, and mostly FactorialAnova gives SingularMatrix error
 
     def test_a_db_1(self):
         config = parse_config(["oeda", "databases"], "experiment_db_config")
@@ -101,8 +100,8 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(result)
         for key in result:
             self.assertTrue(result[key] is not None) # we used this instead of assertTrue(test[k]) because value can be False
-        db().save_analysis(AnalysisTest.stage_id, test.name, result)
-        retrieved = db().get_analysis(AnalysisTest.stage_id, test.name)
+        db().save_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_id, test.name, result)
+        retrieved = db().get_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_id, test.name)
         self.assertTrue(retrieved)
 
     def test_h_dagostino(self):
@@ -111,8 +110,8 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(result)
         for key in result:
             self.assertTrue(result[key] is not None)
-        db().save_analysis(AnalysisTest.stage_id, test.name, result)
-        retrieved = db().get_analysis(AnalysisTest.stage_id, test.name)
+        db().save_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_id, test.name, result)
+        retrieved = db().get_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_id, test.name)
         self.assertTrue(retrieved)
 
     def test_i_kolmogorov(self):
@@ -121,8 +120,8 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(result)
         for key in result:
             self.assertTrue(result[key] is not None)
-        db().save_analysis(AnalysisTest.stage_id, test.name, result)
-        retrieved = db().get_analysis(AnalysisTest.stage_id, test.name)
+        db().save_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_id, test.name, result)
+        retrieved = db().get_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_id, test.name)
         self.assertTrue(retrieved)
 
     def test_j_shapiro(self):
@@ -131,8 +130,8 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(result)
         for key in result:
             self.assertTrue(result[key] is not None)
-        db().save_analysis(AnalysisTest.stage_id, test.name, result)
-        retrieved = db().get_analysis(AnalysisTest.stage_id, test.name)
+        db().save_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_id, test.name, result)
+        retrieved = db().get_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_id, test.name)
         self.assertTrue(retrieved)
 
     #########################
@@ -146,8 +145,8 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(result)
         for key in result:
             self.assertTrue(result[key] is not None)
-        db().save_analysis(AnalysisTest.stage_ids, test.name, result)
-        retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
+        db().save_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_ids, test.name, result)
+        retrieved = db().get_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_ids, test.name)
         self.assertTrue(retrieved)
 
     def test_l_TtestPower(self):
@@ -161,8 +160,8 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(result)
         for key in result:
             self.assertTrue(result[key] is not None)
-        db().save_analysis(AnalysisTest.stage_ids, test.name, result)
-        retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
+        db().save_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_ids, test.name, result)
+        retrieved = db().get_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_ids, test.name)
         self.assertTrue(retrieved)
 
     def test_m_TtestSampleSizeEstimation(self):
@@ -172,8 +171,8 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(result)
         for key in result:
             self.assertTrue(result[key] is not None)
-        db().save_analysis(AnalysisTest.stage_ids, test.name, result)
-        retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
+        db().save_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_ids, test.name, result)
+        retrieved = db().get_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_ids, test.name)
         self.assertTrue(retrieved)
 
     #########################
@@ -187,8 +186,8 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(result)
         for key in result:
             self.assertTrue(result[key] is not None)
-        db().save_analysis(AnalysisTest.stage_ids, test.name, result)
-        retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
+        db().save_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_ids, test.name, result)
+        retrieved = db().get_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_ids, test.name)
         self.assertTrue(retrieved)
 
     def test_o_KruskalWallis(self):
@@ -198,8 +197,8 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(result)
         for key in result:
             self.assertTrue(result[key] is not None)
-        db().save_analysis(AnalysisTest.stage_ids, test.name, result)
-        retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
+        db().save_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_ids, test.name, result)
+        retrieved = db().get_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_ids, test.name)
         self.assertTrue(retrieved)
 
     ##########################
@@ -212,8 +211,8 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(result)
         for key in result:
             self.assertTrue(result[key] is not None)
-        db().save_analysis(AnalysisTest.stage_ids, test.name, result)
-        retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
+        db().save_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_ids, test.name, result)
+        retrieved = db().get_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_ids, test.name)
         self.assertTrue(retrieved)
 
     def test_q_Bartlett(self):
@@ -223,8 +222,8 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(result)
         for key in result:
             self.assertTrue(result[key] is not None)
-        db().save_analysis(AnalysisTest.stage_ids, test.name, result)
-        retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
+        db().save_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_ids, test.name, result)
+        retrieved = db().get_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_ids, test.name)
         self.assertTrue(retrieved)
 
     def test_r_FlignerKilleen(self):
@@ -234,8 +233,8 @@ class AnalysisTest(unittest.TestCase):
         self.assertTrue(result)
         for key in result:
             self.assertTrue(result[key] is not None)
-        db().save_analysis(AnalysisTest.stage_ids, test.name, result)
-        retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
+        db().save_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_ids, test.name, result)
+        retrieved = db().get_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_ids, test.name)
         self.assertTrue(retrieved)
 
 
@@ -271,9 +270,9 @@ def suite():
         set analysis_tests_included to True o/w data will be deleted before these tests
     """
     test_suite = unittest.TestSuite()
-    # test_suite.addTest(unittest.makeSuite(UnitTest))
-    # IntegrationTest.analysis_tests_included = True
-    # test_suite.addTest(unittest.makeSuite(IntegrationTest))
+    test_suite.addTest(unittest.makeSuite(UnitTest))
+    IntegrationTest.analysis_tests_included = True
+    test_suite.addTest(unittest.makeSuite(IntegrationTest))
     test_suite.addTest(unittest.makeSuite(AnalysisTest))
     return test_suite
 

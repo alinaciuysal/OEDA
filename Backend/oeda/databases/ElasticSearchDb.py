@@ -450,11 +450,12 @@ class ElasticSearchDb(Database):
         data = dict()
         knobs = dict()
         stages = self.get_stages(experiment_id=experiment_id)
+        print(stages)
         if len(stages[0]) > 0 and len(stages[1]) > 0:
             stage_ids = stages[0]
             sources = stages[1]
             for idx, stage_id in enumerate(stage_ids):
-                data_points = self.get_data_points(experiment_id=experiment_id, stage_no=idx)
+                data_points = self.get_data_points(experiment_id=experiment_id, stage_no=idx + 1) # because stages start from 1 whereas idx start from 0
                 if len(data_points) > 1:
                     data[stage_id] = [d for d in data_points]
                     knobs[stage_id] = sources[idx]["knobs"]
@@ -463,25 +464,28 @@ class ElasticSearchDb(Database):
             return data, knobs
         raise Exception("Cannot retrieve stage and data from db, please restart")
 
-    def save_analysis(self, stage_ids, analysis_name, result):
-        analysis_id = Database.create_analysis_id(stage_ids, analysis_name)
+    # we had to distinguish between anova_result (json of json objects) with regular t_test result (single json object)
+    def save_analysis(self, experiment_id, stage_ids, analysis_name, result=None, anova_result=None):
+        analysis_id = Database.create_analysis_id(experiment_id, stage_ids, analysis_name)
         body = dict()
         body["stage_ids"] = stage_ids
         body["name"] = analysis_name
         body["result"] = result
+        body["anova_result"] = anova_result
         body["created"] = datetime.now()
-        try:
-            self.es.index(index=self.index, doc_type=self.analysis_type_name, body=body, id=analysis_id)
-        except ConnectionError as err1:
-            error("Error while saving analysis in elasticsearch. Check connection to elasticsearch.")
-            raise err1
-        except TransportError as err2:
-            error("TransportError while saving analysis. Check type mappings for analysis in experiment_db_config.json.")
-            raise err2
+        print(body)
+        # try:
+        self.es.index(index=self.index, doc_type=self.analysis_type_name, body=body, id=analysis_id)
+        # except ConnectionError as err1:
+        #     error("Error while saving analysis in elasticsearch. Check connection to elasticsearch.")
+        #     raise err1
+        # except TransportError as err2:
+        #     error("TransportError while saving analysis. Check type mappings for analysis in experiment_db_config.json.")
+        #     raise err2
 
-    def get_analysis(self, stage_ids, analysis_name):
+    def get_analysis(self, experiment_id, stage_ids, analysis_name):
         try:
-            analysis_id = Database.create_analysis_id(stage_ids, analysis_name)
+            analysis_id = Database.create_analysis_id(experiment_id, stage_ids, analysis_name)
             res = self.es.get(index=self.index, doc_type=self.analysis_type_name, id=analysis_id)
             return res["_source"]
         except ConnectionError as err1:

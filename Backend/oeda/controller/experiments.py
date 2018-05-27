@@ -15,16 +15,6 @@ class ExperimentController(Resource):
     @staticmethod
     def post(experiment_id):
         experiment = request.get_json()
-        new_knobs = {}
-        for knob in experiment["executionStrategy"]["knobs"]:
-            if experiment["executionStrategy"]["type"] == 'step_explorer':
-                new_knobs[knob[0]] = [knob[1], knob[2], knob[3]]
-            elif experiment["executionStrategy"]["type"] == 'forever':
-                new_knobs[knob[0]] = knob[1]
-            else:
-                new_knobs[knob[0]] = [knob[1], knob[2]]
-
-        experiment["executionStrategy"]["knobs"] = new_knobs
         db().save_experiment(experiment)
         # here we refresh the status of oeda callback, too
         set_dict(None, experiment_id)

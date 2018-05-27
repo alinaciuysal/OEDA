@@ -36,9 +36,9 @@ import {isNullOrUndefined} from "util";
     </div>
 
     <!-- Experiment Name & Description -->
-    <div class="col-md-12">
+    <div class="col-md-12" [hidden]="is_collapsed" style="border-top: 3px groove green; border-right: 3px groove green; border-left: 3px groove green">
       <div class="panel panel-default chartJs">
-        <div class="panel-body" [hidden]="is_collapsed">
+        <div class="panel-body">
           <div class="row">
             <labeled-input name="Experiment Name" [model]="experiment" key="name" [colSize]="6"
                            [disabled]="true"></labeled-input>
@@ -50,8 +50,7 @@ import {isNullOrUndefined} from "util";
     </div>
 
     <!-- Data Providers & Change Provider -->
-    <div class="col-md-12" *ngIf="targetSystem.name !== ''"
-         [hidden]="is_collapsed">
+    <div class="col-md-12" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed" style="border-right: 3px groove green; border-left: 3px groove green">
 
       <!-- Primary Data Provider & Secondary Data Provider(s)-->
       <div class="col-md-6" style="padding-left: 0">
@@ -217,7 +216,7 @@ import {isNullOrUndefined} from "util";
         </div>
       </div>
 
-      <!-- Change Provider -->
+      <!-- Change Provider & Execution Strategy -->
       <div class="col-md-6" style="padding-right: 0">
         <div class="panel panel-default chartJs">
           <div class="panel-heading">
@@ -277,54 +276,8 @@ import {isNullOrUndefined} from "util";
             </div>
           </div>
         </div>
-      </div>
 
-    </div>
-
-    <!-- Incoming Data Types, Execution strategy, Experiment Variables -->
-    <div class="col-md-12" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed">
-      <!-- Incoming Data Types -->
-      <div class="col-md-6" style="padding-left: 0">
-        <div class="panel panel-default chartJs">
-          <div class="panel-heading">
-            <div class="card-title">
-              <div class="title pull-left">Incoming Data Types</div>
-            </div>
-          </div>
-          <div class="panel-body" style="padding-top: 20px">
-            <div class="table-responsive" style="padding-top: 20px">
-              <table style="margin-top: 5px" class="table table-striped table-bordered table-hover">
-                <thead>
-                <th style="padding-left: 2%">Name</th>
-                <th style="padding-left: 2%">Scale</th>
-                <th style="padding-left: 2%">Description</th>
-                <th style="padding-left: 2%">Data Provider Name</th>
-                <th style="padding-left: 2%">Optimization Criteria</th>
-                <th style="padding-left: 2%; padding-right: 2%">Consider</th>
-                <th style="padding-left: 2%; padding-right: 2%">Aggregate Function</th>
-                <th style="padding-left: 2%; padding-right: 2%">Weight</th>
-                </thead>
-                <tbody>
-                <tr *ngFor="let dataType of combined_data_types" style="padding-top: 1%">
-                  <td>{{dataType.name}}</td>
-                  <td>{{dataType.scale}}</td>
-                  <td>{{dataType.description}}</td>
-                  <td>{{dataType.dataProviderName}}</td>
-                  <td>{{dataType.criteria}}</td>
-                  <td *ngIf="is_considered(dataType.name)">Yes</td>
-                  <td *ngIf="!is_considered(dataType.name)">No</td>
-                  <td>{{dataType.aggregateFunction}}</td>
-                  <td>{{dataType.weight}}<span *ngIf="dataType.weight !== undefined">%</span></td>
-                </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Execution Strategy & Experiment Variables -->
-      <div class="col-md-6" style="padding-right: 0">
+        <!--Execution Strategy-->
         <div class="panel panel-default chartJs">
           <div class="panel-heading">
             <div class="card-title">
@@ -379,59 +332,110 @@ import {isNullOrUndefined} from "util";
             </div>
           </div>
         </div>
+        
+      </div>
+      
+    </div>
 
-        <!-- Experiment variables (or default variables for forever)-->
-        <div class="panel panel-default chartJs" *ngIf="experiment.executionStrategy.type !== 'forever'">
-          <div class="panel-heading">
-            <div class="card-title">
-              <div class="title pull-left">Experiment Variables</div>
-            </div>
-          </div>
-          <div class="panel-body" style="padding-top: 20px">
-            <div class="table-responsive" style="padding-top: 20px">
-              <table>
-                <thead>
-                <th style="width: 5%">Name</th>
-                <th style="width: 5%">Min</th>
-                <th style="width: 5%">Max</th>
-                <th style="width: 5%">Default</th>
-                <th *ngIf="experiment.executionStrategy.type == 'step_explorer'" style="width: 5%">Step Size</th>
-                </thead>
-                <tbody>
-                <tr *ngFor="let input of experiment.changeableVariables" style="padding-top: 1%">
-                  <td style="padding-top: 1%">{{input.name}}</td>
-                  <td>{{input.min}}</td>
-                  <td>{{input.max}}</td>
-                  <td>{{input.default}}</td>
-                  <td *ngIf="experiment.executionStrategy.type == 'step_explorer'">{{input.step}}</td>
-                </tr>
-                </tbody>
-              </table>
-            </div>
+    <!-- Incoming Data Types -->
+    <div class="col-md-12" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed" style="padding-left:0; padding-right: 0; border-right: 3px groove green; border-left: 3px groove green">
+      <div class="panel panel-default chartJs">
+        <div class="panel-heading">
+          <div class="card-title">
+            <div class="title pull-left">Incoming Data Types</div>
           </div>
         </div>
-
-        <div class="panel panel-default chartJs" *ngIf="experiment.executionStrategy.type === 'forever'">
-          <div class="panel-heading">
-            <div class="card-title">
-              <div class="title pull-left">Default Configuration of {{targetSystem.name}}</div>
-            </div>
+        <div class="panel-body" style="padding-top: 20px">
+          <div class="table-responsive" style="padding-top: 20px">
+            <table style="margin-top: 5px" class="table table-striped table-bordered table-hover">
+              <thead>
+              <th style="padding-left: 2%">Name</th>
+              <th style="padding-left: 2%">Scale</th>
+              <th style="padding-left: 2%">Description</th>
+              <th style="padding-left: 2%">Data Provider Name</th>
+              <th style="padding-left: 2%">Optimization Criteria</th>
+              <th style="padding-left: 2%; padding-right: 2%">Consider</th>
+              <th style="padding-left: 2%; padding-right: 2%">Aggregate Function</th>
+              <th style="padding-left: 2%; padding-right: 2%">Weight</th>
+              </thead>
+              <tbody>
+              <tr *ngFor="let dataType of combined_data_types" style="padding-top: 1%">
+                <td>{{dataType.name}}</td>
+                <td>{{dataType.scale}}</td>
+                <td>{{dataType.description}}</td>
+                <td>{{dataType.dataProviderName}}</td>
+                <td>{{dataType.criteria}}</td>
+                <td *ngIf="is_considered(dataType.name)">Yes</td>
+                <td *ngIf="!is_considered(dataType.name)">No</td>
+                <td>{{dataType.aggregateFunction}}</td>
+                <td>{{dataType.weight}}<span *ngIf="dataType.weight !== undefined">%</span></td>
+              </tr>
+              </tbody>
+            </table>
           </div>
-          <div class="panel-body" style="padding-top: 20px">
-            <div class="table-responsive" style="padding-top: 20px">
-              <table>
-                <thead>
-                <th style="width: 5%">Name</th>
-                <th style="width: 5%">Default</th>
-                </thead>
-                <tbody>
-                <tr *ngFor="let key of get_keys(experiment.executionStrategy.knobs)" style="padding-top: 1%">
-                  <td style="padding-top: 1%">{{key}}</td>
-                  <td>{{experiment.executionStrategy.knobs[key]}}</td>
-                </tr>
-                </tbody>
-              </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Experiment Variables -->
+    <div class="col-md-12" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed" style="padding-left:0; padding-right: 0; border-bottom: 3px groove green; border-right: 3px groove green; border-left: 3px groove green">
+      <!-- Experiment variables (or default variables for forever)-->
+      
+      <div class="panel panel-default chartJs" *ngIf="experiment.changeableVariables.length > 0 && experiment.executionStrategy.type !== 'forever'">
+        <div class="panel-heading">
+          <div class="card-title">
+            <div class="title pull-left">Experiment Variables</div>
+          </div>
+        </div>
+        
+        <div class="panel-body">
+          <div class="row" *ngFor="let knobArr of experiment.changeableVariables">
+            <div class="row" style="padding-left: 1%" *ngFor="let knobKey of get_keys(knobArr)">
+              <labeled-input name="Name" [model]="knobArr[knobKey]" key="name" [colSize]="3" disabled="true"></labeled-input>
+              <span *ngIf="experiment.analysis.type == 'no_analysis' || experiment.analysis.type == 'bayesian_opt'">
+                  <labeled-input inputType="number" name="Experiment Min" [model]="knobArr[knobKey]" key="min" [colSize]="2" [disabled]="true"></labeled-input>
+                  <labeled-input inputType="number" name="Experiment Max" [model]="knobArr[knobKey]" key="max" [colSize]="2" [disabled]="true"></labeled-input>
+                  <labeled-input inputType="number" name="Default" [model]="knobArr[knobKey]" key="default" [colSize]="2" [disabled]="true"></labeled-input>
+                  <labeled-input *ngIf="experiment.executionStrategy.type == 'sequential'" inputType="number" name="Experiment Value" [model]="knobArr[knobKey]" key="target" [colSize]="2" [disabled]="true"></labeled-input>
+                  <labeled-input *ngIf="experiment.executionStrategy.type == 'step_explorer'" inputType="number" name="Step Size" [model]="knobArr[knobKey]" key="step" [colSize]="2" [disabled]="true"></labeled-input>
+                  <labeled-input-select *ngIf="experiment.executionStrategy.type == 'step_explorer'" name="Steps" [model]="knobArr[knobKey]" key="levels" [options]="knobArr[knobKey]['levels']" [colSize]="3" [disabled]=true></labeled-input-select>
+                </span>
+  
+              <span *ngIf="experiment.analysis.type == 't_test' || experiment.analysis.type == 'anova'">
+                  <labeled-input inputType="number" name="Experiment Min" [model]="knobArr[knobKey]" key="min" [colSize]="2" [disabled]="true"></labeled-input>
+                  <labeled-input inputType="number" name="Experiment Max" [model]="knobArr[knobKey]" key="max" [colSize]="2" [disabled]="true"></labeled-input>
+                  <labeled-input inputType="number" name="Default" [model]="knobArr[knobKey]" key="default" [colSize]="2" [disabled]="true"></labeled-input>
+                  <labeled-input *ngIf="experiment.analysis.method == 'one_factor_two_values' || experiment.analysis.method == 'two_factors_one_value'" inputType="number" name="Experiment Value" [model]="knobArr[knobKey]" key="target" [colSize]="2" [disabled]="true"></labeled-input>
+                  <labeled-input *ngIf="experiment.analysis.type == 'anova'" inputType="number" name="Step Size" [model]="knobArr[knobKey]" key="step" [colSize]="2" [disabled]="true"></labeled-input>
+                  <labeled-input-select *ngIf="experiment.analysis.type == 'anova'" name="Levels" [model]="knobArr[knobKey]" key="levels" [options]="knobArr[knobKey]['levels']" [colSize]="3" [disabled]=true></labeled-input-select>
+                </span>
+  
             </div>
+            <hr class="col-md-12">
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-default chartJs" *ngIf="experiment.executionStrategy.type === 'forever'">
+        <div class="panel-heading">
+          <div class="card-title">
+            <div class="title pull-left">Default Configuration of {{targetSystem.name}}</div>
+          </div>
+        </div>
+        <div class="panel-body" style="padding-top: 20px">
+          <div class="table-responsive" style="padding-top: 20px">
+            <table>
+              <thead>
+              <th style="width: 5%">Name</th>
+              <th style="width: 5%">Default</th>
+              </thead>
+              <tbody>
+              <tr *ngFor="let key of get_keys(experiment.executionStrategy.knobs)" style="padding-top: 1%">
+                <td style="padding-top: 1%">{{key}}</td>
+                <td>{{experiment.executionStrategy.knobs[key]}}</td>
+              </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -479,6 +483,8 @@ export class ExperimentDetailsComponent implements OnInit {
 
   /** combines unselected data types of targetSystem and selected data types of experiment */
   ngOnInit(): void {
+    console.log(this.experiment);
+    console.log("chVar", this.experiment.changeableVariables);
     this.combined_data_types = [];
     for (let considered_data_type of this.experiment.considered_data_types) {
       this.combined_data_types.push(considered_data_type);

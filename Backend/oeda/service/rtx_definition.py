@@ -35,6 +35,7 @@ class RTXDefinition:
         self.change_provider = oeda_target["changeProvider"]
         self.incoming_data_types = oeda_target["incomingDataTypes"] # contains all of the data types provided by both config & user
         self.considered_data_types = oeda_experiment["considered_data_types"]
+        self.analysis = oeda_experiment["analysis"]
 
         # set-up primary data provider
         primary_data_provider = oeda_target["primaryDataProvider"]
@@ -46,13 +47,9 @@ class RTXDefinition:
                 dp["data_reducer"] = RTXDefinition.secondary_data_reducer
                 self.secondary_data_providers.append(dp)
 
-        # TODO: knob_value[2] is only provided in step_explorer strategy?
         execution_strategy = oeda_experiment["executionStrategy"]
-        if execution_strategy["type"] == 'step_explorer':
-            new_knobs = {}
-            for knob_key, knob_value in oeda_experiment["executionStrategy"]["knobs"].iteritems():
-                new_knobs[knob_key] = ([knob_value[0], knob_value[1]], knob_value[2])
-            execution_strategy["knobs"] = new_knobs
+        knobs = parse_knobs(execution_strategy["type"], execution_strategy["knobs"])
+        execution_strategy["knobs"] = knobs
 
         self.execution_strategy = execution_strategy
         self.state_initializer = RTXDefinition.state_initializer
@@ -60,10 +57,10 @@ class RTXDefinition:
         self.folder = None
         self.setup_stage = RTXDefinition.setup_stage
 
-        if execution_strategy["type"] == "step_explorer" or execution_strategy["type"] == "sequential":
-            knob_values = get_experiment_list(execution_strategy["type"], execution_strategy["knobs"])
-            knob_keys = get_knob_keys(execution_strategy["type"], execution_strategy["knobs"])
-            self.all_knobs = get_all_knobs(knob_keys, knob_values)
+        # if execution_strategy["type"] == "step_explorer" or execution_strategy["type"] == "sequential":
+        #     knob_values = get_knob_values(execution_strategy["type"], execution_strategy["knobs"])
+        #     knob_keys = get_knob_keys(execution_strategy["type"], execution_strategy["knobs"])
+        #     self.all_knobs = get_all_knobs(knob_keys, knob_values)
 
     def run_oeda_callback(self, dictionary):
         dictionary['stage_counter'] = self.stage_counter
@@ -135,7 +132,6 @@ class RTXDefinition:
             data_type_name = data_type["name"]
             data_type_aggregate_function = str(data_type['aggregateFunction'])
             aggs = db().get_aggregation(wf.id, wf.stage_counter, "stats", data_type_name)
-            # distinction between boolean (nominal) scale TODO: more scale will be added
             if data_type["scale"] == "Boolean":
                 # now data_type_aggregate_function is either count-True or count-False
                 field_value = data_type_aggregate_function.split("-")[1] # fetch value
@@ -174,7 +170,8 @@ class RTXDefinition:
         wf.stage_counter += 1 # this must be done after all calculations
         return result
 
-def get_experiment_list(strategy_type, knobs):
+
+def get_knob_values(strategy_type, knobs):
 
     if strategy_type == "sequential":
         return [config.values() for config in knobs]
@@ -227,3 +224,40 @@ def get_all_knobs(knob_keys, knob_values):
             index += 1
         all_knobs.append(knobs)
     return all_knobs
+
+
+def parse_knobs(strategy_type, knobs):
+    print("KNOBS", knobs)
+    if strategy_type == 'step_explorer':
+        new_knobs = {}
+        for knobArr in knobs:
+            # there is only one knob in knobArr for step str.
+            knob = knobArr[0]
+            new_knobs[knob["name"]] = ([knob["min"], knob["max"]], knob["step"])
+        return new_knobs
+    elif strategy_type == 'sequential':
+        new_knobs = []
+        for knobArr in knobs:
+            # knob with a single value
+            if len(knobArr) == 1:
+                new_knob = {}
+                new_knob[knobArr[0]["name"]] = knobArr[0]["target"]
+                new_knobs.append(new_knob)
+            else:
+                new_knob = {}
+                # knob with different keys & values
+                for knob in knobArr:
+                    new_knob[knob["name"]] = knob["target"]
+                new_knobs.append(new_knob)
+        return new_knobs
+    else:
+        # case for no_analysis or bayesian_opt
+        new_knobs = {}
+        for knobArr in knobs:
+            # there is only one knob in knobArr for this case as user can't add them as configurations
+            knob = knobArr[0]
+            new_knobs[knob["name"]] = [knob["min"], knob["max"]]
+        print(new_knobs)
+        return new_knobs
+
+

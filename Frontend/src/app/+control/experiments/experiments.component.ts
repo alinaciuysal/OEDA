@@ -6,7 +6,6 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {isNullOrUndefined} from "util";
 import {TempStorageService} from "../../shared/modules/helper/temp-storage-service";
 import {UserService} from "../../shared/modules/auth/user.service";
-import * as moment from 'moment';
 import {UtilService} from "../../shared/modules/util/util.service";
 
 @Component({

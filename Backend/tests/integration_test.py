@@ -28,6 +28,7 @@ class IntegrationTest(unittest.TestCase):
     experiment = None
     stage_ids = None
     analysis_tests_included = False
+    analysis = None
 
     def test_e_data_provider(self):
         self.assertTrue(UnitTest.data_providers)
@@ -36,6 +37,10 @@ class IntegrationTest(unittest.TestCase):
     def test_f_considered_data_types(self):
         self.assertTrue(UnitTest.considered_data_types)
         IntegrationTest.considered_data_types = UnitTest.considered_data_types
+
+    def test_g_analysis(self):
+        self.assertTrue(UnitTest.analysis)
+        IntegrationTest.analysis = UnitTest.analysis
 
     def test_h_create_knobs(self):
         self.assertTrue(UnitTest.knobs)
@@ -55,6 +60,7 @@ class IntegrationTest(unittest.TestCase):
                                                     sample_size=20,
                                                     knobs=IntegrationTest.knobs,
                                                     considered_data_types=IntegrationTest.considered_data_types,
+                                                    analysis=IntegrationTest.analysis,
                                                     optimizer_iterations_in_design=len(IntegrationTest.knobs)*4,
                                                     acquisition_method="ei")
         self.assertTrue(experiment)
@@ -74,6 +80,7 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(experiment_status, "SUCCESS")
         self.stage_test()
         self.data_point_test()
+        self.analysis_test()
         if IntegrationTest.analysis_tests_included is False:
             self.delete_index_test()
 

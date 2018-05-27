@@ -7,6 +7,7 @@ import * as _ from "lodash.clonedeep";
 import {isNullOrUndefined} from "util";
 import {TempStorageService} from "../../../shared/modules/helper/temp-storage-service";
 import {EntityService} from "../../../shared/util/entity-service";
+import {UtilService} from "../../../shared/modules/util/util.service";
 
 @Component({
   selector: 'control-experiments',
@@ -20,7 +21,7 @@ export class CreateExperimentsComponent implements OnInit {
   availableTargetSystems: any;
   executionStrategy: any;
   variable: any;
-  initialVariables: any;
+  data_types_for_analysis: any;
   selectedTargetSystem: any;
   stages_count: any;
   is_collapsed: boolean;
@@ -32,9 +33,9 @@ export class CreateExperimentsComponent implements OnInit {
 
   constructor(private layout: LayoutService, private api: OEDAApiService,
               private router: Router, private notify: NotificationsService,
-              private temp_storage: TempStorageService, private entityService: EntityService) {
+              private temp_storage: TempStorageService, private entityService: EntityService, private utilService: UtilService) {
     this.availableTargetSystems = [];
-    this.initialVariables = [];
+    this.data_types_for_analysis = [];
 
     // create experiment, target system, and execution strategy
     this.executionStrategy = this.entityService.create_execution_strategy();
@@ -44,6 +45,7 @@ export class CreateExperimentsComponent implements OnInit {
     this.defaultAlpha = 0.05; // default value to be added when an analysis is selected
     this.stages_count = null;
     this.is_collapsed = true;
+
     /** TODO: add support for other scales */
     this.aggregateFunctionsMetric = [
       {key:'avg',label:'Average'},
@@ -88,35 +90,17 @@ export class CreateExperimentsComponent implements OnInit {
 
   saveExperiment() {
     if (!this.hasErrors()) {
-      let all_knobs = [];
       let experiment_type = this.experiment.executionStrategy.type;
       // push names & default values of target system to executionStrategy for forever strategy if there are no errors
       if (experiment_type === 'forever') {
+        let all_knobs: any = {};
         for (let j = 0; j < this.targetSystem.defaultVariables.length; j++) {
           let default_knob  = this.targetSystem.defaultVariables[j];
-          let knob = [];
-          knob.push(default_knob["name"]);
-          knob.push(default_knob["default"]);
-          all_knobs.push(knob);
+          all_knobs[default_knob["name"]] = default_knob["default"];
         }
+        this.experiment.executionStrategy.knobs = all_knobs;
       } else {
-        // updated knob creation TODO: test
         this.experiment.executionStrategy.knobs = this.experiment.changeableVariables;
-        // for (let j = 0; j < this.experiment.changeableVariables.length; j++) {
-        //   let knobArr = this.experiment.changeableVariables[j];
-        //   for (let k = 0; j < this.get_keys(knobArr).length; k++) {
-        //
-        //   }
-        //   let changeable_variable =
-        //   const knob = [];
-        //   knob.push(changeable_variable.name);
-        //   knob.push(Number(changeable_variable.min));
-        //   knob.push(Number(changeable_variable.max));
-        //   if (this.experiment.executionStrategy.type === "step_explorer") {
-        //     knob.push(Number(changeable_variable.step));
-        //   }
-        //   all_knobs.push(knob);
-        // }
         // prepare other attributes
         if (experiment_type === "mlr_mbo" || experiment_type === "self_optimizer" || experiment_type === "uncorrelated_self_optimizer") {
           this.experiment.executionStrategy.optimizer_iterations = Number(this.experiment.executionStrategy.optimizer_iterations);
@@ -132,16 +116,15 @@ export class CreateExperimentsComponent implements OnInit {
           this.experiment.considered_data_types.push(item);
         }
       }
-      console.log(this.experiment);
-      // this.api.saveExperiment(this.experiment).subscribe(
-      //   (success) => {
-      //     this.notify.success("Success", "Experiment saved");
-      //     this.temp_storage.setNewValue(this.experiment);
-      //     this.router.navigate(["control/experiments"]);
-      //   }, (error) => {
-      //     this.notify.error("Error", error.toString());
-      //   }
-      // )
+      this.api.saveExperiment(this.experiment).subscribe(
+        (success) => {
+          this.notify.success("Success", "Experiment saved");
+          this.temp_storage.setNewValue(this.experiment);
+          this.router.navigate(["control/experiments"]);
+        }, (error) => {
+          this.notify.error("Error", error.toString());
+        }
+      )
     }
   }
 
@@ -285,6 +268,23 @@ export class CreateExperimentsComponent implements OnInit {
       return true;
     }
 
+    // NEW: iterates min, max provided by the user and checks if they are within the range of default ones
+    if (this.experiment.analysis.type == 'no_analysis' || this.experiment.analysis.type == 'bayesian_opt') {
+      for (let i = 0; i < this.experiment.changeableVariables.length; i++) {
+        let knobArr = this.experiment.changeableVariables[i];
+        for (let idx = 0; idx < knobArr.length; idx++) {
+          let knob = knobArr[idx];
+          let originalKnob = this.targetSystem.defaultVariables.find(x => x.name == knob.name);
+          if (knob.min < originalKnob.min || knob.max > originalKnob.max || knob.max <= knob.min || knob.min >= knob.max) {
+            this.errorButtonLabel = "Value(s) of changeable variables should be within the range of original ones";
+            return true;
+          }
+
+        }
+      }
+    }
+
+
     // if there's an error in analysis stage, propogate it to upper part of UI
     if (this.hasErrorsAnalysis()) {
       this.errorButtonLabel = this.errorButtonLabelChangeableVariables;
@@ -321,16 +321,21 @@ export class CreateExperimentsComponent implements OnInit {
         this.variable = null;
       }
 
-      // now copy all changeable variables to initialVariables array
-      this.initialVariables = this.selectedTargetSystem.changeableVariables.slice(0);
-
       this.targetSystem = this.selectedTargetSystem;
-      // also make a copy of original ts for changes in analysis etc.
+      // also make a copy of original ts for changes in analysis
       this.originalTargetSystem = _(this.targetSystem);
-      console.log(this.originalTargetSystem.defaultVariables);
 
       // relate target system with experiment now
       this.experiment.targetSystemId = this.selectedTargetSystem.id;
+
+      // prepare Data Types for Analysis TODO: this might be filtered/changed whether data is coming from primary or secondary
+      for (let i = 0; i < this.originalTargetSystem.incomingDataTypes.length; i++) {
+        let data_type = {};
+        data_type["key"] = this.originalTargetSystem.incomingDataTypes[i]["name"];
+        data_type["label"] = this.originalTargetSystem.incomingDataTypes[i]["name"];
+        this.data_types_for_analysis.push(data_type);
+      }
+      console.log(this.originalTargetSystem.incomingDataTypes);
 
     } else {
       this.notify.error("Error", "Cannot fetch selected target system, please try again");
@@ -396,6 +401,7 @@ export class CreateExperimentsComponent implements OnInit {
       }
       // legacy part
       // first check single variables (they should not occur twice)
+      // TODO: might be changed depending on the strategy & if we allow A/A testing
       for (let j = 0; j < ctrl.experiment.changeableVariables.length; j++) {
         let knobArr = ctrl.experiment.changeableVariables[j];
         if (knobArr.length == 1) {
@@ -418,19 +424,14 @@ export class CreateExperimentsComponent implements OnInit {
                 || isNullOrUndefined(variable.target) || !variable.hasOwnProperty("target") ) {
             this.notify.error("Error", "Provide valid values for variable(s)");
             return;
-          } else {
-            newKnobArr.push(_(variable));
-            ctrl.experiment.changeableVariables.push(newKnobArr);
           }
         }
-        console.log("after adding", this.experiment.changeableVariables);
-      } else {
-        newKnobArr.push(_(variable));
-        ctrl.experiment.changeableVariables.push(newKnobArr);
-        ctrl.preCalculateStepSize();
-        ctrl.calculateTotalNrOfStages();
       }
 
+      newKnobArr.push(_(variable));
+      ctrl.experiment.changeableVariables.push(newKnobArr);
+      ctrl.preCalculateStepSize();
+      ctrl.calculateTotalNrOfStages();
     }
   }
 
@@ -490,13 +491,6 @@ export class CreateExperimentsComponent implements OnInit {
 
   }
 
-  // re-calculates number of stages after each change to step size
-  stepSizeChanged(stepSize) {
-    if (!isNullOrUndefined(stepSize)) {
-      this.calculateTotalNrOfStages();
-    }
-  }
-
   // if one of the parameters in executionStrategy is not valid, sets stages_count to null, so that it will get hidden
   strategyParametesChanged(value) {
     if (isNullOrUndefined(value)) {
@@ -526,14 +520,23 @@ export class CreateExperimentsComponent implements OnInit {
     }
   }
 
+  // User can select the data type for analysis to be performed
+  analysisDataTypeChanged(data_type) {
+    this.experiment.analysis.data_type = data_type;
+    // for(let i = 0; i < this.experiment.)
+  }
+
   // User can select analysis type while creating an experiment
   analysisTypeChanged(key) {
-    console.log(this.experiment.analysis);
+    this.experiment.analysis.type = key;
     // refresh previously-created tuples
     this.experiment.executionStrategy = this.entityService.create_execution_strategy();
     this.stages_count = null;
     this.experiment.changeableVariables = [];
     this.experiment.analysis.method = null;
+    this.experiment.analysis.data_type = null;
+    this.experiment.analysis.alpha = null;
+
     // also refresh targetSystem variables if user has selected some of them
     this.targetSystem.changeableVariables = _(this.originalTargetSystem.changeableVariables);
 
@@ -574,7 +577,7 @@ export class CreateExperimentsComponent implements OnInit {
 
   // calculates step size of all added variables if strategy is step_explorer
   preCalculateStepSize() {
-    if (this.experiment.executionStrategy.type === 'step_explorer') {
+    if (this.experiment.executionStrategy.type === 'step_explorer' || this.experiment.analysis.type == 'anova') {
       for (let j = 0; j < this.experiment.changeableVariables.length; j++) {
         let knobArr = this.experiment.changeableVariables[j];
         let knob = knobArr[0]; // for step str. we have only one knob in knobArr
@@ -588,25 +591,41 @@ export class CreateExperimentsComponent implements OnInit {
   // or sets stage_counts to sum of optimizer_iterations and optimizer_iterations in design for bayesian opt. methods
   calculateTotalNrOfStages() {
     this.stages_count = null;
-    if (this.experiment.executionStrategy.type === 'step_explorer') {
+    if (this.experiment.executionStrategy.type === 'step_explorer' || this.experiment.analysis.type == 'anova') {
       const stage_counts = [];
       for (let j = 0; j < this.experiment.changeableVariables.length; j++) {
         let knob = this.experiment.changeableVariables[j][0]; // for step str. we have only one knob in knobArr
+        let levels = []; // represent levels in an array-form for UI
+
         if (knob["step"] <= 0) {
           this.stages_count = null;
           break;
         } else {
-          if (knob["step"] > knob["max"] - knob["min"]) {
+          // first get decimals of provided step value
+          let decimals = this.utilService.countDecimals(knob.step);
+
+          if (knob.step > knob.max - knob.min) {
             stage_counts.push(1);
+            let num = Number(knob.min).toFixed(decimals);
+            levels.push({"key":num, "label": num}); // push an object of labeled-input-select options
           } else {
             const stage_count = Math.floor((knob["max"] - knob["min"]) / knob["step"]) + 1;
             stage_counts.push(stage_count);
+
+            // so for each stage, push a step value to levels
+            for (let lower = knob.min; lower <= knob.max;) {
+              // knob.step = Number(knob.step).toFixed(decimals);
+              let num = Number(lower).toFixed(decimals);
+              levels.push({"key":num, "label": num}); // push an object of labeled-input-select options
+              lower += knob.step;
+            }
           }
         }
+        console.log(levels);
+        knob.levels = levels;
       }
       if (stage_counts.length !== 0) {
-        const sum = stage_counts.reduce(function(a, b) {return a * b; } );
-        this.stages_count = sum;
+        this.stages_count = stage_counts.reduce(function(a, b) {return a * b; } );
       }
     }
     // prepare stages_count for other str.
@@ -769,7 +788,7 @@ export class CreateExperimentsComponent implements OnInit {
           return true;
         }
         if (n < 2) {
-          this.errorButtonLabelChangeableVariables = "ANOVA cannot be used with less than 2 samples";
+          this.errorButtonLabelChangeableVariables = "ANOVA cannot be used with less than 2 factors";
           return true;
         }
         if (chVarLen != n) {
@@ -785,6 +804,10 @@ export class CreateExperimentsComponent implements OnInit {
     if (analysis_type == 't_test' || analysis_type == 'anova') {
       if (isNullOrUndefined(this.experiment.analysis.alpha) || this.experiment.analysis.alpha <= 0 || this.experiment.analysis.alpha >= 1) {
         this.errorButtonLabelChangeableVariables = "Provide valid alpha value for analysis";
+        return true;
+      }
+      if (isNullOrUndefined(this.experiment.analysis.data_type)) {
+        this.errorButtonLabelChangeableVariables = "Provide valid data type for analysis";
         return true;
       }
     }

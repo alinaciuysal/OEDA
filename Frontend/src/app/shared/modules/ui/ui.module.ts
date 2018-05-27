@@ -7,6 +7,7 @@ import {LabeledInputSelectComponent} from "./labeled-input-select-component";
 import {ExperimentDetailsComponent} from "./experiment-details.component";
 import {ExperimentStagesComponent} from "./experiment-stages.component";
 import {ExperimentStagesPaginatorComponent} from "./experiment-stages-paginator.component";
+import {AnalysisComponent} from "./analysis.component";
 import {DataTableModule} from "angular2-datatable";
 
 const uiElements = [
@@ -15,7 +16,8 @@ const uiElements = [
   LabeledInputSelectComponent,
   ExperimentDetailsComponent,
   ExperimentStagesComponent,
-  ExperimentStagesPaginatorComponent
+  ExperimentStagesPaginatorComponent,
+  AnalysisComponent
 ];
 
 @NgModule({

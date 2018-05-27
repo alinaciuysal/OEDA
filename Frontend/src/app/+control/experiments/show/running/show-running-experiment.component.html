@@ -9,20 +9,6 @@
                       (disable_polling_btn_clicked)="disable_polling($event)"
                       (stop_experiment_btn_clicked)="stopRunningExperiment($event)"></experiment-details>
 
-  <!-- Experiment Stages -->
-  <!--<experiment-stages [experiment]="experiment"-->
-                     <!--[selected_stage]="selected_stage"-->
-                     <!--[available_stages]="available_stages"-->
-                     <!--[incoming_data_type]="incoming_data_type"-->
-                     <!--[scale]="scale"-->
-                     <!--[targetSystem]="targetSystem"-->
-                     <!--[for_successful_experiment]="false"-->
-                     <!--[oedaCallback]="oedaCallback"-->
-                     <!--[hidden]="first_render_of_page"-->
-                     <!--(incomingDataTypeChanged)="incoming_data_type_changed($event)"-->
-                     <!--(scaleChanged)="scale_changed($event)"-->
-                     <!--(stageChanged)="stage_changed($event)"></experiment-stages>-->
-
   <!-- Experiment Stages with paginator -->
   <experiment-stages-paginator [experiment]="experiment"
                                [selected_stage]="selected_stage"

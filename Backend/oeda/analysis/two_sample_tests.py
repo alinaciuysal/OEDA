@@ -20,7 +20,6 @@ class TwoSampleTest(Analysis):
             warn("Comparing only the first two samples.")
 
         from math import log
-        # UPDATED: removed d[self.y_key] logic
         self.y1 = [log(d) for d in data[0]]
         self.y2 = [log(d) for d in data[1]]
 
@@ -41,7 +40,7 @@ class Ttest(TwoSampleTest):
             error("Aborting analysis.")
             return
 
-        statistic, pvalue = ttest_ind(self.y1, self.y2, equal_var = False)
+        statistic, pvalue = ttest_ind(self.y1, self.y2, equal_var=False)
 
         different_averages = bool(pvalue <= self.alpha)
 

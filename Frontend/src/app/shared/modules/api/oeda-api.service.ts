@@ -79,7 +79,11 @@ export class OEDAApiService extends RESTService {
     return this.doPOSTPublicRequest("/auth/register", user);
   }
 
-  // remove in production
+  public getAnalysis(experiment: Experiment): Observable<any> {
+    return this.doPOSTPublicRequest("/analysis/" + experiment.id, experiment);
+  }
+
+  // remove for production
   public clear_database(): Observable<any> {
     return this.doGETPublicRequest("/delete");
   }

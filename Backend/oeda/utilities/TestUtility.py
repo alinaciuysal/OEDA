@@ -29,7 +29,7 @@ def parse_config(folder_names, config_file_name):
 
 
 # usable strategy_names are sequential, self_optimizer, uncorrelated_self_optimizer, step_explorer, forever, random, mlr_mbo
-def create_experiment_with_mlr_mbo(strategy_name, sample_size, knobs, considered_data_types, optimizer_iterations_in_design, acquisition_method="ei", optimizer_iterations=5):
+def create_experiment_with_mlr_mbo(strategy_name, sample_size, knobs, considered_data_types, analysis, optimizer_iterations_in_design, acquisition_method="ei", optimizer_iterations=5):
     num = randint(0, 100)
     id = str(uuid4())
     experiment = dict(
@@ -43,7 +43,8 @@ def create_experiment_with_mlr_mbo(strategy_name, sample_size, knobs, considered
             sample_size=sample_size,
             knobs=knobs,
             stages_count=optimizer_iterations + optimizer_iterations_in_design
-        )
+        ),
+        analysis=analysis
     )
     if strategy_name in ["self_optimizer", "uncorrelated_self_optimizer", "mlr_mbo"]:
         experiment["executionStrategy"]["optimizer_iterations"] = optimizer_iterations
@@ -116,6 +117,14 @@ def create_knobs():
     return dict(
         route_random_sigma=(0, 0.2),
         exploration_percentage=(2, 2.7)
+    )
+
+def create_analysis():
+    return dict(
+        alpha=0.05,
+        type='t_test',
+        outer_key='payload',
+        data_type='overhead'
     )
 
 def rtx_execution(experiment, target):

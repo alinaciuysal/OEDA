@@ -1,8 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
 import {OedaCallbackEntity} from "../api/oeda-api.service";
 import {isNullOrUndefined} from "util";
-import * as _ from "lodash";
-
 
 @Component({
   selector: 'experiment-stages-paginator',
@@ -56,7 +54,7 @@ import * as _ from "lodash";
                   <td *ngIf="item.number === -1 && experiment.executionStrategy.type === 'forever'" data-toggle="tooltip" title="Default values of {{targetSystem.name}} are shown on this row">
                     <b>All Stages</b> 
                   </td>
-                  <td *ngIf="item.number === -1 && experiment.executionStrategy.type !== 'forever'" data-toggle="tooltip" title="Min & Max values of changeable variables and default values of non-changeable variables are shown on this row">
+                  <td *ngIf="item.number === -1 && experiment.executionStrategy.type !== 'forever'" data-toggle="tooltip" title="Default configuration values are shown on this row">
                     <b>All Stages</b>
                   </td>
                   <td *ngIf="item.number !== -1" data-toggle="tooltip" title="Click to draw plots">

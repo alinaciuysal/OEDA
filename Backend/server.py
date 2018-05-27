@@ -15,6 +15,7 @@ from oeda.controller.plotting import QQPlotController
 from oeda.controller.users import UserRegisterController, UserListController, UserController, UserLoginController
 from oeda.controller.execution_scheduler import ExecutionSchedulerController
 from oeda.controller.deletedb import DeleteDBController
+from oeda.controller.analysis import AnalysisController
 
 app = Flask(__name__, static_folder="assets")
 
@@ -79,6 +80,7 @@ api.add_resource(UserController, '/api/user/<string:username>')
 
 api.add_resource(ExperimentsListController, '/api/experiments')
 api.add_resource(ExperimentController, '/api/experiments/<string:experiment_id>')
+api.add_resource(AnalysisController, '/api/analysis/<string:experiment_id>')
 
 api.add_resource(TargetsListController, '/api/targets')
 api.add_resource(TargetController, '/api/targets/<string:target_id>')

@@ -83,7 +83,8 @@
   </div>
 
   <!-- Primary Data Provider & Secondary Data Provider(s) & Default variables -->
-  <div class="col-md-12" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed">
+  <div class="col-md-12" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed"
+       style="border-radius: 25px; border: 2px solid #73AD21;">
 
     <!-- Primary Data Provider -->
     <div class="col-sm-6" style="padding-left: 0">
@@ -307,7 +308,7 @@
     </div>
 
     <!-- Default Variables -->
-    <div class="col-sm-12" style="padding-right: 0">
+    <div class="col-sm-12" style="padding-right: 0; padding-left: 0">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">
@@ -452,6 +453,11 @@
                            tooltipTitle='Alpha value that will be used as significance threshold for analysis phase'>
             </labeled-input>
 
+            <labeled-input-select name="Data Type" [model]="experiment.analysis" key="data_type" [colSize]="6"
+                                  [options]="data_types_for_analysis"
+                                  (modelChanged)="analysisDataTypeChanged($event)">
+            </labeled-input-select>
+
           </div>
 
           <div *ngIf="experiment.analysis.type == 'bayesian_opt'">
@@ -569,7 +575,7 @@
                 <td>{{changeableVariable.min}}</td>
                 <td>{{changeableVariable.max}}</td>
                 <td>{{changeableVariable.default}}</td>
-                <td *ngIf="experiment.executionStrategy.type=='sequential' || experiment.executionStrategy.type=='step_explorer'" style="width: 2%">
+                <td *ngIf="experiment.executionStrategy.type=='sequential' || experiment.executionStrategy.type=='step_explorer'">
                   <input type="checkbox" class="form-check-input"
                          (change)="changeable_variable_checkbox_clicked(i)" data-toggle="tooltip"
                          title="Select changeable variable(s) suitable for the analysis">
@@ -583,7 +589,7 @@
                          [max]="changeableVariable.max"
                          required>
                 </td>
-                <td *ngIf="is_changeable_variable_selected(i) && experiment.executionStrategy.type=='step_explorer'" style="width: 2%">
+                <td *ngIf="is_changeable_variable_selected(i) && experiment.executionStrategy.type=='step_explorer'">
                   <input type="number" class="form-check-input"
                          data-toggle="tooltip"
                          title="Please provide step value for this variable to be used in the process"
@@ -592,7 +598,7 @@
                          [max]="changeableVariable.max"
                          required>
                 </td>
-                <td *ngIf="is_changeable_variable_valid(i)" style="width: 2%">
+                <td *ngIf="is_changeable_variable_valid(i)">
                   <div class="btn btn-xs btn-orange" (click)="addChangeableVariable(changeableVariable)"
                        *ngIf="targetSystem.changeableVariables.length > 0 ">
                     <i class="fa fa-plus push-5-r"></i> Add
@@ -719,15 +725,17 @@
                 <labeled-input inputType="number" name="Experiment Max" [model]="knobArr[knobKey]" key="max" [colSize]="2" (modelChanged)="strategyParametesChanged($event)"></labeled-input>
                 <labeled-input inputType="number" name="Default" [model]="knobArr[knobKey]" key="default" [colSize]="2" disabled="true"></labeled-input>
                 <labeled-input *ngIf="experiment.executionStrategy.type == 'sequential'" inputType="number" name="Experiment Value" [model]="knobArr[knobKey]" key="target" [colSize]="2"></labeled-input>
-                <labeled-input *ngIf="experiment.executionStrategy.type == 'step_explorer'" inputType="number" name="Step Size" [model]="knobArr[knobKey]" key="step" [colSize]="2"></labeled-input>
+                <labeled-input *ngIf="experiment.executionStrategy.type == 'step_explorer'" inputType="number" name="Step Size" [model]="knobArr[knobKey]" key="step" [colSize]="2" (modelChanged)="strategyParametesChanged($event)"></labeled-input>
+                <labeled-input-select *ngIf="experiment.executionStrategy.type == 'step_explorer'" name="Steps" [model]="knobArr[knobKey]" key="levels" [options]="knobArr[knobKey]['levels']" [colSize]="3" [disabled]=true></labeled-input-select>
               </span>
 
-              <span *ngIf="experiment.analysis.type === 't_test' || experiment.analysis.type == 'anova'">
+              <span *ngIf="experiment.analysis.type == 't_test' || experiment.analysis.type == 'anova'">
                 <labeled-input inputType="number" name="Experiment Min" [model]="knobArr[knobKey]" key="min" [colSize]="2" disabled="true" (modelChanged)="strategyParametesChanged($event)"></labeled-input>
                 <labeled-input inputType="number" name="Experiment Max" [model]="knobArr[knobKey]" key="max" [colSize]="2" disabled="true" (modelChanged)="strategyParametesChanged($event)"></labeled-input>
                 <labeled-input inputType="number" name="Default" [model]="knobArr[knobKey]" key="default" [colSize]="2" disabled="true"></labeled-input>
-                <labeled-input *ngIf="experiment.analysis.method == 'one_factor_two_values'" inputType="number" name="Experiment Value" [model]="knobArr[knobKey]" key="target" [colSize]="2" disabled="true"></labeled-input>
+                <labeled-input *ngIf="experiment.analysis.method == 'one_factor_two_values' || experiment.analysis.method == 'two_factors_one_value'" inputType="number" name="Experiment Value" [model]="knobArr[knobKey]" key="target" [colSize]="2" disabled="true"></labeled-input>
                 <labeled-input *ngIf="experiment.analysis.type == 'anova'" inputType="number" name="Step Size" [model]="knobArr[knobKey]" key="step" [colSize]="2" disabled="true"></labeled-input>
+                <labeled-input-select *ngIf="experiment.analysis.type == 'anova'" name="Levels" [model]="knobArr[knobKey]" key="levels" [options]="knobArr[knobKey]['levels']" [colSize]="3" [disabled]=true></labeled-input-select>
               </span>
 
             </div>
@@ -740,7 +748,6 @@
             </div>
             <hr class="col-md-12">
         </div>
-
       </div>
     </div>
   </div>
@@ -822,7 +829,7 @@
             </button>
           </div>
           <div class="modal-body">
-            <p>Different types of analysis can be performed (i) to test a statistical hypothesis or (ii) to optimize output of experiments with respect to different criteria </p>
+            <p>Different types of analysis can be performed (i) to test a statistical hypothesis or (ii) to optimize output of experiments with respect to different criteria</p>
             <p>OEDA supports following analysis types</p>
             <hr>
 
@@ -848,7 +855,7 @@
             <hr>
 
             <p>
-              You can also choose not to specify an analysis type. In this case you need to choose execution strategies yourself and provide necessary parameters of it accordingly.
+              You can also choose not to specify an analysis type. In this case you need to choose execution strategies yourself and provide necessary parameters accordingly.
             </p>
           </div>
           <div class="modal-footer">

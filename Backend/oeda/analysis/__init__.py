@@ -1,8 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from colorama import Fore
-from oeda.databases import db
 from oeda.log import *
-
 
 class Analysis(object):
 

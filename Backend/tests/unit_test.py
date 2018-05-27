@@ -6,7 +6,7 @@ from sumolib import checkBinary
 from oeda.config.R_config import Config
 from oeda.log import *
 from oeda.rtxlib.dataproviders import createInstance
-from oeda.utilities.TestUtility import parse_config, adjust_functions_and_weights, create_knobs
+from oeda.utilities.TestUtility import parse_config, adjust_functions_and_weights, create_knobs, create_analysis
 
 
 class UnitTest(unittest.TestCase):
@@ -19,6 +19,7 @@ class UnitTest(unittest.TestCase):
 
     data_providers = None
     considered_data_types = None
+    analysis = None
 
     def test_a_db_1(self):
         config = parse_config(["oeda", "databases"], "experiment_db_config")
@@ -120,6 +121,11 @@ class UnitTest(unittest.TestCase):
         knobs = create_knobs()
         self.assertTrue(knobs)
         UnitTest.knobs = knobs
+
+    def test_i_create_analysis(self):
+        analysis = create_analysis()
+        self.assertTrue(analysis)
+        UnitTest.analysis = analysis
 
 if __name__ == '__main__':
     unittest.main()

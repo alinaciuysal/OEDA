@@ -5,7 +5,7 @@ from scipy.stats import kstest
 from scipy.stats import shapiro
 from oeda.log import warn, error
 from oeda.analysis import Analysis
-
+import numpy as np
 
 class OneSampleTest(Analysis):
 
@@ -15,6 +15,7 @@ class OneSampleTest(Analysis):
         #     warn("Running only for first sample.")
 
         # self.y1 = [d[self.y_key] for d in data[0]]
+        print("y1 in OneSampleTest", y1)
         self.y1 = y1
 
 
@@ -32,6 +33,9 @@ class NormalityTest(OneSampleTest):
         super(NormalityTest, self).run(data, knobs)
 
         statistic, pvalue = self.get_statistic_and_pvalue(self.y1)
+
+        if np.isnan(np.sum(statistic)):
+            statistic = None # TODO: should we initialize it to [] ?
 
         not_normal = bool(pvalue <= self.alpha)
 

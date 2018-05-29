@@ -187,7 +187,7 @@ export class CreateExperimentsComponent implements OnInit {
       let execution_strategy_type = this.experiment.executionStrategy.type;
       let analysis_type = this.experiment.analysis.type;
 
-      if (execution_strategy_type === "step_explorer" || analysis_type === 'anova') {
+      if (execution_strategy_type === "step_explorer" || analysis_type === 'factorial_tests') {
         // check inputs for step strategy changeable variables
         for (let j = 0; j < this.experiment.changeableVariables.length; j++) {
           let knobArr = this.experiment.changeableVariables[j];
@@ -346,7 +346,7 @@ export class CreateExperimentsComponent implements OnInit {
   addChangeableVariable(variable) {
     const ctrl = this;
     let knobArr = [];
-    if (ctrl.experiment.analysis.type === 't_test') {
+    if (ctrl.experiment.analysis.type === 'two_sample_tests') {
       if (isNullOrUndefined(variable.target)) {
         ctrl.notify.error("Error", "Provide target value for changeable variable(s)");
       } else {
@@ -376,11 +376,11 @@ export class CreateExperimentsComponent implements OnInit {
         // two_factors_one_value option & adding two or more variables for sequential str. are handled via addVariablesFor2FactorAndSeqTest() fcn
       }
     } else {
-      // because anova is similar to step str., we handle it here
+      // because factorial_tests (anova) is similar to step str., we handle it here
       // check N
-      if (this.experiment.analysis.type == 'anova') {
+      if (this.experiment.analysis.type == 'factorial_tests') {
         if (this.experiment.analysis.n > this.targetSystem.changeableVariables.length) {
-          this.notify.error("Error", "Number of factors for anova should be less than or equal to " + this.targetSystem.changeableVariables.length);
+          this.notify.error("Error", "Number of factors for factorial tests should be less than or equal to " + this.targetSystem.changeableVariables.length);
           return;
         }
         // also check previously-added variables if they match with N
@@ -438,10 +438,15 @@ export class CreateExperimentsComponent implements OnInit {
   // assuming that user has provided different configurations for variables and wants them to use for the selected analysis test
   addVariablesFor2FactorAndSeqTest() {
     let number_of_desired_variables: number;
-    if (this.experiment.analysis.method === 'two_factors_one_value') {
-      number_of_desired_variables = 2;
+    if (this.experiment.analysis.method === 'two_factors_one_value' || this.experiment.analysis.type == 'one_sample_tests') {
+
+      if (this.experiment.analysis.method === 'two_factors_one_value')
+        number_of_desired_variables = 2;
+      else if (this.experiment.analysis.type === 'one_sample_tests')
+        number_of_desired_variables = 1;
+
       if (this.experiment.changeableVariables.length >= number_of_desired_variables) {
-        this.notify.error("Error", "You can't exceed " + number_of_desired_variables + " variables for this test");
+        this.notify.error("Error", "You can't exceed " + number_of_desired_variables + " variable(s) for this test");
         return;
       }
     }
@@ -523,7 +528,6 @@ export class CreateExperimentsComponent implements OnInit {
   // User can select the data type for analysis to be performed
   analysisDataTypeChanged(data_type) {
     this.experiment.analysis.data_type = data_type;
-    // for(let i = 0; i < this.experiment.)
   }
 
   // User can select analysis type while creating an experiment
@@ -540,13 +544,17 @@ export class CreateExperimentsComponent implements OnInit {
     // also refresh targetSystem variables if user has selected some of them
     this.targetSystem.changeableVariables = _(this.originalTargetSystem.changeableVariables);
 
+    // set defaultAlpha for all analysis tests
+    if (key !== 'no_analysis') {
+      this.experiment.analysis.alpha = this.defaultAlpha;
+    }
+
     // set executionStrategy
-    if (this.experiment.analysis.type == 't_test') {
+    if (key == 'two_sample_tests' || key == 'one_sample_tests' || key == 'n_sample_tests') {
       this.experiment.executionStrategy.type = "sequential"; // TODO: this might be removed depending on backend logic
-      this.experiment.analysis.alpha = this.defaultAlpha;
-    } else if (this.experiment.analysis.type == 'anova') {
+    }
+    else if (this.experiment.analysis.type == 'factorial_tests') {
       this.experiment.executionStrategy.type = "step_explorer";  // TODO: this might be removed depending on backend logic
-      this.experiment.analysis.alpha = this.defaultAlpha;
     }
   }
 
@@ -557,7 +565,7 @@ export class CreateExperimentsComponent implements OnInit {
     // also refresh original variables of target system (in case any changes have been made previously)
     this.targetSystem.changeableVariables = _(this.originalTargetSystem.changeableVariables);
 
-    if (this.experiment.analysis.type == 't_test') {
+    if (this.experiment.analysis.type == 'two_sample_tests') {
       // check if target system has enough factors for t-test with 2 factors
       if (this.targetSystem.changeableVariables.length < 2 && method == 'two_factors_one_value') {
         this.notify.error("Error", "This target system definition does not have two changeable variables");
@@ -577,7 +585,7 @@ export class CreateExperimentsComponent implements OnInit {
 
   // calculates step size of all added variables if strategy is step_explorer
   preCalculateStepSize() {
-    if (this.experiment.executionStrategy.type === 'step_explorer' || this.experiment.analysis.type == 'anova') {
+    if (this.experiment.executionStrategy.type === 'step_explorer' || this.experiment.analysis.type == 'factorial_tests') {
       for (let j = 0; j < this.experiment.changeableVariables.length; j++) {
         let knobArr = this.experiment.changeableVariables[j];
         let knob = knobArr[0]; // for step str. we have only one knob in knobArr
@@ -591,7 +599,7 @@ export class CreateExperimentsComponent implements OnInit {
   // or sets stage_counts to sum of optimizer_iterations and optimizer_iterations in design for bayesian opt. methods
   calculateTotalNrOfStages() {
     this.stages_count = null;
-    if (this.experiment.executionStrategy.type === 'step_explorer' || this.experiment.analysis.type == 'anova') {
+    if (this.experiment.executionStrategy.type === 'step_explorer' || this.experiment.analysis.type == 'factorial_tests') {
       const stage_counts = [];
       for (let j = 0; j < this.experiment.changeableVariables.length; j++) {
         let knob = this.experiment.changeableVariables[j][0]; // for step str. we have only one knob in knobArr
@@ -744,8 +752,8 @@ export class CreateExperimentsComponent implements OnInit {
       changeableVariable.is_selected = !changeableVariable.is_selected;
       changeableVariable.target = null;
     }
-    // set step for anova automatically
-    if (changeableVariable.is_selected && this.experiment.analysis.type == 'anova') {
+    // set step for factorial_tests automatically
+    if (changeableVariable.is_selected && this.experiment.analysis.type == 'factorial_tests') {
       changeableVariable.step = changeableVariable.max - changeableVariable.min;
     }
   }
@@ -766,42 +774,12 @@ export class CreateExperimentsComponent implements OnInit {
 
   // checks if user has added proper number of variables to the definition
   public hasErrorsAnalysis() {
-    let chVarLen = this.experiment.changeableVariables.length;
-    let analysis_method = this.experiment.analysis.method;
-    let analysis_type = this.experiment.analysis.type;
+    if (this.experiment.analysis.type !== 'bayesian_opt') {
+      let chVarLen = this.experiment.changeableVariables.length;
+      let analysis_method = this.experiment.analysis.method;
+      let analysis_type = this.experiment.analysis.type;
 
-    if (chVarLen != 2) {
-      if (analysis_method == 'two_factors_one_value') {
-        this.errorButtonLabelChangeableVariables = "Select and provide 1 value for each of 2 factors";
-        return true;
-      } else if (analysis_method == 'one_factor_two_values') {
-        this.errorButtonLabelChangeableVariables = "Select and provide 2 different values for a single variable";
-        return true;
-      }
-    }
-
-    if (analysis_type == 'anova') {
-      let n = this.experiment.analysis.n;
-      if (!isNullOrUndefined(n)) {
-        if (n > this.targetSystem.changeableVariables.length) {
-          this.errorButtonLabelChangeableVariables = "Number of factors can be maximum " + this.targetSystem.changeableVariables.length;
-          return true;
-        }
-        if (n < 2) {
-          this.errorButtonLabelChangeableVariables = "ANOVA cannot be used with less than 2 factors";
-          return true;
-        }
-        if (chVarLen != n) {
-          // n is valid but not enough variables have been added to experiment yet
-          this.errorButtonLabelChangeableVariables = "Select and provide values for " + n + " different variables of ANOVA";
-          return true;
-        }
-      } else {
-        this.errorButtonLabelChangeableVariables = "Provide Number of factors for ANOVA";
-        return true;
-      }
-    }
-    if (analysis_type == 't_test' || analysis_type == 'anova') {
+      // regular check for all analysis types
       if (isNullOrUndefined(this.experiment.analysis.alpha) || this.experiment.analysis.alpha <= 0 || this.experiment.analysis.alpha >= 1) {
         this.errorButtonLabelChangeableVariables = "Provide valid alpha value for analysis";
         return true;
@@ -810,11 +788,60 @@ export class CreateExperimentsComponent implements OnInit {
         this.errorButtonLabelChangeableVariables = "Provide valid data type for analysis";
         return true;
       }
+
+      // two_sample_tests checks
+      if (chVarLen != 2) {
+        if (analysis_method == 'two_factors_one_value') {
+          this.errorButtonLabelChangeableVariables = "Select and provide 1 value for each of 2 factors";
+          return true;
+        } else if (analysis_method == 'one_factor_two_values') {
+          this.errorButtonLabelChangeableVariables = "Select and provide 2 different values for a single variable";
+          return true;
+        }
+      }
+
+      // so n is used for both number of factors in factorial anova & sample size for n_sample_test
+      if (analysis_type == 'factorial_tests') {
+        let n = this.experiment.analysis.n;
+        if (!isNullOrUndefined(n)) {
+          if (n > this.targetSystem.changeableVariables.length) {
+            this.errorButtonLabelChangeableVariables = "Number of factors can be maximum " + this.targetSystem.changeableVariables.length;
+            return true;
+          }
+          if (n < 2) {
+            this.errorButtonLabelChangeableVariables = "Factorial tests cannot be used with less than 2 factors";
+            return true;
+          }
+          if (chVarLen != n) {
+            // n is valid but not enough variables have been added to experiment yet
+            this.errorButtonLabelChangeableVariables = "Select and provide values for " + n + " different variables of factorial test";
+            return true;
+          }
+        } else {
+          this.errorButtonLabelChangeableVariables = "Provide Number of factors for the factorial test";
+          return true;
+        }
+      }
+      else if (analysis_type == 'n_sample_tests') {
+        let n = this.experiment.analysis.n;
+
+        if (!isNullOrUndefined(n)) {
+          if (chVarLen != n) {
+            // n is valid but not enough variables have been added to experiment yet
+            this.errorButtonLabelChangeableVariables = "Select and provide values for " + n + " different variables for N-Samples Tests";
+            return true;
+          }
+        } else {
+          this.errorButtonLabelChangeableVariables = "Provide Number of samples for N-Samples Tests";
+          return true;
+        }
+      }
+      return false;
     }
     return false;
   }
 
-  // checks if user has selected proper number of variables for t-test
+  // checks if user has selected proper number of variables for analysis tests
   // and checks if user selected at least one variable to be added to experiment.changeableVariables
   public hasErrors2FactorAndSequential() {
     if (this.experiment.analysis.method == 'two_factors_one_value') {
@@ -835,17 +862,30 @@ export class CreateExperimentsComponent implements OnInit {
         return true;
       }
       return false;
-    } else if (this.experiment.executionStrategy.type == 'sequential') {
+    }
+    else if (this.experiment.executionStrategy.type == 'sequential') {
+      let nr = 0;
+
       for (let chVar of this.targetSystem.changeableVariables) {
-        if (chVar["is_selected"] == true && !isNullOrUndefined(chVar["target"]))
-          return false;
+        if (chVar["is_selected"] == true && isNullOrUndefined(chVar["target"])) {
+          this.errorButtonLabelChangeableVariables = "Provide target value(s)";
+          return true;
+        }
+
         // check boundaries
         if (chVar.target < chVar.min || chVar.target > chVar.max) {
           this.errorButtonLabelChangeableVariables = "Provide valid value(s)";
           return true;
         }
+
+        if (chVar["is_selected"] == true && !isNullOrUndefined(chVar["target"]))
+          nr += 1;
       }
-      return true;
+      if (nr == 0 && (this.experiment.analysis.type == 'one_sample_tests' || this.experiment.analysis.type == 'n_sample_tests') ) {
+        this.errorButtonLabelChangeableVariables = "Select and provide value(s) for at least one variable";
+        return true;
+      }
+      return false;
     }
   }
 
@@ -855,15 +895,18 @@ export class CreateExperimentsComponent implements OnInit {
     if (isNullOrUndefined(this.experiment.executionStrategy.sample_size) || this.experiment.executionStrategy.sample_size < 0)
       return false;
 
+    // general for all types of analysis
+    if (isNullOrUndefined(this.experiment.analysis.alpha) || this.experiment.analysis.alpha <= 0 || this.experiment.analysis.alpha >= 1)
+      return false;
+
     let analysis_type = this.experiment.analysis.type;
-    if (analysis_type == 't_test') {
+    if (analysis_type == 'two_sample_tests') {
       return !isNullOrUndefined(this.experiment.analysis.method)
-    } else if (analysis_type == 'anova') {
-      return !isNullOrUndefined(this.experiment.analysis.n)
-          && !isNullOrUndefined(this.experiment.analysis.alpha)
-          && this.experiment.analysis.alpha > 0 && this.experiment.analysis.alpha < 100
-          && this.experiment.analysis.n > 0
-    } else if (analysis_type == 'bayesian_opt') {
+    }
+    else if (analysis_type == 'factorial_tests' || analysis_type == 'n_sample_tests') {
+      return !isNullOrUndefined(this.experiment.analysis.n) && this.experiment.analysis.n > 0
+    }
+    else if (analysis_type == 'bayesian_opt') {
       return !isNullOrUndefined(this.experiment.analysis.method)
         && !isNullOrUndefined(this.experiment.executionStrategy.optimizer_iterations_in_design)
         && this.experiment.executionStrategy.optimizer_iterations_in_design > 0
@@ -873,6 +916,10 @@ export class CreateExperimentsComponent implements OnInit {
         && !isNullOrUndefined(this.experiment.executionStrategy.acquisition_method)
         && !isNullOrUndefined(this.experiment.executionStrategy.sample_size)
         && this.experiment.executionStrategy.sample_size > 0
+    }
+    else if (analysis_type == 'one_sample_tests') {
+        // nothing is needed in addition to alpha
+        return true;
     }
   }
 

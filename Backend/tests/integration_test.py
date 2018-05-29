@@ -98,7 +98,7 @@ class IntegrationTest(unittest.TestCase):
             data_points = db().get_data_points(IntegrationTest.experiment["id"], stage_id)
             for point in data_points:
                 self.assertTrue(point["payload"])
-                self.assertTrue(point["created"])
+                self.assertTrue(point["createdDate"])
 
     def delete_index_test(self):
         db().indices_client.delete(index=UnitTest.elasticsearch_index, ignore=[400, 404]) # remove all records

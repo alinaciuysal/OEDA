@@ -1,37 +1,125 @@
 from oeda.databases import db
 from oeda.log import *
 from oeda.analysis.two_sample_tests import Ttest, TtestPower, TtestSampleSizeEstimation
+from oeda.analysis.one_sample_tests import DAgostinoPearson, AndersonDarling, KolmogorovSmirnov, ShapiroWilk
+from oeda.analysis.n_sample_tests import Bartlett, FlignerKilleen, KruskalWallis, Levene, OneWayAnova
 from oeda.analysis.factorial_tests import FactorialAnova
-from collections import defaultdict
 
-outer_key = "payload" # this is default, see: data_point_type properties in experiment_db_config.json
+from collections import defaultdict
+from math import sqrt
+import numpy as np
+
+outer_key = "payload" # this is by default, see: data_point_type properties in experiment_db_config.json
+
 
 def run_analysis(wf):
     """ we run the correct analysis """
-    if wf.analysis["type"] == "t_test":
-        start_t_test(wf)
+    if wf.analysis["type"] == "two_sample_tests":
+        start_two_sample_tests(wf)
 
-    elif wf.analysis["type"] == "anova":
-        start_anova(wf)
+    elif wf.analysis["type"] == "factorial_tests":
+        start_factorial_tests(wf)
+
+    elif wf.analysis["type"] == "one_sample_tests":
+        start_one_sample_tests(wf)
+
+    elif wf.analysis["type"] == "n_sample_tests":
+        start_n_sample_tests(wf)
 
     info("> Finished analysis")
 
+
 # there are always 2 samples for the t-test
-def start_t_test(wf):
+def start_two_sample_tests(wf):
     id = wf.id
     alpha = wf.analysis["alpha"]
     key = wf.analysis["data_type"]
-    # key = "overhead"
-    # alpha = 0.05
+    mean_diff = 0.1 # as in crowdnav-elastic-ttest-sample-size/definition.py # TODO: get it from user
+
     stage_ids, samples, knobs = get_tuples(id, key)
-    test = Ttest(stage_ids=stage_ids, y_key="overhead", alpha=alpha)
-    result = test.run(data=samples, knobs=knobs)
-    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+
+    test1 = Ttest(stage_ids=stage_ids, y_key=key, alpha=alpha)
+    result = test1.run(data=samples, knobs=knobs)
+    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test1.name, result=result)
+
+    x1 = samples[0]
+    x2 = samples[1]
+    pooled_std = sqrt((np.var(x1) + np.var(x2)) / 2)
+    effect_size = mean_diff / pooled_std
+    test2 = TtestPower(stage_ids=stage_ids, y_key=key, effect_size=effect_size)
+    result2 = test2.run(data=samples, knobs=knobs)
+    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test2.name, result=result2)
+
+    test3 = TtestSampleSizeEstimation(stage_ids=stage_ids, y_key=key, effect_size=None, mean_diff=mean_diff)
+    result3 = test3.run(data=samples, knobs=knobs)
+    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test3.name, result=result3)
     return
 
 
-# there are >= 2 samples for anova
-def start_anova(wf):
+##########################
+## One sample tests (Normality tests)
+##########################
+def start_one_sample_tests(wf):
+    id = wf.id
+    alpha = wf.analysis["alpha"]
+    key = wf.analysis["data_type"]
+
+    stage_ids, samples, knobs = get_tuples(id, key)
+    test = AndersonDarling(id, key, alpha=alpha)
+    # as we have only one sample, we need to pass data=samples[0]
+    result = test.run(data=samples[0], knobs=knobs)
+    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+
+    test = DAgostinoPearson(id, key, alpha=alpha)
+    result = test.run(data=samples[0], knobs=knobs)
+    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+
+    test = KolmogorovSmirnov(id, key, alpha=alpha)
+    result = test.run(data=samples[0], knobs=knobs)
+    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+
+    test = ShapiroWilk(id, key, alpha=alpha)
+    result = test.run(data=samples[0], knobs=knobs)
+    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+
+    return
+
+
+#########################
+# Different distributions tests
+# pass necessary stage_ids to db().save_analysis() method
+#########################
+def start_n_sample_tests(wf):
+    id = wf.id
+    alpha = wf.analysis["alpha"]
+    key = wf.analysis["data_type"]
+    stage_ids, samples, knobs = get_tuples(id, key)
+
+    test = OneWayAnova(stage_ids=stage_ids, y_key=key, alpha=alpha)
+    result = test.run(data=samples, knobs=knobs)
+    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+
+    test = KruskalWallis(stage_ids=stage_ids, y_key=key, alpha=alpha)
+    result = test.run(data=samples, knobs=knobs)
+    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+
+    test = Levene(stage_ids=stage_ids, y_key=key, alpha=alpha)
+    result = test.run(data=samples, knobs=knobs)
+    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+
+    test = Bartlett(stage_ids=stage_ids, y_key=key, alpha=alpha)
+    result = test.run(data=samples, knobs=knobs)
+    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+
+    test = FlignerKilleen(stage_ids=stage_ids, y_key=key, alpha=alpha)
+    result = test.run(data=samples, knobs=knobs)
+    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+
+    return
+
+
+# there are >= 2 samples for factorial_tests
+def start_factorial_tests(wf):
     id = wf.id
     key = wf.analysis["data_type"]
     # key = "overhead"
@@ -40,15 +128,18 @@ def start_anova(wf):
     aov_table, aov_table_sqr = test.run(data=samples, knobs=knobs)
     # type(dd) is defaultdict with unique keys
     dd = iterate_anova_tables(aov_table=aov_table, aov_table_sqr=aov_table_sqr)
-    print(dd.items())
-    anova_result = {}
-    for k, v in dd.items():
-        anova_result[k] = v
-    print("res", anova_result)
-    # TODO: Problem in ES while parsing anova_result
-    # db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, anova_result=anova_result)
-    # retrieved = db().get_analysis(id, stage_ids, test.name)
-    # print("retrieved", retrieved)
+
+    # keys e.g. C(exploration_percentage), C(route_random_sigma), Residual
+    # resultDict e.g. {'PR(>F)': 0.0949496951695454, 'F': 2.8232330924997346 ...
+    anova_result = dict()
+    for key, resultDict in dd.items():
+        anova_result[key] = resultDict
+        for inner_key, value in resultDict.items():
+            if str(value) == 'nan':
+                value = None
+            anova_result[key][inner_key] = value
+    print("anova_result before save", anova_result)
+    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, anova_result=anova_result)
     return
 
 

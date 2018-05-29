@@ -114,10 +114,12 @@ class Database:
     def create_analysis_id(experiment_id, stage_ids, analysis_name):
         """ e.g. a6d30adf-0bdb-7d84-e82b-252473e11699*1*2*anova """
         res = str(experiment_id) + "*"
-        for idx, stage_id in enumerate(stage_ids):
-            stage_no = str.split(str(stage_id), "#")[1]
-            res += stage_no
-            res += "*"
+        mid = ""
+        for id in stage_ids:
+            stage_no = id.split("#")[1]
+            mid += str(stage_no)
+            mid += "*"
+        res += mid
         res += analysis_name
         return res
 

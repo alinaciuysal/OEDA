@@ -56,13 +56,14 @@ class IntegrationTest(unittest.TestCase):
         IntegrationTest.target_system = target_system
 
     def test_j_create_experiment(self):
-        experiment = create_experiment_with_mlr_mbo(strategy_name="mlr_mbo",
+        experiment = create_experiment_with_mlr_mbo("mlr_mbo",
                                                     sample_size=20,
                                                     knobs=IntegrationTest.knobs,
                                                     considered_data_types=IntegrationTest.considered_data_types,
                                                     analysis=IntegrationTest.analysis,
                                                     optimizer_iterations_in_design=len(IntegrationTest.knobs)*4,
-                                                    acquisition_method="ei")
+                                                    acquisition_method="ei",
+                                                    optimizer_iterations=5)
         self.assertTrue(experiment)
         self.assertTrue(experiment["id"])
         experiment["targetSystemId"] = IntegrationTest.target_system["id"]

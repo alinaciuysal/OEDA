@@ -13,6 +13,13 @@ from oeda.log import *
 
 
 class ElasticSearchDb(Database):
+    data_point_definition = None
+    experiment_definition = None
+    target_system_definition = None
+    analysis_definition = None
+    stage_definition = None
+    settings = None
+    definitions = []
 
     def __init__(self, host, port, db_config):
         self.es = Elasticsearch([{"host": host, "port": port}])
@@ -21,54 +28,60 @@ class ElasticSearchDb(Database):
                 es_logger = logging.getLogger('elasticsearch')
                 es_logger.setLevel(logging.CRITICAL)
 
-                index = db_config["index"]
-                self.index = index["name"]
-
-                stage_type = db_config["stage_type"]
-                self.stage_type_name = stage_type["name"]
-
-                analysis_type = db_config["analysis_type"]
-                self.analysis_type_name = analysis_type["name"]
-
-                data_point_type = db_config["data_point_type"]
-                self.data_point_type_name = data_point_type["name"]
-
-                target_system_type = db_config["target_system_type"]
-                self.target_system_type_name = target_system_type["name"]
-
-                experiment_system_type = db_config["experiment_type"]
-                self.experiment_type_name = experiment_system_type["name"]
-
-                mappings = dict()
-                # user can specify an type without a mapping (dynamic mapping)
-                if "mapping" in stage_type:
-                    mappings[self.stage_type_name] = stage_type["mapping"]
-                if "mapping" in analysis_type:
-                    mappings[self.analysis_type_name] = analysis_type["mapping"]
-                if "mapping" in data_point_type:
-                    mappings[self.data_point_type_name] = data_point_type["mapping"]
-
-                body = dict()
-                if "settings" in index:
-                    body["settings"] = index["settings"]
-                if mappings:
-                    body["mappings"] = mappings
-
-                self.body = body
                 self.indices_client = IndicesClient(self.es)
-                if not self.indices_client.exists(self.index):
-                    self.indices_client.create(index=self.index, body=self.body)
+
+                index_definitions = db_config["index_definitions"]
+                self.settings = db_config["settings"]
+
+                self.data_point_definition = index_definitions["data_point"]
+                self.create_index_from_definition(self.data_point_definition, self.settings)
+                self.data_point_type_name = self.data_point_definition["name"]
+                self.data_point_index = self.data_point_definition["index_name"]
+                self.definitions.append(self.data_point_definition)
+
+                self.experiment_definition = index_definitions["experiment"]
+                self.create_index_from_definition(self.experiment_definition, self.settings)
+                self.experiment_type_name = self.experiment_definition["name"]
+                self.experiment_index = self.experiment_definition["index_name"]
+                self.definitions.append(self.experiment_definition)
+
+                self.target_system_definition = index_definitions["target_system"]
+                self.create_index_from_definition(self.target_system_definition, self.settings)
+                self.target_system_type_name = self.target_system_definition["name"]
+                self.target_system_index = self.target_system_definition["index_name"]
+                self.definitions.append(self.target_system_definition)
+
+                self.analysis_definition = index_definitions["analysis"]
+                self.create_index_from_definition(self.analysis_definition, self.settings)
+                self.analysis_type_name = self.analysis_definition["name"]
+                self.analysis_index = self.analysis_definition["index_name"]
+                self.definitions.append(self.analysis_definition)
+
+                self.stage_definition = index_definitions["stage"]
+                self.create_index_from_definition(self.stage_definition, self.settings)
+                self.stage_type_name = self.stage_definition["name"]
+                self.stage_index = self.stage_definition["index_name"]
+                self.definitions.append(self.stage_definition)
+
             else:
                 raise ConnectionError("Host/port values are not valid")
         except TransportError as err1:
             error("TransportError while creating elasticsearch instance for experiments. Check type mappings in experiment_db_config.json.")
             raise err1
 
+    def create_index_from_definition(self, definition, settings):
+        index = definition["index_name"]
+        if not self.indices_client.exists(index):
+            body = dict()
+            body["settings"] = settings
+            body["mappings"] = definition["mappings"]
+            self.indices_client.create(index=index, body=body)
+
     def save_target(self, target_system_data):
         target_system_data["createdDate"] = datetime.now().isoformat(' ')
         target_system_id = target_system_data["id"]
         try:
-            self.es.index(index=self.index, doc_type=self.target_system_type_name, id=target_system_id, body=target_system_data)
+            self.es.index(index=self.target_system_index, doc_type=self.target_system_type_name, id=target_system_id, body=target_system_data)
             return target_system_data
         except ConnectionError as err1:
             error("ConnectionError while saving target system. Check connection to elasticsearch.")
@@ -79,7 +92,7 @@ class ElasticSearchDb(Database):
 
     def get_target(self, target_system_id):
         try :
-            res = self.es.get(index=self.index, doc_type=self.target_system_type_name, id=target_system_id)
+            res = self.es.get(index=self.target_system_index, doc_type=self.target_system_type_name, id=target_system_id)
             return res["_source"]
         except ConnectionError as err1:
             error("ConnectionError while retrieving target. Check connection to elasticsearch.")
@@ -93,7 +106,7 @@ class ElasticSearchDb(Database):
                     "match_all": {}
                 }
             }
-            res = self.es.search(index=self.index, doc_type=self.target_system_type_name, body=query)
+            res = self.es.search(index=self.target_system_index, doc_type=self.target_system_type_name, body=query)
             return [r["_id"] for r in res["hits"]["hits"]], [r["_source"] for r in res["hits"]["hits"]]
         except ConnectionError as err1:
             error("ConnectionError while retrieving targets. Check connection to elasticsearch.")
@@ -107,7 +120,7 @@ class ElasticSearchDb(Database):
         experiment_data["createdDate"] = datetime.now().isoformat(' ')
         experiment_id = experiment_data["id"]
         try:
-            self.es.index(index=self.index, doc_type=self.experiment_type_name, body=experiment_data, id=experiment_id)
+            self.es.index(index=self.experiment_index, doc_type=self.experiment_type_name, body=experiment_data, id=experiment_id)
         except ConnectionError as err1:
             error("ConnectionError while saving experiment data. Check connection to elasticsearch.")
             raise err1
@@ -117,7 +130,7 @@ class ElasticSearchDb(Database):
 
     def get_experiment(self, experiment_id):
         try:
-            res = self.es.get(index=self.index, doc_type=self.experiment_type_name, id=experiment_id)
+            res = self.es.get(index=self.experiment_index, doc_type=self.experiment_type_name, id=experiment_id)
             return res["_source"]
         except ConnectionError as err1:
             error("ConnectionError while retrieving an experiment. Check connection to elasticsearch.")
@@ -134,7 +147,7 @@ class ElasticSearchDb(Database):
             }
         }
         try:
-            res = self.es.search(index=self.index, doc_type=self.experiment_type_name, body=query, sort='createdDate')
+            res = self.es.search(index=self.experiment_index, doc_type=self.experiment_type_name, body=query, sort='createdDate')
             return [r["_id"] for r in res["hits"]["hits"]], [r["_source"] for r in res["hits"]["hits"]]
         except ConnectionError as err1:
             error("ConnectionError while getting experiments. Check connection to elasticsearch.")
@@ -146,7 +159,7 @@ class ElasticSearchDb(Database):
     def update_experiment_status(self, experiment_id, status):
         body = {"doc": {"status": status}}
         try:
-            self.es.update(index=self.index, doc_type=self.experiment_type_name, id=experiment_id, body=body)
+            self.es.update(index=self.experiment_index, doc_type=self.experiment_type_name, id=experiment_id, body=body)
         except ConnectionError as err:
             error("ConnectionError while updating experiment status. Check connection to elasticsearch.")
             raise err
@@ -157,7 +170,7 @@ class ElasticSearchDb(Database):
     def update_target_system_status(self, target_system_id, status):
         body = {"doc": {"status": status}}
         try:
-            self.es.update(index=self.index, doc_type=self.target_system_type_name, id=target_system_id, body=body)
+            self.es.update(index=self.target_system_index, doc_type=self.target_system_type_name, id=target_system_id, body=body)
         except ConnectionError as err1:
             error("ConnectionError while updating target system status. Check connection to elasticsearch.")
             raise err1
@@ -168,7 +181,7 @@ class ElasticSearchDb(Database):
     def update_data_point(self, experiment_id, status):
         body = {"doc": {"status": status}}
         try:
-            self.es.update(index=self.index, doc_type=self.experiment_type_name, id=experiment_id, body=body)
+            self.es.update(index=self.data_point_index, doc_type=self.experiment_type_name, id=experiment_id, body=body)
         except ConnectionError as err1:
             error("ConnectionError while updating experiment status. Check connection to elasticsearch.")
             raise err1
@@ -182,8 +195,9 @@ class ElasticSearchDb(Database):
         body["number"] = stage_no
         body["knobs"] = knobs
         body["createdDate"] = datetime.now().isoformat(' ')
+        body["experiment_id"] = experiment_id
         try:
-            self.es.index(index=self.index, doc_type=self.stage_type_name, id=stage_id, body=body, parent=experiment_id)
+            self.es.index(index=self.stage_index, doc_type=self.stage_type_name, id=stage_id, body=body)
         except ConnectionError as err1:
             error("ConnectionError while saving stage. Check connection to elasticsearch.")
             raise err1
@@ -195,7 +209,7 @@ class ElasticSearchDb(Database):
         stage_id = self.create_stage_id(experiment_id, str(stage_no))
         body = {"doc": {"stage_result": stage_result}}
         try:
-            self.es.update(index=self.index, doc_type=self.stage_type_name, id=stage_id, body=body, parent=experiment_id)
+            self.es.update(index=self.stage_index, doc_type=self.stage_type_name, id=stage_id, body=body)
         except ConnectionError as err1:
             error("ConnectionError while updating stage result. Check connection to elasticsearch.")
             raise err1
@@ -206,19 +220,14 @@ class ElasticSearchDb(Database):
     def get_stages(self, experiment_id):
         query = {
             "query": {
-                "has_parent": {
-                    "parent_type": "experiment",
-                    "query": {
-                        "match": {
-                            "_id": str(experiment_id)
-                        }
-                    }
+                "match": {
+                    "experiment_id": str(experiment_id)
                 }
             }
         }
 
         try:
-            res = self.es.search(index=self.index, doc_type=self.stage_type_name, body=query, size=10000, sort='createdDate')
+            res = self.es.search(index=self.stage_index, doc_type=self.stage_type_name, body=query, size=10000, sort='createdDate')
             _ids = [r["_id"] for r in res["hits"]["hits"]]
             _sources = [r["_source"] for r in res["hits"]["hits"]]
             return _ids, _sources
@@ -267,8 +276,9 @@ class ElasticSearchDb(Database):
         body = dict()
         body["payload"] = payload
         body["createdDate"] = datetime.now().isoformat(' ')  # used to replace 'T' with ' '
+        body["stage_id"] = stage_id
         try:
-            self.es.index(index=self.index, doc_type=self.data_point_type_name, body=body, id=data_point_id, parent=stage_id)
+            self.es.index(index=self.data_point_index, doc_type=self.data_point_type_name, body=body, id=data_point_id)
         except ConnectionError as err1:
             error("ConnectionError while saving data point. Check connection to elasticsearch.")
             raise err1
@@ -280,20 +290,15 @@ class ElasticSearchDb(Database):
         stage_id = Database.create_stage_id(experiment_id, stage_no)
         query = {
             "query": {
-                "has_parent": {
-                    "type": "stage",
-                    "query": {
-                        "match": {
-                            "_id": str(stage_id)
-                        }
-                    }
+                "match": {
+                    "stage_id": str(stage_id)
                 }
             }
         }
         try:
             # https://stackoverflow.com/questions/9084536/sorting-by-multiple-params-in-pyes-and-elasticsearch
             # sorting is required for proper visualization of data
-            res = self.es.search(index=self.index, body=query, size=10000, sort='createdDate')
+            res = self.es.search(index=self.data_point_index, body=query, size=10000, sort='createdDate')
             return [r["_source"] for r in res["hits"]["hits"]]
         except ConnectionError as err1:
             error("ConnectionError while retrieving data points. Check connection to elasticsearch.")
@@ -307,15 +312,11 @@ class ElasticSearchDb(Database):
         exact_field_name = "payload" + "." + str(field)
         query = {
             "query": {
-                "has_parent": {
-                    "type": "stage",
-                    "query": {
-                        "match": {
-                            "_id": str(stage_id)
-                        }
-                    }
+                "match": {
+                    "stage_id": str(stage_id)
                 }
             }
+
         }
         query["size"] = 0 # we are not interested in matching data points
 
@@ -326,7 +327,7 @@ class ElasticSearchDb(Database):
         aggregation_key = aggregation_name + "_" + str(field)
         query["aggs"] = {aggregation_key: {aggregation_name: {"field": exact_field_name} } }
         try:
-            res = self.es.search(index=self.index, body=query)
+            res = self.es.search(index=self.data_point_index, body=query)
             if aggregation_name == "percentiles":
                 return res["aggregations"][aggregation_key]["values"]
             else:
@@ -350,13 +351,8 @@ class ElasticSearchDb(Database):
         aggregation_key = "count_" + str(field)
         query = {
             "query": {
-                "has_parent": {
-                    "type": "stage",
-                    "query": {
-                        "match": {
-                            "_id": str(stage_id)
-                        }
-                    }
+                "match": {
+                    "stage_id": str(stage_id)
                 }
             },
             "size": 0,
@@ -367,7 +363,7 @@ class ElasticSearchDb(Database):
             }
         }
         try:
-            res = self.es.search(index=self.index, body=query)
+            res = self.es.search(index=self.data_point_index, body=query)
             return res["aggregations"][aggregation_key]["doc_count"]
         except ConnectionError as err1:
             error("ConnectionError while retrieving aggregations from elasticsearch. Check connection to elasticsearch.")
@@ -378,28 +374,10 @@ class ElasticSearchDb(Database):
 
     def get_data_points_after(self, experiment_id, stage_no, timestamp):
         stage_id = Database.create_stage_id(experiment_id, stage_no)
-        query1 = {
+        query = {
             "query": {
-                "has_parent": {
-                    "parent_type": "stage",
-                    "query": {
-                        "match": {
-                            "_id": str(stage_id)
-                        }
-                    }
-                }
-            }
-        }
-
-        query2 = {
-            "query": {
-                "has_parent": {
-                    "parent_type": "stage",
-                    "query": {
-                        "match": {
-                            "_id": str(stage_id)
-                        }
-                    }
+                "match": {
+                    "stage_id": str(stage_id)
                 }
             },
             "post_filter": {
@@ -412,15 +390,9 @@ class ElasticSearchDb(Database):
             }
         }
         try:
-            # res1 = self.es.count(self.index, self.data_point_type_name, query1)
-            # # first determine size, otherwise it returns only 10 data (by default)
-            # size = res1['count']
-            # if size is None:
-            #     size = 10000
-
             # https://stackoverflow.com/questions/9084536/sorting-by-multiple-params-in-pyes-and-elasticsearch
             # sorting is required for proper visualization of data
-            res = self.es.search(index=self.index, doc_type=self.data_point_type_name, body=query2, size=10000, sort='createdDate')
+            res = self.es.search(index=self.data_point_index, doc_type=self.data_point_type_name, body=query, size=10000, sort='createdDate')
             return [r["_source"] for r in res["hits"]["hits"]]
         except ConnectionError as err1:
             error("ConnectionError while retrieving data points from elasticsearch. Check connection to elasticsearch.")
@@ -432,8 +404,9 @@ class ElasticSearchDb(Database):
     def clear_db(self):
         try:
             if self.es.ping():
-                self.indices_client.delete(index=self.index, ignore=[400, 404])  # remove all records
-                self.indices_client.create(index=self.index, body=self.body)
+                for definition in self.definitions:
+                    self.indices_client.delete(index=definition["index_name"], ignore=[400, 404])  # remove all records
+                    self.create_index_from_definition(definition, self.settings)
         except ConnectionError as err1:
             error("ConnectionError while clearing database. Check connection to elasticsearch.")
             raise err1
@@ -442,7 +415,7 @@ class ElasticSearchDb(Database):
             raise err2
 
     def get_stages_count(self, experiment_id):
-        res = self.es.get(index=self.index, doc_type=self.experiment_type_name, id=experiment_id, _source=["executionStrategy"])
+        res = self.es.get(index=self.experiment_index, doc_type=self.experiment_type_name, id=experiment_id, _source=["executionStrategy"])
         if "stages_count" not in res["_source"]["executionStrategy"]:
             error("'stages_count' does not exist in experiment strategy with id " + experiment_id)
             return 0
@@ -474,10 +447,10 @@ class ElasticSearchDb(Database):
         body["name"] = analysis_name
         body["result"] = result
         body["anova_result"] = anova_result
-        body["createdDate"] = datetime.now()
+        body["createdDate"] = datetime.now().isoformat(' ')
 
         try:
-            self.es.index(index=self.index, doc_type=self.analysis_type_name, body=body, id=analysis_id)
+            self.es.index(index=self.analysis_index, doc_type=self.analysis_type_name, body=body, id=analysis_id)
         except ConnectionError as err1:
             error("Error while saving analysis in elasticsearch. Check connection to elasticsearch.")
             raise err1
@@ -488,7 +461,7 @@ class ElasticSearchDb(Database):
     def get_analysis(self, experiment_id, stage_ids, analysis_name):
         try:
             analysis_id = Database.create_analysis_id(experiment_id, stage_ids, analysis_name)
-            res = self.es.get(index=self.index, doc_type=self.analysis_type_name, id=analysis_id)
+            res = self.es.get(index=self.analysis_index, doc_type=self.analysis_type_name, id=analysis_id)
             return res["_source"]
         except ConnectionError as err1:
             error("Error while retrieving analysis in elasticsearch. Check connection to elasticsearch.")

@@ -1,4 +1,4 @@
-from oeda.databases import setup_experiment_database, db
+from oeda.databases import setup_experiment_database, setup_user_database, db
 from collections import defaultdict
 from oeda.analysis.factorial_tests import FactorialAnova
 
@@ -63,11 +63,12 @@ def iterate_anova_tables(aov_table, aov_table_sqr):
     return dd
 
 if __name__ == '__main__':
+    # setup_user_database()
     setup_experiment_database("elasticsearch", "localhost", 9200)
-    id = "6dc62e9c-3625-85ca-657e-3b06cc269828"
-    stage_ids = ["6dc62e9c-3625-85ca-657e-3b06cc269828#1", "6dc62e9c-3625-85ca-657e-3b06cc269828#2", "6dc62e9c-3625-85ca-657e-3b06cc269828#3", "6dc62e9c-3625-85ca-657e-3b06cc269828#4"]
-    retrieved = db().get_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name="two-way-anova")
-    print(retrieved)
-
-    start_anova(id=id)
+    # id = "6dc62e9c-3625-85ca-657e-3b06cc269828"
+    # stage_ids = ["6dc62e9c-3625-85ca-657e-3b06cc269828#1", "6dc62e9c-3625-85ca-657e-3b06cc269828#2", "6dc62e9c-3625-85ca-657e-3b06cc269828#3", "6dc62e9c-3625-85ca-657e-3b06cc269828#4"]
+    # retrieved = db().get_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name="two-way-anova")
+    # print(retrieved)
+    #
+    # start_anova(id=id)
     # start_two_sample_tests(id=id)

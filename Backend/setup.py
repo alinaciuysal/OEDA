@@ -14,7 +14,7 @@ setup(
         'tornado',
         'flask_restful',
         'flask_cors',
-        'elasticsearch', # elasticsearch integration
+        'elasticsearch>=6.0.0,<7.0.0', # elasticsearch integration
         'statsmodels', # statistics and statistical testing
         'numpy', # scientific computing
         'requests', # http integreation

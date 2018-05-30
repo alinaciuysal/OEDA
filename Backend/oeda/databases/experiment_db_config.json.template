@@ -1,93 +1,113 @@
 {
-    "db_type": "elasticsearch",
-    "host": "localhost",
-    "port": 9200,
-  "index": {
-    "name": "oeda",
-    "settings" : {
-      "number_of_shards" : 1,
-      "number_of_replicas" : 1
-    }
+  "db_type": "elasticsearch",
+  "host": "localhost",
+  "port": 9200,
+  "settings": {
+    "number_of_shards" : 1,
+    "number_of_replicas" : 1
   },
-  "experiment_type": {
-    "name": "experiment",
-    "mapping": {
-      "properties": {
-        "executionStrategy": {
-          "type": "nested",
+  "index_definitions": {
+    "experiment": {
+      "name": "experiment",
+      "index_name": "oeda_experiment",
+      "mappings": {
+        "experiment": {
           "properties": {
-            "knobs":                   { "type": "object"  },
-            "sample_size":             { "type": "integer" },
-            "type":                    { "type": "keyword" },
-            "stages_count":            { "type": "integer" }
+            "executionStrategy": {
+              "type": "nested",
+              "properties": {
+                "knobs":                   { "type": "object"  },
+                "sample_size":             { "type": "integer" },
+                "type":                    { "type": "keyword" },
+                "stages_count":            { "type": "integer" }
+              }
+            },
+            "createdDate":                  { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"},
+            "targetSystemId":           { "type": "keyword"  },
+            "variable_to_be_optimized": { "type": "keyword"  }
           }
-        },
-        "createdDate":                  { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"},
-        "targetSystemId":           { "type": "keyword"  },
-        "variable_to_be_optimized": { "type": "keyword"  }
+        }
       }
-    }
-  },
-  "stage_type": {
-    "name": "stage",
-    "mapping": {
-      "_parent":        { "type": "experiment"},
-      "properties":     {
-        "number":       { "type": "integer" },
-        "knobs":        { "type": "object"  },
-        "createdDate":  { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"},
-        "stage_result": { "type": "float" }
+    },
+    "stage": {
+      "name": "stage",
+      "index_name": "oeda_stage",
+      "mappings": {
+        "stage": {
+          "properties":     {
+            "experiment_id": {"type": "keyword"},
+            "number":       { "type": "integer" },
+            "knobs":        { "type": "object"  },
+            "createdDate":  { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"},
+            "stage_result": { "type": "float" }
+          }
+        }
       }
-    }
-  },
-  "analysis_type": {
-    "name": "analysis",
-    "mapping": {
-      "properties": {
-        "stage_ids":   { "type": "keyword" },
-        "name":          { "type": "keyword" },
-        "result":        { "type": "object"  },
-        "data_type":        { "type": "object"  },
-        "createdDate":       { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"}
-      }
-    }
-  },
-  "data_point_type": {
-    "name": "data_point",
-    "mapping": {
-      "_parent":    { "type": "stage"},
-      "properties": {
-        "payload":  { "type": "object"  },
-        "createdDate":  { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"}
-      }
-    }
-  },
-  "target_system_type": {
-    "name": "target_system",
-    "mapping": {
-      "properties": {
-        "primary_data_provider": {
-          "type": "nested",
+    },
+    "analysis": {
+      "name": "analysis",
+      "index_name": "oeda_analysis",
+      "mappings": {
+        "analysis": {
           "properties": {
-            "type":          { "type": "keyword" },
-            "serializer":    { "type": "keyword" },
-            "ignore_first_n_samples":  { "type": "integer" }
+            "stage_ids":   { "type": "keyword" },
+            "name":          { "type": "keyword" },
+            "result":        { "type": "object"  },
+            "anova_result":
+            {
+              "type": "nested",
+              "dynamic": true,
+              "properties": {}
+            },
+            "data_type":        { "type": "object"  },
+            "createdDate":       { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"}
           }
-        },
-        "secondary_data_providers": {
-          "type": "nested"
-        },
-        "change_provider": {
-          "type": "nested",
+        }
+      }
+    },
+    "data_point": {
+      "name": "data_point",
+      "index_name": "oeda_data_point",
+      "mappings": {
+        "data_point": {
           "properties": {
-            "type":          { "type": "keyword" },
-            "serializer":    { "type": "keyword" }
+            "stage_id": { "type": "keyword"},
+            "payload":  { "type": "object"  },
+            "createdDate":  { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"}
           }
-        },
-        "name":         { "type": "keyword"  },
-        "description":  { "type": "text"     },
-        "status":       { "type": "keyword"  },
-        "createdDate":      { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"}
+        }
+      }
+    },
+    "target_system": {
+      "name": "target_system",
+      "index_name": "oeda_target_system",
+      "mappings": {
+        "target_system": {
+          "properties": {
+            "primary_data_provider": {
+              "type": "nested",
+              "properties": {
+                "type":          { "type": "keyword" },
+                "serializer":    { "type": "keyword" },
+                "ignore_first_n_samples":  { "type": "integer" }
+              }
+            },
+            "secondary_data_providers": {
+              "type": "nested"
+            },
+            "change_provider": {
+              "type": "nested",
+              "properties": {
+                "type":          { "type": "keyword" },
+                "serializer":    { "type": "keyword" }
+              }
+            },
+            "name":         { "type": "keyword"  },
+            "description":  { "type": "text"     },
+            "status":       { "type": "keyword"  },
+            "createdDate":      { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"}
+          }
+        }
       }
     }
   }

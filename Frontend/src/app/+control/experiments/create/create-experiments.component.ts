@@ -501,11 +501,6 @@ export class CreateExperimentsComponent implements OnInit {
     }
   }
 
-  // User can select the data type for analysis to be performed
-  analysisDataTypeChanged(data_type) {
-    this.experiment.analysis.data_type = data_type;
-  }
-
   // User can select analysis type while creating an experiment
   analysisTypeChanged(key) {
     this.experiment.analysis.type = key;
@@ -519,6 +514,7 @@ export class CreateExperimentsComponent implements OnInit {
 
     // also refresh targetSystem variables if user has selected some of them
     this.targetSystem.changeableVariables = _(this.originalTargetSystem.changeableVariables);
+    this.targetSystem.incomingDataTypes = _(this.originalTargetSystem.incomingDataTypes);
 
     // set defaultAlpha for all analysis tests
     if (key !== 'no_analysis') {
@@ -812,6 +808,10 @@ export class CreateExperimentsComponent implements OnInit {
     if (isNullOrUndefined(this.experiment.analysis.alpha) || this.experiment.analysis.alpha <= 0 || this.experiment.analysis.alpha >= 1)
       return false;
 
+    // general for all types of analysis
+    if (isNullOrUndefined(this.experiment.analysis.data_type))
+      return false;
+
     let analysis_type = this.experiment.analysis.type;
     if (analysis_type == 'two_sample_tests') {
       return !isNullOrUndefined(this.experiment.analysis.method)
@@ -839,6 +839,10 @@ export class CreateExperimentsComponent implements OnInit {
   // simple proxy
   public get_keys(obj) {
     return this.entityService.get_keys(obj);
+  }
+
+  public experimentChanged(data_type) {
+    this.experiment.analysis.data_type = data_type;
   }
 
 }

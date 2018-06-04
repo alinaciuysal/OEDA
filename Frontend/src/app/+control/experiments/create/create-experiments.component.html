@@ -401,12 +401,6 @@
                            [maxNumber]="1"
                            tooltipTitle='Alpha value that will be used as significance threshold for analysis phase'>
             </labeled-input>
-
-            <labeled-input-select name="Data Type" [model]="experiment.analysis" key="data_type" [colSize]="6"
-                                  [options]="data_types_for_analysis"
-                                  (modelChanged)="analysisDataTypeChanged($event)">
-            </labeled-input-select>
-
           </div>
 
           <div *ngIf="experiment.analysis.type == 'bayesian_opt'">
@@ -418,11 +412,16 @@
                                   (modelChanged)="analysisMethodChanged($event)">
             </labeled-input-select>
           </div>
+
+          <!-- Execution Strategy for any type of analysis -->
+          <labeled-input *ngIf="experiment.analysis.type != 'bayesian_opt' && experiment.analysis.type != 'no_analysis'"
+            inputType="number" name="Sample Size per Stage" [model]="experiment.executionStrategy" key="sample_size" [colSize]="6" [minNumber]="1" tooltipTitle='Number of samples to be collected from each experiment'></labeled-input>
+
         </div>
       </div>
 
-      <!-- Execution Strategy -->
-      <div class="panel panel-default chartJs" *ngIf="experiment.analysis.type !== undefined">
+      <!-- Execution Strategy for bayesian opt or no analysis -->
+      <div class="panel panel-default chartJs" *ngIf="experiment.analysis.type == 'bayesian_opt' || experiment.analysis.type == 'no_analysis'">
         <div class="panel-heading">
           <div class="card-title">
             <div class="title pull-left">Execution Strategy</div>
@@ -489,80 +488,8 @@
       </div>
     </div>
 
-    <!-- Selection among Changeable Variables if user has selected "No Analysis" option-->
-    <div class="col-md-12" style="padding-left: 0; padding-right: 0" *ngIf="targetSystem.name !== ''
-                                              && experiment.executionStrategy.type !== 'forever'
-                                              && experiment.executionStrategy.type.length !== 0
-                                              && experiment.analysis.type === 'no_analysis'">
-      <div class="panel panel-default chartJs">
-        <div class="panel-heading">
-          <div class="card-title">
-            <div class="title pull-left">Changeable Variables</div>
-          </div>
-        </div>
-        <div class="panel-body">
-          <div class="table-responsive">
-            <table class="table table-striped table-bordered table-hover">
-              <thead>
-                <th>Name</th>
-                <th>Scale</th>
-                <th>Description</th>
-                <th>Min</th>
-                <th>Max</th>
-                <th>Default</th>
-                <th *ngIf="experiment.executionStrategy.type=='sequential' || experiment.executionStrategy.type=='step_explorer'">Select</th>
-                <th *ngIf="is_changeable_variable_selected(null) && experiment.executionStrategy.type=='sequential'">Experiment Value</th>
-                <th *ngIf="is_changeable_variable_selected(null) && experiment.executionStrategy.type=='step_explorer'">Step</th>
-                <th *ngIf="is_changeable_variable_selected(null) && (experiment.executionStrategy.type=='sequential' || experiment.executionStrategy.type=='step_explorer')">Action</th>
-              </thead>
-              <tbody>
-              <tr *ngFor="let changeableVariable of targetSystem.changeableVariables; let i = index" style="padding-top: 1%">
-                <td>{{changeableVariable.name}}</td>
-                <td>{{changeableVariable.scale}}</td>
-                <td>{{changeableVariable.description}}</td>
-                <td>{{changeableVariable.min}}</td>
-                <td>{{changeableVariable.max}}</td>
-                <td>{{changeableVariable.default}}</td>
-                <td *ngIf="experiment.executionStrategy.type=='sequential' || experiment.executionStrategy.type=='step_explorer'">
-                  <input type="checkbox" class="form-check-input"
-                         (change)="changeable_variable_checkbox_clicked(i)" data-toggle="tooltip"
-                         title="Select changeable variable(s) suitable for the execution strategy">
-                </td>
-                <td *ngIf="is_changeable_variable_selected(i) && experiment.executionStrategy.type=='sequential'">
-                  <input type="number" class="form-check-input"
-                         data-toggle="tooltip"
-                         title="Please provide target value for this variable to be used in the process"
-                         [(ngModel)]="changeableVariable['target']"
-                         [min]="changeableVariable.min"
-                         [max]="changeableVariable.max"
-                         required>
-                </td>
-                <td *ngIf="is_changeable_variable_selected(i) && experiment.executionStrategy.type=='step_explorer'">
-                  <input type="number" class="form-check-input"
-                         data-toggle="tooltip"
-                         title="Please provide step value for this variable to be used in the process"
-                         [(ngModel)]="changeableVariable['step']"
-                         [min]="changeableVariable.min"
-                         [max]="changeableVariable.max"
-                         required>
-                </td>
-                <td *ngIf="is_changeable_variable_valid(i)">
-                  <div class="btn btn-xs btn-orange" (click)="addChangeableVariable(changeableVariable)"
-                       *ngIf="targetSystem.changeableVariables.length > 0 ">
-                    <i class="fa fa-plus push-5-r"></i> Add
-                  </div>
-                </td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="btn btn-xs btn-orange pull-right" *ngIf="experiment.executionStrategy.type === 'sequential' && targetSystem.changeableVariables.length > 0"
-               (click)="addVariablesFor2FactorAndSeqTest()">
-            <i class="fa fa-plus push-5-r"></i> Add as Configuration
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Incoming Data Types for Analysis process -->
+    <incoming-data-types-analysis *ngIf="experiment.analysis.type !== 'no_analysis' && experiment.analysis.type != 'bayesian_opt'" (experimentChanged)="experimentChanged($event)" [experiment]="experiment" [targetSystem]="targetSystem"></incoming-data-types-analysis>
 
     <!-- Selection among Changeable Variables if user has selected an Analysis option-->
     <div class="col-md-12" style="padding-left: 0; padding-right: 0" *ngIf="targetSystem.name !== ''
@@ -644,6 +571,82 @@
         </div>
       </div>
     </div>
+
+    <!-- Selection among Changeable Variables if user has selected "No Analysis" option-->
+    <div class="col-md-12" style="padding-left: 0; padding-right: 0" *ngIf="targetSystem.name !== ''
+                                              && experiment.executionStrategy.type !== 'forever'
+                                              && experiment.executionStrategy.type.length !== 0
+                                              && experiment.analysis.type === 'no_analysis'">
+      <div class="panel panel-default chartJs">
+        <div class="panel-heading">
+          <div class="card-title">
+            <div class="title pull-left">Changeable Variables</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="table-responsive">
+            <table class="table table-striped table-bordered table-hover">
+              <thead>
+              <th>Name</th>
+              <th>Scale</th>
+              <th>Description</th>
+              <th>Min</th>
+              <th>Max</th>
+              <th>Default</th>
+              <th *ngIf="experiment.executionStrategy.type=='sequential' || experiment.executionStrategy.type=='step_explorer'">Select</th>
+              <th *ngIf="is_changeable_variable_selected(null) && experiment.executionStrategy.type=='sequential'">Experiment Value</th>
+              <th *ngIf="is_changeable_variable_selected(null) && experiment.executionStrategy.type=='step_explorer'">Step</th>
+              <th *ngIf="is_changeable_variable_selected(null) && (experiment.executionStrategy.type=='sequential' || experiment.executionStrategy.type=='step_explorer')">Action</th>
+              </thead>
+              <tbody>
+              <tr *ngFor="let changeableVariable of targetSystem.changeableVariables; let i = index" style="padding-top: 1%">
+                <td>{{changeableVariable.name}}</td>
+                <td>{{changeableVariable.scale}}</td>
+                <td>{{changeableVariable.description}}</td>
+                <td>{{changeableVariable.min}}</td>
+                <td>{{changeableVariable.max}}</td>
+                <td>{{changeableVariable.default}}</td>
+                <td *ngIf="experiment.executionStrategy.type=='sequential' || experiment.executionStrategy.type=='step_explorer'">
+                  <input type="checkbox" class="form-check-input"
+                         (change)="changeable_variable_checkbox_clicked(i)" data-toggle="tooltip"
+                         title="Select changeable variable(s) suitable for the execution strategy">
+                </td>
+                <td *ngIf="is_changeable_variable_selected(i) && experiment.executionStrategy.type=='sequential'">
+                  <input type="number" class="form-check-input"
+                         data-toggle="tooltip"
+                         title="Please provide target value for this variable to be used in the process"
+                         [(ngModel)]="changeableVariable['target']"
+                         [min]="changeableVariable.min"
+                         [max]="changeableVariable.max"
+                         required>
+                </td>
+                <td *ngIf="is_changeable_variable_selected(i) && experiment.executionStrategy.type=='step_explorer'">
+                  <input type="number" class="form-check-input"
+                         data-toggle="tooltip"
+                         title="Please provide step value for this variable to be used in the process"
+                         [(ngModel)]="changeableVariable['step']"
+                         [min]="changeableVariable.min"
+                         [max]="changeableVariable.max"
+                         required>
+                </td>
+                <td *ngIf="is_changeable_variable_valid(i)">
+                  <div class="btn btn-xs btn-orange" (click)="addChangeableVariable(changeableVariable)"
+                       *ngIf="targetSystem.changeableVariables.length > 0 ">
+                    <i class="fa fa-plus push-5-r"></i> Add
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="btn btn-xs btn-orange pull-right" *ngIf="experiment.executionStrategy.type === 'sequential' && targetSystem.changeableVariables.length > 0"
+               (click)="addVariablesFor2FactorAndSeqTest()">
+            <i class="fa fa-plus push-5-r"></i> Add as Configuration
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- Incoming Data Types for Optimization process -->

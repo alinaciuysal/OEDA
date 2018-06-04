@@ -1,66 +1,39 @@
-import {Component, Input} from "@angular/core";
+import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {isNullOrUndefined} from "util";
 import {OEDAApiService} from "../api/oeda-api.service";
 import {NotificationsService} from "angular2-notifications/dist";
 import {EntityService} from "../../util/entity-service";
 
 @Component({
-  selector: 'incoming-data-types-optimization',
+  selector: 'incoming-data-types-analysis',
   template: `
-    <div class="col-md-12" *ngIf="targetSystem.name !== ''">
+    <div class="col-md-12" *ngIf="targetSystem.name !== '' && experiment.analysis.type !== undefined">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">
-            <div class="title pull-left">Incoming Data Types</div>
+            <div class="title pull-left">Incoming Data Types for Analysis</div>
           </div>
         </div>
         <div class="panel-body">
           <div class="table-responsive">
             <table class="table table-striped table-bordered table-hover">
               <thead>
-              <th>Name</th>
-              <th>Scale</th>
-              <th>Description</th>
-              <th>Provider Name</th>
-              <th>Provider Type</th>
-              <th>Criteria</th>
-              <th>Consider</th>
-              <th *ngIf="is_data_type_selected()">Aggregation</th>
-              <th *ngIf="is_data_type_selected()">Weight</th>
+                <th>Name</th>
+                <th>Scale</th>
+                <th>Description</th>
+                <th>Select</th>
               </thead>
               <tbody>
               <tr *ngFor="let dataType of targetSystem.incomingDataTypes; let i = index">
                 <td>{{dataType.name}}</td>
                 <td>{{dataType.scale}}</td>
                 <td>{{dataType.description}}</td>
-                <td>{{dataType.dataProviderName}}</td>
-                <td *ngIf="is_data_type_coming_from_primary(i)">Primary</td> <td *ngIf="!is_data_type_coming_from_primary(i)">Secondary</td>
-                <td>{{dataType.criteria}}</td>
-                <td *ngIf="is_data_type_coming_from_primary(i)">
+                <td>
                   <input type="checkbox" class="form-check-input"
                          (change)="data_type_checkbox_clicked(i)"
                          data-toggle="tooltip"
-                         title="Select one incoming data type to be optimized. You cannot aggregate data coming from primary & secondary data providers at the same time">
-                </td>
-                <td *ngIf="dataType['is_considered'] && dataType.scale == 'Metric'">
-                  <select [(ngModel)]="dataType['aggregateFunction']" required>
-                    <option *ngFor="let fcn of aggregateFunctionsMetric" [ngValue]="fcn.key">{{fcn.label}}</option>
-                  </select>
-                </td>
-                <td *ngIf="dataType['is_considered'] && dataType.scale == 'Boolean'">
-                  <select [(ngModel)]="dataType['aggregateFunction']" required>
-                    <option *ngFor="let fcn of aggregateFunctionsBoolean" [ngValue]="fcn.key">{{fcn.label}}</option>
-                  </select>
-                </td>
-                <td *ngIf="dataType['is_considered']">
-                  <input type="number" class="form-check-input"
-                         data-toggle="tooltip"
-                         title="Please provide weight of this data type within the final result"
-                         [(ngModel)]="dataType['weight']"
-                         [min]="1"
-                         [max]="100"
-                         required>
-                  <span *ngIf="dataType['aggregateFunction'] !== 'percentiles'"><b>%</b></span>
+                         [checked]="dataType['is_considered'] == true"
+                         title="Select one incoming data type for analysis. You can only select one of these data types">
                 </td>
               </tr>
               </tbody>
@@ -72,9 +45,11 @@ import {EntityService} from "../../util/entity-service";
   `
 })
 
-export class IncomingDataTypesOptimizationComponent {
+export class IncomingDataTypesAnalysisComponent {
   @Input() targetSystem: any;
   @Input() experiment: any;
+
+  @Output() experimentChanged = new EventEmitter();
 
   public aggregateFunctionsMetric: any;
   public aggregateFunctionsBoolean: any;
@@ -133,7 +108,7 @@ export class IncomingDataTypesOptimizationComponent {
   }
 
   /**
-   * sets respective weights of data types when user clicks
+   * sets respective attributes of data types when user clicks
    */
   public data_type_checkbox_clicked(data_type_index): void {
     let data_type = this.targetSystem.incomingDataTypes[data_type_index];
@@ -141,31 +116,32 @@ export class IncomingDataTypesOptimizationComponent {
     // first click
     if (isNullOrUndefined(data_type["is_considered"])) {
       data_type["is_considered"] = true;
-      data_type["weight"] = 100 / this.entityService.get_number_of_considered_data_types(this.targetSystem);
+      this.experiment.analysis.dataType = data_type;
     }
     // subsequent clicks
     else {
       data_type["is_considered"] = !data_type["is_considered"];
     }
 
-    // adjust weights of all data types
+    // make other data types "not-selected"
+    for (let i = 0; i < this.targetSystem.incomingDataTypes.length; i++) {
+      if (i != data_type_index) {
+        let data_type = this.targetSystem.incomingDataTypes[i];
+        if (!isNullOrUndefined(data_type["is_considered"])) {
+          data_type["is_considered"] = false;
+        }
+      }
+    }
+
+    // propogate changes to parent component if there's at least one selected data type
     for (let i = 0; i < this.targetSystem.incomingDataTypes.length; i++) {
       let data_type = this.targetSystem.incomingDataTypes[i];
-      if(data_type["is_considered"] == true) {
-        data_type["weight"] = 100 / this.entityService.get_number_of_considered_data_types(this.targetSystem);
-      } else {
-        data_type["weight"] = undefined;
-      }
-    }
-  }
-
-  // check if user has selected a data coming from primary dp.
-  public is_primary_dp_selected() {
-    for (let data_type of this.targetSystem.primaryDataProvider.incomingDataTypes) {
       if (data_type["is_considered"] == true) {
-        return true;
+        this.experimentChanged.emit(data_type);
+        return;
       }
     }
-    return false;
+    // no dataType is selected, send null
+    this.experimentChanged.emit(null);
   }
 }

@@ -10,6 +10,7 @@ import {ExperimentStagesPaginatorComponent} from "./experiment-stages-paginator.
 import {AnalysisComponent} from "./analysis.component";
 import {DataTableModule} from "angular2-datatable";
 import {IncomingDataTypesOptimizationComponent} from "./incoming-data-types-optimization";
+import {IncomingDataTypesAnalysisComponent} from "./incoming-data-types-analysis";
 
 const uiElements = [
   DebugElementComponent,
@@ -19,7 +20,8 @@ const uiElements = [
   ExperimentStagesComponent,
   ExperimentStagesPaginatorComponent,
   AnalysisComponent,
-  IncomingDataTypesOptimizationComponent
+  IncomingDataTypesOptimizationComponent,
+  IncomingDataTypesAnalysisComponent
 ];
 
 @NgModule({

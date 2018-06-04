@@ -340,75 +340,13 @@
 
   </div>
 
-  <!-- Incoming Data Types -->
-  <div class="col-md-12" *ngIf="targetSystem.name !== ''">
-    <div class="panel panel-default chartJs">
-      <div class="panel-heading">
-        <div class="card-title">
-          <div class="title pull-left">Incoming Data Types</div>
-        </div>
-      </div>
-      <div class="panel-body" style="padding-top: 20px">
-        <div class="table-responsive">
-          <table class="table table-striped table-bordered table-hover">
-            <thead>
-              <th style="padding-left: 1%">Name</th>
-              <th style="padding-left: 1%">Scale</th>
-              <th style="padding-left: 1%">Description</th>
-              <th style="padding-left: 1%">Data Provider Name</th>
-              <th style="padding-left: 1%">Data Provider Type</th>
-              <th style="padding-left: 1%">Optimization Criteria</th>
-              <th style="padding-left: 1%">Consider</th>
-              <th *ngIf="is_data_type_selected()" style="padding-left: 1%">Aggregation</th>
-              <th *ngIf="is_data_type_selected()" style="padding-left: 1%">Weight</th>
-            </thead>
-            <tbody>
-            <tr *ngFor="let dataType of targetSystem.incomingDataTypes; let i = index" style="padding-top: 1%">
-              <td>{{dataType.name}}</td>
-              <td>{{dataType.scale}}</td>
-              <td>{{dataType.description}}</td>
-              <td>{{dataType.dataProviderName}}</td>
-              <td *ngIf="is_data_type_coming_from_primary(i)">Primary</td> <td *ngIf="!is_data_type_coming_from_primary(i)">Secondary</td>
-              <td>{{dataType.criteria}}</td>
-              <td *ngIf="is_data_type_coming_from_primary(i)">
-                <input type="checkbox" class="form-check-input"
-                       (change)="data_type_checkbox_clicked(i)"
-                       data-toggle="tooltip"
-                       title="Select one incoming data type to be optimized. You cannot aggregate data coming from primary & secondary data providers at the same time">
-              </td>
-              <td *ngIf="dataType['is_considered'] && dataType.scale == 'Metric'">
-                <select [(ngModel)]="dataType['aggregateFunction']" required>
-                  <option *ngFor="let fcn of aggregateFunctionsMetric" [ngValue]="fcn.key">{{fcn.label}}</option>
-                </select>
-              </td>
-              <td *ngIf="dataType['is_considered'] && dataType.scale == 'Boolean'">
-                <select [(ngModel)]="dataType['aggregateFunction']" required>
-                  <option *ngFor="let fcn of aggregateFunctionsBoolean" [ngValue]="fcn.key">{{fcn.label}}</option>
-                </select>
-              </td>
-              <td *ngIf="dataType['is_considered']">
-                <input type="number" class="form-check-input"
-                       data-toggle="tooltip"
-                       title="Please provide weight of this data type within the final result"
-                       [(ngModel)]="dataType['weight']"
-                       [min]="1"
-                       [max]="100"
-                       required>
-                <span *ngIf="dataType['aggregateFunction'] !== 'percentiles'"><b>%</b></span>
-              </td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Analysis, Execution Strategy -->
+  <!-- Analysis & Execution Strategy -->
   <div class="col-md-12" *ngIf="targetSystem.name !== ''">
 
-    <!-- Analysis -->
-    <div class="col-md-6" style="padding-left: 0">
+    <!-- Analysis & Execution Strategy -->
+    <div class="col-md-12" style="padding-left: 0">
+
+      <!-- Analysis -->
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">
@@ -429,6 +367,7 @@
                                     {key:'no_analysis', label:'Do not perform analysis tests'}]"
                                 (modelChanged)="analysisTypeChanged($event)">
           </labeled-input-select>
+
           <div *ngIf="experiment.analysis.type == 'two_sample_tests'">
             <labeled-input-select name="Specific Method" [model]="experiment.analysis" key="method" [colSize]="6"
                                   [options]="[
@@ -437,6 +376,7 @@
                                   (modelChanged)="analysisMethodChanged($event)">
             </labeled-input-select>
           </div>
+
           <div *ngIf="experiment.analysis.type == 'factorial_tests' ">
             <labeled-input inputType="number" name="Number of Factors"
                            [model]="experiment.analysis" key="n" [colSize]="6"
@@ -480,15 +420,13 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Execution Strategy -->
-    <div class="col-md-6" style="padding-right: 0" *ngIf="experiment.analysis.type !== undefined">
-      <div class="panel panel-default chartJs">
+      <!-- Execution Strategy -->
+      <div class="panel panel-default chartJs" *ngIf="experiment.analysis.type !== undefined">
         <div class="panel-heading">
           <div class="card-title">
             <div class="title pull-left">Execution Strategy</div>
-            <div class="title pull-right">
+            <div class="title pull-right" *ngIf="experiment.analysis.type == 'no_analysis'">
               <a data-toggle="modal" data-target="#infoModal"><i class="fa fa-info fa-lg"></i></a>
             </div>
           </div>
@@ -537,7 +475,7 @@
                                 experiment.executionStrategy.type == 'self_optimizer' ||
                                 experiment.executionStrategy.type == 'uncorrelated_self_optimizer'"
                          inputType="number" name="Optimizer Iterations in Design" [model]="experiment.executionStrategy" key="optimizer_iterations_in_design" [colSize]="6" [minNumber]="0" (modelChanged)="strategyParametesChanged($event)"></labeled-input>
-          <labeled-input inputType="number" name="Sample Size" [model]="experiment.executionStrategy" key="sample_size" [colSize]="6" [minNumber]="1" tooltipTitle='Number of samples to be collected from each experiment'></labeled-input>
+          <labeled-input inputType="number" name="Sample Size per Stage" [model]="experiment.executionStrategy" key="sample_size" [colSize]="6" [minNumber]="1" tooltipTitle='Number of samples to be collected from each experiment'></labeled-input>
 
           <div *ngIf="experiment.executionStrategy.type !== 'forever' && stages_count !== null">
             <div class="col-md-6">
@@ -575,6 +513,7 @@
                 <th *ngIf="experiment.executionStrategy.type=='sequential' || experiment.executionStrategy.type=='step_explorer'">Select</th>
                 <th *ngIf="is_changeable_variable_selected(null) && experiment.executionStrategy.type=='sequential'">Experiment Value</th>
                 <th *ngIf="is_changeable_variable_selected(null) && experiment.executionStrategy.type=='step_explorer'">Step</th>
+                <th *ngIf="is_changeable_variable_selected(null) && (experiment.executionStrategy.type=='sequential' || experiment.executionStrategy.type=='step_explorer')">Action</th>
               </thead>
               <tbody>
               <tr *ngFor="let changeableVariable of targetSystem.changeableVariables; let i = index" style="padding-top: 1%">
@@ -587,7 +526,7 @@
                 <td *ngIf="experiment.executionStrategy.type=='sequential' || experiment.executionStrategy.type=='step_explorer'">
                   <input type="checkbox" class="form-check-input"
                          (change)="changeable_variable_checkbox_clicked(i)" data-toggle="tooltip"
-                         title="Select changeable variable(s) suitable for the analysis">
+                         title="Select changeable variable(s) suitable for the execution strategy">
                 </td>
                 <td *ngIf="is_changeable_variable_selected(i) && experiment.executionStrategy.type=='sequential'">
                   <input type="number" class="form-check-input"
@@ -707,6 +646,9 @@
     </div>
   </div>
 
+  <!-- Incoming Data Types for Optimization process -->
+  <incoming-data-types-optimization *ngIf="experiment.analysis.type == 'no_analysis' || experiment.analysis.type == 'bayesian_opt'" [experiment]="experiment" [targetSystem]="targetSystem"></incoming-data-types-optimization>
+
   <!-- Added Variables -->
   <div class="col-md-12" *ngIf="targetSystem.name !== ''
                                 && experiment.executionStrategy.type !== 'forever'
@@ -782,7 +724,7 @@
   </div>
 
   <!-- Info modal for Execution Strategies -->
-  <div class="modal fade bd-example-modal-sm" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+  <div *ngIf="experiment.analysis.type == 'no_analysis'" class="modal fade bd-example-modal-sm" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
     <div class="col-md-12">
       <div class="modal-dialog" role="document">
         <div class="modal-content">

@@ -27,8 +27,6 @@ export class CreateExperimentsComponent implements OnInit {
   is_collapsed: boolean;
   errorButtonLabel: string;
   errorButtonLabelChangeableVariables: string;
-  aggregateFunctionsMetric: any;
-  aggregateFunctionsBoolean: any;
   defaultAlpha: number;
 
   constructor(private layout: LayoutService, private api: OEDAApiService,
@@ -45,29 +43,6 @@ export class CreateExperimentsComponent implements OnInit {
     this.defaultAlpha = 0.05; // default value to be added when an analysis is selected
     this.stages_count = null;
     this.is_collapsed = true;
-
-    /** TODO: add support for other scales */
-    this.aggregateFunctionsMetric = [
-      {key:'avg',label:'Average'},
-      {key:'min',label:'Min'},
-      {key:'max',label:'Max'},
-      {key:'count',label:'Count'},
-      {key:'sum',label:'Sum'},
-      {key:'percentiles-1', label:'1st Percentile'},
-      {key:'percentiles-5', label:'5th Percentile'},
-      {key:'percentiles-25', label:'25th Percentile'},
-      {key:'percentiles-50', label:'50th Percentile (median)'},
-      {key:'percentiles-75', label:'75th Percentile'},
-      {key:'percentiles-95', label:'95th Percentile'},
-      {key:'percentiles-99', label:'99th Percentile'},
-      {key:'sum_of_squares', label:'Sum of Squares'},
-      {key:'variance', label:'Variance'},
-      {key:'std_deviation', label:'Std. Deviation'}
-    ];
-    this.aggregateFunctionsBoolean = [
-      {key:'ratio-True',label:'True Ratio'},
-      {key:'ratio-False',label:'False Ratio'}
-    ];
   }
 
   ngOnInit(): void {
@@ -144,46 +119,64 @@ export class CreateExperimentsComponent implements OnInit {
       return true;
     }
 
-    // check data types to be considered
-    let weight_sum = 0;
-    for (let item of this.targetSystem.incomingDataTypes) {
-      if (item.is_considered) {
-        // check aggregate functions
-        if (isNullOrUndefined(item["aggregateFunction"])) {
-          this.errorButtonLabel = "Provide valid aggregate function(s)";
-          return true;
-        }
-
-        // check weights
-        if (isNullOrUndefined(item["weight"])) {
-          this.errorButtonLabel = "Provide valid weight(s)";
-          return true;
-        } else {
-          if (item["weight"] <= 0 || item["weight"] > 100) {
-            this.errorButtonLabel = "Provide valid weight(s)";
+    // check data types to be considered for optimization
+    if (this.experiment.analysis.type == 'no_analysis' || this.experiment.analysis.type == 'bayesian_opt') {
+      let weight_sum = 0;
+      for (let item of this.targetSystem.incomingDataTypes) {
+        if (item.is_considered) {
+          // check aggregate functions
+          if (isNullOrUndefined(item["aggregateFunction"])) {
+            this.errorButtonLabel = "Provide valid aggregate function(s)";
             return true;
           }
-          else {
-            weight_sum += item["weight"];
+
+          // check weights
+          if (isNullOrUndefined(item["weight"])) {
+            this.errorButtonLabel = "Provide valid weight(s)";
+            return true;
+          } else {
+            if (item["weight"] <= 0 || item["weight"] > 100) {
+              this.errorButtonLabel = "Provide valid weight(s)";
+              return true;
+            }
+            else {
+              weight_sum += item["weight"];
+            }
           }
         }
       }
-    }
-    if (this.entityService.get_number_of_considered_data_types(this.targetSystem) == 0) {
-      this.errorButtonLabel = "Provide at least one incoming type to be optimized";
-      return true;
-    }
 
-    // check weights' sum with 3-decimal precision
-    if (weight_sum < 99.999 || weight_sum > 100) {
-      this.errorButtonLabel = "Weights should sum up to 100";
-      return true;
+      if (this.entityService.get_number_of_considered_data_types(this.targetSystem) == 0) {
+        this.errorButtonLabel = "Provide at least one incoming type to be optimized";
+        return true;
+      }
+
+
+      // check weights' sum with 3-decimal precision
+      if (weight_sum < 99.999 || weight_sum > 100) {
+        this.errorButtonLabel = "Weights should sum up to 100";
+        return true;
+      }
+      // NEW: iterates min, max provided by the user and checks if they are within the range of default ones
+      for (let i = 0; i < this.experiment.changeableVariables.length; i++) {
+        let knobArr = this.experiment.changeableVariables[i];
+        for (let idx = 0; idx < knobArr.length; idx++) {
+          let knob = knobArr[idx];
+          let originalKnob = this.targetSystem.defaultVariables.find(x => x.name == knob.name);
+          if (knob.min < originalKnob.min || knob.max > originalKnob.max || knob.max <= knob.min || knob.min >= knob.max) {
+            this.errorButtonLabel = "Value(s) of changeable variables should be within the range of original ones";
+            return true;
+          }
+
+        }
+      }
     }
 
     if (this.experiment.executionStrategy.type.length === 0) {
-      this.errorButtonLabel = "Provide analysis or execution strategy";
+      this.errorButtonLabel = "Provide analysis type";
       return true;
-    } else {
+    }
+    else {
       let execution_strategy_type = this.experiment.executionStrategy.type;
       let analysis_type = this.experiment.analysis.type;
 
@@ -267,23 +260,6 @@ export class CreateExperimentsComponent implements OnInit {
       this.errorButtonLabel = "Provide a valid sample size";
       return true;
     }
-
-    // NEW: iterates min, max provided by the user and checks if they are within the range of default ones
-    if (this.experiment.analysis.type == 'no_analysis' || this.experiment.analysis.type == 'bayesian_opt') {
-      for (let i = 0; i < this.experiment.changeableVariables.length; i++) {
-        let knobArr = this.experiment.changeableVariables[i];
-        for (let idx = 0; idx < knobArr.length; idx++) {
-          let knob = knobArr[idx];
-          let originalKnob = this.targetSystem.defaultVariables.find(x => x.name == knob.name);
-          if (knob.min < originalKnob.min || knob.max > originalKnob.max || knob.max <= knob.min || knob.min >= knob.max) {
-            this.errorButtonLabel = "Value(s) of changeable variables should be within the range of original ones";
-            return true;
-          }
-
-        }
-      }
-    }
-
 
     // if there's an error in analysis stage, propogate it to upper part of UI
     if (this.hasErrorsAnalysis()) {
@@ -658,15 +634,6 @@ export class CreateExperimentsComponent implements OnInit {
     return JSON.stringify(this.experiment) !== JSON.stringify(this.originalExperiment);
   }
 
-  public is_data_type_selected(): boolean {
-    for (let dataType of this.targetSystem.incomingDataTypes) {
-      if (dataType["is_considered"] == true) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   // i is the index of changeable variable to be added to experiment
   public is_changeable_variable_valid(i: number) {
     let variable = this.targetSystem.changeableVariables[i];
@@ -699,47 +666,6 @@ export class CreateExperimentsComponent implements OnInit {
   }
 
   /**
-   * sets respective weights of data types when user clicks
-   */
-  public data_type_checkbox_clicked(data_type_index): void {
-    let data_type = this.targetSystem.incomingDataTypes[data_type_index];
-
-    if (!this.is_data_type_coming_from_primary(data_type_index) && !this.is_primary_dp_selected()) {
-
-    }
-
-    // first click
-    if (isNullOrUndefined(data_type["is_considered"])) {
-      data_type["is_considered"] = true;
-      data_type["weight"] = 100 / this.entityService.get_number_of_considered_data_types(this.targetSystem);
-    }
-    // subsequent clicks
-    else {
-      data_type["is_considered"] = !data_type["is_considered"];
-    }
-
-    // adjust weights of all data types
-    for (let i = 0; i < this.targetSystem.incomingDataTypes.length; i++) {
-      let data_type = this.targetSystem.incomingDataTypes[i];
-      if(data_type["is_considered"] == true) {
-        data_type["weight"] = 100 / this.entityService.get_number_of_considered_data_types(this.targetSystem);
-      } else {
-        data_type["weight"] = undefined;
-      }
-    }
-  }
-
-  // check if user has selected a data coming from primary dp.
-  public is_primary_dp_selected() {
-    for (let data_type of this.targetSystem.primaryDataProvider.incomingDataTypes) {
-      if (data_type["is_considered"] == true) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
    * sets is_selected flag of changeableVariables for analysis options
    */
   public changeable_variable_checkbox_clicked(changeableVariable_index): void {
@@ -756,19 +682,6 @@ export class CreateExperimentsComponent implements OnInit {
     if (changeableVariable.is_selected && this.experiment.analysis.type == 'factorial_tests') {
       changeableVariable.step = changeableVariable.max - changeableVariable.min;
     }
-  }
-
-  /**
-   * checks whether given data type is coming from primaryDataProvider of targetSystem
-   */
-  public is_data_type_coming_from_primary(data_type_index): boolean {
-    let data_type_name = this.targetSystem.incomingDataTypes[data_type_index]["name"];
-    for (let data_type of this.targetSystem.primaryDataProvider.incomingDataTypes) {
-      if (data_type["name"] == data_type_name) {
-        return true;
-      }
-    }
-    return false;
   }
 
 

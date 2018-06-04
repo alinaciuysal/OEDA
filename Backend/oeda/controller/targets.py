@@ -26,6 +26,9 @@ class TargetController(Resource):
 
             target_system["status"] = "READY"
             db().save_target(target_system)
+            resp = jsonify(target_system)
+            resp.status_code = 200
+            return resp
         except Exception as e:
             tb = traceback.format_exc()
             print(tb)

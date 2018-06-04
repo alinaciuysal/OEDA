@@ -18,7 +18,9 @@ class ExperimentController(Resource):
         db().save_experiment(experiment)
         # here we refresh the status of oeda callback, too
         set_dict(None, experiment_id)
-        return {}, 200
+        resp = jsonify(experiment)
+        resp.status_code = 200
+        return resp
 
     @staticmethod
     def put(experiment_id):

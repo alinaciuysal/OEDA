@@ -289,7 +289,7 @@ import {isNullOrUndefined} from "util";
               <table>
                 <thead>
                 <th style="width: 5%">Type</th>
-                <th style="width: 5%">Sample Size</th>
+                <th style="width: 5%">Sample Size per Stage</th>
                 <th style="width: 5%" *ngIf="experiment.executionStrategy.type == 'random' 
                   || experiment.executionStrategy.type == 'mlr_mbo' 
                   || experiment.executionStrategy.type == 'self_optimizer' 

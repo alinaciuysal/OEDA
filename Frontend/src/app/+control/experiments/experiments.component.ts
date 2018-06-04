@@ -50,9 +50,8 @@ export class ExperimentsComponent {
           // also check if there is any newly added experiment with TempStorageService
           const new_experiment = this.temp_storage.getNewValue();
           if (new_experiment) {
-            // this is needed because the retrieved targets might already contain the new one
+            // retrieved experiments might already contain the new one
             if (!(ctrl.experiments.find(e => e.id == new_experiment.id))) {
-
               this.experiments.push(new_experiment);
             }
             this.temp_storage.clearNewValue();

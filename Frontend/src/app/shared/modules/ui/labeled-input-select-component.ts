@@ -10,7 +10,7 @@ import {Component, Input, Output, EventEmitter} from "@angular/core";
         <select class="form-control" id="{{name}}Edit" name="{{name}}Edit"
                 [(ngModel)]="model[key]" (ngModelChange)="onModelChange($event)" size="1"
                 data-toggle="tooltip" title="{{tooltipTitle}}">
-          <option *ngFor="let i of options; let ind = index;" value="{{i.key}}" [selected]="ind == 0" [disabled]=disabled>{{i.label}}</option>
+          <option *ngFor="let i of options; let ind = index;" value="{{i.key}}" [selected]='ind == 0' [disabled]=disabled>{{i.label}}</option>
         </select>
       </div>
     </div>

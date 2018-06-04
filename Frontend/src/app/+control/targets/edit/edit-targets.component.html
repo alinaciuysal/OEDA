@@ -171,11 +171,26 @@
                                 {key:'Boolean',label:'Boolean (Nominal)'},
                                 {key:'Ratio',label:'Ratio'}]"
                                 data-toggle="tooltip" title="Select Boolean scale for boolean values">
-            <!--TODO: add more informative scale tips here-->
           </labeled-input-select>
           <labeled-input-select name="Optimization Criteria" [model]="input" key="criteria" [colSize]="5"
                                 [options]="[{key:'Minimize',label:'Minimize'},
                                 {key:'Maximize',label:'Maximize'}]"></labeled-input-select>
+
+          <labeled-input name="Default Data Type for Analysis?"
+                         [model]="input"
+                         key="is_default"
+                         [colSize]="5"
+                         inputType="checkbox"
+                         data-toggle="tooltip" title="Select the default data type to perform statistical tests during analysis phases"
+                          (modelChanged)="data_type_checkbox_clicked($event, i)"></labeled-input>
+
+          <labeled-input-select *ngIf="input['scale'] == 'Boolean'"
+                                name="Default Aggregation Function for Analysis" [model]="input" key="defaultAggregationFcn" [colSize]="5"
+                                [options]=aggregateFunctionsBoolean></labeled-input-select>
+
+          <labeled-input-select *ngIf="input['scale'] != 'Boolean'"
+                                name="Default Aggregation Function for Analysis" [model]="input" key="defaultAggregationFcn" [colSize]="5"
+                                [options]=aggregateFunctionsMetric></labeled-input-select>
           <hr class="col-md-12">
         </div>
       </div>
@@ -188,9 +203,11 @@
       <div class="panel-heading">
         <div class="card-title">
           <div class="title pull-left">Changeable Variables</div>
+
+          <div class="title" style="padding-left: 15%"><a data-toggle="modal" data-target="#changeableVariableModal"><i class="fa fa-info fa-lg"></i></a></div>
+
           <div class="pull-right">
-            <div (click)="addChangeableVariable(null)" class="btn btn-xs btn-orange"><i class="fa fa-plus push-5-r"></i> Add
-            </div>
+            <div (click)="addChangeableVariable(null)" class="btn btn-xs btn-orange"><i class="fa fa-plus push-5-r"></i> Add Changeable Variable</div>
           </div>
 
         </div>
@@ -228,9 +245,9 @@
         <div class="modal-content">
           <div class="modal-header">
             <h4 class="modal-title" id="modalTitle">Available Configurations</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
+            <!--<button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
+              <!--<span aria-hidden="true">&times;</span>-->
+            <!--</button>-->
           </div>
           <div class="modal-body">
             <select class="form-control" required (change)="configDropdownChanged($event.target.value)">
@@ -286,8 +303,33 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="closeModalAndRevertChanges()">Close and Revert Changes</button>
             <button type="button" class="btn btn-primary" data-dismiss="modal" [disabled]="selectedConfiguration === undefined" (click)="useConfiguration()">Use Configuration</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info modal for Changeable Variables -->
+  <div class="modal fade bd-example-modal-sm" id="changeableVariableModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="col-md-12">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title" id="changeableVariableModalTitle">Changeable Variables</h3>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>You can use already-provided configuration(s) to create target system or you can define your own target system.</p>
+            <hr>
+            <p>If you want to define your own target system, please provide its default variables in "Changeable Variables" section</p>
+            <hr>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
           </div>
         </div>
       </div>

@@ -490,11 +490,9 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
         this.subscription.unsubscribe();
         // set temp_storage so that experiments page will reflect the new status of it
         this.temp_storage.setNewValue(this.experiment);
+        this.notify.success("Success", "Experiment stopped successfully");
         // switch to regular experiments page
-        this.router.navigate(["control/experiments"]).then(() => {
-          console.log("navigated to experiments page");
-          this.notify.success("Success", "Experiment stopped successfully");
-        });
+        this.router.navigate(["control/experiments"]);
       }, errorResp2 => {
         this.notify.error("Error", errorResp2.message);
       });

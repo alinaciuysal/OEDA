@@ -30,9 +30,36 @@ export class EditTargetsComponent implements OnInit {
   availableConfigurations = [];
   selectedConfiguration: any;
   configsAvailable = false;
+  targetCreatedFromConfig: boolean = false;
+
+  public aggregateFunctionsMetric: any;
+  public aggregateFunctionsBoolean: any;
 
   /* tslint:disable */
   ngOnInit(): void {
+
+    this.aggregateFunctionsMetric = [
+      {key:'avg',label:'Average'},
+      {key:'min',label:'Min'},
+      {key:'max',label:'Max'},
+      {key:'count',label:'Count'},
+      {key:'sum',label:'Sum'},
+      {key:'percentiles-1', label:'1st Percentile'},
+      {key:'percentiles-5', label:'5th Percentile'},
+      {key:'percentiles-25', label:'25th Percentile'},
+      {key:'percentiles-50', label:'50th Percentile (median)'},
+      {key:'percentiles-75', label:'75th Percentile'},
+      {key:'percentiles-95', label:'95th Percentile'},
+      {key:'percentiles-99', label:'99th Percentile'},
+      {key:'sum_of_squares', label:'Sum of Squares'},
+      {key:'variance', label:'Variance'},
+      {key:'std_deviation', label:'Std. Deviation'}
+    ];
+    this.aggregateFunctionsBoolean = [
+      {key:'ratio-True',label:'True Ratio'},
+      {key:'ratio-False',label:'False Ratio'}
+    ];
+
     const ctrl = this;
     this.layout.setHeader("Target System", "");
     this.route.params.subscribe((params: Params) => {
@@ -103,7 +130,7 @@ export class EditTargetsComponent implements OnInit {
     }
   }
 
-  addChangeableVariable(existingKnob) {
+  public addChangeableVariable(existingKnob) {
     if (existingKnob == null) { // for usual case, without using any configuration files
       this.target.changeableVariables.push({
         "disabled": false // mark the variable as 'not' disabled, so that user can provide a default value for it
@@ -124,11 +151,12 @@ export class EditTargetsComponent implements OnInit {
   }
 
   addDataProvider(dataProvider) {
-    if (dataProvider == null)
+    if (dataProvider == null) {
       // for usual case, without using any configuration files
       this.target.dataProviders.push({
         "is_primary": false
       });
+    }
     else {
       // user should not be able to add already-added data providers
       if (this.target.dataProviders.filter(variable => variable.name === dataProvider.name).length === 0) {
@@ -161,11 +189,26 @@ export class EditTargetsComponent implements OnInit {
 
   }
 
-  // TODO: discuss the necessity of this function / feature with Ilias?
   addIncomingDataType() {
     this.target.incomingDataTypes.push({
       "disabled": false
     });
+    // automatically add is_default & aggregationFcn attributes if there's only one data type
+    if (this.target.incomingDataTypes.length == 1) {
+      this.target.incomingDataTypes[0]["is_default"] = true;
+    }
+  }
+
+  // if user adds a data type via configuration modal, then event is an object of SimpleEvent etc.
+  // but if he/she just clicks the checkbox, it is either true or false
+  data_type_checkbox_clicked(event, data_type_index) {
+    if (typeof event == "boolean") {
+      let data_type = this.target.incomingDataTypes[data_type_index];
+      data_type["is_default"] = !data_type["is_default"];
+      // main reason for this function is to refresh defaultAggregationFcn modal upon click
+      data_type["defaultAggregationFcn"] = null;
+    }
+
   }
 
   // removes incoming data type from target system as well as from data provider if it does not contain any variables after deletion
@@ -235,10 +278,16 @@ export class EditTargetsComponent implements OnInit {
     const ctrl = this;
     if (!ctrl.hasErrors()) {
 
+      if (!this.targetCreatedFromConfig) {
+        // for this case, all of the variables provided by the user will be taken as defaultVariables
+        this.target.defaultVariables = _(this.target.changeableVariables);
+      }
+
       ctrl.target.name = ctrl.target.name.trim();
+      // new ts will be created in first case
       if (ctrl.router.url.indexOf("/create") !== -1) {
         // check for validity of target system
-        this.checkValidityOfTargetSystemDefinition();
+        ctrl.checkValidityOfTargetSystemDefinition();
         let primary_data_provider_exists = this.refreshDataProvidersAndCheckValidity();
         if (!primary_data_provider_exists) {
           return ctrl.notify.error("", "Provide at least one primary data provider and number of samples to ignore");
@@ -254,7 +303,7 @@ export class EditTargetsComponent implements OnInit {
         )
       } else {
         // perform necessary checks for validity of target system
-        this.checkValidityOfTargetSystemDefinition();
+        ctrl.checkValidityOfTargetSystemDefinition();
         let primary_exists = this.refreshDataProvidersAndCheckValidity();
         if (!primary_exists) {
           return ctrl.notify.error("", "Provide at least one primary data provider and number of samples to ignore");
@@ -262,7 +311,7 @@ export class EditTargetsComponent implements OnInit {
         // everything is OK, create new uuid for edit operation
         ctrl.target.id = UUID.UUID();
 
-        ctrl.api.saveTarget(this.target).subscribe(
+        ctrl.api.saveTarget(ctrl.target).subscribe(
           (new_target) => {
             ctrl.temp_storage.setNewValue(new_target);
             ctrl.notify.success("Success", "Target system is saved");
@@ -277,14 +326,13 @@ export class EditTargetsComponent implements OnInit {
   hasErrors(): boolean {
     let nr_of_selected_primary_data_providers = 0;
 
-
     if (this.target.dataProviders.length === 0) {
       this.errorButtonLabel = "Provide data provider(s)";
       return true;
     }
 
     // automatically add is_primary attribute if there's only one data provider
-    if (this.target.dataProviders.length === 1) {
+    if (this.target.dataProviders.length == 1) {
       this.target.dataProviders[0]["is_primary"] = true;
     }
 
@@ -375,7 +423,25 @@ export class EditTargetsComponent implements OnInit {
       }
     }
 
-    // check for attributes of incoming data types
+    // first check number of default incoming data types
+    let nr_of_default_data_types = 0;
+    for (let i = 0; i < this.target.incomingDataTypes.length; i++) {
+      if (this.target.incomingDataTypes[i].is_default == true) {
+        nr_of_default_data_types += 1;
+      }
+    }
+
+    if (nr_of_default_data_types == 0) {
+      this.errorButtonLabel = "Provide one default data type for analysis";
+      return true;
+    }
+
+    if (nr_of_default_data_types > 1) {
+      this.errorButtonLabel = "Only one default data type is allowed for analysis";
+      return true;
+    }
+
+    // now check attributes of incoming data types
     for (let i = 0; i < this.target.incomingDataTypes.length; i++) {
       if (this.target.incomingDataTypes[i].name == null
           || this.target.incomingDataTypes[i].length === 0
@@ -385,6 +451,12 @@ export class EditTargetsComponent implements OnInit {
           || isNullOrUndefined(this.target.incomingDataTypes[i].criteria)) {
         this.errorButtonLabel = "Provide valid inputs for incoming data type(s)";
         return true;
+      }
+      if (this.target.incomingDataTypes[i].is_default == true) {
+        if (isNullOrUndefined(this.target.incomingDataTypes[i].defaultAggregationFcn)) {
+          this.errorButtonLabel = "Provide default aggregation function for " + this.target.incomingDataTypes[i].name + " data type";
+          return true;
+        }
       }
     }
 
@@ -398,14 +470,32 @@ export class EditTargetsComponent implements OnInit {
         || isNullOrUndefined(this.target.changeableVariables[i].min)
         || isNullOrUndefined(this.target.changeableVariables[i].max)
         || isNullOrUndefined(this.target.changeableVariables[i].default)
-        || this.target.changeableVariables[i].default < this.target.changeableVariables[i].min
-        || this.target.changeableVariables[i].default > this.target.changeableVariables[i].max
         || this.target.changeableVariables[i].min > this.target.changeableVariables[i].max) {
         this.errorButtonLabel = "Provide valid inputs for changeable variable(s)";
         return true;
       }
-    }
 
+      // if ch. var. is not created from configuration, check its default values
+      if (this.target.changeableVariables[i]["disabled"] == false) {
+        if(this.target.changeableVariables[i].default < this.target.changeableVariables[i].min
+          || this.target.changeableVariables[i].default > this.target.changeableVariables[i].max) {
+          this.errorButtonLabel = "Provide valid inputs for your changeable variable(s)";
+          return true;
+        }
+      }
+      // if ch. var. is created from configuration, check its min & max
+      else {
+        let changeableVariable = this.target.changeableVariables[i];
+        let existingDefaultVariable = this.target.defaultVariables.find(item => item.name === changeableVariable.name);
+        if (existingDefaultVariable) {
+          if (changeableVariable["min"] < existingDefaultVariable["min"]
+            || changeableVariable["max"] > existingDefaultVariable["max"]) {
+            this.errorButtonLabel = "Inputs for changeable variable(s) cannot exceed limits in target system configuration";
+            return true;
+          }
+        }
+      }
+    }
     if (this.target.changeProvider.type == null || this.target.changeProvider.type === "" ||
         this.target.changeProvider.type == null || this.target.changeProvider.type === "" ||
         this.target.changeProvider.type == null || this.target.changeProvider.type === "" ||
@@ -430,6 +520,7 @@ export class EditTargetsComponent implements OnInit {
       this.errorButtonLabel = "Provide at least one incoming data type";
       return true;
     }
+
     return false;
   }
 
@@ -442,7 +533,7 @@ export class EditTargetsComponent implements OnInit {
   }
 
   useConfiguration() {
-
+    this.targetCreatedFromConfig = true;
     this.target['name'] = this.selectedConfiguration['name'];
     this.target['description'] = this.selectedConfiguration['description'];
 
@@ -453,10 +544,16 @@ export class EditTargetsComponent implements OnInit {
       this.target.changeProvider['topic'] = this.selectedConfiguration['kafkaCommandsTopic'];
       this.target.changeProvider['serializer'] = 'JSON';
     }
-    // also push each knob into defaultVariables array
+
+    // push each knob into defaultVariables array if ts is created from config
     for (let knob of this.selectedConfiguration.knobs) {
-      this.target.defaultVariables.push(knob);
+      this.target.defaultVariables.push(_(knob));
     }
+  }
+
+  closeModalAndRevertChanges() {
+    this.revertChanges();
+    this.targetCreatedFromConfig = false;
   }
 
   // http://www.competa.com/blog/lets-find-duplicate-property-values-in-an-array-of-objects-in-javascript/

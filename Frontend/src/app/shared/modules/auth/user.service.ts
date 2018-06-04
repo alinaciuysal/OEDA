@@ -1,24 +1,23 @@
 import {Injectable} from '@angular/core';
-import {Observable} from "rxjs/Rx";
-import {Http, Headers, Response} from "@angular/http";
+import {Observable} from "rxjs/Observable";
+import {HttpClient, HttpHeaders, HttpResponse} from "@angular/common/http";
 import {LoggerService} from "../helper/logger.service";
-import {JwtHelper} from "angular2-jwt";
 import {Router} from "@angular/router";
 import {Try, Option, None, Some} from "monapt";
 import {environment} from "../../../../environments/environment";
 import {NotificationsService} from "angular2-notifications/dist";
+import { JwtHelperService } from '@auth0/angular-jwt';
+import { of } from 'rxjs/observable/of'; // for static methods
 
 @Injectable()
 export class UserService {
 
-  constructor(private http: Http, private router: Router, private log: LoggerService, private notify: NotificationsService) {
+  constructor(private http: HttpClient, private router: Router, private log: LoggerService, private notify: NotificationsService,
+              public jwtHelper: JwtHelperService) {
   }
 
   /** store the URL so we can redirect after logging in */
   redirectUrl: string;
-
-  /** helper for the jwt token */
-  jwtHelper: JwtHelper = new JwtHelper();
 
   /** true if the user is logged in */
   isLoggedIn(): boolean {
@@ -37,21 +36,38 @@ export class UserService {
 
   }
 
-  tryTokenRenewal(): Observable<boolean> {
+  tryTokenRenewal(): Observable<Object> {
     if (this.getAuthTokenRaw().isEmpty) {
-      return Observable.throw("not logged in")
+      return of("user not logged in");
+      // return new Observable("not logged in")
     }
-    const authHeader = new Headers();
-    authHeader.append('Authorization', 'Bearer ' + this.getAuthTokenRaw().get());
+    const authHeader = new HttpHeaders();
+    authHeader.set('Authorization', 'Bearer ' + this.getAuthTokenRaw().get());
     return this.http.post(environment.backendURL + "/auth/renew", {},
       {headers: authHeader})
-      .map((response: Response) => {
-        this.log.debug("UserService - reauth successful");
-        this.setAuthToken(response.json().token);
-        return true;
-      })
+      .map(
+        data => {
+          this.log.debug("tryTokenRenewal successful");
+          this.setAuthToken(data['body'].token);
+          return true;
+        }
+      ).catch((error: any) => {
+        let errorMsg: any = {};
+        // server is not running
+        if (typeof(error['_body']) == 'object') {
+          errorMsg.message = "Server is not running";
+        } else {
+          // server is running and returned a json string
+          errorMsg = JSON.parse(error['_body']);
+        }
+        this.notify.error("Error", errorMsg.error || errorMsg.message);
+        return new Observable(error || 'Server error');
+      });
   }
 
+  handleError() {
+    console.log("error occurred in userService");
+  }
 
   userIsInGroup(groupName: string): boolean {
     return this.getAuthToken()
@@ -65,25 +81,25 @@ export class UserService {
   }
 
   /** tries to log in the user and stores the token in localStorage (another option is to store it in sessionStorage) */
-  login(request: LoginRequest): Observable<boolean> {
+  login(request: LoginRequest): Observable<Object> {
     this.log.debug("UserService - starting LoginRequest");
     return this.http.post(environment.backendURL + "/auth/login", request)
-      .map((response: Response) => {
+      .map(res => {
         this.log.debug("UserService - request successful");
-        this.setAuthToken(response.json().token);
+        this.setAuthToken(res['body'].token);
         return true;
       })
       .catch((error: any) => {
         let errorMsg: any = {};
         // server is not running
-        if (typeof(error._body) == 'object') {
+        if (typeof(error['_body']) == 'object') {
           errorMsg.message = "Server is not running";
         } else {
           // server is running and returned a json string
-          errorMsg = JSON.parse(error._body);
+          errorMsg = JSON.parse(error['_body']);
         }
         this.notify.error("Error", errorMsg.error || errorMsg.message);
-        return Observable.throw(error || 'Server error');
+        return new Observable(error || 'Server error');
       })
   }
 

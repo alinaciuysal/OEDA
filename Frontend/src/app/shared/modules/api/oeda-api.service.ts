@@ -1,7 +1,6 @@
 import {Injectable} from "@angular/core";
 import {NotificationsService} from "angular2-notifications";
-import {AuthHttp} from "angular2-jwt";
-import {Http, Response} from "@angular/http";
+import {HttpClient} from "@angular/common/http";
 import {RESTService} from "../../util/rest-service";
 import {LoggerService} from "../helper/logger.service";
 import {Observable} from "rxjs/Observable";
@@ -10,8 +9,8 @@ import {Observable} from "rxjs/Observable";
 @Injectable()
 export class OEDAApiService extends RESTService {
 
-  constructor(http: Http, authHttp: AuthHttp, notify: NotificationsService, log: LoggerService) {
-    super(http, authHttp, notify, log);
+  constructor(http: HttpClient, notify: NotificationsService, log: LoggerService) {
+    super(http, notify, log);
   }
 
   public loadAllExperiments(): Observable<Experiment[]> {
@@ -64,7 +63,6 @@ export class OEDAApiService extends RESTService {
 
   public saveTarget(target: Target): Observable<Target> {
     return this.doPOSTPublicRequest("/targets/" + target.id, target)
-      .map((res: Response) => res.json())
   }
 
   public updateTarget(target: Target): Observable<any> {
@@ -72,20 +70,20 @@ export class OEDAApiService extends RESTService {
   }
 
   public updateUser(user: UserEntity): Observable<any> {
-    return this.doPOSTPublicRequest("/user/" + user.name, user);
+    return this.doPOSTPublicRequest("/user/" + user.name, user)
   }
 
   public registerUser(user: UserEntity): Observable<any> {
-    return this.doPOSTPublicRequest("/auth/register", user);
+    return this.doPOSTPublicRequest("/auth/register", user)
   }
 
   public getAnalysis(experiment: Experiment): Observable<any> {
-    return this.doPOSTPublicRequest("/analysis/" + experiment.id, experiment);
+    return this.doPOSTPublicRequest("/analysis/" + experiment.id, experiment)
   }
 
   // remove for production
   public clear_database(): Observable<any> {
-    return this.doGETPublicRequest("/delete");
+    return this.doGETPublicRequest("/delete")
   }
 }
 

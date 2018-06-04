@@ -1,10 +1,10 @@
 import {NgModule} from "@angular/core";
-import {HttpModule} from "@angular/http";
+import {HttpClientModule} from "@angular/common/http";
 import {UtilService} from "./util.service";
 
 @NgModule({
   imports: [
-    HttpModule,
+    HttpClientModule,
   ],
   exports: [
   ],

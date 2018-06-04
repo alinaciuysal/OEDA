@@ -17,7 +17,6 @@ import {SimpleNotificationsModule} from "angular2-notifications";
     BrowserModule,
     BrowserAnimationsModule,
     RouterModule.forRoot(routes),
-    BrowserModule,
     GlobalModule,
     AmChartsModule,
     SharedModule.forRoot(),

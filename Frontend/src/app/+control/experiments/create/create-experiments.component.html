@@ -371,8 +371,19 @@
           <div *ngIf="experiment.analysis.type == 'two_sample_tests'">
             <labeled-input-select name="Specific Method" [model]="experiment.analysis" key="method" [colSize]="6"
                                   [options]="[
-                                    {key:'one_factor_two_values',label:'1 Factor & 2 Values'},
-                                    {key:'two_factors_one_value',label:'2 Factors & 1 Value'}]"
+                                    {key:'t-test',label:'T-Test'},
+                                    {key:'t-test-power',label:'T-Test Power'}]"
+                                  (modelChanged)="analysisMethodChanged($event)">
+            </labeled-input-select>
+          </div>
+
+          <div *ngIf="experiment.analysis.type == 'one_sample_tests'">
+            <labeled-input-select name="Specific Method" [model]="experiment.analysis" key="method" [colSize]="6"
+                                  [options]="[
+                                    {key:'dagostino-pearson',label:'Dagostino Pearson'},
+                                    {key:'anderson-darling',label:'Anderson Darling'},
+                                    {key:'kolmogorov-smirnov',label:'Kolmogorov Smirnov'},
+                                    {key:'shapiro-wilk',label:'Shapiro Wilk'}]"
                                   (modelChanged)="analysisMethodChanged($event)">
             </labeled-input-select>
           </div>
@@ -392,6 +403,15 @@
                            [minNumber]="1"
                            tooltipTitle='Number of experiments to be passed to n-sample tests and factorial tests. It must be greater than 1'>
             </labeled-input>
+            <labeled-input-select name="Specific Method" [model]="experiment.analysis" key="method" [colSize]="6"
+                                  [options]="[
+                                    {key:'one-way-anova',label:'One Way Anova'},
+                                    {key:'kruskal-wallis',label:'Kruskal Wallis'},
+                                    {key:'levene',label:'Levene'},
+                                    {key:'bartlett',label:'Bartlett'},
+                                    {key:'fligner-killeen',label:'Fligner Killeen'}]"
+                                  (modelChanged)="analysisMethodChanged($event)">
+            </labeled-input-select>
           </div>
 
           <div *ngIf="experiment.analysis.type == 'factorial_tests' || experiment.analysis.type == 'two_sample_tests' || experiment.analysis.type == 'one_sample_tests' || experiment.analysis.type == 'n_sample_tests'">
@@ -489,7 +509,8 @@
     </div>
 
     <!-- Incoming Data Types for Analysis process -->
-    <incoming-data-types-analysis *ngIf="experiment.analysis.type !== 'no_analysis' && experiment.analysis.type != 'bayesian_opt'" (experimentChanged)="experimentChanged($event)" [experiment]="experiment" [targetSystem]="targetSystem"></incoming-data-types-analysis>
+    <incoming-data-types-analysis *ngIf="experiment.analysis.type !== 'no_analysis' && experiment.analysis.type != 'bayesian_opt'"
+                                  (analysisDataTypeChanged)="analysisDataTypeChanged($event)" [experiment]="experiment" [targetSystem]="targetSystem"></incoming-data-types-analysis>
 
     <!-- Selection among Changeable Variables if user has selected an Analysis option-->
     <div class="col-md-12" style="padding-left: 0; padding-right: 0" *ngIf="targetSystem.name !== ''

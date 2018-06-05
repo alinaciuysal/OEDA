@@ -527,6 +527,7 @@ export class CreateExperimentsComponent implements OnInit {
     }
     else if (this.experiment.analysis.type == 'factorial_tests') {
       this.experiment.executionStrategy.type = "step_explorer";  // TODO: this might be removed depending on backend logic
+      this.experiment.analysis.n = this.targetSystem.changeableVariables.length; // set default value of factors (n)
     }
   }
 
@@ -816,9 +817,9 @@ export class CreateExperimentsComponent implements OnInit {
     if (analysis_type == 'two_sample_tests') {
       return !isNullOrUndefined(this.experiment.analysis.method)
     }
-    else if (analysis_type == 'factorial_tests' || analysis_type == 'n_sample_tests') {
-      return !isNullOrUndefined(this.experiment.analysis.n) && this.experiment.analysis.n > 0
-    }
+    // else if (analysis_type == 'factorial_tests' || analysis_type == 'n_sample_tests') {
+    //   return !isNullOrUndefined(this.experiment.analysis.n) && this.experiment.analysis.n > 0
+    // }
     else if (analysis_type == 'bayesian_opt') {
       return !isNullOrUndefined(this.experiment.analysis.method)
         && !isNullOrUndefined(this.experiment.executionStrategy.optimizer_iterations_in_design)
@@ -830,10 +831,8 @@ export class CreateExperimentsComponent implements OnInit {
         && !isNullOrUndefined(this.experiment.executionStrategy.sample_size)
         && this.experiment.executionStrategy.sample_size > 0
     }
-    else if (analysis_type == 'one_sample_tests') {
-        // nothing is needed in addition to alpha
-        return true;
-    }
+    // nothing is needed in addition to alpha (for other types of tests)
+    return true;
   }
 
   // simple proxy
@@ -841,7 +840,7 @@ export class CreateExperimentsComponent implements OnInit {
     return this.entityService.get_keys(obj);
   }
 
-  public experimentChanged(data_type) {
+  public analysisDataTypeChanged(data_type) {
     this.experiment.analysis.data_type = data_type;
   }
 

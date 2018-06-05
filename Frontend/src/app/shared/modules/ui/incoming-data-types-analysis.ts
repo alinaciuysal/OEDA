@@ -49,7 +49,7 @@ export class IncomingDataTypesAnalysisComponent {
   @Input() targetSystem: any;
   @Input() experiment: any;
 
-  @Output() experimentChanged = new EventEmitter();
+  @Output() analysisDataTypeChanged = new EventEmitter();
 
   public aggregateFunctionsMetric: any;
   public aggregateFunctionsBoolean: any;
@@ -116,7 +116,6 @@ export class IncomingDataTypesAnalysisComponent {
     // first click
     if (isNullOrUndefined(data_type["is_considered"])) {
       data_type["is_considered"] = true;
-      this.experiment.analysis.dataType = data_type;
     }
     // subsequent clicks
     else {
@@ -137,11 +136,11 @@ export class IncomingDataTypesAnalysisComponent {
     for (let i = 0; i < this.targetSystem.incomingDataTypes.length; i++) {
       let data_type = this.targetSystem.incomingDataTypes[i];
       if (data_type["is_considered"] == true) {
-        this.experimentChanged.emit(data_type);
+        this.analysisDataTypeChanged.emit(data_type);
         return;
       }
     }
     // no dataType is selected, send null
-    this.experimentChanged.emit(null);
+    this.analysisDataTypeChanged.emit(null);
   }
 }

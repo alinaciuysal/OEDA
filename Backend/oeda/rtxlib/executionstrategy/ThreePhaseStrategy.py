@@ -28,29 +28,7 @@ def start_three_phase_strategy(wf):
 
     info(">")
 
-
-def recreate_knob_from_optimizer_values(variables, opti_values):
-    """ recreates knob values from a variable """
-    knob_object = {}
-    # create the knobObject based on the position of the opti_values and variables in their array
-    for idx, val in enumerate(variables):
-        knob_object[val] = opti_values[idx]
-    return knob_object
-
-
-def self_optimizer_execution(wf, opti_values, variables):
-    """ this is the function we call and that returns a value for optimization """
-    knob_object = recreate_knob_from_optimizer_values(variables, opti_values)
-    # create a new experiment to run in execution
-    exp = dict()
-    exp["ignore_first_n_samples"] = wf.primary_data_provider["ignore_first_n_samples"]
-    exp["sample_size"] = wf.execution_strategy["sample_size"]
-    exp["knobs"] = knob_object
-    wf.setup_stage(wf, exp["knobs"])
-    return experimentFunction(wf, exp)
-
-
 def get_key(wf):
-    for chVar in wf.experiment["changeableVariables"]:
+    for chVar in wf._oeda_experiment["changeableVariables"]:
         if chVar["is_default"]:
             return chVar["name"]

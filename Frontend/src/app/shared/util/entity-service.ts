@@ -182,7 +182,7 @@ export class EntityService {
   public create_execution_strategy(): ExecutionStrategy {
     return {
       type: "",
-      sample_size: 40,
+      sample_size: 4,
       knobs: [],
       stages_count: 0,
       acquisition_method: "",

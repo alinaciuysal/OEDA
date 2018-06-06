@@ -11,7 +11,7 @@ import {EntityService} from "../../util/entity-service";
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">
-            <div class="title pull-left">Incoming Data Types</div>
+            <div class="title pull-left">Please select the output to optimize, along with the function to apply in the optimization process.</div>
           </div>
         </div>
         <div class="panel-body">
@@ -25,8 +25,7 @@ import {EntityService} from "../../util/entity-service";
               <th>Provider Type</th>
               <th>Criteria</th>
               <th>Consider</th>
-              <th *ngIf="is_data_type_selected()">Aggregation</th>
-              <th *ngIf="is_data_type_selected()">Weight</th>
+              <th>Aggregation</th>
               </thead>
               <tbody>
               <tr *ngFor="let dataType of targetSystem.incomingDataTypes; let i = index">
@@ -42,16 +41,18 @@ import {EntityService} from "../../util/entity-service";
                          data-toggle="tooltip"
                          title="Select one incoming data type to be optimized. You cannot aggregate data coming from primary & secondary data providers at the same time">
                 </td>
-                <td *ngIf="dataType['is_considered'] && dataType.scale == 'Metric'">
+                
+                <td *ngIf="dataType.scale == 'Metric'">
                   <select [(ngModel)]="dataType['aggregateFunction']" required>
                     <option *ngFor="let fcn of aggregateFunctionsMetric" [ngValue]="fcn.key">{{fcn.label}}</option>
                   </select>
                 </td>
-                <td *ngIf="dataType['is_considered'] && dataType.scale == 'Boolean'">
+                <td *ngIf="dataType.scale == 'Boolean'">
                   <select [(ngModel)]="dataType['aggregateFunction']" required>
                     <option *ngFor="let fcn of aggregateFunctionsBoolean" [ngValue]="fcn.key">{{fcn.label}}</option>
                   </select>
                 </td>
+                <!--
                 <td *ngIf="dataType['is_considered']">
                   <input type="number" class="form-check-input"
                          data-toggle="tooltip"
@@ -62,6 +63,7 @@ import {EntityService} from "../../util/entity-service";
                          required>
                   <span *ngIf="dataType['aggregateFunction'] !== 'percentiles'"><b>%</b></span>
                 </td>
+                -->
               </tr>
               </tbody>
             </table>

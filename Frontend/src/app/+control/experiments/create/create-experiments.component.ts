@@ -29,6 +29,7 @@ export class CreateExperimentsComponent implements OnInit {
   errorButtonLabelAnova: string;
   errorButtonLabelTtest: string;
   defaultAlpha: number;
+  defaultTTestEffectSize: number;
   maxNrOfImportantFactors: number;
 
   constructor(private layout: LayoutService, private api: OEDAApiService,
@@ -43,6 +44,7 @@ export class CreateExperimentsComponent implements OnInit {
     this.experiment = this.entityService.create_experiment(this.executionStrategy);
     this.originalExperiment = _(this.experiment);
     this.defaultAlpha = 0.05; // default value to be added when an analysis is selected
+    this.defaultTTestEffectSize = 0.7;
     this.stages_count = null;
     this.is_collapsed = true;
   }
@@ -195,12 +197,12 @@ export class CreateExperimentsComponent implements OnInit {
       }
     }
 
-    const cond5 = this.experiment.changeableVariables == null;
-    const cond6 = this.experiment.changeableVariables.length === 0;
-    if ( cond5 || cond6) {
-      this.errorButtonLabel = "Provide at least one changeable variable";
-      return true;
-    }
+    // const cond5 = this.experiment.changeableVariables == null;
+    // const cond6 = this.experiment.changeableVariables.length === 0;
+    // if ( cond5 || cond6) {
+    //   this.errorButtonLabel = "Provide at least one changeable variable";
+    //   return true;
+    // }
 
     // if there's an error in analysis stage, propogate it to upper part of UI
     if (this.hasErrorsAnova()) {
@@ -242,9 +244,10 @@ export class CreateExperimentsComponent implements OnInit {
 
       // set default values
       this.experiment.analysis.n = this.targetSystem.changeableVariables.length; // set number of factor's default value
-      this.experiment.analysis.nrOfImportantFactors = 1;
+      this.experiment.analysis.nrOfImportantFactors = 3;
       this.experiment.analysis.anovaAlpha = this.defaultAlpha;
       this.experiment.analysis.tTestAlpha = this.defaultAlpha;
+      this.experiment.analysis.tTestEffectSize = this.defaultTTestEffectSize;
       this.maxNrOfImportantFactors = Math.pow(2, this.targetSystem.changeableVariables.length);
       this.experiment.executionStrategy.type = "self_optimizer";
       this.acquisitionMethodChanged("gp_hedge");

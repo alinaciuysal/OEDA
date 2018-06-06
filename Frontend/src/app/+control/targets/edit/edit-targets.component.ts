@@ -32,34 +32,8 @@ export class EditTargetsComponent implements OnInit {
   configsAvailable = false;
   targetCreatedFromConfig: boolean = false;
 
-  public aggregateFunctionsMetric: any;
-  public aggregateFunctionsBoolean: any;
-
   /* tslint:disable */
   ngOnInit(): void {
-
-    this.aggregateFunctionsMetric = [
-      {key:'avg',label:'Average'},
-      {key:'min',label:'Min'},
-      {key:'max',label:'Max'},
-      {key:'count',label:'Count'},
-      {key:'sum',label:'Sum'},
-      {key:'percentiles-1', label:'1st Percentile'},
-      {key:'percentiles-5', label:'5th Percentile'},
-      {key:'percentiles-25', label:'25th Percentile'},
-      {key:'percentiles-50', label:'50th Percentile (median)'},
-      {key:'percentiles-75', label:'75th Percentile'},
-      {key:'percentiles-95', label:'95th Percentile'},
-      {key:'percentiles-99', label:'99th Percentile'},
-      {key:'sum_of_squares', label:'Sum of Squares'},
-      {key:'variance', label:'Variance'},
-      {key:'std_deviation', label:'Std. Deviation'}
-    ];
-    this.aggregateFunctionsBoolean = [
-      {key:'ratio-True',label:'True Ratio'},
-      {key:'ratio-False',label:'False Ratio'}
-    ];
-
     const ctrl = this;
     this.layout.setHeader("Target System", "");
     this.route.params.subscribe((params: Params) => {
@@ -197,18 +171,6 @@ export class EditTargetsComponent implements OnInit {
     if (this.target.incomingDataTypes.length == 1) {
       this.target.incomingDataTypes[0]["is_default"] = true;
     }
-  }
-
-  // if user adds a data type via configuration modal, then event is an object of SimpleEvent etc.
-  // but if he/she just clicks the checkbox, it is either true or false
-  data_type_checkbox_clicked(event, data_type_index) {
-    if (typeof event == "boolean") {
-      let data_type = this.target.incomingDataTypes[data_type_index];
-      data_type["is_default"] = !data_type["is_default"];
-      // main reason for this function is to refresh defaultAggregationFcn modal upon click
-      data_type["aggregationFunction"] = null;
-    }
-
   }
 
   // removes incoming data type from target system as well as from data provider if it does not contain any variables after deletion
@@ -423,24 +385,6 @@ export class EditTargetsComponent implements OnInit {
       }
     }
 
-    // first check number of default incoming data types
-    let nr_of_default_data_types = 0;
-    for (let i = 0; i < this.target.incomingDataTypes.length; i++) {
-      if (this.target.incomingDataTypes[i].is_default == true) {
-        nr_of_default_data_types += 1;
-      }
-    }
-
-    if (nr_of_default_data_types == 0) {
-      this.errorButtonLabel = "Provide one default data type for analysis";
-      return true;
-    }
-
-    if (nr_of_default_data_types > 1) {
-      this.errorButtonLabel = "Only one default data type is allowed for analysis";
-      return true;
-    }
-
     // now check attributes of incoming data types
     for (let i = 0; i < this.target.incomingDataTypes.length; i++) {
       if (this.target.incomingDataTypes[i].name == null
@@ -451,12 +395,6 @@ export class EditTargetsComponent implements OnInit {
           || isNullOrUndefined(this.target.incomingDataTypes[i].criteria)) {
         this.errorButtonLabel = "Provide valid inputs for incoming data type(s)";
         return true;
-      }
-      if (this.target.incomingDataTypes[i].is_default == true) {
-        if (isNullOrUndefined(this.target.incomingDataTypes[i].aggregationFunction)) {
-          this.errorButtonLabel = "Provide default aggregation function for " + this.target.incomingDataTypes[i].name + " data type";
-          return true;
-        }
       }
     }
 

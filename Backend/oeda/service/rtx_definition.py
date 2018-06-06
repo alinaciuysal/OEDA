@@ -127,38 +127,37 @@ class RTXDefinition:
 
     @staticmethod
     def calculate_result(wf):
-        weighted_sum = 0
-        for data_type in wf.considered_data_types:
-            data_type_name = data_type["name"]
-            data_type_aggregate_function = str(data_type['aggregateFunction'])
-            aggs = db().get_aggregation(wf.id, wf.stage_counter, "stats", data_type_name)
-            if data_type["scale"] == "Boolean":
-                # now data_type_aggregate_function is either count-True or count-False
-                field_value = data_type_aggregate_function.split("-")[1] # fetch value
-                field_value = 1 if field_value == 'True' else 0 # because we store them in binary, not in True/False
-                count = db().get_count(wf.id, wf.stage_counter, data_type_name, field_value)
-                total = db().get_aggregation(wf.id, wf.stage_counter, "stats", data_type_name)["count"]
-                value = float(count) / total
+        data_type = wf.considered_data_types[0]
+        data_type_name = data_type["name"]
+        data_type_aggregate_function = str(data_type['aggregateFunction'])
+        if data_type["scale"] == "Boolean":
+            # now data_type_aggregate_function is either count-True or count-False
+            field_value = data_type_aggregate_function.split("-")[1] # fetch value
+            field_value = 1 if field_value == 'True' else 0 # because we store them in binary, not in True/False
+            count = db().get_count(wf.id, wf.stage_counter, data_type_name, field_value)
+            total = db().get_aggregation(wf.id, wf.stage_counter, "stats", data_type_name)["count"]
+            value = float(count) / total
+        else:
+            if 'percentiles' in data_type_aggregate_function:
+                # we have percentiles-25, percentiles-50 etc and parse it to use percentiles as outer aggregate_function
+                aggregate_function, percentile_number = data_type_aggregate_function.split("-")
+                values = db().get_aggregation(wf.id, wf.stage_counter, aggregate_function, data_type_name)
+                value = values[str(float(percentile_number))]
             else:
-                if 'percentiles' in data_type_aggregate_function:
-                    # we have percentiles-25, percentiles-50 etc and parse it to use percentiles as outer aggregate_function
-                    aggregate_function, percentile_number = data_type_aggregate_function.split("-")
-                    values = db().get_aggregation(wf.id, wf.stage_counter, aggregate_function, data_type_name)
-                    value = values[str(float(percentile_number))]
-                else:
-                    aggregate_function = "stats"
-                    if data_type_aggregate_function in ['sum_of_squares', 'variance', 'std_deviation']:
-                        aggregate_function = "extended_stats"
-                    values = db().get_aggregation(wf.id, wf.stage_counter, aggregate_function, data_type_name)
-                    value = values[data_type_aggregate_function] # retrieve exact value from response
-            if value is not None and isnan(float(value)) is False:
-                # maximization criteria before calculating the result
-                if data_type["criteria"] == "Maximize":
-                    value = take_inverse(value)
-                weighted_sum += value * float(data_type["weight"]) / 100
-            info("data_type_name: " + data_type_name + " value: " + str(value) + " weight: " + str(data_type["weight"]) + " weighted_sum: " + str(weighted_sum))
-        result = weighted_sum
-        return result
+                aggregate_function = "stats"
+                if data_type_aggregate_function in ['sum_of_squares', 'variance', 'std_deviation']:
+                    aggregate_function = "extended_stats"
+                values = db().get_aggregation(wf.id, wf.stage_counter, aggregate_function, data_type_name)
+                value = values[data_type_aggregate_function] # retrieve exact value from response
+        if value is not None and isnan(float(value)) is False:
+            # maximization criteria before calculating the result
+            if data_type["criteria"] == "Maximize":
+                value = take_inverse(value)
+            info("data_type_name: " + data_type_name + " value: " + str(value))
+            return value
+        else:
+            error("data_type_name: " + data_type_name + " value: 0")
+            return 0
 
     @staticmethod
     def evaluator(wf):

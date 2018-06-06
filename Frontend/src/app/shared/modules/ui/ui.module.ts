@@ -9,7 +9,7 @@ import {ExperimentStagesComponent} from "./experiment-stages.component";
 import {ExperimentStagesPaginatorComponent} from "./experiment-stages-paginator.component";
 import {AnalysisComponent} from "./analysis.component";
 import {DataTableModule} from "angular2-datatable";
-import {IncomingDataTypesOptimizationComponent} from "./incoming-data-types-optimization";
+import {IncomingDataTypesComponent} from "./incoming-data-types-optimization";
 import {IncomingDataTypesAnalysisComponent} from "./incoming-data-types-analysis";
 
 const uiElements = [
@@ -20,7 +20,7 @@ const uiElements = [
   ExperimentStagesComponent,
   ExperimentStagesPaginatorComponent,
   AnalysisComponent,
-  IncomingDataTypesOptimizationComponent,
+  IncomingDataTypesComponent,
   IncomingDataTypesAnalysisComponent
 ];
 

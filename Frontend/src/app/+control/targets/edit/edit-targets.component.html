@@ -175,22 +175,6 @@
           <labeled-input-select name="Optimization Criteria" [model]="input" key="criteria" [colSize]="5"
                                 [options]="[{key:'Minimize',label:'Minimize'},
                                 {key:'Maximize',label:'Maximize'}]"></labeled-input-select>
-
-          <labeled-input name="Default Data Type for Analysis?"
-                         [model]="input"
-                         key="is_default"
-                         [colSize]="5"
-                         inputType="checkbox"
-                         data-toggle="tooltip" title="Select the default data type to perform statistical tests during analysis phases"
-                          (modelChanged)="data_type_checkbox_clicked($event, i)"></labeled-input>
-
-          <labeled-input-select *ngIf="input['scale'] == 'Boolean'"
-                                name="Default Aggregation Function for Analysis" [model]="input" key="aggregationFunction" [colSize]="5"
-                                [options]=aggregateFunctionsBoolean></labeled-input-select>
-
-          <labeled-input-select *ngIf="input['scale'] != 'Boolean'"
-                                name="Default Aggregation Function for Analysis" [model]="input" key="aggregationFunction" [colSize]="5"
-                                [options]=aggregateFunctionsMetric></labeled-input-select>
           <hr class="col-md-12">
         </div>
       </div>
@@ -230,7 +214,6 @@
                                 {key:'Boolean',label:'Boolean (Nominal)'},
                                 {key:'Ratio', label:'Ratio'}]"
                                 data-toggle="tooltip" title="Select Boolean scale for boolean values">
-            <!--TODO: add more informative scale tips here-->
           </labeled-input-select>
           <hr class="col-md-12">
         </div>

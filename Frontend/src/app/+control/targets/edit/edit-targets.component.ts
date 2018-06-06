@@ -206,7 +206,7 @@ export class EditTargetsComponent implements OnInit {
       let data_type = this.target.incomingDataTypes[data_type_index];
       data_type["is_default"] = !data_type["is_default"];
       // main reason for this function is to refresh defaultAggregationFcn modal upon click
-      data_type["defaultAggregationFcn"] = null;
+      data_type["aggregationFunction"] = null;
     }
 
   }
@@ -453,7 +453,7 @@ export class EditTargetsComponent implements OnInit {
         return true;
       }
       if (this.target.incomingDataTypes[i].is_default == true) {
-        if (isNullOrUndefined(this.target.incomingDataTypes[i].defaultAggregationFcn)) {
+        if (isNullOrUndefined(this.target.incomingDataTypes[i].aggregationFunction)) {
           this.errorButtonLabel = "Provide default aggregation function for " + this.target.incomingDataTypes[i].name + " data type";
           return true;
         }

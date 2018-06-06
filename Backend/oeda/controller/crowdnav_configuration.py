@@ -19,8 +19,8 @@ class CrowdNavConfigController(Resource):
             valid = False
             for dp in dataProviders:
                 for dataType in dp["incomingDataTypes"]:
-                    if "is_default" in dataType and "defaultAggregationFcn" in dataType:
-                        if dataType["is_default"] is True and dataType["defaultAggregationFcn"] in validAggregationFcns:
+                    if "is_default" in dataType and "aggregationFunction" in dataType:
+                        if dataType["is_default"] is True and dataType["aggregationFunction"] in validAggregationFcns:
                             valid = True
                             break
             if valid:
@@ -39,7 +39,7 @@ class CrowdNavConfigController(Resource):
                 resp.status_code = 200
                 return resp
             else:
-                msg = "At least one incoming data type should have default & defaultAggregationFcn fields"
+                msg = "At least one incoming data type should have default & aggregationFunction fields"
                 error(msg)
                 return {"error": msg}, 404
 

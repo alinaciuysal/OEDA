@@ -14,7 +14,7 @@
         "dataProviderName": "Trips",
         "criteria": "Minimize",
         "is_default": true,
-        "defaultAggregationFcn": "avg"
+        "aggregationFunction": "avg"
       }, {
         "name": "complaint",
         "description": "indicates complaint (in a uniformly distributed manner) if overhead of a trip is greater than 2.5",

@@ -185,11 +185,11 @@
                           (modelChanged)="data_type_checkbox_clicked($event, i)"></labeled-input>
 
           <labeled-input-select *ngIf="input['scale'] == 'Boolean'"
-                                name="Default Aggregation Function for Analysis" [model]="input" key="defaultAggregationFcn" [colSize]="5"
+                                name="Default Aggregation Function for Analysis" [model]="input" key="aggregationFunction" [colSize]="5"
                                 [options]=aggregateFunctionsBoolean></labeled-input-select>
 
           <labeled-input-select *ngIf="input['scale'] != 'Boolean'"
-                                name="Default Aggregation Function for Analysis" [model]="input" key="defaultAggregationFcn" [colSize]="5"
+                                name="Default Aggregation Function for Analysis" [model]="input" key="aggregationFunction" [colSize]="5"
                                 [options]=aggregateFunctionsMetric></labeled-input-select>
           <hr class="col-md-12">
         </div>

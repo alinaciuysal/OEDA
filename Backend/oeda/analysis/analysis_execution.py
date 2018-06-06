@@ -122,25 +122,29 @@ def start_n_sample_tests(wf):
 def start_factorial_tests(wf):
     id = wf.id
     key = wf.analysis["data_type"]
-    # key = "overhead"
-    stage_ids, samples, knobs = get_tuples(id, key)
-    test = FactorialAnova(stage_ids=stage_ids, y_key=key, knob_keys=None, stages_count=len(stage_ids))
-    aov_table, aov_table_sqr = test.run(data=samples, knobs=knobs)
-    # type(dd) is defaultdict with unique keys
-    dd = iterate_anova_tables(aov_table=aov_table, aov_table_sqr=aov_table_sqr)
 
-    # keys e.g. C(exploration_percentage), C(route_random_sigma), Residual
-    # resultDict e.g. {'PR(>F)': 0.0949496951695454, 'F': 2.8232330924997346 ...
-    anova_result = dict()
-    for key, resultDict in dd.items():
-        anova_result[key] = resultDict
-        for inner_key, value in resultDict.items():
-            if str(value) == 'nan':
-                value = None
-            anova_result[key][inner_key] = value
-    print("anova_result before save", anova_result)
-    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, anova_result=anova_result)
-    return
+    # key = "overhead"
+    if key is not None:
+        stage_ids, samples, knobs = get_tuples(id, key)
+        test = FactorialAnova(stage_ids=stage_ids, y_key=key, knob_keys=None, stages_count=len(stage_ids))
+        aov_table, aov_table_sqr = test.run(data=samples, knobs=knobs)
+        # type(dd) is defaultdict with unique keys
+        dd = iterate_anova_tables(aov_table=aov_table, aov_table_sqr=aov_table_sqr)
+
+        # keys e.g. C(exploration_percentage), C(route_random_sigma), Residual
+        # resultDict e.g. {'PR(>F)': 0.0949496951695454, 'F': 2.8232330924997346 ...
+        anova_result = dict()
+        for key, resultDict in dd.items():
+            anova_result[key] = resultDict
+            for inner_key, value in resultDict.items():
+                if str(value) == 'nan':
+                    value = None
+                anova_result[key][inner_key] = value
+        db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, anova_result=anova_result)
+        return True
+    else:
+        error("data type for anova is not properly provided")
+        return False
 
 
 def get_tuples(id, key):

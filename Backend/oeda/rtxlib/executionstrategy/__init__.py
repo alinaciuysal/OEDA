@@ -4,7 +4,7 @@ from oeda.rtxlib.executionstrategy.SelfOptimizerStrategy import start_self_optim
 from oeda.rtxlib.executionstrategy.SequencialStrategy import start_sequential_strategy
 from oeda.rtxlib.executionstrategy.RandomStrategy import start_random_strategy
 from oeda.rtxlib.executionstrategy.MlrStrategy import start_mlr_mbo_strategy
-
+from oeda.rtxlib.executionstrategy.ThreePhaseStrategy import start_three_phase_strategy
 
 from oeda.log import *
 
@@ -15,7 +15,10 @@ def run_execution_strategy(wf):
     """ we run the correct execution strategy """
     applyInitKnobs(wf)
     # start the right execution strategy
-    if wf.execution_strategy["type"] == "sequential":
+    if wf.analysis["type"] == "3_phase":
+        start_three_phase_strategy(wf)
+
+    elif wf.execution_strategy["type"] == "sequential":
         # log_results(wf.folder, wf.execution_strategy["knobs"][0].keys() + ["result"], append=False)
         start_sequential_strategy(wf)
 
@@ -33,9 +36,6 @@ def run_execution_strategy(wf):
 
     elif wf.execution_strategy["type"] == "forever":
         start_forever_strategy(wf)
-
-    # elif wf.execution_strategy["type"] == "random":
-    #     start_random_strategy(wf)
 
     elif wf.execution_strategy["type"] == "mlr_mbo":
         start_mlr_mbo_strategy(wf)

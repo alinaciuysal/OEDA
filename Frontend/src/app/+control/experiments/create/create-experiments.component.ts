@@ -243,6 +243,7 @@ export class CreateExperimentsComponent implements OnInit {
       this.targetSystem = this.selectedTargetSystem;
 
       // set default values
+      this.experiment.analysis.type = "3_phase";
       this.experiment.analysis.n = this.targetSystem.changeableVariables.length; // set number of factor's default value
       this.experiment.analysis.nrOfImportantFactors = 3;
       this.experiment.analysis.anovaAlpha = this.defaultAlpha;
@@ -310,67 +311,6 @@ export class CreateExperimentsComponent implements OnInit {
     newKnobArr.push(_(variable));
     ctrl.experiment.changeableVariables.push(newKnobArr);
     ctrl.experiment.executionStrategy.optimizer_iterations_in_design = ctrl.experiment.changeableVariables.length * 4;
-  }
-
-  // assuming that user has provided different configurations for variables and wants them to use for the selected analysis test
-  addVariablesFor2FactorAndSeqTest() {
-    let number_of_desired_variables: number;
-    if (this.experiment.analysis.method === 'two_factors_one_value' || this.experiment.analysis.type == 'one_sample_tests') {
-
-      if (this.experiment.analysis.method === 'two_factors_one_value')
-        number_of_desired_variables = 2;
-      else if (this.experiment.analysis.type === 'one_sample_tests')
-        number_of_desired_variables = 1;
-
-      if (this.experiment.changeableVariables.length >= number_of_desired_variables) {
-        this.notify.error("Error", "You can't exceed " + number_of_desired_variables + " variable(s) for this test");
-        return;
-      }
-    }
-
-    // check boundaries of selected variables
-    for (let j = 0; j < this.targetSystem.changeableVariables.length; j++) {
-      let variable = this.targetSystem.changeableVariables[j];
-      if (variable.is_selected) {
-        if (isNullOrUndefined(variable.target)) {
-          this.notify.error("Error", "Provide valid values for variable(s)");
-          return;
-        } else {
-          if (variable.target < variable.min || variable.target > variable.max) {
-            this.notify.error("Error", "Provide valid values for variable(s)");
-            return;
-          }
-          // everything is ok for selected variables
-        }
-      }
-    }
-
-    // everything is ok, push to experiment.changeableVariables array
-    let knobArr = [];
-    for (let variable of this.targetSystem.changeableVariables) {
-      if (variable["is_selected"] == true) {
-        if (!isNullOrUndefined(variable.target) ) {
-          // push an array of k-v pairs instead of pushing variables directly
-          let knob: any = {};
-          knob.name = variable.name;
-          knob.min = variable.min;
-          knob.max = variable.max;
-          knob.default = variable.default;
-          knob.target = variable.target;
-          knobArr.push(knob);
-        } else {
-          this.notify.error("Error", "Please specify valid values for the selected changeable variables");
-          return;
-        }
-      }
-    }
-    // do not push empty k-v pair
-    if (knobArr.length == 0) {
-      this.notify.error("Error", "Please specify valid values for the selected changeable variables");
-    } else {
-      this.experiment.changeableVariables.push(knobArr);
-    }
-
   }
 
   // if one of the parameters in executionStrategy is not valid, sets stages_count to null, so that it will get hidden

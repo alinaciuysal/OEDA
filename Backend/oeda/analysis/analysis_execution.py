@@ -141,7 +141,7 @@ def start_factorial_tests(wf):
                     value = None
                 anova_result[key][inner_key] = value
         db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, anova_result=anova_result)
-        return True
+        return True, aov_table, aov_table_sqr
     else:
         error("data type for anova is not properly provided")
         return False

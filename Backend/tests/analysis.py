@@ -62,9 +62,25 @@ def iterate_anova_tables(aov_table, aov_table_sqr):
                 dd[row.Index][col_name] = getattr(row, col_name)
     return dd
 
-def get_influence_parameters(anova_result, nrOfParameters):
-    print(anova_result)
-    print(type(anova_result))
+def get_influence_parameters(anova_result, alpha, nrOfParameters):
+
+    print "##########"
+    import pprint
+    pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(anova_result)
+    print "##########"
+    # now we want to select the most important factors out of anova result
+
+    significant_interactions = []
+    for interaction_key in anova_result.keys():
+        pvalue = anova_result[interaction_key]['PR(>F)']
+        if pvalue < alpha:
+            significant_interactions.append((interaction_key, pvalue))
+
+    sorted_significant_interactions = sorted((value, key) for (key, value) in significant_interactions)
+    print "!!!!!!!!!"
+    pp.pprint(sorted_significant_interactions)
+    print "!!!!!!!!!"
     return anova_result
 
 if __name__ == '__main__':
@@ -73,5 +89,6 @@ if __name__ == '__main__':
     id = "a780bba9-a2c7-20a5-7be9-ede26d9c9b64"
     stage_ids = ["6dc62e9c-3625-85ca-657e-3b06cc269828#1", "6dc62e9c-3625-85ca-657e-3b06cc269828#2", "6dc62e9c-3625-85ca-657e-3b06cc269828#3", "6dc62e9c-3625-85ca-657e-3b06cc269828#4"]
     retrieved = db().get_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name="two-way-anova")
-    nrOfParameters = 2 # to be retrieved from experiment definition
-    get_influence_parameters(retrieved["anova_result"], nrOfParameters)
+    nrOfParameters = 2 # to be retrieved from analysis definition
+    alpha = 0.5 # to be retrieved from analysis definition
+    get_influence_parameters(retrieved["anova_result"], alpha, nrOfParameters)

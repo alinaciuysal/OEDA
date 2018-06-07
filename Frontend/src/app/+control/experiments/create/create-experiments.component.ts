@@ -168,11 +168,6 @@ export class CreateExperimentsComponent implements OnInit {
 
   // User can select execution strategy while creating an experiment
   public executionStrategyModelChanged(execution_strategy_key) {
-
-    // refresh previously-selected variables of targetSystem & experiment
-    this.experiment.changeableVariables = _(this.originalExperiment.changeableVariables);
-    this.targetSystem.changeableVariables = _(this.originalTargetSystem.changeableVariables);
-
     this.experiment.executionStrategy.type = execution_strategy_key;
     if (execution_strategy_key === 'mlr_mbo') {
       this.acquisitionMethodChanged("ei");

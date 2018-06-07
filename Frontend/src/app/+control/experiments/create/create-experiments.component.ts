@@ -2,7 +2,7 @@ import {OnInit, Component} from "@angular/core";
 import {NotificationsService} from "angular2-notifications";
 import {Router} from "@angular/router";
 import {LayoutService} from "../../../shared/modules/helper/layout.service";
-import {OEDAApiService, Experiment, Target} from "../../../shared/modules/api/oeda-api.service";
+import {OEDAApiService, Experiment, Target, ExecutionStrategy} from "../../../shared/modules/api/oeda-api.service";
 import * as _ from "lodash.clonedeep";
 import {isNullOrUndefined} from "util";
 import {TempStorageService} from "../../../shared/modules/helper/temp-storage-service";
@@ -69,23 +69,11 @@ export class CreateExperimentsComponent implements OnInit {
 
   public saveExperiment() {
     if (!this.hasErrors()) {
-      let experiment_type = this.experiment.executionStrategy.type;
-      // push names & default values of target system to executionStrategy for forever strategy if there are no errors
-      if (experiment_type === 'forever') {
-        let all_knobs: any = {};
-        for (let j = 0; j < this.targetSystem.defaultVariables.length; j++) {
-          let default_knob  = this.targetSystem.defaultVariables[j];
-          all_knobs[default_knob["name"]] = default_knob["default"];
-        }
-        this.experiment.executionStrategy.knobs = all_knobs;
-      } else {
-        this.experiment.executionStrategy.knobs = this.experiment.changeableVariables;
-        // prepare other attributes
-        if (experiment_type === "mlr_mbo" || experiment_type === "self_optimizer") {
-          this.experiment.executionStrategy.optimizer_iterations = Number(this.experiment.executionStrategy.optimizer_iterations);
-        }
-        this.experiment.executionStrategy.sample_size = Number(this.experiment.executionStrategy.sample_size);
-      }
+      // prepare other attributes
+      this.experiment.executionStrategy.optimizer_iterations = Number(this.experiment.executionStrategy.optimizer_iterations);
+      this.experiment.executionStrategy.sample_size = Number(this.experiment.executionStrategy.sample_size);
+      this.experiment.analysis.sample_size = Number(this.experiment.analysis.sample_size);
+
       // take the incoming data type labeled as "is_considered" to perform stage result calculation in backend
       for (let item of this.targetSystem.incomingDataTypes) {
         if (item.is_considered === true) {
@@ -106,7 +94,8 @@ export class CreateExperimentsComponent implements OnInit {
         }
       }
       this.experiment.changeableVariables = knobs;
-
+      this.experiment.executionStrategy.knobs = knobs; // also set executionStrategy knobs here
+      console.log(this.experiment);
       this.api.saveExperiment(this.experiment).subscribe(
         (success) => {
           this.notify.success("Success", "Experiment saved");
@@ -155,6 +144,7 @@ export class CreateExperimentsComponent implements OnInit {
 
       // set default values
       this.experiment.analysis.type = "3_phase";
+      this.experiment.analysis.sample_size = 15; // same with the one in entityService's ExecutionStrategy.sample_size
       this.experiment.analysis.n = this.targetSystem.changeableVariables.length; // set number of factor's default value
       this.experiment.analysis.nrOfImportantFactors = Math.round(Number(this.experiment.analysis.n / 3));
       this.experiment.analysis.anovaAlpha = this.defaultAlpha;
@@ -297,8 +287,8 @@ export class CreateExperimentsComponent implements OnInit {
       return true;
     }
 
-    if (isNullOrUndefined(this.experiment.executionStrategy.sample_size) || this.experiment.executionStrategy.sample_size <= 0 ) {
-      this.errorButtonLabelAnova = "Provide valid sample size";
+    if (isNullOrUndefined(this.experiment.analysis.sample_size) || this.experiment.analysis.sample_size <= 0 ) {
+      this.errorButtonLabelAnova = "Provide valid sample size for anova";
       return true;
     }
 
@@ -381,6 +371,11 @@ export class CreateExperimentsComponent implements OnInit {
     if (this.experiment.executionStrategy.optimizer_iterations === null || this.experiment.executionStrategy.optimizer_iterations <= 0
       || isNullOrUndefined(this.experiment.executionStrategy.acquisition_method) || isNullOrUndefined(execution_strategy_type)) {
       this.errorButtonLabelOptimization = "Provide valid inputs for " + execution_strategy_type;
+      return true;
+    }
+
+    if (isNullOrUndefined(this.experiment.executionStrategy.sample_size) || this.experiment.executionStrategy.sample_size <= 0 ) {
+      this.errorButtonLabelOptimization = "Provide valid sample size for optimization";
       return true;
     }
 

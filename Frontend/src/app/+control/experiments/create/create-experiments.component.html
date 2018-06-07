@@ -412,9 +412,9 @@
             </div>
           </div>
 
-          <!-- Sample Size -->
+          <!-- Sample Size for ANOVA -->
           <labeled-input inputType="number" name="How many samples do you want to collect for each configuration?"
-                         [model]="experiment.executionStrategy" key="sample_size" [colSize]="6" [minNumber]="1" tooltipTitle='Number of samples to be collected from each experiment'></labeled-input>
+                         [model]="experiment.analysis" key="sample_size" [colSize]="6" [minNumber]="1" tooltipTitle='Number of samples to be collected from each experiment'></labeled-input>
 
           <!-- Alpha -->
           <labeled-input inputType="number" name="Significance level (alpha) for factorial analysis"
@@ -493,7 +493,12 @@
           <labeled-input inputType="number" name="How many iterations should the optimizer perform across all its executions?"
                          [model]="experiment.executionStrategy" key="optimizer_iterations" [colSize]="6" [minNumber]="1"></labeled-input>
 
-          <!--error label for anova-->
+          <!-- sample size for optimization -->
+          <labeled-input inputType="number" name="How many samples do you want to collect for each configuration of optimization process?"
+                         [model]="experiment.executionStrategy" key="sample_size" [colSize]="6" [minNumber]="1" tooltipTitle='Number of samples to be collected from each optimization experiment'></labeled-input>
+
+
+          <!--error label for optimization-->
           <div class="col-md-12">
             <div class="sub-title"></div>
             <div class="row">

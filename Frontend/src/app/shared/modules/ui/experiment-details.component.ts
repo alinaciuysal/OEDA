@@ -296,37 +296,37 @@ import {isNullOrUndefined} from "util";
                   || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">
                   Optimizer Iterations
                 </th>
-                <th style="width: 5%" *ngIf="experiment.executionStrategy.type == 'random' 
-                  || experiment.executionStrategy.type == 'mlr_mbo' 
-                  || experiment.executionStrategy.type == 'self_optimizer' 
-                  || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">
-                  Optimizer Iterations in Design
-                </th>
+                <!--<th style="width: 5%" *ngIf="experiment.executionStrategy.type == 'random' -->
+                  <!--|| experiment.executionStrategy.type == 'mlr_mbo' -->
+                  <!--|| experiment.executionStrategy.type == 'self_optimizer' -->
+                  <!--|| experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">-->
+                  <!--Optimizer Iterations in Design-->
+                <!--</th>-->
                 <th style="width: 5%" *ngIf="experiment.executionStrategy.type == 'mlr_mbo' 
                   || experiment.executionStrategy.type == 'self_optimizer' 
                   || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">Acquisition Method
                 </th>
                 </thead>
                 <tbody>
-                <td style="padding-top: 1%">{{experiment.executionStrategy.type}}</td>
-                <td>{{experiment.executionStrategy.sample_size}}</td>
-                <td *ngIf="experiment.executionStrategy.type == 'random'
-                || experiment.executionStrategy.type == 'mlr_mbo'
-                || experiment.executionStrategy.type == 'self_optimizer'
-                || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">
-                  {{experiment.executionStrategy.optimizer_iterations}}
-                </td>
-                <td *ngIf="experiment.executionStrategy.type == 'random' 
-                  || experiment.executionStrategy.type == 'mlr_mbo' 
-                  || experiment.executionStrategy.type == 'self_optimizer' 
+                  <td style="padding-top: 1%">{{experiment.executionStrategy.type}}</td>
+                  <td>{{experiment.executionStrategy.sample_size}}</td>
+                  <td *ngIf="experiment.executionStrategy.type == 'random'
+                  || experiment.executionStrategy.type == 'mlr_mbo'
+                  || experiment.executionStrategy.type == 'self_optimizer'
                   || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">
-                  {{experiment.executionStrategy.optimizer_iterations_in_design}}
-                </td>
-                <td *ngIf="experiment.executionStrategy.type == 'mlr_mbo' 
-                  || experiment.executionStrategy.type == 'self_optimizer' 
-                  || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">
-                  {{experiment.executionStrategy.acquisition_method}}
-                </td>
+                    {{experiment.executionStrategy.optimizer_iterations}}
+                  </td>
+                  <!--<td *ngIf="experiment.executionStrategy.type == 'random' -->
+                    <!--|| experiment.executionStrategy.type == 'mlr_mbo' -->
+                    <!--|| experiment.executionStrategy.type == 'self_optimizer' -->
+                    <!--|| experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">-->
+                    <!--{{experiment.executionStrategy.optimizer_iterations_in_design}}-->
+                  <!--</td>-->
+                  <td *ngIf="experiment.executionStrategy.type == 'mlr_mbo' 
+                    || experiment.executionStrategy.type == 'self_optimizer' 
+                    || experiment.executionStrategy.type == 'uncorrelated_self_optimizer'">
+                    {{experiment.executionStrategy.acquisition_method}}
+                  </td>
                 </tbody>
               </table>
             </div>

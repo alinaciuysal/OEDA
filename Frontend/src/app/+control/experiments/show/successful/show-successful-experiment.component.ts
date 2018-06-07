@@ -159,8 +159,8 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
             // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
             const clonedData = JSON.parse(JSON.stringify(processedData));
             ctrl.initial_threshold_for_scatter_chart = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value', ctrl.decimal_places);
-            ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_chart, "All Stages", ctrl.decimal_places, ctrl.experiment.executionStrategy.sample_size);            ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type["name"], "All Stages", ctrl.decimal_places);
-
+            ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_chart, "All Stages", ctrl.decimal_places);
+            ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type["name"], "All Stages", ctrl.decimal_places);
             ctrl.is_enough_data_for_plots = true;
           } else {
             ctrl.notify.error("Error", "Selected scale might not be appropriate for the selected incoming data type");
@@ -180,7 +180,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
             const clonedData = JSON.parse(JSON.stringify(processedData));
             ctrl.initial_threshold_for_scatter_chart = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value', ctrl.decimal_places);
             ctrl.stage_details = ctrl.entityService.get_stage_details(ctrl.selected_stage);
-            ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_chart, ctrl.stage_details, ctrl.decimal_places, ctrl.experiment.executionStrategy.sample_size);
+            ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_chart, ctrl.stage_details, ctrl.decimal_places);
             ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type["name"], ctrl.stage_details, ctrl.decimal_places);
 
             // check if next stage exists for javascript side of qq plot

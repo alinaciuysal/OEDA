@@ -368,7 +368,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
       document.getElementById(ctrl.filterSummaryId).innerHTML = "<p>Threshold for 95-percentile: <b>" + ctrl.initial_threshold_for_scatter_plot + "</b> and # of points to be removed: <b>" + ctrl.nr_points_to_be_filtered + "</b></p>";
 
       if (ctrl.first_render_of_plots) {
-        ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot(ctrl.divId, ctrl.filterSummaryId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_plot, ctrl.stage_details, ctrl.decimal_places, ctrl.experiment.executionStrategy.sample_size);
+        ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot(ctrl.divId, ctrl.filterSummaryId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_plot, ctrl.stage_details, ctrl.decimal_places);
         ctrl.histogram = ctrl.plotService.draw_histogram(ctrl.histogramDivId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.stage_details, ctrl.decimal_places);
         ctrl.first_render_of_plots = false;
       } else {

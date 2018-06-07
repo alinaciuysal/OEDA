@@ -20,8 +20,7 @@ export class PlotService {
                             incoming_data_type_name: string,
                             initial_threshold_for_scatter_plot: number,
                             stage_details: string,
-                            decimal_places: number,
-                            sample_size: number) {
+                            decimal_places: number) {
     let selectedThreshold = -1;
     let scatter_plot = this.AmCharts.makeChart(divID, {
       "responsive": {

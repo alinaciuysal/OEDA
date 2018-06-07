@@ -50,8 +50,9 @@
       "mappings": {
         "analysis": {
           "properties": {
-            "stage_ids":   { "type": "keyword" },
+            "stage_ids":     { "type": "keyword" },
             "name":          { "type": "keyword" },
+            "sample_size":   { "type": "integer" },
             "result":        { "type": "object"  },
             "anova_result":
             {

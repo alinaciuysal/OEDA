@@ -21,7 +21,8 @@ def step_execution(wf, knob):
     # create a new experiment to run in execution
     exp = dict()
     exp["ignore_first_n_samples"] = wf.primary_data_provider["ignore_first_n_samples"]
-    exp["sample_size"] = wf.execution_strategy["sample_size"]
+    # anova process will call this part, so set sample_size accordingly
+    exp["sample_size"] = wf.analysis["sample_size"]
     exp["knobs"] = knob
     wf.setup_stage(wf, exp["knobs"])
     return experimentFunction(wf, exp)

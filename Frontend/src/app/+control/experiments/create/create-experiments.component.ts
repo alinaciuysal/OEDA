@@ -87,7 +87,7 @@ export class CreateExperimentsComponent implements OnInit {
           let knobArr = [];
           let factors = chVar.factorValues.split(",");
           for (let factor of factors) {
-            knobArr.push(factor);
+            knobArr.push(Number(factor));
           }
           knobs[chVar.name] = knobArr;
 

@@ -62,13 +62,16 @@ def iterate_anova_tables(aov_table, aov_table_sqr):
                 dd[row.Index][col_name] = getattr(row, col_name)
     return dd
 
+def get_influence_parameters(anova_result, nrOfParameters):
+    print(anova_result)
+    print(type(anova_result))
+    return anova_result
+
 if __name__ == '__main__':
     # setup_user_database()
     setup_experiment_database("elasticsearch", "localhost", 9200)
-    # id = "6dc62e9c-3625-85ca-657e-3b06cc269828"
-    # stage_ids = ["6dc62e9c-3625-85ca-657e-3b06cc269828#1", "6dc62e9c-3625-85ca-657e-3b06cc269828#2", "6dc62e9c-3625-85ca-657e-3b06cc269828#3", "6dc62e9c-3625-85ca-657e-3b06cc269828#4"]
-    # retrieved = db().get_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name="two-way-anova")
-    # print(retrieved)
-    #
-    # start_anova(id=id)
-    # start_two_sample_tests(id=id)
+    id = "a780bba9-a2c7-20a5-7be9-ede26d9c9b64"
+    stage_ids = ["6dc62e9c-3625-85ca-657e-3b06cc269828#1", "6dc62e9c-3625-85ca-657e-3b06cc269828#2", "6dc62e9c-3625-85ca-657e-3b06cc269828#3", "6dc62e9c-3625-85ca-657e-3b06cc269828#4"]
+    retrieved = db().get_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name="two-way-anova")
+    nrOfParameters = 2 # to be retrieved from experiment definition
+    get_influence_parameters(retrieved["anova_result"], nrOfParameters)

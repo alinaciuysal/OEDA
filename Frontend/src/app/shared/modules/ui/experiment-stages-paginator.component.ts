@@ -138,26 +138,15 @@ export class ExperimentStagesPaginatorComponent implements OnInit {
   };
 
   ngOnInit() {
-    // distinction between forever & non-forever strategies.
-    // for forever, we get an empty knob object for all_stages at initialization,
-    // so we copy first stage's knob to all_stage, as all are same for forever strategy
-    if (this.experiment.executionStrategy.type === 'forever') {
-      this.available_stages[0].knobs = this.available_stages[1].knobs;
-    }
     this.ordered_keys = this.get_ordered_keys(this.available_stages[0].knobs);
   }
 
   /** returns true if given variable is being tested in the experiment */
   is_included_in_experiment(knob_key_name: string): boolean {
-    let found: boolean = false;
     if (!isNullOrUndefined(this.experiment.changeableVariables)) {
-      this.experiment.changeableVariables.forEach(function(ch_var) {
-        if (ch_var["name"] == knob_key_name && !found) {
-          found = true;
-        }
-      });
+      return this.experiment.changeableVariables.hasOwnProperty(knob_key_name);
     }
-    return found;
+    return false;
   }
 
   /** returns keys of the given object */

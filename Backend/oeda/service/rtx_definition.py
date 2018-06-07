@@ -22,6 +22,7 @@ class RTXDefinition:
     considered_data_types = []
 
     def __init__(self, oeda_experiment, oeda_target, oeda_callback, oeda_stop_request):
+        print(oeda_experiment)
         self._oeda_experiment = oeda_experiment
         self._oeda_target = oeda_target
         self._oeda_callback = oeda_callback
@@ -48,19 +49,11 @@ class RTXDefinition:
                 self.secondary_data_providers.append(dp)
 
         execution_strategy = oeda_experiment["executionStrategy"]
-        knobs = parse_knobs(execution_strategy["type"], execution_strategy["knobs"])
-        execution_strategy["knobs"] = knobs
-
         self.execution_strategy = execution_strategy
         self.state_initializer = RTXDefinition.state_initializer
         self.evaluator = RTXDefinition.evaluator
         self.folder = None
         self.setup_stage = RTXDefinition.setup_stage
-
-        # if execution_strategy["type"] == "step_explorer" or execution_strategy["type"] == "sequential":
-        #     knob_values = get_knob_values(execution_strategy["type"], execution_strategy["knobs"])
-        #     knob_keys = get_knob_keys(execution_strategy["type"], execution_strategy["knobs"])
-        #     self.all_knobs = get_all_knobs(knob_keys, knob_values)
 
     def run_oeda_callback(self, dictionary):
         dictionary['stage_counter'] = self.stage_counter
@@ -72,13 +65,6 @@ class RTXDefinition:
     def primary_data_reducer(new_data, wf):
         db().save_data_point(new_data, wf.primary_data_counter, wf.id, wf.stage_counter, None)
         wf.primary_data_counter += 1
-        # for index, (data_type_name, data_type_value) in enumerate(new_data.items()):
-        #     data_type_count = str(data_type_name) + "_cnt"
-        #     cnt = state.get(data_type_count)
-        #     if index == 0:  # perform save operation only once
-        #         db().save_data_point(new_data, cnt, wf.id, wf.stage_counter, None)
-        #     state[str(data_type_name)] = (state[str(data_type_name)] * cnt + data_type_value) / (cnt + 1)
-        #     state[data_type_count] += 1
         if wf._oeda_stop_request.isSet():
             raise RuntimeError("Experiment interrupted from OEDA while reducing primary data.")
         return wf
@@ -223,40 +209,3 @@ def get_all_knobs(knob_keys, knob_values):
             index += 1
         all_knobs.append(knobs)
     return all_knobs
-
-
-def parse_knobs(strategy_type, knobs):
-    print("KNOBS", knobs)
-    if strategy_type == 'step_explorer':
-        new_knobs = {}
-        for knobArr in knobs:
-            # there is only one knob in knobArr for step str.
-            knob = knobArr[0]
-            new_knobs[knob["name"]] = ([knob["min"], knob["max"]], knob["step"])
-        return new_knobs
-    elif strategy_type == 'sequential':
-        new_knobs = []
-        for knobArr in knobs:
-            # knob with a single value
-            if len(knobArr) == 1:
-                new_knob = {}
-                new_knob[knobArr[0]["name"]] = knobArr[0]["target"]
-                new_knobs.append(new_knob)
-            else:
-                new_knob = {}
-                # knob with different keys & values
-                for knob in knobArr:
-                    new_knob[knob["name"]] = knob["target"]
-                new_knobs.append(new_knob)
-        return new_knobs
-    else:
-        # case for no_analysis or bayesian_opt
-        new_knobs = {}
-        for knobArr in knobs:
-            # there is only one knob in knobArr for this case as user can't add them as configurations
-            knob = knobArr[0]
-            new_knobs[knob["name"]] = [knob["min"], knob["max"]]
-        print(new_knobs)
-        return new_knobs
-
-

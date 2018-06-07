@@ -14,13 +14,14 @@ def start_three_phase_strategy(wf):
     start_step_strategy(wf)
 
     info("> Starting ANOVA")
-    key = get_key(wf)
-    wf.analysis["data_type"] = key
+    # as we have only one data type, e.g. overhead
+    considered_data_type_name = wf.considered_data_types[0]["name"]
+    wf.analysis["data_type"] = considered_data_type_name
     successful = start_factorial_tests(wf)
 
     if successful:
-        stage_ids, samples, knobs = get_tuples(wf.id, key)
-        anova_result = db().get_analysis(experiment_id=wf.id, stage_ids=stage_ids, test_name='two-way-anova')
+        stage_ids, samples, knobs = get_tuples(wf.id, considered_data_type_name)
+        anova_result = db().get_analysis(experiment_id=wf.id, stage_ids=stage_ids, analysis_name='two-way-anova')
         print(anova_result)
         # now we want to select the most important factors out of anova result
     else:
@@ -29,6 +30,7 @@ def start_three_phase_strategy(wf):
     info(">")
 
 def get_key(wf):
-    for chVar in wf._oeda_experiment["changeableVariables"]:
-        if chVar["is_default"]:
-            return chVar["name"]
+    for chVarName in wf._oeda_experiment["changeableVariables"]:
+        variable = wf._oeda_experiment["changeableVariables"][chVarName]
+        if variable["is_selected"]:
+            return chVarName

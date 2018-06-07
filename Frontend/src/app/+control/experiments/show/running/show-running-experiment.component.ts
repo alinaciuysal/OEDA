@@ -143,6 +143,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
                     for (let j = 0; j < stages.length; j++) {
                       // if there are any existing stages, round their knob values of stages to provided decimals
                       if (!isNullOrUndefined(stages[j]["knobs"])) {
+                        console.log(stages[j]["knobs"]);
                         stages[j]["knobs"] = this.entityService.round_knob_values(stages[j]["knobs"], this.decimal_places);
                         stages[j]["knobs"] = this.entityService.populate_knob_objects_with_variables(stages[j]["knobs"], this.targetSystem.defaultVariables, false, this.experiment.executionStrategy.type);
                       }

@@ -128,10 +128,14 @@ def start_factorial_tests(wf):
         stage_ids, samples, knobs = get_tuples(id, key)
         test = FactorialAnova(stage_ids=stage_ids, y_key=key, knob_keys=None, stages_count=len(stage_ids))
         aov_table, aov_table_sqr = test.run(data=samples, knobs=knobs)
+        # before saving and merging tables, extract useful information
+        delete_combination_notation(aov_table)
+        delete_combination_notation(aov_table_sqr)
+
         # type(dd) is defaultdict with unique keys
         dd = iterate_anova_tables(aov_table=aov_table, aov_table_sqr=aov_table_sqr)
 
-        # keys e.g. C(exploration_percentage), C(route_random_sigma), Residual
+        # keys = [exploration_percentage, route_random_sigma, exploration_percentage,route_random_sigma...]
         # resultDict e.g. {'PR(>F)': 0.0949496951695454, 'F': 2.8232330924997346 ...
         anova_result = dict()
         for key, resultDict in dd.items():
@@ -140,6 +144,7 @@ def start_factorial_tests(wf):
                 if str(value) == 'nan':
                     value = None
                 anova_result[key][inner_key] = value
+        # TODO: before saving, should we also filter according to the significant interactions?
         db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, anova_result=anova_result)
         return True, aov_table, aov_table_sqr
     else:
@@ -168,23 +173,66 @@ def extract_inner_values(key, stage_ids, data):
 
 
 # type(table) is DataFrame
-# rows are keys of the result obj
-# values are inner keys of those keys
+# rows are keys of the result obj (C(param1), C(param2), C(param1):C(param2) etc.
+# values are inner keys of those keys, type of values is dict
+# also, while iterating original tables, remove C(...): notation and extract exact parameters
 def iterate_anova_tables(aov_table, aov_table_sqr):
     dd = defaultdict(dict)
-    print(aov_table)
     # iterate first table
     for row in aov_table.itertuples():
         for col_name in list(aov_table):
-            if col_name == "PR(>F)" and hasattr(row, "_4"): # PR(>F) is translated to _4 TODO: why?
+            if col_name == "PR(>F)" and hasattr(row, "_4"): # PR(>F) is translated to _4 because of pandas?
                 dd[row.Index][col_name] = getattr(row, "_4")
             elif hasattr(row, col_name):
                 dd[row.Index][col_name] = getattr(row, col_name)
 
-    print(aov_table_sqr)
     # iterate second table
     for row in aov_table_sqr.itertuples():
         for col_name in list(aov_table_sqr):
             if hasattr(row, col_name):
                 dd[row.Index][col_name] = getattr(row, col_name)
+    return dd
+
+
+# https://stackoverflow.com/questions/4406501/change-the-name-of-a-key-in-dictionary
+# https://stackoverflow.com/questions/40855900/pandas-rename-index-values
+def delete_combination_notation(table):
+    for r in table.index:
+        corrected = []
+        keys = str(r).split(':')
+        for k in keys:
+            k = str(k).replace('C(', '').replace(')', '')
+            corrected.append(k)
+        if len(corrected) != 0:
+            res = ""
+            for idx, k in enumerate(corrected):
+                res += k
+                if idx != len(corrected) - 1:
+                    res += ","
+            table = table.rename(index={r: res})
+    return table
+
+
+# https://stackoverflow.com/questions/16412563/python-sorting-dictionary-of-dictionaries
+def get_significant_interactions(anova_result, alpha, nrOfParameters):
+    # now we want to select the most important factors out of result
+    significant_interactions = []
+    for interaction_key in anova_result.keys():
+        res = anova_result[interaction_key]
+        pvalue = res['PR(>F)']
+        # Residual will be filtered here because of None check
+        if pvalue < alpha and pvalue is not None:
+            significant_interactions.append((interaction_key, res, pvalue))
+
+    # sort w.r.t pvalue and also pass other values to caller fcn
+    sorted_significant_interactions = sorted((pvalue, interaction_key, res) for (interaction_key, res, pvalue) in significant_interactions)
+    # also mark the selected ones, might be required by UI in the future
+    dd = defaultdict()
+    idx = 0
+    for (pvalue, interaction_key, res) in sorted_significant_interactions:
+        # Filtering
+        if idx < nrOfParameters:
+            res["is_selected"] = True
+            dd[interaction_key] = res
+        idx += 1
     return dd

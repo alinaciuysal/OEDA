@@ -67,7 +67,7 @@ class FactorialAnova(Analysis):
         # print "------------------"
 
         aov_table = anova_lm(data_lm, typ=2)
-        aov_table_sqr= deepcopy(aov_table)
+        aov_table_sqr = deepcopy(aov_table)
         self.eta_squared(aov_table_sqr)
         self.omega_squared(aov_table_sqr)
         # with pd.option_context('display.max_rows', self.stages_count, 'display.max_columns', 6, 'max_colwidth', 10000):

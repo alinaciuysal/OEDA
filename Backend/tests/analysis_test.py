@@ -247,10 +247,6 @@ class AnalysisTest(unittest.TestCase):
             test = FactorialAnova(stage_ids=stage_ids, y_key=AnalysisTest.key, knob_keys=None, stages_count=len(stage_ids))
             result = test.run(data=samples, knobs=knobs)
             self.assertTrue(result is not None)
-            # TODO: Ilias, how can we save Factorial Analysis table to DB?
-            # db().save_analysis(AnalysisTest.stage_ids, test.name, result)
-            # retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
-            # self.assertTrue(retrieved)
         except Exception as e:
             error_name = type(e).__name__
             self.assertTrue(error_name == "LinAlgError" or error_name == "ValueError")

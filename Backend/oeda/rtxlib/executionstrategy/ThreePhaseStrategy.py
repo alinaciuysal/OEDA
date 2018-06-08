@@ -4,7 +4,8 @@ from oeda.rtxlib.execution import experimentFunction
 from oeda.analysis.analysis_execution import start_factorial_tests
 from oeda.databases import db
 from oeda.rtxlib.executionstrategy.StepStrategy import start_step_strategy
-from oeda.analysis.analysis_execution import get_tuples
+from oeda.analysis.analysis_execution import get_tuples, delete_combination_notation, \
+                                             iterate_anova_tables, get_significant_interactions
 
 def start_three_phase_strategy(wf):
     """ executes ANOVA, bayesian opt, and Ttest """

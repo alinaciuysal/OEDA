@@ -60,8 +60,9 @@
               "dynamic": true,
               "properties": {}
             },
-            "data_type":        { "type": "object"  },
-            "createdDate":       { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"}
+            "data_type":                        { "type": "object" },
+            "eligible_for_next_step":           { "type": "boolean" },
+            "createdDate":                      { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"}
           }
         }
       }

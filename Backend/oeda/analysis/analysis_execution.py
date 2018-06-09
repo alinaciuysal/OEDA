@@ -129,8 +129,8 @@ def start_factorial_tests(wf):
         test = FactorialAnova(stage_ids=stage_ids, y_key=key, knob_keys=None, stages_count=len(stage_ids))
         aov_table, aov_table_sqr = test.run(data=samples, knobs=knobs)
         # before saving and merging tables, extract useful information
-        delete_combination_notation(aov_table)
-        delete_combination_notation(aov_table_sqr)
+        aov_table = delete_combination_notation(aov_table)
+        aov_table_sqr = delete_combination_notation(aov_table_sqr)
 
         # type(dd) is defaultdict with unique keys
         dd = iterate_anova_tables(aov_table=aov_table, aov_table_sqr=aov_table_sqr)
@@ -144,7 +144,6 @@ def start_factorial_tests(wf):
                 if str(value) == 'nan':
                     value = None
                 anova_result[key][inner_key] = value
-        # TODO: before saving, should we also filter according to the significant interactions?
         db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, anova_result=anova_result)
         return True, aov_table, aov_table_sqr
     else:
@@ -208,7 +207,7 @@ def delete_combination_notation(table):
             for idx, k in enumerate(corrected):
                 res += k
                 if idx != len(corrected) - 1:
-                    res += ","
+                    res += ", "
             table = table.rename(index={r: res})
     return table
 
@@ -219,20 +218,27 @@ def get_significant_interactions(anova_result, alpha, nrOfParameters):
     significant_interactions = []
     for interaction_key in anova_result.keys():
         res = anova_result[interaction_key]
-        pvalue = res['PR(>F)']
         # Residual will be filtered here because of None check
-        if pvalue < alpha and pvalue is not None:
-            significant_interactions.append((interaction_key, res, pvalue))
+        if 'PR(>F)' in res:
+            pvalue = res['PR(>F)']
+            if pvalue < alpha and pvalue is not None:
+                significant_interactions.append((interaction_key, res, pvalue))
 
     # sort w.r.t pvalue and also pass other values to caller fcn
     sorted_significant_interactions = sorted((pvalue, interaction_key, res) for (interaction_key, res, pvalue) in significant_interactions)
-    # also mark the selected ones, might be required by UI in the future
-    dd = defaultdict()
-    idx = 0
-    for (pvalue, interaction_key, res) in sorted_significant_interactions:
-        # Filtering
-        if idx < nrOfParameters:
-            res["is_selected"] = True
-            dd[interaction_key] = res
-        idx += 1
-    return dd
+    error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(sorted_significant_interactions)
+    error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    if sorted_significant_interactions:
+        dd = defaultdict()
+        # Filtering phase
+        idx = 0
+        for (pvalue, interaction_key, res) in sorted_significant_interactions:
+            if idx < nrOfParameters:
+                # TODO: mark the selected ones in DB, for UI to use this properly, update_analysis method should be changed
+                # for now, we'll re-iterate tuples and mark them in UI
+                res["is_selected"] = True
+                dd[interaction_key] = res
+            idx += 1
+        return dd
+    return None

@@ -349,17 +349,16 @@ import {isNullOrUndefined} from "util";
           <div class="table-responsive" style="padding-top: 20px">
             <table style="margin-top: 5px" class="table table-striped table-bordered table-hover">
               <thead>
-              <th style="padding-left: 2%">Name</th>
-              <th style="padding-left: 2%">Scale</th>
-              <th style="padding-left: 2%">Description</th>
-              <th style="padding-left: 2%">Data Provider Name</th>
-              <th style="padding-left: 2%">Optimization Criteria</th>
-              <th style="padding-left: 2%; padding-right: 2%">Consider</th>
-              <th style="padding-left: 2%; padding-right: 2%">Aggregate Function</th>
-              <th style="padding-left: 2%; padding-right: 2%">Weight</th>
+              <th style="padding-left: 1%">Name</th>
+              <th style="padding-left: 1%">Scale</th>
+              <th style="padding-left: 1%">Description</th>
+              <th style="padding-left: 1%">Data Provider Name</th>
+              <th style="padding-left: 1%">Optimization Criteria</th>
+              <th style="padding-left: 1%">Consider</th>
+              <th style="padding-left: 1%">Aggregate Function</th>
               </thead>
               <tbody>
-              <tr *ngFor="let dataType of combined_data_types" style="padding-top: 1%">
+              <tr *ngFor="let dataType of combined_data_types" style="padding-left: 1%">
                 <td>{{dataType.name}}</td>
                 <td>{{dataType.scale}}</td>
                 <td>{{dataType.description}}</td>
@@ -368,7 +367,6 @@ import {isNullOrUndefined} from "util";
                 <td *ngIf="is_considered(dataType.name)">Yes</td>
                 <td *ngIf="!is_considered(dataType.name)">No</td>
                 <td>{{dataType.aggregateFunction}}</td>
-                <td>{{dataType.weight}}<span *ngIf="dataType.weight !== undefined">%</span></td>
               </tr>
               </tbody>
             </table>

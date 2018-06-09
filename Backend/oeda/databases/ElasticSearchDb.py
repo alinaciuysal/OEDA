@@ -441,7 +441,6 @@ class ElasticSearchDb(Database):
     # we had to distinguish between anova_result (json of json objects) with regular t_test result (single json object)
     def save_analysis(self, experiment_id, stage_ids, analysis_name, result=None, anova_result=None):
         analysis_id = Database.create_analysis_id(experiment_id, stage_ids, analysis_name)
-        print("analysis_id", analysis_id)
         body = dict()
         body["stage_ids"] = stage_ids
         body["name"] = analysis_name
@@ -468,4 +467,16 @@ class ElasticSearchDb(Database):
             raise err1
         except TransportError as err2:
             error("TransportError while retrieving analysis. Check type mappings for analysis in experiment_db_config.json.")
+            raise err2
+
+    def update_analysis(self, experiment_id, stage_ids, analysis_name, field, value):
+        analysis_id = Database.create_analysis_id(experiment_id, stage_ids, analysis_name)
+        body = {"doc": {field: value}}
+        try:
+            self.es.update(index=self.analysis_index, doc_type=self.analysis_type_name, id=analysis_id, body=body)
+        except ConnectionError as err1:
+            error("ConnectionError while updating stage result. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while updating stage result. Check type mappings in experiment_db_config.json.")
             raise err2

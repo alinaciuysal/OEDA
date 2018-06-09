@@ -150,7 +150,7 @@ export class CreateExperimentsComponent implements OnInit {
       this.experiment.analysis.anovaAlpha = this.defaultAlpha;
       this.experiment.analysis.tTestAlpha = this.defaultAlpha;
       this.experiment.analysis.tTestEffectSize = this.defaultTTestEffectSize;
-      this.maxNrOfImportantFactors = Math.pow(2, this.targetSystem.changeableVariables.length);
+      this.maxNrOfImportantFactors = Math.pow(2, this.targetSystem.changeableVariables.length) - 1;
       this.experiment.executionStrategy.type = "self_optimizer";
       this.acquisitionMethodChanged("gp_hedge");
       // set changeableVariable.min, changeableVariable.max as default value for factorValues for each chVar
@@ -196,6 +196,21 @@ export class CreateExperimentsComponent implements OnInit {
     }
     else if (changeableVariable.is_selected == false) {
       changeableVariable.is_selected = true;
+    }
+    this.setMaxNrOfFactors();
+  }
+
+  public setMaxNrOfFactors(): void {
+    if (this.targetSystem.changeableVariables.length == 0) {
+      this.maxNrOfImportantFactors = 0;
+    } else {
+      let selected = 0;
+      for (let chVar of this.targetSystem.changeableVariables) {
+        if (chVar.is_selected) {
+          selected += 1;
+        }
+      }
+      this.maxNrOfImportantFactors = Math.pow(2, selected) - 1;
     }
   }
 
@@ -298,13 +313,14 @@ export class CreateExperimentsComponent implements OnInit {
       return true;
     }
 
-    let n = this.experiment.analysis.n;
-    if (n > this.targetSystem.changeableVariables.length) {
-      this.errorButtonLabelAnova = "Number of factors cannot exceed " + this.targetSystem.changeableVariables.length;
-      return true;
+    let selected = 0;
+    for (let chVar of this.targetSystem.changeableVariables) {
+      if (chVar.is_selected == true) {
+        selected += 1;
+      }
     }
-    if (n < 2) {
-      this.errorButtonLabelAnova = "Factorial tests cannot be used with less than 2 factors";
+    if (selected < 2) {
+      this.errorButtonLabelAnova = "Anova cannot be used with less than 2 factors";
       return true;
     }
 

@@ -36,7 +36,7 @@ def start_self_optimizer_strategy(wf):
     # finished
     info(">")
     applyDefaultKnobs(wf)
-    return str(recreate_knob_from_optimizer_values(variables, optimizer_result.x))
+    return recreate_knob_from_optimizer_values(variables, optimizer_result.x), optimizer_result.fun
 
 
 def recreate_knob_from_optimizer_values(variables, opti_values):

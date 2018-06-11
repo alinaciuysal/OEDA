@@ -11,6 +11,7 @@ from collections import OrderedDict
 from oeda.utilities.Structures import DefaultOrderedDict
 from math import sqrt
 from copy import deepcopy
+from operator import itemgetter
 
 import numpy as np
 
@@ -279,14 +280,14 @@ def assign_iterations(experiment, significant_interactions, execution_strategy_t
     for i in range(len(values)):
         key = significant_interactions.keys()[i]
         # TODO: set UI so that smaller value cannot be retrieved,
-        # if execution_strategy_type == 'self_optimizer' and values[i] < 8:
-        #     values[i] = 8
 
         # if you have more values in keys, then you need to set opt_iter_in_design accordingly
         # the restriction of n_calls <= 4 * nrOfParams is coming from gp_minimize
-        significant_interactions[key]["optimizer_iterations"] = len(str(key).split(', ')) * 4
+        if values[i] < len(str(key).split(', ')) * 4:
+            values[i] = len(str(key).split(', ')) * 4
+        significant_interactions[key]["optimizer_iterations"] = values[i]
         significant_interactions[key]["optimizer_iterations_in_design"] = len(str(key).split(', ')) * 4
-    info("> returning significant_interactions " + str(significant_interactions))
+    info("> Significant Interactions " + str(significant_interactions))
     return significant_interactions
 
 
@@ -298,8 +299,7 @@ def start_bogp(wf, sorted_significant_interactions):
     knobs = newExecutionStrategy["knobs"]
     # k, v example: "route_random_sigma, exploration_percentage": {"optimizer_iterations": 3,"PR(>F)": 0.13678788369818956, "optimizer_iterations_in_design": 8 ...}
     # after changing knobs parameter of experiment.executionStrategy, perform experimentation for each interaction (v)
-    error("len(ssi) in start_bogp" + str(len(sorted_significant_interactions.keys())))
-    info(">>>> wf in start_bogp" + str(wf))
+    optimal_tuples = []
     for k, v in sorted_significant_interactions.items():
         print("k: ", k, " v: ", v)
         # here chVars are {u'route_random_sigma': [0, 0.4], u'exploration_percentage': [0, 0.4, 0.6]}
@@ -326,13 +326,21 @@ def start_bogp(wf, sorted_significant_interactions):
         wf.execution_strategy = newExecutionStrategy
 
         # perform desired optimization process
-        # TODO: 1) also get result (value) from processes in addition to knobs
-        #       2) prepare an array before for loop and sort them after the for loop
-        #       3) insert result to db (create an abstraction of phase1-2-3 etc.) to create experiment_id
+        # after each experimentation, we will get best value & knob related with that value
+        # to find optimum out of all experimentations, we use optimal_tuples array to keep track & sort at the end
+        # TODO: 3) insert result to db (create an abstraction of phase1-2-3 etc.) to create experiment_id
         if wf.execution_strategy["type"] == 'self_optimizer':
-            optimal_knob = start_self_optimizer_strategy(wf)
-            info("> Optimal knob at the end of Bayesian process (scikit): " + str(optimal_knob))
+            optimal_knob, optimal_value = start_self_optimizer_strategy(wf)
+            optimal_tuples.append((optimal_knob, optimal_value))
+            info("> Optimal knob at the end of Bayesian process (scikit): " + str(optimal_knob) + ", " + str(optimal_value))
         elif wf.execution_strategy["type"] == 'mlr_mbo':
-            optimal_knob = start_mlr_mbo_strategy(wf)
-            info("> Optimal knob at the end of Bayesian process (mlr-mbo): " + str(optimal_knob))
+            optimal_knob, optimal_value = start_mlr_mbo_strategy(wf)
+            optimal_tuples.append((optimal_knob, optimal_value))
+            info("> Optimal knob at the end of Bayesian process (mlr-mbo): " + str(optimal_knob) + ", " + str(optimal_value))
         # TODO: to save result to db, we need a new experiment_id, o/w previous ones will be overwritten
+    info("> All knobs & values " + str(optimal_tuples))
+    # find the best tuple (knob & result)
+    sorted_tuples = sorted(optimal_tuples, key=lambda x: x[1])
+    info("> Sorted knobs & values " + str(sorted_tuples))
+    # e.g. {'route_random_sigma': 0.3, 'exploration_percentage': 0.5}, 0.4444444
+    return sorted_tuples[0][0], sorted_tuples[0][1]

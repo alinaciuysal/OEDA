@@ -21,6 +21,8 @@ def save_anova(key, stage_ids, samples, knobs):
 def start_workflow(id, key, alpha, nrOfImportantFactors, performAnova=False):
     stage_ids, samples, knobs = get_tuples(id, key)
     experiment = db().get_experiment(id)
+    print(stage_ids)
+    print(knobs)
     if performAnova:
         save_anova(key, stage_ids, samples, knobs)
 
@@ -29,12 +31,30 @@ def start_workflow(id, key, alpha, nrOfImportantFactors, performAnova=False):
     significant_interactions = assign_iterations(experiment, significant_interactions)
     print("ssi", significant_interactions)
 
+def sort():
+    tuples = []
+    tuple_1 = ({"ep": 0.2, "rrs": 0.4}, 0.5555)
+    tuple_2 = ({"ep": 0.5, "rrs": 0.3}, 0.4444)
+    tuple_3 = ({"ep": 0.2222, "rrs": 0.222}, 0.8888)
+    tuple_4 = ({"ep": 0.3333, "rrs": 0.333}, 0.6666)
+    tuples.append(tuple_1)
+    tuples.append(tuple_2)
+    tuples.append(tuple_3)
+    tuples.append(tuple_4)
+    sorted_tuples = sorted(tuples, key=lambda x: x[1])
+    print("sorted_tuples", sorted_tuples)
+    print("best_knob", sorted_tuples[0][0], " best_value", sorted_tuples[0][1])
+    # new_tuples = [k for (k, v) in sorted(tuples, key=lambda x: x[1])]
+    # print(new_tuples)
+    # tuples = tuples.sort(key=lambda x: x[1])
+    # print(tuples)
 
 if __name__ == '__main__':
-    nrOfParameters = 3 # to be retrieved from analysis definition
-    alpha = 0.5 # to be retrieved from analysis definition
-    setup_experiment_database("elasticsearch", "localhost", 9200)
-    id = "0ad830ff-02b2-285a-93e6-5c7229a91f58"
-    key = "overhead"
-    # set performAnova to true if there are data in DB & you want to save fresh anova result to DB
-    start_workflow(id, key, alpha, nrOfParameters)
+    # nrOfParameters = 3 # to be retrieved from analysis definition
+    # alpha = 0.5 # to be retrieved from analysis definition
+    # setup_experiment_database("elasticsearch", "localhost", 9200)
+    # id = "f11fcd7b-784a-6611-93a7-e7e9b641015e"
+    # key = "overhead"
+    # # set performAnova to true if there are data in DB & you want to save fresh anova result to DB
+    # start_workflow(id, key, alpha, nrOfParameters)
+    sort()

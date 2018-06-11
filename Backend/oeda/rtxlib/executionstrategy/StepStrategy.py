@@ -2,8 +2,12 @@ from colorama import Fore
 from oeda.log import *
 from oeda.rtxlib.execution import experimentFunction
 import itertools
+from oeda.rtxlib.executionstrategy import applyInitKnobs
+from oeda.rtxlib.executionstrategy import applyDefaultKnobs
 
 def start_step_strategy(wf):
+    applyInitKnobs(wf)
+
     """ implements the step strategy, a way to explore a hole feature area """
     info("> ExecStrategy   | Step", Fore.CYAN)
 
@@ -14,6 +18,10 @@ def start_step_strategy(wf):
     info("> Steps Created  | Count: " + str(wf.totalExperiments), Fore.CYAN)
     for knob in list_of_knobs:
         step_execution(wf, knob)
+
+    # finished
+    info(">")
+    applyDefaultKnobs(wf)
 
 def step_execution(wf, knob):
     """ runs a single step_execution experiment """

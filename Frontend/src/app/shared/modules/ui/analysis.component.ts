@@ -21,7 +21,7 @@ import {hasOwnProperty} from "tslint/lib/utils";
           </button>
         </div>
 
-        <div class="panel-body" *ngIf="!analysis_is_collapsed">
+        <div class="panel-body" *ngIf="!analysis_is_collapsed && retrieved">
           <div clasS="row" style="padding-left: 1%">
 
             <div class="col-md-2">
@@ -67,7 +67,7 @@ import {hasOwnProperty} from "tslint/lib/utils";
             
         </div>
           
-        <div class="panel-body" *ngIf="!analysis_is_collapsed">
+        <div class="panel-body" *ngIf="!analysis_is_collapsed && retrieved">
           <div class="col-md-12">
             <div class="table-responsive">
   
@@ -110,9 +110,11 @@ export class AnalysisComponent {
   public eligible_for_next_step: boolean;
   public nrOfImportantFactors: number;
   public anovaAlpha: number;
+  public retrieved: boolean; // keep track of retrieval status
 
   constructor(private apiService: OEDAApiService, private notify: NotificationsService) {
     this.analysis_is_collapsed = true;
+    this.retrieved = false;
   }
 
   public btnClicked(): void {
@@ -165,8 +167,9 @@ export class AnalysisComponent {
           console.log(this.properties);
 
           this.notify.success("Success", "Analysis results are retrieved");
+          this.retrieved = true;
         }, error1 => {
-          this.notify.error("Error", "Cannot retrieve analysis results");
+          this.retrieved = false;
         }
       )
     }

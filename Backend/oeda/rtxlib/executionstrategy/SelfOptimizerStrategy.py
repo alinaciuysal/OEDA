@@ -1,11 +1,13 @@
 from colorama import Fore
-
 from skopt import gp_minimize
 from oeda.log import *
 from oeda.rtxlib.execution import experimentFunction
-
+from oeda.rtxlib.executionstrategy import applyInitKnobs
+from oeda.rtxlib.executionstrategy import applyDefaultKnobs
 
 def start_self_optimizer_strategy(wf):
+    applyInitKnobs(wf)
+
     """ executes a self optimizing strategy """
     info("> ExecStrategy   | SelfOptimizer", Fore.CYAN)
     acquisition_method = wf.execution_strategy["acquisition_method"]
@@ -30,6 +32,11 @@ def start_self_optimizer_strategy(wf):
     info(">")
     info("> OptimalResult  | Knobs:  " + str(recreate_knob_from_optimizer_values(variables, optimizer_result.x)))
     info(">                | Result: " + str(optimizer_result.fun))
+
+    # finished
+    info(">")
+    applyDefaultKnobs(wf)
+    return str(recreate_knob_from_optimizer_values(variables, optimizer_result.x))
 
 
 def recreate_knob_from_optimizer_values(variables, opti_values):

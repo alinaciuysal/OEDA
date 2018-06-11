@@ -22,7 +22,6 @@ class RTXDefinition:
     considered_data_types = []
 
     def __init__(self, oeda_experiment, oeda_target, oeda_callback, oeda_stop_request):
-        print(oeda_experiment)
         self._oeda_experiment = oeda_experiment
         self._oeda_target = oeda_target
         self._oeda_callback = oeda_callback

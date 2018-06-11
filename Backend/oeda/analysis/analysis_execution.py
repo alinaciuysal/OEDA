@@ -4,9 +4,14 @@ from oeda.analysis.two_sample_tests import Ttest, TtestPower, TtestSampleSizeEst
 from oeda.analysis.one_sample_tests import DAgostinoPearson, AndersonDarling, KolmogorovSmirnov, ShapiroWilk
 from oeda.analysis.n_sample_tests import Bartlett, FlignerKilleen, KruskalWallis, Levene, OneWayAnova
 from oeda.analysis.factorial_tests import FactorialAnova
+from oeda.rtxlib.executionstrategy.SelfOptimizerStrategy import start_self_optimizer_strategy
+from oeda.rtxlib.executionstrategy.MlrStrategy import start_mlr_mbo_strategy
 
-from collections import defaultdict
+from collections import OrderedDict
+from oeda.utilities.Structures import DefaultOrderedDict
 from math import sqrt
+from copy import deepcopy
+
 import numpy as np
 
 outer_key = "payload" # this is by default, see: data_point_type properties in experiment_db_config.json
@@ -119,6 +124,8 @@ def start_n_sample_tests(wf):
 
 
 # there are >= 2 samples for factorial_tests
+# ES saves the ordered dict in unordered format because of JSON serialization / deserialization
+# see https://github.com/elastic/elasticsearch-py/issues/68 if you want to preserve order in ES
 def start_factorial_tests(wf):
     id = wf.id
     key = wf.analysis["data_type"]
@@ -132,20 +139,17 @@ def start_factorial_tests(wf):
         aov_table = delete_combination_notation(aov_table)
         aov_table_sqr = delete_combination_notation(aov_table_sqr)
 
-        # type(dd) is defaultdict with unique keys
-        dd = iterate_anova_tables(aov_table=aov_table, aov_table_sqr=aov_table_sqr)
-
+        # type(dd) is DefaultOrderedDict
         # keys = [exploration_percentage, route_random_sigma, exploration_percentage,route_random_sigma...]
         # resultDict e.g. {'PR(>F)': 0.0949496951695454, 'F': 2.8232330924997346 ...
-        anova_result = dict()
-        for key, resultDict in dd.items():
-            anova_result[key] = resultDict
-            for inner_key, value in resultDict.items():
-                if str(value) == 'nan':
-                    value = None
-                anova_result[key][inner_key] = value
-        db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, anova_result=anova_result)
-        return True, aov_table, aov_table_sqr
+        dod = iterate_anova_tables(aov_table=aov_table, aov_table_sqr=aov_table_sqr)
+        try:
+            # from now on, caller functions should fetch result from DB
+            db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, anova_result=dod)
+            return True
+        except Exception as e:
+            error(e.message)
+            return False
     else:
         error("data type for anova is not properly provided")
         return False
@@ -172,24 +176,35 @@ def extract_inner_values(key, stage_ids, data):
 
 
 # type(table) is DataFrame
-# rows are keys of the result obj (C(param1), C(param2), C(param1):C(param2) etc.
+# rows are keys of the result obj param1; param2; param1, param2 etc.
 # values are inner keys of those keys, type of values is dict
-# also, while iterating original tables, remove C(...): notation and extract exact parameters
+# set NaN or nan values to None to save to DB properly
+# they are like (nan, <type 'float'>), so we compare them by str
 def iterate_anova_tables(aov_table, aov_table_sqr):
-    dd = defaultdict(dict)
+    dd = DefaultOrderedDict(OrderedDict)
     # iterate first table
     for row in aov_table.itertuples():
         for col_name in list(aov_table):
             if col_name == "PR(>F)" and hasattr(row, "_4"): # PR(>F) is translated to _4 because of pandas?
-                dd[row.Index][col_name] = getattr(row, "_4")
+                val = getattr(row, "_4")
+                if str(val) == 'nan' or str(val) == 'NaN':
+                    val = None
+                dd[row.Index][col_name] = val
             elif hasattr(row, col_name):
-                dd[row.Index][col_name] = getattr(row, col_name)
+                val = getattr(row, col_name)
+                if str(val) == 'nan' or str(val) == 'NaN':
+                    val = None
+                dd[row.Index][col_name] = val
 
     # iterate second table
     for row in aov_table_sqr.itertuples():
         for col_name in list(aov_table_sqr):
             if hasattr(row, col_name):
-                dd[row.Index][col_name] = getattr(row, col_name)
+                val = getattr(row, col_name)
+                if str(val) == 'nan' or str(val) == 'NaN':
+                    val = None
+                dd[row.Index][col_name] = val
+
     return dd
 
 
@@ -226,11 +241,8 @@ def get_significant_interactions(anova_result, alpha, nrOfParameters):
 
     # sort w.r.t pvalue and also pass other values to caller fcn
     sorted_significant_interactions = sorted((pvalue, interaction_key, res) for (interaction_key, res, pvalue) in significant_interactions)
-    error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-    print(sorted_significant_interactions)
-    error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     if sorted_significant_interactions:
-        dd = defaultdict()
+        dd = DefaultOrderedDict(OrderedDict)
         # Filtering phase
         idx = 0
         for (pvalue, interaction_key, res) in sorted_significant_interactions:
@@ -242,3 +254,85 @@ def get_significant_interactions(anova_result, alpha, nrOfParameters):
             idx += 1
         return dd
     return None
+
+
+''' distributes number of iterations within optimization to respective significant interactions
+    e.g. nrOfFoundInteractions = 10, and we have 3 influencing factors; then
+        4 will be assigned to first (most) influencing factor, 3 will be assigned to second & third factor
+    as we use DefaultOrderedDict, we preserve the insertion order of tuples and we get keys based on index of values
+'''
+def assign_iterations(experiment, significant_interactions, execution_strategy_type):
+    nrOfFoundInteractions = len(significant_interactions.keys())
+    optimizer_iterations = experiment["executionStrategy"]["optimizer_iterations"]
+
+    values = []
+    # https://stackoverflow.com/questions/10366327/dividing-a-integer-equally-in-x-parts
+    for i in range(nrOfFoundInteractions):
+        values.append(optimizer_iterations / nrOfFoundInteractions)    # integer division
+
+    # divide up the remainder
+    for i in range(optimizer_iterations % nrOfFoundInteractions):
+        values[i] += 1
+    # here, values = [4, 3, 3] for nrOfFoundInteractions = 3, optimizer_iterations = 10
+    # keys = ['rrs', 'ep', 'rrs, exploration_percentage']
+    info("> values " + str(values))
+    for i in range(len(values)):
+        key = significant_interactions.keys()[i]
+        # TODO: set UI so that smaller value cannot be retrieved,
+        # if execution_strategy_type == 'self_optimizer' and values[i] < 8:
+        #     values[i] = 8
+
+        # if you have more values in keys, then you need to set opt_iter_in_design accordingly
+        # the restriction of n_calls <= 4 * nrOfParams is coming from gp_minimize
+        significant_interactions[key]["optimizer_iterations"] = len(str(key).split(', ')) * 4
+        significant_interactions[key]["optimizer_iterations_in_design"] = len(str(key).split(', ')) * 4
+    info("> returning significant_interactions " + str(significant_interactions))
+    return significant_interactions
+
+
+def start_bogp(wf, sorted_significant_interactions):
+    execution_strategy_type = wf.execution_strategy["type"]
+    assigned_iterations = assign_iterations(wf._oeda_experiment, sorted_significant_interactions, execution_strategy_type)
+    newExecutionStrategy = deepcopy(wf._oeda_experiment["executionStrategy"])
+    # print(newExecutionStrategy)
+    knobs = newExecutionStrategy["knobs"]
+    # k, v example: "route_random_sigma, exploration_percentage": {"optimizer_iterations": 3,"PR(>F)": 0.13678788369818956, "optimizer_iterations_in_design": 8 ...}
+    # after changing knobs parameter of experiment.executionStrategy, perform experimentation for each interaction (v)
+    error("len(ssi) in start_bogp" + str(len(sorted_significant_interactions.keys())))
+    info(">>>> wf in start_bogp" + str(wf))
+    for k, v in sorted_significant_interactions.items():
+        print("k: ", k, " v: ", v)
+        # here chVars are {u'route_random_sigma': [0, 0.4], u'exploration_percentage': [0, 0.4, 0.6]}
+        # print(experiment["changeableVariables"])
+        # if there is only one x value in key, then fetch min & max values from chVars
+        new_knob = {}
+        params = str(k).split(', ')
+        if len(params) == 1:
+            min_value = knobs[k][0]
+            max_value = knobs[k][-1]
+            new_knob[str(k)] = [min_value, max_value]
+        else:
+            for parameter in params:
+                all_values = knobs[parameter] # e.g. [0, 0.2, 0.4]
+                new_knob[parameter] = [all_values[0], all_values[-1]]
+
+        # prepare everything needed for experimentation
+        # fetch optimizer_iterations and optimizer_iterations_in_design from assigned_iterations
+        newExecutionStrategy["knobs"] = new_knob
+        newExecutionStrategy["optimizer_iterations"] = assigned_iterations[k]["optimizer_iterations"]
+        newExecutionStrategy["optimizer_iterations_in_design"] = assigned_iterations[k]["optimizer_iterations_in_design"]
+
+        # set new values in wf
+        wf.execution_strategy = newExecutionStrategy
+
+        # perform desired optimization process
+        # TODO: 1) also get result (value) from processes in addition to knobs
+        #       2) prepare an array before for loop and sort them after the for loop
+        #       3) insert result to db (create an abstraction of phase1-2-3 etc.) to create experiment_id
+        if wf.execution_strategy["type"] == 'self_optimizer':
+            optimal_knob = start_self_optimizer_strategy(wf)
+            info("> Optimal knob at the end of Bayesian process (scikit): " + str(optimal_knob))
+        elif wf.execution_strategy["type"] == 'mlr_mbo':
+            optimal_knob = start_mlr_mbo_strategy(wf)
+            info("> Optimal knob at the end of Bayesian process (mlr-mbo): " + str(optimal_knob))
+        # TODO: to save result to db, we need a new experiment_id, o/w previous ones will be overwritten

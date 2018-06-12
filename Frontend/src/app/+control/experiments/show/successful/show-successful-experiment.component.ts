@@ -47,6 +47,8 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
 
   public selected_stage: any;
 
+  public step_no: any;
+
   constructor(private layout: LayoutService,
               private apiService: OEDAApiService,
               private plotService: PlotService,
@@ -74,6 +76,8 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
 
     this.selected_stage_for_qq_js = "Select a stage";
     this.incoming_data_type = null;
+
+    this.step_no = 1;
 
     // subscribe to router event
     this.activated_route.params.subscribe((params: Params) => {
@@ -108,7 +112,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
               if (!isNullOrUndefined(targetSystem)) {
                 this.targetSystem = targetSystem;
                 // retrieve stages
-                this.apiService.loadAvailableStagesWithExperimentId(this.experiment_id).subscribe(stages => {
+                this.apiService.loadAvailableStagesWithExperimentId(this.experiment_id, this.step_no).subscribe(stages => {
                   if (!isNullOrUndefined(stages)) {
                     console.log(stages);
                     // initially selected stage is "All Stages"
@@ -206,7 +210,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
   /** called when theoretical distribution in QQ Plot's dropdown is changed */
   selectDistributionAndDrawQQPlot(distName) {
     this.distribution = distName;
-    this.plotService.retrieve_qq_plot_image(this.experiment_id, this.selected_stage, this.distribution, this.scale, this.incoming_data_type["name"]).subscribe(response => {
+    this.plotService.retrieve_qq_plot_image(this.experiment_id, this.step_no, this.selected_stage, this.distribution, this.scale, this.incoming_data_type["name"]).subscribe(response => {
       const imageSrc = 'data:image/jpg;base64,' + response;
       document.getElementById("qqPlot").setAttribute('src', imageSrc);
       this.is_qq_plot_rendered = true;
@@ -218,7 +222,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
   /** retrieves all_data from server */
   fetch_data() {
     const ctrl = this;
-    this.apiService.loadAllDataPointsOfExperiment(this.experiment_id).subscribe(
+    this.apiService.loadAllDataPointsOfExperiment(this.experiment_id, this.step_no).subscribe(
       retrieved_data => {
         if (isNullOrUndefined(retrieved_data)) {
           this.notify.error("Error", "Cannot retrieve data from DB, please try again");

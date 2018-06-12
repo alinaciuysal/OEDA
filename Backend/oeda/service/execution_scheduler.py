@@ -22,11 +22,11 @@ def find_open_experiments():
 
 
 def set_experiment_status(experiment_id, status):
-    db().update_experiment_status(experiment_id, status)
+    db().update_experiment(experiment_id=experiment_id, field="status", value=status)
 
 
 def set_target_system_status(target_id, status):
-    db().update_target_system_status(target_id, status)
+    db().update_target_system(target_system_id=target_id, field="status", value=status)
 
 
 def get_target_system(target_system_id):
@@ -98,7 +98,6 @@ def rtx_execution(experiment, target_system, oeda_stop_request):
         execute_workflow(workflow)
         set_experiment_status(experiment["id"], "SUCCESS")
         set_target_system_status(experiment["targetSystemId"], "READY")
-        # TODO here the analytics part should start and also do updateExperiment(experimentId, analysisResults)
 
     except RuntimeError as e:
         debug("Experiment INTERRUPTED - " + experiment["id"] + " - " + str(e))

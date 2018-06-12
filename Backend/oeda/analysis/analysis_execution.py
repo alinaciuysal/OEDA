@@ -11,8 +11,7 @@ from collections import OrderedDict
 from oeda.utilities.Structures import DefaultOrderedDict
 from math import sqrt
 from copy import deepcopy
-from operator import itemgetter
-
+import traceback
 import numpy as np
 
 outer_key = "payload" # this is by default, see: data_point_type properties in experiment_db_config.json
@@ -37,29 +36,31 @@ def run_analysis(wf):
 
 # there are always 2 samples for the t-test
 def start_two_sample_tests(wf):
-    id = wf.id
-    alpha = wf.analysis["alpha"]
+    experiment_id = wf.id
+    alpha = wf.analysis["tTestAlpha"]
     key = wf.analysis["data_type"]
-    mean_diff = 0.1 # as in crowdnav-elastic-ttest-sample-size/definition.py # TODO: get it from user
+    mean_diff = 0.1 # as in crowdnav-elastic-ttest-sample-size/definition.py # TODO: get it from user ??
 
-    stage_ids, samples, knobs = get_tuples(id, key)
+    stage_ids, samples, knobs = get_tuples(experiment_id=experiment_id, step_no=wf.step_no, key=key)
 
     test1 = Ttest(stage_ids=stage_ids, y_key=key, alpha=alpha)
     result = test1.run(data=samples, knobs=knobs)
-    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test1.name, result=result)
+    db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test1.name, result=result)
 
-    x1 = samples[0]
-    x2 = samples[1]
-    pooled_std = sqrt((np.var(x1) + np.var(x2)) / 2)
-    effect_size = mean_diff / pooled_std
-    test2 = TtestPower(stage_ids=stage_ids, y_key=key, effect_size=effect_size)
-    result2 = test2.run(data=samples, knobs=knobs)
-    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test2.name, result=result2)
-
-    test3 = TtestSampleSizeEstimation(stage_ids=stage_ids, y_key=key, effect_size=None, mean_diff=mean_diff)
-    result3 = test3.run(data=samples, knobs=knobs)
-    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test3.name, result=result3)
-    return
+    # if we want to integrate following tests, they should be saved as another step_no, just increment it before saving
+    # effect_size = wf.analysis["tTestEffectSize"]
+    # x1 = samples[0]
+    # x2 = samples[1]
+    # pooled_std = sqrt((np.var(x1) + np.var(x2)) / 2)
+    # effect_size = mean_diff / pooled_std
+    # test2 = TtestPower(stage_ids=stage_ids, y_key=key, effect_size=effect_size)
+    # result2 = test2.run(data=samples, knobs=knobs)
+    # db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test2.name, result=result2)
+    #
+    # test3 = TtestSampleSizeEstimation(stage_ids=stage_ids, y_key=key, effect_size=None, mean_diff=mean_diff)
+    # result3 = test3.run(data=samples, knobs=knobs)
+    # db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test3.name, result=result3)
+    return result
 
 
 ##########################
@@ -70,23 +71,23 @@ def start_one_sample_tests(wf):
     alpha = wf.analysis["alpha"]
     key = wf.analysis["data_type"]
 
-    stage_ids, samples, knobs = get_tuples(id, key)
+    stage_ids, samples, knobs = get_tuples(experiment_id=id, step_no=wf.step_no, key=key)
     test = AndersonDarling(id, key, alpha=alpha)
     # as we have only one sample, we need to pass data=samples[0]
     result = test.run(data=samples[0], knobs=knobs)
-    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+    db().save_analysis(experiment_id=id, step_no=wf.step_no, analysis_name=test.name, result=result)
 
     test = DAgostinoPearson(id, key, alpha=alpha)
     result = test.run(data=samples[0], knobs=knobs)
-    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+    db().save_analysis(experiment_id=id, step_no=wf.step_no, analysis_name=test.name, result=result)
 
     test = KolmogorovSmirnov(id, key, alpha=alpha)
     result = test.run(data=samples[0], knobs=knobs)
-    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+    db().save_analysis(experiment_id=id, step_no=wf.step_no, analysis_name=test.name, result=result)
 
     test = ShapiroWilk(id, key, alpha=alpha)
     result = test.run(data=samples[0], knobs=knobs)
-    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+    db().save_analysis(experiment_id=id, step_no=wf.step_no, analysis_name=test.name, result=result)
 
     return
 
@@ -99,27 +100,27 @@ def start_n_sample_tests(wf):
     id = wf.id
     alpha = wf.analysis["alpha"]
     key = wf.analysis["data_type"]
-    stage_ids, samples, knobs = get_tuples(id, key)
+    stage_ids, samples, knobs = get_tuples(experiment_id=id, step_no=wf.step_no, key=key)
 
     test = OneWayAnova(stage_ids=stage_ids, y_key=key, alpha=alpha)
     result = test.run(data=samples, knobs=knobs)
-    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+    db().save_analysis(experiment_id=id, step_no=wf.step_no, analysis_name=test.name, result=result)
 
     test = KruskalWallis(stage_ids=stage_ids, y_key=key, alpha=alpha)
     result = test.run(data=samples, knobs=knobs)
-    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+    db().save_analysis(experiment_id=id, step_no=wf.step_no, analysis_name=test.name, result=result)
 
     test = Levene(stage_ids=stage_ids, y_key=key, alpha=alpha)
     result = test.run(data=samples, knobs=knobs)
-    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+    db().save_analysis(experiment_id=id, step_no=wf.step_no, analysis_name=test.name, result=result)
 
     test = Bartlett(stage_ids=stage_ids, y_key=key, alpha=alpha)
     result = test.run(data=samples, knobs=knobs)
-    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+    db().save_analysis(experiment_id=id, step_no=wf.step_no, analysis_name=test.name, result=result)
 
     test = FlignerKilleen(stage_ids=stage_ids, y_key=key, alpha=alpha)
     result = test.run(data=samples, knobs=knobs)
-    db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, result=result)
+    db().save_analysis(experiment_id=id, step_no=wf.step_no, analysis_name=test.name, result=result)
 
     return
 
@@ -128,37 +129,40 @@ def start_n_sample_tests(wf):
 # ES saves the ordered dict in unordered format because of JSON serialization / deserialization
 # see https://github.com/elastic/elasticsearch-py/issues/68 if you want to preserve order in ES
 def start_factorial_tests(wf):
-    id = wf.id
+    experiment_id = wf.id
     key = wf.analysis["data_type"]
 
     # key = "overhead"
     if key is not None:
-        stage_ids, samples, knobs = get_tuples(id, key)
-        test = FactorialAnova(stage_ids=stage_ids, y_key=key, knob_keys=None, stages_count=len(stage_ids))
-        aov_table, aov_table_sqr = test.run(data=samples, knobs=knobs)
-        # before saving and merging tables, extract useful information
-        aov_table = delete_combination_notation(aov_table)
-        aov_table_sqr = delete_combination_notation(aov_table_sqr)
-
-        # type(dd) is DefaultOrderedDict
-        # keys = [exploration_percentage, route_random_sigma, exploration_percentage,route_random_sigma...]
-        # resultDict e.g. {'PR(>F)': 0.0949496951695454, 'F': 2.8232330924997346 ...
-        dod = iterate_anova_tables(aov_table=aov_table, aov_table_sqr=aov_table_sqr)
         try:
+            stage_ids, samples, knobs = get_tuples(experiment_id=experiment_id, step_no=wf.step_no, key=key)
+            test = FactorialAnova(stage_ids=stage_ids, y_key=key, knob_keys=None, stages_count=len(stage_ids))
+            aov_table, aov_table_sqr = test.run(data=samples, knobs=knobs)
+            # before saving and merging tables, extract useful information
+            aov_table = delete_combination_notation(aov_table)
+            aov_table_sqr = delete_combination_notation(aov_table_sqr)
+
+            # type(dd) is DefaultOrderedDict
+            # keys = [exploration_percentage, route_random_sigma, exploration_percentage,route_random_sigma...]
+            # resultDict e.g. {'PR(>F)': 0.0949496951695454, 'F': 2.8232330924997346 ...
+            dod = iterate_anova_tables(aov_table=aov_table, aov_table_sqr=aov_table_sqr)
+
             # from now on, caller functions should fetch result from DB
-            db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, anova_result=dod)
+            db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test.name, anova_result=dod)
             return True
         except Exception as e:
-            error(e.message)
+            print("error in factorial tests, while performing anova")
+            tb = traceback.format_exc()
+            error(tb)
             return False
     else:
         error("data type for anova is not properly provided")
         return False
 
 
-def get_tuples(id, key):
-    stage_ids = db().get_stages(id)[0]
-    data, knobs = db().get_data_for_analysis(id)
+def get_tuples(experiment_id, step_no, key):
+    stage_ids = db().get_stages(experiment_id, step_no)[0]
+    data, knobs = db().get_data_for_analysis(experiment_id, step_no)
     extract_inner_values(key=key, stage_ids=stage_ids, data=data)
     # parse data & knobs (k-v pairs) to a proper array of values
     samples = [data[stage_id] for stage_id in stage_ids]
@@ -283,6 +287,7 @@ def assign_iterations(experiment, significant_interactions, execution_strategy_t
 
         # if you have more values in keys, then you need to set opt_iter_in_design accordingly
         # the restriction of n_calls <= 4 * nrOfParams is coming from gp_minimize
+        # TODO: depending on execution_strategy_type, different values can be assigned
         if values[i] < len(str(key).split(', ')) * 4:
             values[i] = len(str(key).split(', ')) * 4
         significant_interactions[key]["optimizer_iterations"] = values[i]
@@ -327,16 +332,23 @@ def start_bogp(wf, sorted_significant_interactions):
 
         # perform desired optimization process
         # after each experimentation, we will get best value & knob related with that value
-        # to find optimum out of all experimentations, we use optimal_tuples array to keep track & sort at the end
-        # TODO: 3) insert result to db (create an abstraction of phase1-2-3 etc.) to create experiment_id
+        # to find optimum out of all experiments, we use optimal_tuples array to keep track & sort at the end
+        # also save this optimum as stage_result and distinguish between regular stage & overall stage (final) result
+        stage_no = "final_" + str(wf.step_no)
         if wf.execution_strategy["type"] == 'self_optimizer':
-            optimal_knob, optimal_value = start_self_optimizer_strategy(wf)
-            optimal_tuples.append((optimal_knob, optimal_value))
-            info("> Optimal knob at the end of Bayesian process (scikit): " + str(optimal_knob) + ", " + str(optimal_value))
+            optimal_knob, optimal_result = start_self_optimizer_strategy(wf)
+            optimal_tuples.append((optimal_knob, optimal_result))
+            info("> Saving optimal knob at the end of Bayesian process (scikit): " + str(optimal_knob) + ", " + str(optimal_result))
+            db().save_stage(experiment_id=wf.id, step_no=wf.step_no, stage_no=stage_no, knobs=optimal_knob, stage_result=optimal_result)
         elif wf.execution_strategy["type"] == 'mlr_mbo':
-            optimal_knob, optimal_value = start_mlr_mbo_strategy(wf)
-            optimal_tuples.append((optimal_knob, optimal_value))
-            info("> Optimal knob at the end of Bayesian process (mlr-mbo): " + str(optimal_knob) + ", " + str(optimal_value))
+            optimal_knob, optimal_result = start_mlr_mbo_strategy(wf)
+            optimal_tuples.append((optimal_knob, optimal_result))
+            db().save_stage(experiment_id=wf.id, step_no=wf.step_no, stage_no=stage_no, knobs=optimal_knob, stage_result=optimal_result)
+            info("> Saving optimal knob at the end of Bayesian process (mlr-mbo): " + str(optimal_knob) + ", " + str(optimal_result))
+
+        # TODO: by sorting optimal_tuples, find best one so far and apply / pass it to CrowdNav with workflow_knobs
+        # increment step_no by one as we treat each run of optimization as one step
+        wf.step_no += 1
         # TODO: to save result to db, we need a new experiment_id, o/w previous ones will be overwritten
     info("> All knobs & values " + str(optimal_tuples))
     # find the best tuple (knob & result)

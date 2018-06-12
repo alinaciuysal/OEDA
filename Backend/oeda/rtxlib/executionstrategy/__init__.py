@@ -21,3 +21,13 @@ def applyDefaultKnobs(wf):
                 .applyChange(wf.change_event_creator(wf.execution_strategy["post_workflow_knobs"]))
         except:
             error("apply changes did not work")
+
+
+''' re-creates knobs from defaultVariables e.g.{"name":...,"default":...}, {"name":...,"default":...}, {"name":...,"default":...} ...'''
+def create_knob_from_default(wf):
+    knob = {}
+    for definition in wf._oeda_target["defaultVariables"]:
+        key = definition["name"]
+        value = definition["default"]
+        knob[key] = value
+    return knob

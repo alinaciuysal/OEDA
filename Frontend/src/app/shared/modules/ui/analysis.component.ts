@@ -101,6 +101,7 @@ import {hasOwnProperty} from "tslint/lib/utils";
 export class AnalysisComponent {
   @Input() targetSystem: any;
   @Input() experiment: any;
+  @Input() step_no: any;
 
   public analysis_is_collapsed: boolean;
   public properties: any;
@@ -120,7 +121,7 @@ export class AnalysisComponent {
   public btnClicked(): void {
     // first case with empty results
     if (this.analysis_is_collapsed && isNullOrUndefined(this.results)) {
-      this.apiService.getAnalysis(this.experiment).subscribe(
+      this.apiService.getAnalysis(this.experiment, this.step_no).subscribe(
         (result) => {
           let analysis = JSON.parse(result._body);
           console.log("incoming", analysis);

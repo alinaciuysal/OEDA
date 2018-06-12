@@ -18,6 +18,7 @@ class FactorialAnova(Analysis):
 
     name = "two-way-anova"
 
+    # TODO: refactor Analysis classes because we don't have stage_ids associated with analysis tuple in ES anymore
     def __init__(self, stage_ids, y_key, knob_keys, stages_count):
         super(FactorialAnova, self).__init__(stage_ids, y_key)
         self.knob_keys = knob_keys

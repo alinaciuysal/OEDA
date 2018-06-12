@@ -29,8 +29,6 @@ def experimentFunction(wf, exp):
     # start
     info(">")
     info("> KnobValues     | " + str(exp["knobs"]))
-    # create new state
-    # exp["state"] = wf.state_initializer(dict(), wf)
 
     try:
         wf.change_provider["instance"].applyChange(change_creator(exp["knobs"], wf))

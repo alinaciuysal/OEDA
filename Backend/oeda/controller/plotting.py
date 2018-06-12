@@ -16,7 +16,7 @@ class QQPlotController(Resource):
 
     availableScales = ["normal", "log"]
 
-    def get(self, experiment_id, stage_no, distribution, scale, incoming_data_type_name):
+    def get(self, experiment_id, step_no, stage_no, distribution, scale, incoming_data_type_name):
         try:
             if str(scale).lower() not in self.availableScales:
                 return {"error": "Provided scale is not supported"}, 404
@@ -24,7 +24,7 @@ class QQPlotController(Resource):
             pts = []
             # this case corresponds to all stage data
             if int(stage_no) == -1:
-                stages_and_data_points = get_all_stage_data(experiment_id=experiment_id)
+                stages_and_data_points = get_all_stage_data(experiment_id=experiment_id, step_no=step_no)
                 if stages_and_data_points is None:
                     return {"error": "Data points cannot be retrieved for given experiment and/or stage"}, 404
                 for entity in stages_and_data_points:
@@ -38,7 +38,7 @@ class QQPlotController(Resource):
                         if point:
                             pts.append(point)
             else:
-                data_points = db().get_data_points(experiment_id=experiment_id, stage_no=stage_no)
+                data_points = db().get_data_points(experiment_id=experiment_id, step_no=step_no, stage_no=stage_no)
                 if data_points is None:
                     return {"error": "Data points cannot be retrieved for given experiment and/or stage"}, 404
                 for data_point in data_points:

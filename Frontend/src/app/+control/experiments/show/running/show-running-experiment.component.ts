@@ -68,6 +68,8 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
   public selected_stage: any;
   public oedaCallback: OedaCallbackEntity;
 
+  public step_no: any;
+
 
   constructor(private layout: LayoutService,
               private apiService: OEDAApiService,
@@ -105,6 +107,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     this.filterSummaryId = "filterSummary";
     this.qqPlotDivId = "qqPlot";
     this.qqPlotDivIdJS = "qqPlotJS";
+    this.step_no = "1";
 
     // subscribe to router event
     this.activated_route.params.subscribe((params: Params) => {
@@ -134,7 +137,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
                 this.targetSystem = targetSystem;
                 this.targetSystem.id = this.experiment.targetSystemId;
                 // retrieve stages
-                this.apiService.loadAvailableStagesWithExperimentId(this.experiment_id).subscribe(stages => {
+                this.apiService.loadAvailableStagesWithExperimentId(this.experiment_id, this.step_no).subscribe(stages => {
                   if (!isNullOrUndefined(stages)) {
                     // initially selected stage is "All Stages"
                     this.selected_stage = {"number": -1, "knobs": {}};
@@ -185,6 +188,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
       if(!isNullOrUndefined(oedaCallback)) {
         ctrl.oedaCallback["status"] = oedaCallback.status;
         ctrl.oedaCallback["stage_counter"] = oedaCallback.stage_counter;
+        ctrl.oedaCallback["step_no"] = oedaCallback.step_no;
 
         // keywords (index, size) are same for the first two cases, but they indicate different things
         if (oedaCallback.status === "PROCESSING") {
@@ -205,7 +209,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
           // fetch data from backend
           if (oedaCallback.status == "COLLECTING_DATA") {
             if (ctrl.first_render_of_page) {
-              ctrl.apiService.loadAllDataPointsOfExperiment(ctrl.experiment_id).subscribe(response => {
+              ctrl.apiService.loadAllDataPointsOfExperiment(ctrl.experiment_id, ctrl.step_no).subscribe(response => {
                 let is_successful_fetch = ctrl.process_response(response);
                 if (ctrl.incoming_data_type == null)
                   ctrl.incoming_data_type = ctrl.entityService.get_candidate_data_type(ctrl.experiment, ctrl.targetSystem, ctrl.all_data[0]);
@@ -219,7 +223,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
               if (ctrl.timestamp == undefined) {
                 ctrl.timestamp = "-1";
               }
-              ctrl.apiService.loadAllDataPointsOfRunningExperiment(ctrl.experiment_id, ctrl.timestamp).subscribe(response => {
+              ctrl.apiService.loadAllDataPointsOfRunningExperiment(ctrl.experiment_id, ctrl.step_no, ctrl.timestamp).subscribe(response => {
                 ctrl.process_response(response);
                 if (ctrl.incoming_data_type == null)
                   ctrl.incoming_data_type = ctrl.entityService.get_candidate_data_type(ctrl.experiment, ctrl.targetSystem, ctrl.all_data[0]);
@@ -485,7 +489,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
 
   stopRunningExperiment(): void {
     this.experiment.status = "INTERRUPTED";
-    this.apiService.updateExperiment(this.experiment).subscribe(() => {
+    this.apiService.updateExperiment(this.experiment, this.step_no).subscribe(() => {
       this.targetSystem.status = "READY";
       this.apiService.updateTarget(this.targetSystem).subscribe(() => {
         this.subscription.unsubscribe();

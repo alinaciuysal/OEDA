@@ -213,8 +213,8 @@ export class PlotService {
   }
 
   /** retrieves qq plot image from the server */
-  public retrieve_qq_plot_image(experiment_id, selected_stage, distribution, scale, incoming_data_type_name): Observable<any> {
-    return this.apiService.getQQPlot(experiment_id, selected_stage.number.toString(), distribution, scale, incoming_data_type_name);
+  public retrieve_qq_plot_image(experiment_id, step_no, selected_stage, distribution, scale, incoming_data_type_name): Observable<any> {
+    return this.apiService.getQQPlot(experiment_id, step_no, selected_stage.number.toString(), distribution, scale, incoming_data_type_name);
   }
 
   /** dstributes data to bins for histogram*/

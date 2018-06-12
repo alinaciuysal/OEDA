@@ -36,7 +36,7 @@ class ExperimentController(Resource):
                 # also remove callback dict from callbackDict
                 pop_from_dict(experiment_id, None)
 
-            db().update_experiment_status(experiment_id, status)
+            db().update_experiment(experiment_id=experiment_id, field="status", value=status)
             resp = jsonify({"message": "Experiment status is updated"})
             resp.status_code = 200
             return resp

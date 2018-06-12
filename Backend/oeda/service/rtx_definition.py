@@ -6,7 +6,6 @@ from oeda.utilities.MathUtility import take_inverse
 class RTXDefinition:
 
     name = None
-    folder = None
     _oeda_experiment = None
     _oeda_target = None
     _oeda_callback = None
@@ -15,10 +14,11 @@ class RTXDefinition:
     secondary_data_providers = []
     change_provider = None
     id = None
-    stage_counter = None
+    stage_counter = None # for each different step, this stage counter is reset to 1
     all_knobs = None
     remaining_time_and_stages = None
     incoming_data_types = None
+    step_no = None
     considered_data_types = []
 
     def __init__(self, oeda_experiment, oeda_target, oeda_callback, oeda_stop_request):
@@ -49,20 +49,20 @@ class RTXDefinition:
 
         execution_strategy = oeda_experiment["executionStrategy"]
         self.execution_strategy = execution_strategy
-        self.state_initializer = RTXDefinition.state_initializer
         self.evaluator = RTXDefinition.evaluator
-        self.folder = None
         self.setup_stage = RTXDefinition.setup_stage
 
     def run_oeda_callback(self, dictionary):
         dictionary['stage_counter'] = self.stage_counter
+        dictionary['step_no'] = self.step_no
         self._oeda_callback(dictionary, self.id)
 
     """ saves the data provided by the primary data provider
         new_data is sth like {'overhead' : 1.22253, 'minimalCosts': '200.2522', ...} but count is same for all keys """
     @staticmethod
     def primary_data_reducer(new_data, wf):
-        db().save_data_point(new_data, wf.primary_data_counter, wf.id, wf.stage_counter, None)
+        db().save_data_point(experiment_id=wf.id, step_no=wf.step_no, stage_no=wf.stage_counter,
+                             data_point_count=wf.primary_data_counter, secondary_data_provider_index=None, payload=new_data)
         wf.primary_data_counter += 1
         if wf._oeda_stop_request.isSet():
             raise RuntimeError("Experiment interrupted from OEDA while reducing primary data.")
@@ -75,40 +75,14 @@ class RTXDefinition:
         declare another secondary data provider for this purpose """
     @staticmethod
     def secondary_data_reducer(new_data, wf, idx):
-        db().save_data_point(new_data, wf.secondary_data_counter, wf.id, wf.stage_counter, idx)
+        db().save_data_point(experiment_id=wf.id, step_no=wf.step_no, stage_no=wf.stage_counter,
+                             data_point_count=wf.secondary_data_counter, secondary_data_provider_index=idx, payload=new_data)
         wf.secondary_data_counter += 1
-        # for index, (data_type_name, data_type_value) in enumerate(new_data.items()):
-        #     data_type_count = str(data_type_name) + "_cnt"
-        #     cnt = state.get(data_type_count)
-        #     if index == 0:  # perform save operation only once by passing index of data provider(idx)
-        #         db().save_data_point(new_data, cnt, wf.id, wf.stage_counter, idx)
-        #     state[data_type_count] += 1
-        # return state
         return wf
 
     @staticmethod
-    def state_initializer(state, wf):
-
-        for data_type in wf.primary_data_provider["incomingDataTypes"]:
-            data_type_name = str(data_type["name"])
-            data_type_count = data_type_name + "_cnt"
-            state[data_type_name] = 0
-            state[data_type_count] = 0
-
-        if len(wf.secondary_data_providers) > 0:
-            # initialize all secondary data types, not only the hard-coded ones; as well as their counts to 0
-            for dp in wf.secondary_data_providers:
-                for data_type in dp["incomingDataTypes"]:
-                    data_type_name = str(data_type["name"])
-                    data_type_count = data_type_name + "_cnt"
-                    state[data_type_name] = 0
-                    state[data_type_count] = 0
-
-        return state
-
-    @staticmethod
-    def setup_stage(wf, stage_knob):
-        db().save_stage(wf.stage_counter, stage_knob, wf.id)
+    def setup_stage(wf, knobs):
+        db().save_stage(experiment_id=wf.id, step_no=wf.step_no, stage_no=wf.stage_counter, knobs=knobs)
 
     @staticmethod
     def calculate_result(wf):
@@ -120,19 +94,19 @@ class RTXDefinition:
             field_value = data_type_aggregate_function.split("-")[1] # fetch value
             field_value = 1 if field_value == 'True' else 0 # because we store them in binary, not in True/False
             count = db().get_count(wf.id, wf.stage_counter, data_type_name, field_value)
-            total = db().get_aggregation(wf.id, wf.stage_counter, "stats", data_type_name)["count"]
+            total = db().get_aggregation(wf.id, wf.step_no, wf.stage_counter, "stats", data_type_name)["count"]
             value = float(count) / total
         else:
             if 'percentiles' in data_type_aggregate_function:
                 # we have percentiles-25, percentiles-50 etc and parse it to use percentiles as outer aggregate_function
                 aggregate_function, percentile_number = data_type_aggregate_function.split("-")
-                values = db().get_aggregation(wf.id, wf.stage_counter, aggregate_function, data_type_name)
+                values = db().get_aggregation(wf.id, wf.step_no, wf.stage_counter, aggregate_function, data_type_name)
                 value = values[str(float(percentile_number))]
             else:
                 aggregate_function = "stats"
                 if data_type_aggregate_function in ['sum_of_squares', 'variance', 'std_deviation']:
                     aggregate_function = "extended_stats"
-                values = db().get_aggregation(wf.id, wf.stage_counter, aggregate_function, data_type_name)
+                values = db().get_aggregation(wf.id, wf.step_no, wf.stage_counter, aggregate_function, data_type_name)
                 value = values[data_type_aggregate_function] # retrieve exact value from response
         if value is not None and isnan(float(value)) is False:
             # maximization criteria before calculating the result
@@ -150,8 +124,8 @@ class RTXDefinition:
         result = RTXDefinition.calculate_result(wf)
         info("---------------- result")
         info(result)
-        db().update_stage(wf.id, wf.stage_counter, result)
-        wf.stage_counter += 1 # this must be done after all calculations
+        db().update_stage(experiment_id=wf.id, step_no=wf.step_no, stage_no=wf.stage_counter, field="stage_result", value=result)
+        wf.stage_counter += 1 # this must be done after all calculations of a single stage
         return result
 
 

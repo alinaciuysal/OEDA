@@ -16,15 +16,15 @@
             "executionStrategy": {
               "type": "nested",
               "properties": {
-                "knobs":                   { "type": "object"  },
-                "sample_size":             { "type": "integer" },
-                "type":                    { "type": "keyword" },
-                "stages_count":            { "type": "integer" }
+                "knobs":                  { "type": "object"  },
+                "sample_size":            { "type": "integer" },
+                "type":                   { "type": "keyword" },
+                "stages_count":           { "type": "integer" }
               }
             },
-            "createdDate":                  { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"},
-            "targetSystemId":           { "type": "keyword"  },
-            "variable_to_be_optimized": { "type": "keyword"  }
+            "createdDate":                { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"},
+            "targetSystemId":             { "type": "keyword"  },
+            "numberOfSteps":              { "type": "integer"  }
           }
         }
       }
@@ -36,7 +36,8 @@
         "stage": {
           "properties":     {
             "experiment_id": {"type": "keyword"},
-            "number":       { "type": "integer" },
+            "step_no":       { "type": "keyword" },
+            "number":       { "type": "text"     },
             "knobs":        { "type": "object"  },
             "createdDate":  { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"},
             "stage_result": { "type": "float" }
@@ -50,7 +51,8 @@
       "mappings": {
         "analysis": {
           "properties": {
-            "stage_ids":     { "type": "keyword" },
+            "experiment_id": { "type": "keyword" },
+            "step_no":       { "type": "keyword" },
             "name":          { "type": "keyword" },
             "sample_size":   { "type": "integer" },
             "result":        { "type": "object"  },

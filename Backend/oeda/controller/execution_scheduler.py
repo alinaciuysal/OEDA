@@ -9,7 +9,7 @@ class ExecutionSchedulerController(Resource):
     def post():
         try:
             content = request.get_json()
-            print content
+            print(content)
         except Exception as e:
             tb = traceback.format_exc()
             print(tb)

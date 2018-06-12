@@ -32,6 +32,7 @@ export class CreateExperimentsComponent implements OnInit {
   errorButtonLabelTtest: string;
   defaultAlpha: number;
   defaultTTestEffectSize: number;
+  defaultTTestSampleSize: number;
   maxNrOfImportantFactors: number;
 
   constructor(private layout: LayoutService, private api: OEDAApiService,
@@ -46,6 +47,7 @@ export class CreateExperimentsComponent implements OnInit {
     this.originalExperiment = _(this.experiment);
     this.defaultAlpha = 0.05; // default value to be added when an analysis is selected
     this.defaultTTestEffectSize = 0.7;
+    this.defaultTTestSampleSize = 25;
     this.is_collapsed = true;
   }
 
@@ -150,6 +152,7 @@ export class CreateExperimentsComponent implements OnInit {
       this.experiment.analysis.anovaAlpha = this.defaultAlpha;
       this.experiment.analysis.tTestAlpha = this.defaultAlpha;
       this.experiment.analysis.tTestEffectSize = this.defaultTTestEffectSize;
+      this.experiment.analysis.tTestSampleSize = this.defaultTTestSampleSize;
       this.maxNrOfImportantFactors = Math.pow(2, this.targetSystem.changeableVariables.length) - 1;
       this.experiment.executionStrategy.type = "self_optimizer";
       this.acquisitionMethodChanged("gp_hedge");
@@ -416,8 +419,6 @@ export class CreateExperimentsComponent implements OnInit {
   }
 
   public hasErrorsTtest() {
-
-    // regular check
     if (isNullOrUndefined(this.experiment.analysis.tTestAlpha) || this.experiment.analysis.tTestAlpha <= 0 || this.experiment.analysis.tTestAlpha >= 1) {
       this.errorButtonLabelTtest = "Provide valid alpha for T-test";
       return true;
@@ -427,6 +428,12 @@ export class CreateExperimentsComponent implements OnInit {
       this.errorButtonLabelTtest = "Provide valid effect size for T-test";
       return true;
     }
+
+    if (isNullOrUndefined(this.experiment.analysis.tTestSampleSize) || this.experiment.analysis.tTestSampleSize <= 0) {
+      this.errorButtonLabelTtest = "Provide valid sample size for T-test";
+      return true;
+    }
+    return false;
   }
 
   public incomingDataTypesChanged(incomingDataTypes) {

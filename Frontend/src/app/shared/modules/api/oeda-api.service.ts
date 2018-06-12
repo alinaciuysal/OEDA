@@ -22,24 +22,24 @@ export class OEDAApiService extends RESTService {
     return this.doGETPublicRequest("/experiments/" + experiment_id)
   }
 
-  public loadAllDataPointsOfExperiment(experiment_id: string): Observable<any> {
-    return this.doGETPublicRequest("/experiment_results/" + experiment_id)
+  public loadAllDataPointsOfExperiment(experiment_id: string, step_no: any): Observable<any> {
+    return this.doGETPublicRequest("/experiment_results/" + experiment_id + "/" + step_no)
   }
 
-  public loadAllDataPointsOfRunningExperiment(experiment_id: string, timestamp: string): Observable<any> {
-    return this.doGETPublicRequest("/running_experiment_results/" + experiment_id + "/" + timestamp)
+  public loadAllDataPointsOfRunningExperiment(experiment_id: string, step_no: any, timestamp: string): Observable<any> {
+    return this.doGETPublicRequest("/running_experiment_results/" + experiment_id + "/" + step_no + "/" + timestamp)
   }
 
-  public loadAvailableStagesWithExperimentId(experiment_id: string): Observable<any> {
-    return this.doGETPublicRequest("/stages/" + experiment_id)
+  public loadAvailableStagesWithExperimentId(experiment_id: string, step_no: any): Observable<any> {
+    return this.doGETPublicRequest("/stages/" + experiment_id + "/" + step_no)
   }
 
   public getOedaCallback(experiment_id: string): Observable<any> {
     return this.doGETPublicRequest("/running_experiment_results/oeda_callback/" + experiment_id)
   }
 
-  public getQQPlot(experiment_id: string, stage_no: string, distribution: string, scale: string, incoming_data_type_name: string): Observable<any> {
-    return this.doGETPublicRequest("/qqPlot/" + experiment_id + "/" + stage_no + "/" + distribution + "/" + scale + "/" + incoming_data_type_name);
+  public getQQPlot(experiment_id: string, step_no: any, stage_no: string, distribution: string, scale: string, incoming_data_type_name: string): Observable<any> {
+    return this.doGETPublicRequest("/qqPlot/" + experiment_id + "/" + step_no + "/" + stage_no + "/" + distribution + "/" + scale + "/" + incoming_data_type_name);
   }
 
   public getConfigFromAPI(url: string): Observable<any> {
@@ -50,8 +50,8 @@ export class OEDAApiService extends RESTService {
     return this.doPOSTPublicRequest("/experiments/" + experiment.id, experiment)
   }
 
-  public updateExperiment(experiment: Experiment): Observable<any> {
-    return this.doPUTPublicRequest("/experiments/" + experiment.id, experiment)
+  public updateExperiment(experiment: Experiment, step_no: any): Observable<any> {
+    return this.doPUTPublicRequest("/experiments/" + experiment.id + "/" + step_no, experiment)
   }
 
   public loadAllTargets(): Observable<Target[]> {
@@ -79,8 +79,8 @@ export class OEDAApiService extends RESTService {
     return this.doPOSTPublicRequest("/auth/register", user);
   }
 
-  public getAnalysis(experiment: Experiment): Observable<any> {
-    return this.doPOSTPublicRequest("/analysis/" + experiment.id, experiment);
+  public getAnalysis(experiment: Experiment, step_no: any): Observable<any> {
+    return this.doPOSTPublicRequest("/analysis/" + experiment.id + "/" + step_no, experiment);
   }
 
   // remove for production

@@ -430,8 +430,8 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
   }
 
   /** called when incoming data type of the target system is changed */
-  incoming_data_type_changed(incoming_data_type) {
-    this.incoming_data_type = incoming_data_type;
+  incoming_data_type_changed(incoming_data_type_name) {
+    this.incoming_data_type = this.targetSystem.incomingDataTypes.find(x => x.name == incoming_data_type_name);
     if (this.entityService.scale_allowed(this.scale, this.incoming_data_type["scale"])) {
       this.draw_all_plots();
     } else {

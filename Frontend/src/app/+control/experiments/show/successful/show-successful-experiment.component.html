@@ -2,13 +2,31 @@
 
   <!-- Experiment Details & Analysis Section -->
   <experiment-details [experiment]="experiment" [targetSystem]="targetSystem" [is_collapsed]="is_collapsed" [for_successful_experiment]="true"></experiment-details>
-  <analysis [experiment]="experiment" [targetSystem]="targetSystem" [step_no]="step_no"></analysis>
+
+
+  <div class="col-md-6">
+    <div class="panel panel-default chartJs">
+      <div class="panel-heading">
+        <div class="title">Step</div>
+          <select class="form-control"
+                  [(ngModel)]="step_no" (ngModelChange)="stepNoChanged($event)" size="1">
+            <option *ngFor="let step_no of available_steps" value="{{step_no.number}}">{{step_no.name}}</option>
+          </select>
+        </div>
+    </div>
+  </div>
+
+
+  <!-- Show analysis sections for relevant steps-->
+  <anova-analysis *ngIf="step_no == 1" [experiment]="experiment" [targetSystem]="targetSystem" [step_no]="step_no"></anova-analysis>
+
+  <ttest-analysis *ngIf="step_no == experiment.numberOfSteps" [experiment]="experiment" [targetSystem]="targetSystem" [step_no]="step_no"></ttest-analysis>
 
   <!-- Experiment Stages with paginator -->
   <experiment-stages-paginator [experiment]="experiment"
                      [selected_stage]="selected_stage"
                      [available_stages]="available_stages"
-                     [incoming_data_type]="incoming_data_type"
+                     [incoming_data_type_name]="incoming_data_type?.name"
                      [scale]="scale"
                      [targetSystem]="targetSystem"
                      [for_successful_experiment]="true"

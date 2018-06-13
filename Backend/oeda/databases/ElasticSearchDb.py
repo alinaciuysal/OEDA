@@ -429,7 +429,7 @@ class ElasticSearchDb(Database):
         raise Exception("Cannot retrieve stage and data from db, please restart")
 
     # we had to distinguish between anova_result (json of json objects) with regular t_test result (single json object)
-    def save_analysis(self, experiment_id, step_no, analysis_name, result = None, anova_result = None):
+    def save_analysis(self, experiment_id, step_no, analysis_name, knobs=None, result=None, anova_result=None):
         analysis_id = Database.create_analysis_id(experiment_id, step_no, analysis_name)
         body = dict()
         body["experiment_id"] = experiment_id
@@ -438,6 +438,9 @@ class ElasticSearchDb(Database):
         body["result"] = result
         body["anova_result"] = anova_result
         body["createdDate"] = datetime.now().isoformat(' ')
+
+        if knobs:
+            body["knobs"] = knobs
 
         try:
             self.es.index(index=self.analysis_index, doc_type=self.analysis_type_name, body=body, id=analysis_id)

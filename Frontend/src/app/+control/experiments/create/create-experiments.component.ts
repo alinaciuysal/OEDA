@@ -7,8 +7,6 @@ import * as _ from "lodash.clonedeep";
 import {isNullOrUndefined} from "util";
 import {TempStorageService} from "../../../shared/modules/helper/temp-storage-service";
 import {EntityService} from "../../../shared/util/entity-service";
-import {UtilService} from "../../../shared/modules/util/util.service";
-import indexOf = require("core-js/library/fn/array/index-of");
 import {hasOwnProperty} from "tslint/lib/utils";
 import {isNumeric} from "rxjs/util/isNumeric";
 
@@ -37,7 +35,7 @@ export class CreateExperimentsComponent implements OnInit {
 
   constructor(private layout: LayoutService, private api: OEDAApiService,
               private router: Router, private notify: NotificationsService,
-              private temp_storage: TempStorageService, private entityService: EntityService, private utilService: UtilService) {
+              private temp_storage: TempStorageService, private entityService: EntityService) {
     this.availableTargetSystems = [];
 
     // create experiment, target system, and execution strategy

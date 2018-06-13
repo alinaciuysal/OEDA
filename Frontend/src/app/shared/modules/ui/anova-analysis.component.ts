@@ -1,22 +1,20 @@
-import {Component, Input, PipeTransform, Pipe} from "@angular/core";
+import {Component, Input} from "@angular/core";
 import {isNullOrUndefined} from "util";
 import {OEDAApiService} from "../api/oeda-api.service";
 import {NotificationsService} from "angular2-notifications/dist";
-import * as _ from "lodash.clonedeep";
-import {hasOwnProperty} from "tslint/lib/utils";
 
 @Component({
-  selector: 'analysis',
+  selector: 'anova-analysis',
   template: `
     <!-- Show/Hide Button & Additional Buttons for Running experiments -->
     <div class="col-md-12">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <button type="button" class="btn btn-success" (click)="btnClicked()">
-            <span *ngIf="analysis_is_collapsed">Show Analysis Details</span>
+            <span *ngIf="analysis_is_collapsed">Show ANOVA Details</span>
             <i *ngIf="analysis_is_collapsed" class="fa fa-angle-double-down" aria-hidden="true"></i>
 
-            <span *ngIf="!analysis_is_collapsed">Hide Analysis Details</span>
+            <span *ngIf="!analysis_is_collapsed">Hide ANOVA Details</span>
             <i *ngIf="!analysis_is_collapsed" class="fa fa-angle-double-up" aria-hidden="true"></i>
           </button>
         </div>
@@ -98,7 +96,7 @@ import {hasOwnProperty} from "tslint/lib/utils";
   `
 })
 
-export class AnalysisComponent {
+export class AnovaAnalysisComponent {
   @Input() targetSystem: any;
   @Input() experiment: any;
   @Input() step_no: any;
@@ -116,16 +114,15 @@ export class AnalysisComponent {
   constructor(private apiService: OEDAApiService, private notify: NotificationsService) {
     this.analysis_is_collapsed = true;
     this.retrieved = false;
+    this.analysis_name = "two-way-anova";
   }
 
   public btnClicked(): void {
     // first case with empty results
     if (this.analysis_is_collapsed && isNullOrUndefined(this.results)) {
-      this.apiService.getAnalysis(this.experiment, this.step_no).subscribe(
+      this.apiService.getAnalysis(this.experiment, this.step_no, this.analysis_name).subscribe(
         (result) => {
           let analysis = JSON.parse(result._body);
-          console.log("incoming", analysis);
-          this.analysis_name = analysis["name"];
           this.eligible_for_next_step = analysis["eligible_for_next_step"];
           this.nrOfImportantFactors = this.experiment.analysis["nrOfImportantFactors"];
           this.anovaAlpha = this.experiment.analysis["anovaAlpha"];
@@ -134,10 +131,7 @@ export class AnalysisComponent {
 
           // naming convention with backend server
           this.results = analysis["anova_result"]; // {C(x): {F: 0.2, PR(>F): 0.4} ... }
-          console.log("results", this.results);
           this.properties = this.get_keys(this.results); // Residual, exploration_percentage etc.
-          console.log("properties", this.properties);
-
           // concatenate inner keys of tuples
           let allKeys = [];
           for (let property of this.properties) {
@@ -149,8 +143,6 @@ export class AnalysisComponent {
             }
           }
           this.inner_keys = allKeys;
-          console.log("inner_keys", this.inner_keys);
-
           let new_properties = [];
           // mark the ones less than alpha for now, might be changed. see get_significant_interactions method in Backend
           for (let prop of this.properties) {

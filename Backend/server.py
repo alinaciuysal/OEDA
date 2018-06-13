@@ -78,7 +78,7 @@ api.add_resource(UserController, '/api/user/<string:username>')
 
 api.add_resource(ExperimentsListController, '/api/experiments')
 api.add_resource(ExperimentController, '/api/experiments/<string:experiment_id>')
-api.add_resource(AnalysisController, '/api/analysis/<string:experiment_id>/<string:step_no>')
+api.add_resource(AnalysisController, '/api/analysis/<string:experiment_id>/<string:step_no>/<string:analysis_name>')
 
 api.add_resource(TargetsListController, '/api/targets')
 api.add_resource(TargetController, '/api/targets/<string:target_id>')

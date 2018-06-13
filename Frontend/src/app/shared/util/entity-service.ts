@@ -154,7 +154,8 @@ export class EntityService {
         "executionStrategy": execution_strategy,
         "changeableVariables": [], // used while creating an experiment
         "considered_data_types": [],
-        "analysis": {}
+        "analysis": {},
+        "numberOfSteps": 0
       }
   }
 

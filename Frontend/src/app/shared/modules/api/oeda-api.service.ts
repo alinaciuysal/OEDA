@@ -79,8 +79,8 @@ export class OEDAApiService extends RESTService {
     return this.doPOSTPublicRequest("/auth/register", user);
   }
 
-  public getAnalysis(experiment: Experiment, step_no: any): Observable<any> {
-    return this.doPOSTPublicRequest("/analysis/" + experiment.id + "/" + step_no, experiment);
+  public getAnalysis(experiment: Experiment, step_no: any, analysis_name: string): Observable<any> {
+    return this.doPOSTPublicRequest("/analysis/" + experiment.id + "/" + step_no + "/" + analysis_name, experiment);
   }
 
   // remove for production
@@ -99,6 +99,7 @@ export interface Experiment {
   executionStrategy: ExecutionStrategy,
   considered_data_types: object[],
   analysis: any
+  numberOfSteps: number
 }
 
 export interface StageEntity {

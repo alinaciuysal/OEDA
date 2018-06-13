@@ -12,8 +12,8 @@ import {isNullOrUndefined} from "util";
             <div class="col-md-4">
               <div class="card-title">
                 Incoming Data Type
-                <select class="form-control" [(ngModel)]="incoming_data_type" (ngModelChange)="onIncomingDataTypeChange($event)">
-                  <option *ngFor="let dataType of targetSystem.incomingDataTypes" [ngValue]="dataType">
+                <select class="form-control" [(ngModel)]="incoming_data_type_name" (ngModelChange)="onIncomingDataTypeChange($event)">
+                  <option *ngFor="let dataType of targetSystem.incomingDataTypes" value="{{dataType.name}}">
                     {{dataType.name}}
                   </option>
                 </select>
@@ -50,7 +50,7 @@ import {isNullOrUndefined} from "util";
               </tr>
               </thead>
               <tbody class="bigTable">
-                <tr *ngFor="let item of mf.data; let i = index;" (click)="onRowClick(item)" [class.active]="item.number == selected_row">
+                <tr *ngFor="let item of mf.data" (click)="onRowClick(item)" [class.active]="item.number == selected_row">
                   <td *ngIf="item.number === -1 && experiment.executionStrategy.type === 'forever'" data-toggle="tooltip" title="Default values of {{targetSystem.name}} are shown on this row">
                     <b>All Stages</b> 
                   </td>
@@ -114,7 +114,7 @@ export class ExperimentStagesPaginatorComponent implements OnInit {
   @Input() selected_stage: any;
   @Input() available_stages: any;
   @Input() targetSystem: any;
-  @Input() incoming_data_type: object;
+  @Input() incoming_data_type_name: string;
   @Input() scale: string;
   @Input() hidden: boolean;
   @Input() retrieved_data_length: number;
@@ -124,18 +124,18 @@ export class ExperimentStagesPaginatorComponent implements OnInit {
   public selected_row: number = 0;
   public ordered_keys: any;
 
-  @Input() onRowClick(stage) {
+  public onRowClick(stage) {
     this.selected_row = stage.number;
     this.rowClicked.emit(stage);
   }
 
-  @Input() onScaleChange = (ev) => {
+  public onScaleChange = (ev) => {
     this.scaleChanged.emit(ev);
   };
 
-  @Input() onIncomingDataTypeChange = (ev) => {
+  public onIncomingDataTypeChange(ev) {
     this.incomingDataTypeChanged.emit(ev);
-  };
+  }
 
   ngOnInit() {
     this.ordered_keys = this.get_ordered_keys(this.available_stages[0].knobs);

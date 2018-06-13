@@ -30,6 +30,7 @@ def start_three_phase_analysis(wf):
         # in this case, we can't find any significant interactions
         if sorted_significant_interactions is None:
             db().update_analysis(experiment_id=wf.id, step_no=wf.step_no, analysis_name='two-way-anova', field='eligible_for_next_step', value=False)
+            db().update_experiment(experiment_id=wf.id, field='numberOfSteps', value=wf.step_no)
             info("> Cannot find significant interactions, aborting process")
         else:
             db().update_analysis(experiment_id=wf.id, step_no=wf.step_no, analysis_name='two-way-anova', field='eligible_for_next_step', value=True)
@@ -46,7 +47,7 @@ def start_three_phase_analysis(wf):
             info("> Starting T-test, step_no: " + str(wf.step_no) + " re-setting stage_counter")
             # perform experiments with default & best knobs in another step
             # also save this to experiment in ES
-            wf.step_no += 1
+            # there is no need to increment step_no because at the last stage of bogp, it gets incremented, but reset stage_counter
             wf.stage_counter = 1
             db().update_experiment(experiment_id=wf.id, field='numberOfSteps', value=wf.step_no)
             # prepare knobs accordingly

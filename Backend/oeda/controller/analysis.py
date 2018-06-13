@@ -8,18 +8,15 @@ from oeda.log import *
 class AnalysisController(Resource):
 
     @staticmethod
-    def post(experiment_id, step_no):
+    def post(experiment_id, step_no, analysis_name):
         if experiment_id is None:
             return {"error": "experiment_id cannot be null"}, 404
 
-        # as we only have one considered_data_type
-        # naming conventions
-        test_name = "two-way-anova"
         test_results = {}
         try:
-            res = db().get_analysis(experiment_id, step_no, test_name)
+            res = db().get_analysis(experiment_id, step_no, analysis_name)
             if res:
-                test_results[test_name] = res
+                test_results[analysis_name] = res
                 resp = jsonify(res)
                 resp.status_code = 200
                 return resp

@@ -45,7 +45,15 @@ def start_two_sample_tests(wf):
 
     test1 = Ttest(stage_ids=stage_ids, y_key=key, alpha=alpha)
     result = test1.run(data=samples, knobs=knobs)
-    db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test1.name, result=result)
+
+    # prepare default & optimal knobs to save to analysis
+    stage_no = 1
+    knobs = {}
+    for tpl in wf.execution_strategy["knobs"]:
+        knobs[stage_no] = tpl
+        stage_no += 1
+
+    db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test1.name, result=result, knobs=knobs)
 
     # if we want to integrate following tests, they should be saved as another step_no, just increment it before saving
     # effect_size = wf.analysis["tTestEffectSize"]
@@ -148,7 +156,7 @@ def start_factorial_tests(wf):
             dod = iterate_anova_tables(aov_table=aov_table, aov_table_sqr=aov_table_sqr)
 
             # from now on, caller functions should fetch result from DB
-            db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test.name, anova_result=dod)
+            db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test.name, anova_result=dod, knobs=knobs)
             return True
         except Exception as e:
             print("error in factorial tests, while performing anova")
@@ -334,7 +342,7 @@ def start_bogp(wf, sorted_significant_interactions):
         # after each experimentation, we will get best value & knob related with that value
         # to find optimum out of all experiments, we use optimal_tuples array to keep track & sort at the end
         # also save this optimum as stage_result and distinguish between regular stage & overall stage (final) result
-        stage_no = "final_" + str(wf.step_no)
+        stage_no = "best"
         if wf.execution_strategy["type"] == 'self_optimizer':
             optimal_knob, optimal_result = start_self_optimizer_strategy(wf)
             optimal_tuples.append((optimal_knob, optimal_result))
@@ -349,6 +357,8 @@ def start_bogp(wf, sorted_significant_interactions):
         # TODO: by sorting optimal_tuples, find best one so far and apply / pass it to CrowdNav with workflow_knobs
         # increment step_no by one as we treat each run of optimization as one step
         wf.step_no += 1
+        # also reset stage_counter
+        wf.stage_counter = 1
         # TODO: to save result to db, we need a new experiment_id, o/w previous ones will be overwritten
     info("> All knobs & values " + str(optimal_tuples))
     # find the best tuple (knob & result)

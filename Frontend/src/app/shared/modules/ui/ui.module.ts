@@ -7,7 +7,8 @@ import {LabeledInputSelectComponent} from "./labeled-input-select-component";
 import {ExperimentDetailsComponent} from "./experiment-details.component";
 import {ExperimentStagesComponent} from "./experiment-stages.component";
 import {ExperimentStagesPaginatorComponent} from "./experiment-stages-paginator.component";
-import {AnalysisComponent} from "./analysis.component";
+import {AnovaAnalysisComponent} from "./anova-analysis.component";
+import {TtestAnalysisComponent} from "./ttest-analysis.component";
 import {DataTableModule} from "angular2-datatable";
 import {IncomingDataTypesComponent} from "./incoming-data-types-optimization";
 import {IncomingDataTypesAnalysisComponent} from "./incoming-data-types-analysis";
@@ -19,7 +20,8 @@ const uiElements = [
   ExperimentDetailsComponent,
   ExperimentStagesComponent,
   ExperimentStagesPaginatorComponent,
-  AnalysisComponent,
+  AnovaAnalysisComponent,
+  TtestAnalysisComponent,
   IncomingDataTypesComponent,
   IncomingDataTypesAnalysisComponent
 ];

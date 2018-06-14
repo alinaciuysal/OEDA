@@ -43,6 +43,13 @@ import {NotificationsService} from "angular2-notifications/dist";
               </div>
             </div>
 
+            <div class="col-md-2">
+              <div class="sub-title">Given Effect Size</div>
+              <div>
+                <input type="text" name="tTestEffectSize" value="{{tTestEffectSize}}" disabled>
+              </div>
+            </div>
+
             <div class="col-md-2" *ngIf="statistical_significance">
               <div class="sub-title">
                 <h4><span class="label label-success"><i class="fa fa-check"></i> Statistical significance is found</span></h4>
@@ -94,6 +101,7 @@ export class TtestAnalysisComponent {
   public results: any; // keeps track of keys & values in incoming obj
   public analysis_name: string;
   public tTestAlpha: number;
+  public tTestEffectSize: number;
   public retrieved: boolean; // keep track of retrieval status
   public statistical_significance: boolean; // keep track of statistical significance & respective UI tabs
 
@@ -110,6 +118,7 @@ export class TtestAnalysisComponent {
         (result) => {
           let analysis = JSON.parse(result._body);
           this.tTestAlpha = this.experiment.analysis["tTestAlpha"];
+          this.tTestEffectSize = this.experiment.analysis["tTestEffectSize"];
           this.results = analysis["result"]; // {different_averages: .., effect_size: .., ...}
           delete this.results["alpha"]; // no need to show it in the table, we already show it in the row
           console.log(this.results);

@@ -71,15 +71,15 @@
   <!-- QQ graphs -->
   <div class="col-md-12" [hidden]="!is_enough_data_for_plots" >
     <!-- QQ graph 1 -->
-    <div class="col-md-6">
+    <!--<div class="col-md-10">-->
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">
-            <div class="col-md-6">
-              <div class="title pull-left">Quantile Quantile (QQ) Plot against Theoretical Data &nbsp;</div>
-
-            </div>
             <div class="row">
+              <div class="col-md-6">
+                <div class="title pull-left">Quantile Quantile (QQ) Plot against Theoretical Data &nbsp;</div>
+              </div>
+
               <div class="col-md-6">
                 <div class="title">Theoretical Data Distribution</div>
                 <select class="form-control"
@@ -88,18 +88,25 @@
                 </select>
               </div>
             </div>
+
+            <div class="container-fluid" style="padding-top: 2%">
+              {{stage_details}}
+            </div>
           </div>
         </div>
 
-        <div class="panel-body">
-          <div>{{stage_details}}</div>
-          <div [hidden]="!is_qq_plot_rendered">
-            <!--additional css for centering the img-->
-            <img class="col-md-6" id="qqPlot" class="img-thumbnail">
+        <div class="panel-heading">
+          <div class="row">
+            <div class="col-md-8">
+              <div [hidden]="!is_qq_plot_rendered">
+                <!--additional css for centering the img-->
+                <img class="col-md-8 img-thumbnail" id="qqPlot">
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    <!--</div>-->
 
 
     <!-- QQ graph 2 -->

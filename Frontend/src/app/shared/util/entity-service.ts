@@ -282,17 +282,17 @@ export class EntityService {
 
   /**
    * for experiments, we pass string representation to scatter plots & histograms
-   * @param {selected_stage} JSON representation of selected stage object
-   * @returns {string}
+   * @param selected_stage = JSON representation of selected stage object
+   * @returns string
    */
   public get_stage_details(selected_stage: any): string {
     let details: string = "Stage: ";
-    details += selected_stage["number"] + " ";
+    details += selected_stage["number"] + " \n";
     let json_str = JSON.stringify(selected_stage["knobs"]);
     json_str = json_str.replace(/["']/g, "");
-    json_str = json_str.replace(",", ", ");
-    json_str = json_str.replace("{", "[");
-    json_str = json_str.replace("}", "]");
+    // json_str = json_str.replace(",", ", ");
+    // json_str = json_str.replace("{", "[");
+    // json_str = json_str.replace("}", "]");
     details += json_str;
     return details;
   }

@@ -37,7 +37,9 @@ def start_three_phase_analysis(wf):
             # TODO: proceed to BOGP execution
             info("> Starting Optimization process, setting step_no to 2 and re-setting stage_counter")
             wf.step_no += 1
-            wf.stage_counter = 1 # first step is done, reset stage counter to 1
+            wf.stage_counter = 1 # first step is done, reset stage counter to 1 and remove experimentCounter attribute
+            delattr(wf, 'experimentCounter')
+
             best_knob, best_result = start_bogp(wf=wf, sorted_significant_interactions=sorted_significant_interactions)
             default_knob = create_knob_from_default(wf=wf)
             info("> Step no for T-test, " + str(wf.step_no))
@@ -47,8 +49,11 @@ def start_three_phase_analysis(wf):
             info("> Starting T-test, step_no: " + str(wf.step_no) + " re-setting stage_counter")
             # perform experiments with default & best knobs in another step
             # also save this to experiment in ES
-            # there is no need to increment step_no because at the last stage of bogp, it gets incremented, but reset stage_counter
+            # there is no need to increment step_no because at the last stage of bogp, it gets incremented
+            # but we need to reset stage_counter and remove experimentCounter attribute, it will be assigned properly in experimentFunction(wf)
             wf.stage_counter = 1
+            delattr(wf, 'experimentCounter')
+
             db().update_experiment(experiment_id=wf.id, field='numberOfSteps', value=wf.step_no)
             # prepare knobs accordingly
             wf.execution_strategy["knobs"] = [default_knob, best_knob]

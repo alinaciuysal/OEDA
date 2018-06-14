@@ -56,12 +56,13 @@ def start_two_sample_tests(wf):
     db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test1.name, result=result, knobs=knobs)
 
     # if we want to integrate following tests, they should be saved as another step_no, just increment it before saving
-    # effect_size = wf.analysis["tTestEffectSize"]
+
     # x1 = samples[0]
     # x2 = samples[1]
     # pooled_std = sqrt((np.var(x1) + np.var(x2)) / 2)
     # effect_size = mean_diff / pooled_std
-    # test2 = TtestPower(stage_ids=stage_ids, y_key=key, effect_size=effect_size)
+    effect_size = wf.analysis["tTestEffectSize"]
+    test2 = TtestPower(stage_ids=stage_ids, y_key=key, effect_size=effect_size)
     # result2 = test2.run(data=samples, knobs=knobs)
     # db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test2.name, result=result2)
     #

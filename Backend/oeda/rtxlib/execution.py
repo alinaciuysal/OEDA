@@ -1,5 +1,4 @@
 from oeda.log import *
-from colorama import Fore
 import traceback
 
 def _defaultChangeProvider(variables,wf):
@@ -9,11 +8,7 @@ def _defaultChangeProvider(variables,wf):
 def experimentFunction(wf, exp):
 
     if hasattr(wf, "experimentCounter"):
-        if wf.execution_strategy["type"] == "forever":
-            wf.remaining_time_and_stages['remaining_stages'] = 'Infinite'
-            wf.remaining_time_and_stages['remaining_time'] = 'Infinite'
-        else:
-            wf.remaining_time_and_stages['remaining_stages'] = wf.totalExperiments - wf.experimentCounter
+        wf.remaining_time_and_stages['remaining_stages'] = wf.totalExperiments - wf.experimentCounter
 
     """ executes a given experiment stage """
     start_time = current_milli_time()
@@ -116,9 +111,8 @@ def experimentFunction(wf, exp):
         wf.experimentCounter = 1
 
     duration = current_milli_time() - start_time
-    if wf.execution_strategy["type"] != "forever":
-        wf.remaining_time_and_stages['remaining_stages'] = wf.totalExperiments - wf.experimentCounter
-        wf.remaining_time_and_stages['remaining_time'] = str(wf.remaining_time_and_stages['remaining_stages'] * duration / 1000)
+    wf.remaining_time_and_stages['remaining_stages'] = wf.totalExperiments - wf.experimentCounter
+    wf.remaining_time_and_stages['remaining_time'] = str(wf.remaining_time_and_stages['remaining_stages'] * duration / 1000)
 
     wf.run_oeda_callback({"experiment": exp, "status": "EXPERIMENT_STAGE_DONE",
                           "experiment_counter": wf.experimentCounter, "total_experiments": wf.totalExperiments,

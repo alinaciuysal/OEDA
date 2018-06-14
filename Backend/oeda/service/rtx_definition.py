@@ -155,9 +155,6 @@ def get_knob_values(strategy_type, knobs):
             parameters_values += [parameter_values]
         return reduce(lambda list1, list2: [x + y for x in list1 for y in list2], parameters_values)
 
-    if strategy_type == "random":
-        return [config.values() for config in knobs]
-
 
 def get_knob_keys(strategy_type, knobs):
 
@@ -167,9 +164,6 @@ def get_knob_keys(strategy_type, knobs):
 
     if strategy_type == "step_explorer":
         return knobs.keys()
-
-    if strategy_type == "random":
-        return knobs[0].keys()
 
 
 def get_all_knobs(knob_keys, knob_values):

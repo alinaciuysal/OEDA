@@ -14,10 +14,10 @@ def start_three_phase_analysis(wf):
     """ executes ANOVA, bayesian opt, and Ttest """
     info("> Analysis   | 3-Phase", Fore.CYAN)
     info("> Starting experimentFunction for ANOVA, setting step_no to 1")
-    wf.step_no = 1 # set step_no to 1 initially, as we did not perform any experiment, stage_counter is still 0
+    wf.step_no = 1 # set step_no to 1 initially, as we did not perform any experiment stage_counter is still 0
     start_step_strategy(wf)
     info("> Starting ANOVA, step_no is still 1")
-    # as we have only one data type, e.g. overhead
+    # we have only one data type, e.g. overhead
     considered_data_type_name = wf.considered_data_types[0]["name"]
     wf.analysis["data_type"] = considered_data_type_name
     successful = start_factorial_tests(wf)
@@ -34,11 +34,11 @@ def start_three_phase_analysis(wf):
             info("> Cannot find significant interactions, aborting process")
         else:
             db().update_analysis(experiment_id=wf.id, step_no=wf.step_no, analysis_name='two-way-anova', field='eligible_for_next_step', value=True)
-            # TODO: proceed to BOGP execution
-            info("> Starting Optimization process, setting step_no to 2 and re-setting stage_counter")
+            info("> Starting Optimization process, setting step_no to 2, re-setting stage_counter, updating numberOfSteps in experiment")
             wf.step_no += 1
             wf.stage_counter = 1 # first step is done, reset stage counter to 1 and remove experimentCounter attribute
             delattr(wf, 'experimentCounter')
+            db().update_experiment(experiment_id=wf.id, field='numberOfSteps', value=wf.step_no)
 
             best_knob, best_result = start_bogp(wf=wf, sorted_significant_interactions=sorted_significant_interactions)
             default_knob = create_knob_from_default(wf=wf)
@@ -53,8 +53,8 @@ def start_three_phase_analysis(wf):
             # but we need to reset stage_counter and remove experimentCounter attribute, it will be assigned properly in experimentFunction(wf)
             wf.stage_counter = 1
             delattr(wf, 'experimentCounter')
-
             db().update_experiment(experiment_id=wf.id, field='numberOfSteps', value=wf.step_no)
+
             # prepare knobs accordingly
             wf.execution_strategy["knobs"] = [default_knob, best_knob]
             # set tTestSampleSize as executionStr sample_size

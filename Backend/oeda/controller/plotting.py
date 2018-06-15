@@ -18,17 +18,20 @@ class QQPlotController(Resource):
 
     def get(self, experiment_id, step_no, stage_no, distribution, scale, incoming_data_type_name):
         try:
+            # required because we store them as number in db, but retrieve as string
+            step_no = int(step_no)
             if str(scale).lower() not in self.availableScales:
                 return {"error": "Provided scale is not supported"}, 404
 
             pts = []
-            # this case corresponds to all stage data
+            # this case corresponds to all stage data of the provided step
             if int(stage_no) == -1:
-                stages_and_data_points = get_all_stage_data(experiment_id=experiment_id, step_no=step_no)
-                if stages_and_data_points is None:
+                steps_and_stages = get_all_stage_data(experiment_id=experiment_id)
+                if steps_and_stages is None:
                     return {"error": "Data points cannot be retrieved for given experiment and/or stage"}, 404
-                for entity in stages_and_data_points:
-                    entity = json.loads(entity)
+
+                for stage_no in steps_and_stages[step_no]:
+                    entity = steps_and_stages[step_no][stage_no]
                     if len(entity['values']) == 0:
                         pass
 

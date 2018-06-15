@@ -22,16 +22,16 @@ export class OEDAApiService extends RESTService {
     return this.doGETPublicRequest("/experiments/" + experiment_id)
   }
 
-  public loadAllDataPointsOfExperiment(experiment_id: string, step_no: any): Observable<any> {
-    return this.doGETPublicRequest("/experiment_results/" + experiment_id + "/" + step_no)
+  public loadAllDataPointsOfExperiment(experiment_id: string): Observable<any> {
+    return this.doGETPublicRequest("/experiment_results/" + experiment_id)
   }
 
-  public loadAllDataPointsOfRunningExperiment(experiment_id: string, step_no: any, timestamp: string): Observable<any> {
-    return this.doGETPublicRequest("/running_experiment_results/" + experiment_id + "/" + step_no + "/" + timestamp)
+  public loadAllDataPointsOfRunningExperiment(experiment_id: string, timestamp: string): Observable<any> {
+    return this.doGETPublicRequest("/running_experiment_results/" + experiment_id + "/" + timestamp)
   }
 
-  public loadAvailableStagesWithExperimentId(experiment_id: string, step_no: any): Observable<any> {
-    return this.doGETPublicRequest("/stages/" + experiment_id + "/" + step_no)
+  public loadAvailableStepsAndStagesWithExperimentId(experiment_id: string): Observable<any> {
+    return this.doGETPublicRequest("/steps/" + experiment_id)
   }
 
   public getOedaCallback(experiment_id: string): Observable<any> {
@@ -107,6 +107,12 @@ export interface StageEntity {
   values: object[],
   knobs: any,
   stage_result: number
+}
+
+export interface StepEntity {
+  step_no: string,
+  stages: object[],
+  name: string
 }
 
 

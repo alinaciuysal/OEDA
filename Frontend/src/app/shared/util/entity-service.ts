@@ -1,7 +1,15 @@
 import {NotificationsService} from "angular2-notifications";
 import {LoggerService} from "../modules/helper/logger.service";
 import {Injectable} from "@angular/core";
-import {StageEntity, Experiment, OedaCallbackEntity, UserEntity, Target, ExecutionStrategy} from "../modules/api/oeda-api.service";
+import {
+  StageEntity,
+  Experiment,
+  OedaCallbackEntity,
+  UserEntity,
+  Target,
+  ExecutionStrategy,
+  StepEntity
+} from "../modules/api/oeda-api.service";
 
 import {isNullOrUndefined} from "util";
 import {UUID} from "angular2-uuid";
@@ -120,28 +128,36 @@ export class EntityService {
   }
 
   /** parses static response object returned from server, creates new stage-point tuple(s) and pushes them to the all_data (array of json strings) */
-  public process_response_for_successful_experiment(response, all_data): StageEntity[] {
-    if (isNullOrUndefined(response)) {
+  public process_response_for_successful_experiment(steps_and_stages, step_no, all_data): StageEntity[] {
+    if (isNullOrUndefined(steps_and_stages)) {
       this.notify.error("Error", "Cannot retrieve data from DB, please try again");
       return;
     }
 
-    // we can retrieve more than one array of stages and data points
-    for (const index in response) {
-      if (response.hasOwnProperty(index)) {
-        const parsed_json_object = JSON.parse(response[index]);
-        // distribute data points to empty bins
-        const new_entity = this.create_stage_entity();
-        new_entity.number = parsed_json_object['number'].toString();
-        new_entity.values = parsed_json_object['values'];
-        new_entity.knobs = parsed_json_object['knobs'];
-        // important assumption here: we retrieve stages and data points in a sorted manner with respect to created field
-        // thus, pushed new_entity will have a key of its "number" with this assumption
-        // e.g. [ 0: {number: 1, values: ..., knobs: [...]}, 1: {number: 2, values: ..., knobs: [...] }...]
-        all_data.push(new_entity);
+    // we can retrieve more than one step and multiple stages
+    for (const step_number in steps_and_stages) {
+      // we need to filter out the data that is specifically requested for the given step_no
+      if (step_number == step_no) {
+        for (const stage_index in steps_and_stages[step_number]) {
+          if (steps_and_stages[step_number].hasOwnProperty(stage_index)) {
+            let stage_object = steps_and_stages[step_number][stage_index];
+            // distribute data points to empty bins
+            const new_entity = this.create_stage_entity();
+            new_entity.number = stage_object['number'].toString();
+            new_entity.values = stage_object['values'];
+            new_entity.knobs = stage_object['knobs'];
+            new_entity.stage_result = stage_object['stage_result'];
+
+            // important assumption here: we retrieve steps, stages and data points in a sorted manner w.r.t. createdDate field
+            // so all_data is sth like:
+            // [ 0: {number: 1, values: ..., knobs: [...]}, 1: {number: 2, values: ..., knobs: [...] }...]
+            all_data.push(new_entity);
+          }
+        }
       }
     }
     return all_data;
+
   }
 
   public create_experiment(execution_strategy): Experiment {
@@ -220,6 +236,14 @@ export class EntityService {
       values: [],
       knobs: null,
       stage_result: null
+    }
+  }
+
+  public create_step_entity(): StepEntity {
+    return {
+      step_no: "",
+      stages: [],
+      name: ""
     }
   }
 
@@ -325,27 +349,26 @@ export class EntityService {
    * targetSystemVariables: object[]
    * return value -> stageKnobs
    */
-  public populate_knob_objects_with_variables(stageKnobs: any, targetSystemVariables: any, for_all_stages: boolean, execution_strategy_type: string) {
+  public populate_knob_objects_with_variables(stageKnobs: any, targetSystemVariables: any, for_all_stages: boolean) {
     let ctrl = this;
     let knob_keys = ctrl.get_keys(stageKnobs);
-    if (execution_strategy_type !== 'forever') {
-      targetSystemVariables.forEach(function(target_system_knob) {
-        if (knob_keys.length > 0 && !for_all_stages) {
-          if (!knob_keys.includes(target_system_knob.name)) {
-            stageKnobs[target_system_knob.name] = target_system_knob.default;
-          }
-        } else {
-          // this case is for populating all_stage, initially stageKnobs is an empty Map
-          // so it will insert min & max accoringly for non-forever strategies.
-          let min_max_map = {};
-          min_max_map["min"] = target_system_knob.min;
-          min_max_map["max"] = target_system_knob.max;
-          min_max_map["default"] = target_system_knob.default;
-          stageKnobs[target_system_knob.name] = min_max_map;
-
+    targetSystemVariables.forEach(function(target_system_knob) {
+      if (knob_keys.length > 0 && !for_all_stages) {
+        if (!knob_keys.includes(target_system_knob.name)) {
+          stageKnobs[target_system_knob.name] = target_system_knob.default;
         }
-      });
-    }
+      } else {
+        // this case is for populating all_stage, initially stageKnobs is an empty Map
+        // so it will insert min & max accoringly for non-forever strategies.
+        let min_max_map = {};
+        min_max_map["min"] = target_system_knob.min;
+        min_max_map["max"] = target_system_knob.max;
+        min_max_map["default"] = target_system_knob.default;
+        stageKnobs[target_system_knob.name] = min_max_map;
+
+      }
+    });
+
     return stageKnobs
   }
 

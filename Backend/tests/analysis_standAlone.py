@@ -3,6 +3,7 @@ from oeda.analysis.factorial_tests import FactorialAnova
 from oeda.analysis.two_sample_tests import Ttest
 from oeda.analysis.analysis_execution import delete_combination_notation, \
     iterate_anova_tables, get_significant_interactions, get_tuples, assign_iterations
+from oeda.controller.experiment_results import get_all_stage_data
 import json
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
@@ -72,9 +73,16 @@ if __name__ == '__main__':
     nrOfImportantFactors = 3 # to be retrieved from analysis definition
     alpha = 0.5 # to be retrieved from analysis definition
     setup_experiment_database("elasticsearch", "localhost", 9200)
-    experiment_id = "9e3a9598-5cd6-6bb5-9161-8ce65a283927"
+    experiment_id = "8dc0bf6a-6872-f1dd-4feb-167f87f2d067"
     step_no = "1" # 1 denotes step-strategy phase for ANOVA, last one denotes T-test, intermediate ones denote Bayesian Opt
     key = "overhead"
     # set performAnova to true if there are data in DB & you want to save fresh anova result to DB
     # start_workflow_with_anova(experiment_id, step_no, key, alpha, nrOfImportantFactors, 'self-optimizer')
-    start_workflow_with_ttest(experiment_id=experiment_id, key=key, alpha=alpha)
+    # start_workflow_with_ttest(experiment_id=experiment_id, key=key, alpha=alpha)
+    asd = db().get_experiment(experiment_id=experiment_id)["numberOfSteps"]
+    all_stage_data = get_all_stage_data(experiment_id=experiment_id)
+    print(json.dumps(all_stage_data, indent=4))
+    print(all_stage_data.keys())
+    print(all_stage_data[1])
+    # stage_ids, stages = db().get_stages(experiment_id=experiment_id, step_no=step_no)
+    # print(json.dumps(stages, indent=4))

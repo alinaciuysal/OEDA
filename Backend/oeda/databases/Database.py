@@ -95,9 +95,6 @@ class Database:
         """ updates result of a stage with provided experiment_id, step_no, and field and value to be updated """
         pass
 
-    def save_step_result(self, experiment_id, step_no, ):
-        """ saves (best) result of a step (optimization runs) into stage tuple but with a different id """
-
     @staticmethod
     def create_stage_id(experiment_id, step_no, stage_no):
         return str(experiment_id) + "#" + str(step_no) + "#" + str(stage_no)

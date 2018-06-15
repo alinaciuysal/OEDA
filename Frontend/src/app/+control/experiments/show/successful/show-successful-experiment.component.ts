@@ -38,7 +38,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
   public is_enough_data_for_plots: boolean;
   public is_all_stages_selected: boolean;
   public available_steps = [];
-  public available_stages = [];
+
   public selected_stage: any;
 
   public step_no: any;
@@ -88,15 +88,11 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
 
         if (!isNullOrUndefined(experiment)) {
           this.experiment = experiment;
-          console.log(experiment);
           // retrieve target system definition
           this.apiService.loadTargetById(experiment.targetSystemId).subscribe(targetSystem => {
             if (!isNullOrUndefined(targetSystem)) {
               this.targetSystem = targetSystem;
-              console.log(this.targetSystem.incomingDataTypes);
-              // prepare steps
-              this.prepareSteps();
-              // prepare stages, fetch data, create plots
+              // prepare steps & stages, fetch data, create plots
               this.prepareStages();
             }
           });
@@ -175,11 +171,12 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
   public stage_changed(selected_stage) {
     const ctrl = this;
     if (selected_stage !== null) {
-      console.log(selected_stage);
       // find same stage from available ones for bayesian steps
+      console.log("selected_stage", selected_stage);
       if (typeof(selected_stage.number) == 'string') {
         if(selected_stage.number.includes("best")) {
-          selected_stage = this.available_stages.find(x => x.stage_result == selected_stage.stage_result);
+          console.log("stages", this.available_steps[this.step_no]);
+          selected_stage = this.available_steps[this.step_no].find(x => x.stage_result == selected_stage.stage_result);
           ctrl.notify.success("", "You selected best configuration (Stage " + selected_stage.number + ") of this step");
         }
       }
@@ -260,73 +257,73 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     this.retrieved_data_length = 0;
 
     this.selected_stage = {};
-    this.available_stages = [];
     this.dataAvailable = false;
   }
 
   public stepNoChanged(step_no) {
-    console.log("incoming step_no", step_no);
     this.step_no = step_no;
     // refresh tuples and prepare plotting phase
     this.prepareStages();
   }
 
   private prepareStages() {
+    console.log(this.experiment.numberOfSteps);
     this.setValues();
-    // now fetch the data as before
-    this.apiService.loadAvailableStagesWithExperimentId(this.experiment_id, this.step_no).subscribe(stages => {
-      if (!isNullOrUndefined(stages)) {
-        console.log(stages);
-        // initially selected stage is "All Stages"
-        this.selected_stage = {"number": -1, "knobs": {}};
-        this.selected_stage.knobs = this.entityService.populate_knob_objects_with_variables(this.selected_stage.knobs, this.targetSystem.defaultVariables, true, this.experiment.executionStrategy.type);
-        this.available_stages.push(this.selected_stage);
-        for (let j = 0; j < stages.length; j++) {
-          // if there are any existing stages, round their values to provided decimal places
-          if (!isNullOrUndefined(stages[j]["knobs"])) {
-            stages[j]["knobs"] = this.entityService.round_knob_values(stages[j]["knobs"], this.decimal_places);
-            stages[j]["knobs"] = this.entityService.populate_knob_objects_with_variables(stages[j]["knobs"], this.targetSystem.defaultVariables, false, this.experiment.executionStrategy.type);
-            if (!isNullOrUndefined(stages[j]["stage_result"] ) ) {
-              stages[j]["stage_result"] = Number(stages[j]["stage_result"].toFixed(this.decimal_places));
+
+    // initially selected stage is "All Stages"
+    this.selected_stage = {"number": -1, "knobs": {}};
+    this.selected_stage.knobs = this.entityService.populate_knob_objects_with_variables(this.selected_stage.knobs, this.targetSystem.defaultVariables, true);
+
+    this.apiService.loadAvailableStepsAndStagesWithExperimentId(this.experiment_id).subscribe(steps => {
+      if (!isNullOrUndefined(steps)) {
+        console.log("retrieved steps", steps);
+        for (let step_no in steps) {
+          if(steps.hasOwnProperty(step_no)) {
+            let new_stages = [];
+            // push initially selected stage to top of each step
+            new_stages.push(this.selected_stage);
+
+            // iterate actual stage tuples to merge
+            for (let stage of steps[step_no]) {
+              // round knob values of stages to provided decimal places
+              if (!isNullOrUndefined(stage["knobs"])) {
+                stage["knobs"] = this.entityService.round_knob_values(stage["knobs"], this.decimal_places);
+                stage["knobs"] = this.entityService.populate_knob_objects_with_variables(stage["knobs"], this.targetSystem.defaultVariables, false);
+                if (!isNullOrUndefined(stage["stage_result"])) {
+                  stage["stage_result"] = Number(stage["stage_result"].toFixed(this.decimal_places));
+                }
+              }
+              new_stages.push(stage);
+            }
+            steps[step_no] = new_stages;
+
+            if (step_no == "1") {
+              steps[step_no]["name"] = "ANOVA";
+            } else if (step_no == this.experiment.numberOfSteps.toString()) {
+              steps[step_no]["name"] = "T-test";
+            } else {
+              steps[step_no]["name"] = "Bayesian Run - " + step_no.toString();
             }
           }
-          this.available_stages.push(stages[j]);
+          this.available_steps = steps;
+          // stages.sort(this.entityService.sort_by('number', true, parseInt));
+          this.dataAvailable = true;
+          this.fetch_data();
         }
-        stages.sort(this.entityService.sort_by('number', true, parseInt));
-        this.dataAvailable = true;
-        this.fetch_data();
       }
     });
-  }
-
-  private prepareSteps() {
-    for (let i = 1; i <= this.experiment.numberOfSteps; i++) {
-      let step_name = "";
-      if (i == 1)
-        step_name = "ANOVA";
-      else if (i == this.experiment.numberOfSteps)
-        step_name = "T-test";
-      else
-        step_name = "Bayesian Run - " + i.toString();
-      let step_tuple = {
-        "number": i,
-        "name": step_name
-      };
-      this.available_steps.push(step_tuple);
-    }
-    console.log("available_steps", this.available_steps);
   }
 
   /** retrieves all_data from server */
   private fetch_data() {
     const ctrl = this;
-    this.apiService.loadAllDataPointsOfExperiment(this.experiment_id, this.step_no).subscribe(
-      retrieved_data => {
-        if (isNullOrUndefined(retrieved_data)) {
+    this.apiService.loadAllDataPointsOfExperiment(this.experiment_id).subscribe(
+      steps_and_stages => {
+        if (isNullOrUndefined(steps_and_stages)) {
           this.notify.error("Error", "Cannot retrieve data from DB, please try again");
           return;
         }
-        this.all_data = ctrl.entityService.process_response_for_successful_experiment(retrieved_data, this.all_data);
+        this.all_data = ctrl.entityService.process_response_for_successful_experiment(steps_and_stages, this.step_no, this.all_data);
         for (let stage_data of this.all_data) {
           this.retrieved_data_length += stage_data['values'].length;
         }
@@ -339,6 +336,11 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
         this.draw_all_plots(this.all_data);
       }
     );
+  }
+
+  /** returns keys of the given map, but not empty ones */
+  get_keys(object) : Array<string> {
+    return this.entityService.get_keys(object);
   }
 
 }

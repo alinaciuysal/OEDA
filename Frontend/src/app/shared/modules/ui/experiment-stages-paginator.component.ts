@@ -33,7 +33,7 @@ import {isNullOrUndefined} from "util";
         </div>
         <div class="panel-body" style="padding-top: 20px; padding-left: 2%">
           <div class="table-responsive">
-            <table style="margin-top: 20px" class="table table-bordered table-hover" [mfData]="available_stages" #mf="mfDataTable"
+            <table style="margin-top: 20px" class="table table-bordered table-hover" [mfData]="available_steps[step_no]" #mf="mfDataTable"
                    [mfRowsOnPage]="3">
               <thead>
               <tr>
@@ -90,7 +90,7 @@ import {isNullOrUndefined} from "util";
                   
                 </tr>
                 </tbody>
-                <tfoot *ngIf="available_stages.length > 3">
+                <tfoot *ngIf="get_keys(available_steps[step_no]).length > 3">
                 <tr>
                   <td colspan="12">
                     <mfBootstrapPaginator [rowsOnPageSet]="[3,10,25,100]"></mfBootstrapPaginator>
@@ -111,8 +111,8 @@ export class ExperimentStagesPaginatorComponent implements OnInit {
   @Output() incomingDataTypeChanged: EventEmitter<any> = new EventEmitter<any>();
 
   @Input() experiment: any;
-  @Input() selected_stage: any;
-  @Input() available_stages: any;
+  @Input() available_steps: any;
+  @Input() step_no: any;
   @Input() targetSystem: any;
   @Input() incoming_data_type_name: string;
   @Input() scale: string;
@@ -138,7 +138,12 @@ export class ExperimentStagesPaginatorComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.ordered_keys = this.get_ordered_keys(this.available_stages[0].knobs);
+    // ordered_keys is used to display knobs of All Stages row
+    let step_tuple = this.available_steps[this.step_no];
+    // because we pushed an additional tuple while retrieving steps & stages to show All Stages properly
+    let first_stage = step_tuple[0];
+    this.ordered_keys = this.get_ordered_keys(first_stage.knobs);
+    console.log("ordered_keys", this.ordered_keys);
   }
 
   /** returns true if given variable is being tested in the experiment */
@@ -167,7 +172,6 @@ export class ExperimentStagesPaginatorComponent implements OnInit {
       sortingArray.push(default_variable['name']);
     });
     let unordered_stage_keys = this.get_keys(stage_object);
-    let ordered_stage_keys = sortingArray.filter((el)=>(unordered_stage_keys.indexOf(el) > -1));
-    return ordered_stage_keys;
+    return sortingArray.filter((element)=>(unordered_stage_keys.indexOf(element) > -1));
   }
 }

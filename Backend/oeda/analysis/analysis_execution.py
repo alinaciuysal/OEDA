@@ -355,12 +355,16 @@ def start_bogp(wf, sorted_significant_interactions):
             db().save_stage(experiment_id=wf.id, step_no=wf.step_no, stage_no=stage_no, knobs=optimal_knob, stage_result=optimal_result)
             info("> Saving optimal knob at the end of Bayesian process (mlr-mbo): " + str(optimal_knob) + ", " + str(optimal_result))
 
-        # TODO: by sorting optimal_tuples, find best one so far and apply / pass it to CrowdNav with workflow_knobs
         # increment step_no by one as we treat each run of optimization as one step
         wf.step_no += 1
         # also reset stage_counter
         wf.stage_counter = 1
-        # TODO: to save result to db, we need a new experiment_id, o/w previous ones will be overwritten
+        # also update experiment's numberOfSteps
+        db().update_experiment(experiment_id=wf.id, field='numberOfSteps', value=wf.step_no)
+
+        # TODO: sort optimal_tuples, find best one so far and apply / pass it to CrowdNav with workflow_knobs
+
+
     info("> All knobs & values " + str(optimal_tuples))
     # find the best tuple (knob & result)
     sorted_tuples = sorted(optimal_tuples, key=lambda x: x[1])

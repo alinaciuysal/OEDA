@@ -84,9 +84,9 @@ api.add_resource(TargetsListController, '/api/targets')
 api.add_resource(TargetController, '/api/targets/<string:target_id>')
 
 api.add_resource(StageResultsWithExperimentIdController, '/api/experiment_results/<string:experiment_id>/<string:step_no>/<string:stage_no>') # Is this used?
-api.add_resource(AllStageResultsWithExperimentIdController, '/api/experiment_results/<string:experiment_id>/<string:step_no>')
-api.add_resource(StageController, '/api/stages/<string:experiment_id>/<string:step_no>')
-api.add_resource(RunningAllStageResultsWithExperimentIdController, '/api/running_experiment_results/<string:experiment_id>/<string:step_no>/<string:timestamp>')
+api.add_resource(AllStageResultsWithExperimentIdController, '/api/experiment_results/<string:experiment_id>')
+api.add_resource(StageController, '/api/steps/<string:experiment_id>')
+api.add_resource(RunningAllStageResultsWithExperimentIdController, '/api/running_experiment_results/<string:experiment_id>/<string:timestamp>')
 
 api.add_resource(QQPlotController, '/api/qqPlot/<string:experiment_id>/<string:step_no>/<string:stage_no>/<string:distribution>/<string:scale>/<string:incoming_data_type_name>')
 api.add_resource(OEDACallbackController, '/api/running_experiment_results/oeda_callback/<string:experiment_id>')

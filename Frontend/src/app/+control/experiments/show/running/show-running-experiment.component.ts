@@ -9,6 +9,7 @@ import {Observable} from "rxjs/Observable";
 import {PlotService} from "../../../../shared/util/plot-service";
 import {EntityService} from "../../../../shared/util/entity-service";
 import {TempStorageService} from "../../../../shared/modules/helper/temp-storage-service";
+import indexOf = require("core-js/fn/array/index-of");
 
 @Component({
   selector: 'show-running-experiment',
@@ -133,33 +134,51 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
               if (!isNullOrUndefined(targetSystem)) {
                 this.targetSystem = targetSystem;
                 this.targetSystem.id = this.experiment.targetSystemId;
+
+                // initially selected stage is "All Stages"
+                this.selected_stage = {"number": -1, "knobs": {}};
+                this.selected_stage.knobs = this.entityService.populate_knob_objects_with_variables(this.selected_stage.knobs, this.targetSystem.defaultVariables, true);
+
+                // retrieve stages
+                this.apiService.loadAvailableStepsAndStagesWithExperimentId(this.experiment_id).subscribe(steps => {
+                  if (!isNullOrUndefined(steps)) {
+                    for (let step_no in steps) {
+                      if (steps.hasOwnProperty(step_no)) {
+                        let new_stages = [];
+                        // push initially selected stage to top of each step
+                        new_stages.push(this.selected_stage);
+
+                        // iterate actual stage tuples to merge
+                        for (let stage of steps[step_no]) {
+                          // round knob values of stages to provided decimal places
+                          if (!isNullOrUndefined(stage["knobs"])) {
+                            stage["knobs"] = this.entityService.round_values(stage["knobs"], this.decimal_places);
+                            stage["knobs"] = this.entityService.populate_knob_objects_with_variables(stage["knobs"], this.targetSystem.defaultVariables, false);
+                            if (!isNullOrUndefined(stage["stage_result"])) {
+                              stage["stage_result"] = Number(stage["stage_result"].toFixed(this.decimal_places));
+                            }
+                          }
+                          new_stages.push(stage);
+                        }
+                        steps[step_no] = new_stages;
+
+                        if (step_no == "1") {
+                          steps[step_no]["name"] = "ANOVA";
+                        }
+                      }
+
+                    }
+                    this.available_steps = steps;
+                    console.log("this.available_steps", this.available_steps);
+                    this.dataAvailable = true;
+                  }
+                });
+
                 // polling using Timer (2 sec interval) for real-time data visualization
                 this.timer = Observable.timer(1000, 2000);
                 this.subscription = this.timer.subscribe(() => {
                   this.fetch_oeda_callback();
                 });
-
-
-                // retrieve stages
-                // this.apiService.loadAvailableStepsAndStagesWithExperimentId(this.experiment_id, this.step_no).subscribe(stages => {
-                //   if (!isNullOrUndefined(stages)) {
-                //
-                //     this.selected_step = {"step_no": this.step_no, "stages": []};
-                //
-                //     this.available_steps.push(this.selected_stage);
-                //     for (let j = 0; j < stages.length; j++) {
-                //       // if there are any existing stages, round their knob values of stages to provided decimals
-                //       if (!isNullOrUndefined(stages[j]["knobs"])) {
-                //         console.log(stages[j]["knobs"]);
-                //         stages[j]["knobs"] = this.entityService.round_knob_values(stages[j]["knobs"], this.decimal_places);
-                //         stages[j]["knobs"] = this.entityService.populate_knob_objects_with_variables(stages[j]["knobs"], this.targetSystem.defaultVariables, false, this.experiment.executionStrategy.type);
-                //       }
-                //       this.available_stages.push(stages[j]);
-                //     }
-                //     stages.sort(this.entityService.sort_by('number', true, parseInt));
-                //     this.dataAvailable = true;
-                //   }
-                // });
               }
             });
           }
@@ -175,8 +194,10 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
 
   private fetch_oeda_callback() {
     const ctrl = this;
+
     // also set "polling-on" button disabled, because polling is already on
-    document.getElementById("polling_on_button").setAttribute('disabled', 'true');
+    if (document.getElementById("polling_on_button"))
+      document.getElementById("polling_on_button").setAttribute('disabled', 'true');
 
     ctrl.apiService.getOedaCallback(ctrl.experiment_id).subscribe(oedaCallback => {
       if(!isNullOrUndefined(oedaCallback)) {
@@ -193,7 +214,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
           ctrl.oedaCallback["complete"] = (Number(oedaCallback.index)) / (Number(oedaCallback.size));
 
           // round knob values to provided decimal places
-          oedaCallback.current_knob = ctrl.entityService.round_knob_values(oedaCallback.current_knob, ctrl.decimal_places);
+          oedaCallback.current_knob = ctrl.entityService.round_values(oedaCallback.current_knob, ctrl.decimal_places);
           // remaining_time_and_stages is a experiment-wise unique dict that contains remaining stages and time
           ctrl.oedaCallback.remaining_time_and_stages["remaining_time"] = oedaCallback.remaining_time_and_stages["remaining_time"];
           ctrl.oedaCallback.remaining_time_and_stages["remaining_stages"] = oedaCallback.remaining_time_and_stages["remaining_stages"];
@@ -243,6 +264,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
    * spikes while validating/updating all_data.
    */
   private process_response(response) {
+    // hasOwnProperty checks are used to avoid inherited attributes
     const ctrl = this;
     if (isNullOrUndefined(response)) {
       ctrl.notify.error("Error", "Cannot retrieve data from DB, please try again");
@@ -251,41 +273,36 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     if (ctrl.first_render_of_page) {
       // we can retrieve one or more steps at first render
       for (let stepIndex in response) {
-        // we can retrieve one or more stages within retrieved step(s)
-        // distribute retrieved stages to empty step entities
-        let step_entity = ctrl.entityService.create_step_entity();
+        if (response.hasOwnProperty(stepIndex)) {
+          // we can retrieve one or more stages within retrieved step(s)
+          // distribute retrieved stages to empty step entities
+          let step_entity = ctrl.entityService.create_step_entity();
 
-        for (let stageIndex in response[stepIndex]) {
-          let parsed_json_object = JSON.parse(response[stepIndex][stageIndex]);
-          // distribute data points to empty bins
-          let stage_entity = ctrl.entityService.create_stage_entity();
-          stage_entity.number = parsed_json_object['number'];
-          stage_entity.values = parsed_json_object['values'];
-          step_entity.step_no = parsed_json_object.step_no;
-          // round knob values before pushing
-          stage_entity.knobs = ctrl.entityService.round_knob_values(parsed_json_object['knobs'], ctrl.decimal_places);
+          for (let stageIndex in response[stepIndex]) {
+            if (response[stepIndex].hasOwnProperty(stageIndex)) {
+              let stage_object = response[stepIndex][stageIndex];
+              // distribute data points to empty bins
+              const new_entity = this.entityService.create_stage_entity();
+              new_entity.number = stage_object['number'].toString();
+              new_entity.values = stage_object['values'];
+              new_entity.knobs = ctrl.entityService.round_values(stage_object['knobs'], ctrl.decimal_places);
+              new_entity.stage_result = stage_object['stage_result'];
 
-          if (stage_entity.values.length != 0) {
-            step_entity.stages.push(stage_entity);
+              // as a guard against stage duplications
+              let existing_stage = ctrl.available_steps[step_entity.step_no].find(entity => entity.number === new_entity.number);
+              // stage does not exist yet
+              if (isNullOrUndefined(existing_stage)) {
+                new_entity["knobs"] = ctrl.entityService.populate_knob_objects_with_variables(new_entity["knobs"], ctrl.targetSystem.defaultVariables, false);
+                step_entity.stages.push(new_entity);
+              }
+              // do not update timestamp here if we can't retrieve any data, just keep fetching with timestamp "-1"
+              // because backend is also updated accordingly, i.e. it continues to fetch all data if timestamp is -1
+            }
           }
-          // as a guard against stage duplications
-          // also round stages retrieved at first render to provided decimal places (provided that execution strategy is not forever)
-          let existing_stage = ctrl.available_steps[step_entity.step_no].find(entity => entity.number === stage_entity.number);
-          // stage does not exist yet
-          if (isNullOrUndefined(existing_stage)) {
-            const new_stage = {"number": parsed_json_object.number};
-            // round & populate knob object and push to step_entity
-            new_stage["knobs"] = ctrl.entityService.round_knob_values(parsed_json_object.knobs, ctrl.decimal_places);
-            new_stage["knobs"] = ctrl.entityService.populate_knob_objects_with_variables(new_stage["knobs"], ctrl.targetSystem.defaultVariables, false);
-            step_entity.stages.push(new_stage);
-          }
-          // do not update timestamp here if we can't retrieve any data, just keep fetching with timestamp "-1"
-          // because backend is also updated accordingly, i.e. it continues to fetch all data if timestamp is -1
-
+          ctrl.available_steps[step_entity.step_no] = step_entity;
         }
-
-        ctrl.available_steps[step_entity.step_no] = step_entity;
       }
+      console.log("available_steps after first_render", ctrl.available_steps);
       ctrl.first_render_of_page = false;
       return true;
     } else {
@@ -293,54 +310,52 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
       // so, iterate the these steps & their stages to concatenate data points
 
       for (let stepIndex in response) {
-        // first check if we have any existing step tuple
-        let step = {};
-        if (this.available_steps.hasOwnProperty(stepIndex)) {
-          step = this.available_steps[stepIndex];
-        } else {
-          step = this.entityService.create_step_entity();
-        }
+        if (response.hasOwnProperty(stepIndex)) {
+          // first check if we have any existing step tuple
+          let step = {};
+          if (this.available_steps.hasOwnProperty(stepIndex)) {
+            step = this.available_steps[stepIndex];
+          } else {
+            step = this.entityService.create_step_entity();
+          }
 
-        for (let stageIndex in response[stepIndex]) {
-          let parsed_json_object = JSON.parse(response[stepIndex][stageIndex]);
-          // tries to find the retrieved stage within available steps
-          let existing_stage = step["stages"].find(entity => entity.number === parsed_json_object.number);
+          for (let stageIndex in response[stepIndex]) {
+            if (response[stepIndex].hasOwnProperty(stageIndex)) {
+              let stage_object = response[stepIndex][stageIndex];
+              // tries to find the retrieved stage in available steps
+              let existing_stage = step["stages"].find(entity => entity.number === stage_object.number);
 
-          // we have found an existing stage
-          if (existing_stage !== undefined) {
-            // let stage_index = parsed_json_object['number'] - 1;
-            if (parsed_json_object['values'].length > 0) {
-              existing_stage.values = existing_stage.values.concat(parsed_json_object['values']);
+              // we have found an existing stage
+              if (existing_stage !== undefined) {
+                // let stage_index = parsed_json_object['number'] - 1;
+                if (stage_object['values'].length > 0) {
+                  existing_stage.values = existing_stage.values.concat(stage_object['values']);
+                }
+                // update whole tuple by finding index and replacing
+                const existing_stage_idx = step["stages"].indexOf(stage_object);
+                step["stages"][existing_stage_idx] = existing_stage;
+              }
+              else {
+                // a new stage has been fetched, create a new bin for it, and push all the values to the bin,
+                // also push bin to all_data, round knob values to provided decimal places
+                const number = stage_object.number;
+                const values = stage_object.values;
+                let knobs = ctrl.entityService.round_values(stage_object['knobs'], ctrl.decimal_places);
+                knobs = ctrl.entityService.populate_knob_objects_with_variables(knobs, ctrl.targetSystem.defaultVariables, false);
+                const new_stage = {"number": number, "knobs": knobs, "values": values};
+                step["stages"].push(new_stage);
+                this.available_steps[stage_object.step_no] = step;
+              }
+              // update timestamp if we have retrieved any data
+              if (Number(stageIndex) == response[stepIndex].length - 1) {
+                let data_point_length = stage_object['values'].length;
+                if (data_point_length > 0) {
+                  ctrl.timestamp = stage_object.values[data_point_length - 1]['createdDate'];
+                  return true;
+                }
+              }
             }
-            // update whole tuple
-            this.available_steps[parsed_json_object.step_no] = existing_stage;
           }
-          else {
-            // a new stage has been fetched, create a new bin for it, and push all the values to the bin,
-            // also push bin to all_data, round knob values to provided decimal places
-            const number = parsed_json_object.number;
-            const values = parsed_json_object.values;
-            let knobs = ctrl.entityService.round_knob_values(parsed_json_object['knobs'], ctrl.decimal_places);
-            const new_stage = {"number": number, "knobs": knobs, "values": values};
-            new_stage["knobs"] = ctrl.entityService.populate_knob_objects_with_variables(new_stage["knobs"], ctrl.targetSystem.defaultVariables, false);
-            step["stages"].push(new_stage);
-
-            // let new_entity = ctrl.entityService.create_stage_entity();
-            // new_entity.number = number;
-            // new_entity.values = values;
-            // new_entity.knobs = knobs;
-            // ctrl.all_data.push(new_entity);
-            this.available_steps[parsed_json_object.step_no] = step;
-          }
-          // update timestamp if we have retrieved any data
-          if (Number(stageIndex) == response[stepIndex].length - 1) {
-            let data_point_length = parsed_json_object['values'].length;
-            if (data_point_length > 0) {
-              ctrl.timestamp = parsed_json_object.values[data_point_length - 1]['createdDate'];
-              return true;
-            }
-          }
-
         }
       }
     }
@@ -494,7 +509,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
 
   stopRunningExperiment(): void {
     this.experiment.status = "INTERRUPTED";
-    this.apiService.updateExperiment(this.experiment, this.step_no).subscribe(() => {
+    this.apiService.updateExperiment(this.experiment).subscribe(() => {
       this.targetSystem.status = "READY";
       this.apiService.updateTarget(this.targetSystem).subscribe(() => {
         this.subscription.unsubscribe();

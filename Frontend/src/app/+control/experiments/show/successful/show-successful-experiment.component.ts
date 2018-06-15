@@ -267,7 +267,6 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
   }
 
   private prepareStages() {
-    console.log(this.experiment.numberOfSteps);
     this.setValues();
 
     // initially selected stage is "All Stages"
@@ -287,7 +286,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
             for (let stage of steps[step_no]) {
               // round knob values of stages to provided decimal places
               if (!isNullOrUndefined(stage["knobs"])) {
-                stage["knobs"] = this.entityService.round_knob_values(stage["knobs"], this.decimal_places);
+                stage["knobs"] = this.entityService.round_values(stage["knobs"], this.decimal_places);
                 stage["knobs"] = this.entityService.populate_knob_objects_with_variables(stage["knobs"], this.targetSystem.defaultVariables, false);
                 if (!isNullOrUndefined(stage["stage_result"])) {
                   stage["stage_result"] = Number(stage["stage_result"].toFixed(this.decimal_places));
@@ -306,10 +305,10 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
             }
           }
           this.available_steps = steps;
-          // stages.sort(this.entityService.sort_by('number', true, parseInt));
-          this.dataAvailable = true;
-          this.fetch_data();
         }
+        // stages.sort(this.entityService.sort_by('number', true, parseInt));
+        this.dataAvailable = true;
+        this.fetch_data();
       }
     });
   }

@@ -20,7 +20,7 @@ export class EntityService {
 
   private decimal_places: number;
 
-  constructor(public notify: NotificationsService, public log: LoggerService) {
+  constructor (public notify: NotificationsService, public log: LoggerService) {
     this.decimal_places = 3;
   }
 
@@ -136,22 +136,27 @@ export class EntityService {
 
     // we can retrieve more than one step and multiple stages
     for (const step_number in steps_and_stages) {
-      // we need to filter out the data that is specifically requested for the given step_no
-      if (step_number == step_no) {
-        for (const stage_index in steps_and_stages[step_number]) {
-          if (steps_and_stages[step_number].hasOwnProperty(stage_index)) {
-            let stage_object = steps_and_stages[step_number][stage_index];
-            // distribute data points to empty bins
-            const new_entity = this.create_stage_entity();
-            new_entity.number = stage_object['number'].toString();
-            new_entity.values = stage_object['values'];
-            new_entity.knobs = stage_object['knobs'];
-            new_entity.stage_result = stage_object['stage_result'];
+      if (steps_and_stages.hasOwnProperty(step_number)) {
+        // we need to filter out the data that is specifically requested for the given step_no
+        if (step_number == step_no) {
+          for (const stage_index in steps_and_stages[step_number]) {
+            if (steps_and_stages[step_number].hasOwnProperty(stage_index)) {
+              let stage_object = steps_and_stages[step_number][stage_index];
+              if (!this.isEmptyObject(stage_object)) {
+                console.log("stage_object", stage_object);
+                // distribute data points to empty bins
+                const new_entity = this.create_stage_entity();
+                new_entity.number = stage_object['number'].toString();
+                new_entity.values = stage_object['values'];
+                new_entity.knobs = stage_object['knobs'];
+                new_entity.stage_result = stage_object['stage_result'];
 
-            // important assumption here: we retrieve steps, stages and data points in a sorted manner w.r.t. createdDate field
-            // so all_data is sth like:
-            // [ 0: {number: 1, values: ..., knobs: [...]}, 1: {number: 2, values: ..., knobs: [...] }...]
-            all_data.push(new_entity);
+                // important assumption here: we retrieve steps, stages and data points in a sorted manner w.r.t. createdDate field
+                // so all_data is sth like:
+                // [ 0: {number: 1, values: ..., knobs: [...]}, 1: {number: 2, values: ..., knobs: [...] }...]
+                all_data.push(new_entity);
+              }
+            }
           }
         }
       }
@@ -322,14 +327,14 @@ export class EntityService {
   }
 
   /**
-   * iterates given knob object and round their values to given decimal number
+   * iterates given object and round their values to given decimal number
    */
-  public round_knob_values(iterable_knob_object: any, decimal: number) {
-    Object.getOwnPropertyNames(iterable_knob_object).forEach(key => {
-      let value = iterable_knob_object[key];
-      iterable_knob_object[key] = Number(value.toFixed(decimal));
+  public round_values(iterable_object: any, decimal: number) {
+    Object.getOwnPropertyNames(iterable_object).forEach(key => {
+      let value = iterable_object[key];
+      iterable_object[key] = Number(value.toFixed(decimal));
     });
-    return iterable_knob_object;
+    return iterable_object;
   }
 
   /** returns keys of the given map */
@@ -408,5 +413,13 @@ export class EntityService {
       map.set(attribute, value);
     });
     return map;
+  }
+
+  /**
+   * @param obj, object whose emptiness will be tested
+   * @returns {boolean}
+   */
+  public isEmptyObject(obj){
+    return JSON.stringify(obj) === '{}';
   }
 }

@@ -50,8 +50,8 @@ export class OEDAApiService extends RESTService {
     return this.doPOSTPublicRequest("/experiments/" + experiment.id, experiment)
   }
 
-  public updateExperiment(experiment: Experiment, step_no: any): Observable<any> {
-    return this.doPUTPublicRequest("/experiments/" + experiment.id + "/" + step_no, experiment)
+  public updateExperiment(experiment: Experiment): Observable<any> {
+    return this.doPUTPublicRequest("/experiments/" + experiment.id, experiment)
   }
 
   public loadAllTargets(): Observable<Target[]> {

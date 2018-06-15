@@ -32,14 +32,15 @@ class QQPlotController(Resource):
 
                 for stage_no in steps_and_stages[step_no]:
                     entity = steps_and_stages[step_no][stage_no]
-                    if len(entity['values']) == 0:
-                        pass
+                    if 'values' in entity:
+                        if len(entity['values']) == 0:
+                            pass
 
-                    for data_point in entity['values']:
-                        # there might be payload data that does not include the selected data type. filter them out
-                        point = data_point["payload"].get(incoming_data_type_name)
-                        if point:
-                            pts.append(point)
+                        for data_point in entity['values']:
+                            # there might be payload data that does not include the selected data type. filter them out
+                            point = data_point["payload"].get(incoming_data_type_name)
+                            if point:
+                                pts.append(point)
             else:
                 data_points = db().get_data_points(experiment_id=experiment_id, step_no=step_no, stage_no=stage_no)
                 if data_points is None:

@@ -71,9 +71,7 @@ class FactorialAnova(Analysis):
         aov_table_sqr = deepcopy(aov_table)
         self.eta_squared(aov_table_sqr)
         self.omega_squared(aov_table_sqr)
-        # with pd.option_context('display.max_rows', self.stages_count, 'display.max_columns', 6, 'max_colwidth', 10000):
-        #     print(aov_table)
-        # print "------------------"
+        # TODO: aov_table = aov_table[aov_table["omega_sq"] > min_effect_size] can also be integrated
 
         # remove same cols, see: https://stackoverflow.com/questions/13411544/delete-column-from-pandas-dataframe-using-del-df-column-name
         columns = ['sum_sq', 'df', 'F', 'PR(>F)']

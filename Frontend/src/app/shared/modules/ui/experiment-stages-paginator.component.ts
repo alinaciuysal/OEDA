@@ -36,18 +36,18 @@ import {isNullOrUndefined} from "util";
             <table style="margin-top: 20px" class="table table-bordered table-hover" [mfData]="available_steps[step_no]" #mf="mfDataTable"
                    [mfRowsOnPage]="3">
               <thead>
-              <tr>
-                <th>
-                  Stage
-                </th>
-                <th *ngIf="for_successful_experiment">
-                  Result
-                </th>
-                <!-- Default Knobs Header (this is always in the same order because we retrieve it from config)-->
-                <th *ngFor="let default_knob of targetSystem.defaultVariables"> 
-                  {{default_knob.name}}
-                </th>
-              </tr>
+                <tr>
+                  <th>
+                    Stage
+                  </th>
+                  <th *ngIf="for_successful_experiment">
+                    Result
+                  </th>
+                  <!-- Default Knobs Header (this is always in the same order because we retrieve it from config)-->
+                  <th *ngFor="let default_knob of targetSystem.defaultVariables"> 
+                    {{default_knob.name}}
+                  </th>
+                </tr>
               </thead>
               <tbody class="bigTable">
                 <tr *ngFor="let item of mf.data" (click)="onRowClick(item)" [class.active]="item.number == selected_row">
@@ -140,6 +140,7 @@ export class ExperimentStagesPaginatorComponent implements OnInit {
   ngOnInit() {
     // ordered_keys is used to display knobs of All Stages row
     let step_tuple = this.available_steps[this.step_no];
+    console.log("step_tuple", step_tuple);
     // because we pushed an additional tuple while retrieving steps & stages to show All Stages properly
     let first_stage = step_tuple[0];
     this.ordered_keys = this.get_ordered_keys(first_stage.knobs);

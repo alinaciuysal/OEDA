@@ -13,18 +13,21 @@ pp = pprint.PrettyPrinter(indent=4)
 def start_three_phase_analysis(wf):
     """ executes ANOVA, bayesian opt, and Ttest """
     info("> Analysis   | 3-Phase", Fore.CYAN)
-    info("> Starting experimentFunction for ANOVA, setting step_no to 1")
-    wf.step_no = 1 # set step_no to 1 initially, as we did not perform any experiment stage_counter is still 0
+    info("> Starting experimentFunction for ANOVA, setting step_no to 1, updating numberOfSteps in experiment")
+    # set step_no to 1 initially and update experiment, because it will be used in front-end
+    wf.step_no = 1
+    db().update_experiment(experiment_id=wf.id, field='numberOfSteps', value=wf.step_no)
+
     start_step_strategy(wf)
     info("> Starting ANOVA, step_no is still 1")
+
     # we have only one data type, e.g. overhead
     considered_data_type_name = wf.considered_data_types[0]["name"]
     wf.analysis["data_type"] = considered_data_type_name
     successful = start_factorial_tests(wf)
     if successful:
         all_res = db().get_analysis(experiment_id=wf.id, step_no=wf.step_no, analysis_name='two-way-anova')
-        # now we want to select the most important factors out of anova result, following can also be integrated
-        # aov_table = aov_table[aov_table["omega_sq"] > min_effect_size]
+        # now we want to select the most important factors out of anova result
         sorted_significant_interactions = get_significant_interactions(all_res["anova_result"], wf.analysis["anovaAlpha"], wf.analysis["nrOfImportantFactors"])
         info("> Sorted significant interactions " + str(sorted_significant_interactions))
         # in this case, we can't find any significant interactions

@@ -7,7 +7,7 @@ import {NotificationsService} from "angular2-notifications/dist";
   selector: 'ttest-analysis',
   template: `
     <!-- Show/Hide Button & Additional Buttons for Running experiments -->
-    <div class="col-md-12">
+    <div class="col-md-12" *ngIf="experiment.numberOfSteps > 2">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <button type="button" class="btn btn-success" (click)="btnClicked()">

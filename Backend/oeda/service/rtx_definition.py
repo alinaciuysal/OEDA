@@ -52,6 +52,7 @@ class RTXDefinition:
         self.execution_strategy = execution_strategy
         self.evaluator = RTXDefinition.evaluator
         self.setup_stage = RTXDefinition.setup_stage
+        self.resetExperimentCounter = RTXDefinition.resetExperimentCounter
 
     def run_oeda_callback(self, dictionary):
         dictionary['stage_counter'] = self.stage_counter
@@ -129,6 +130,11 @@ class RTXDefinition:
         db().update_stage(experiment_id=wf.id, step_no=wf.step_no, stage_no=wf.stage_counter, field="stage_result", value=result)
         wf.stage_counter += 1 # this must be done after all calculations of a single stage
         return result
+
+    @staticmethod
+    def resetExperimentCounter(wf):
+        if hasattr(wf, "experimentCounter"):
+            delattr(wf, "experimentCounter")
 
 
 def get_knob_values(strategy_type, knobs):

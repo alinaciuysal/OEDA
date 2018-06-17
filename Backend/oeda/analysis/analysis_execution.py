@@ -9,10 +9,8 @@ from oeda.rtxlib.executionstrategy.MlrStrategy import start_mlr_mbo_strategy
 
 from collections import OrderedDict
 from oeda.utilities.Structures import DefaultOrderedDict
-from math import sqrt
 from copy import deepcopy
 import traceback
-import numpy as np
 
 outer_key = "payload" # this is by default, see: data_point_type properties in experiment_db_config.json
 
@@ -288,7 +286,7 @@ def assign_iterations(experiment, significant_interactions, execution_strategy_t
     for i in range(optimizer_iterations % nrOfFoundInteractions):
         values[i] += 1
     # here, values = [4, 3, 3] for nrOfFoundInteractions = 3, optimizer_iterations = 10
-    # keys = ['rrs', 'ep', 'rrs, exploration_percentage']
+    # keys = ['route_random_sigma', 'exploration_percentage', 'route_random_sigma, exploration_percentage']
     info("> values " + str(values))
     for i in range(len(values)):
         key = significant_interactions.keys()[i]
@@ -362,16 +360,23 @@ def start_bogp(wf, sorted_significant_interactions):
         wf.step_no += 1
         # also reset stage_counter
         wf.stage_counter = 1
-        delattr(wf, 'experimentCounter')
+        wf.resetExperimentCounter(wf)
         # also update experiment's numberOfSteps
         db().update_experiment(experiment_id=wf.id, field='numberOfSteps', value=wf.step_no)
 
-        # TODO: sort optimal_tuples, find best one so far and apply / pass it to CrowdNav with workflow_knobs
+        intermediate_tuples = sorted(optimal_tuples, key=lambda x: x[1])
+        info("> Intermediate_tuples & values " + str(intermediate_tuples))
+        intermediate_knobs = intermediate_tuples[0][0]
+        info("> intermediate_knobs 11 " + str(intermediate_knobs))
+        # find best configuration for intermediate runs and apply it on target system (if applicable)
+        if wf.change_provider["changesApplicable"]:
+            wf.change_provider["instance"].applyChange(intermediate_knobs)
 
 
     info("> All knobs & values " + str(optimal_tuples))
-    # find the best tuple (knob & result)
+    # find the best tuple (knob & result) for overall execution
     sorted_tuples = sorted(optimal_tuples, key=lambda x: x[1])
     info("> Sorted knobs & values " + str(sorted_tuples))
-    # e.g. {'route_random_sigma': 0.3, 'exploration_percentage': 0.5}, 0.4444444
+    # e.g. ({'route_random_sigma': 0.3, 'exploration_percentage': 0.5}), 0.4444444
+    info("> sorted_tuples[0][0] " + str(sorted_tuples[0][0]) + " " + str(sorted_tuples[0][1]))
     return sorted_tuples[0][0], sorted_tuples[0][1]

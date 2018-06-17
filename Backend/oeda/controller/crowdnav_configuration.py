@@ -19,6 +19,7 @@ class CrowdNavConfigController(Resource):
                 "kafkaTopicTrips": Config.kafkaTopicTrips,
                 "kafkaTopicPerformance": Config.kafkaTopicPerformance,
                 "kafkaHost": Config.kafkaHost,
+                "changesApplicable": True, # if we can change target system's default configuration on-the-fly
                 "kafkaCommandsTopic": Config.kafkaCommandsTopic, # for now, kafkaHost and kafkaCommandsTopic are only fetched & used for populating change provider entity in OEDA
                 "knobs": knobs, # used to populate changeableVariables in OEDA
                 "dataProviders": dataProviders # used to populate dataProviders in OEDA

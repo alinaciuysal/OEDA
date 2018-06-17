@@ -41,7 +41,7 @@ def start_three_phase_analysis(wf):
             info("> Starting Optimization process, setting step_no to 2, re-setting stage_counter, updating numberOfSteps in experiment")
             wf.step_no += 1
             wf.stage_counter = 1 # first step is done, reset stage counter to 1 and remove experimentCounter attribute
-            delattr(wf, 'experimentCounter')
+            wf.resetExperimentCounter(wf)
             db().update_experiment(experiment_id=wf.id, field='numberOfSteps', value=wf.step_no)
 
             best_knob, best_result = start_bogp(wf=wf, sorted_significant_interactions=sorted_significant_interactions)
@@ -53,7 +53,7 @@ def start_three_phase_analysis(wf):
             info("> Starting T-test, step_no: " + str(wf.step_no) + " re-setting stage_counter")
             # perform experiments with default & best knobs in another step
             # also save this to experiment in ES
-            # there is no need to increment step_no and remove experimentCounter because at the last stage of bogp, it gets incremented & removed
+            # there is no need to increment step_no and remove experimentCounter because at the last stage of bogp; they get incremented & removed, respectively
             # but we need to reset stage_counter
             wf.stage_counter = 1
             db().update_experiment(experiment_id=wf.id, field='numberOfSteps', value=wf.step_no)
@@ -67,6 +67,8 @@ def start_three_phase_analysis(wf):
             # perform T-test
             t_test_result = start_two_sample_tests(wf=wf)
             info("> T-test result is saved to DB:" + str(t_test_result))
+            info("> Reverting back to default configuration:" + str(default_knob))
+            wf.change_provider["instance"].applyChange(default_knob)
     else:
         error("> ANOVA failed")
 

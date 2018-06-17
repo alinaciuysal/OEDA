@@ -7,7 +7,6 @@ class StageController(Resource):
     @staticmethod
     def get(experiment_id):
         numberOfSteps = db().get_experiment(experiment_id=experiment_id)["numberOfSteps"]
-        print("numberOfSteps in backend", numberOfSteps)
         steps_and_stages = {}
         # step numbers always start from 1, not 0. and we should pass numberOfSteps + 1 to range fcn
         for step_no in range(1, numberOfSteps + 1):

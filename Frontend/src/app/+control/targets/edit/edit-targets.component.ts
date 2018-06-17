@@ -94,6 +94,7 @@ export class EditTargetsComponent implements OnInit {
       "secondaryDataProviders": [],
       "changeProvider": {
         "type": "",
+        "changesApplicable": false
       },
       "name": "",
       "status": "READY",
@@ -434,15 +435,6 @@ export class EditTargetsComponent implements OnInit {
         }
       }
     }
-    if (this.target.changeProvider.type == null || this.target.changeProvider.type === "" ||
-        this.target.changeProvider.type == null || this.target.changeProvider.type === "" ||
-        this.target.changeProvider.type == null || this.target.changeProvider.type === "" ||
-        this.target.changeProvider.type == null || this.target.changeProvider.type === "" ||
-        this.target.changeProvider.type == null || this.target.changeProvider.type === "" ||
-        this.target.changeProvider.type == null || this.target.changeProvider.type === "") {
-      this.errorButtonLabel = "Provide valid inputs for change provider";
-      return true;
-    }
 
     if (this.target.name == null || this.target.name === "") {
       this.errorButtonLabel = "Provide valid target system name";
@@ -456,6 +448,16 @@ export class EditTargetsComponent implements OnInit {
 
     if (this.target.incomingDataTypes.length === 0) {
       this.errorButtonLabel = "Provide at least one incoming data type";
+      return true;
+    }
+
+    if (isNullOrUndefined(this.target.changeProvider.changesApplicable)) {
+      this.errorButtonLabel = "Provide True or False for applicability of changes to target system on the run-time";
+      return true;
+    }
+
+    if (this.target.changeProvider.type == "") {
+      this.errorButtonLabel = "Provide a change provider type";
       return true;
     }
 
@@ -474,6 +476,7 @@ export class EditTargetsComponent implements OnInit {
     this.targetCreatedFromConfig = true;
     this.target['name'] = this.selectedConfiguration['name'];
     this.target['description'] = this.selectedConfiguration['description'];
+    this.target.changeProvider['changesApplicable'] = this.selectedConfiguration['changesApplicable'];
 
     // kafkaHost attribute is retrieved from api
     if (this.selectedConfiguration.hasOwnProperty("kafkaHost")) {

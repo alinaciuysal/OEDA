@@ -38,7 +38,7 @@ def experimentFunction(wf, exp):
             new_data = wf.primary_data_provider["instance"].returnData()
             if new_data is not None:
                 i += 1
-                # NEW - we call back to oeda and give us infos there
+                # we callback to oeda and give us info there
                 wf.run_oeda_callback({"experiment": exp,
                                       "status": "IGNORING_SAMPLES",
                                       "index": i,
@@ -114,9 +114,6 @@ def experimentFunction(wf, exp):
     wf.remaining_time_and_stages['remaining_stages'] = wf.totalExperiments - wf.experimentCounter
     wf.remaining_time_and_stages['remaining_time'] = str(wf.remaining_time_and_stages['remaining_stages'] * duration / 1000)
 
-    wf.run_oeda_callback({"experiment": exp, "status": "EXPERIMENT_STAGE_DONE",
-                          "experiment_counter": wf.experimentCounter, "total_experiments": wf.totalExperiments,
-                          "remaining_time_and_stages": wf.remaining_time_and_stages})
     # do not show stats for forever strategy
     if wf.totalExperiments > 0:
         info("> Statistics     | " + str(wf.experimentCounter) + "/" + str(wf.totalExperiments)

@@ -4,7 +4,7 @@ import {OEDAApiService} from "../api/oeda-api.service";
 import {NotificationsService} from "angular2-notifications/dist";
 
 @Component({
-  selector: 'anova-analysis',
+  selector: 'analysis-running',
   template: `
     <div class="col-md-12">
       <div class="panel panel-default chartJs">
@@ -95,7 +95,7 @@ import {NotificationsService} from "angular2-notifications/dist";
   `
 })
 
-export class AnovaAnalysisComponent {
+export class AnalysisRunningComponent {
   @Input() targetSystem: any;
   @Input() experiment: any;
   @Input() step_no: any;
@@ -119,6 +119,11 @@ export class AnovaAnalysisComponent {
   public btnClicked(): void {
     // first case with empty results
     if (this.analysis_is_collapsed && isNullOrUndefined(this.results)) {
+      // well, this component is tailored for running experiment to show only anova results
+      // so we need to adjust retrieved step_no to always show anova results in UI
+      if (this.step_no !== 1) {
+        this.step_no = 1;
+      }
       this.apiService.getAnalysis(this.experiment, this.step_no, this.analysis_name).subscribe(
         (result) => {
           let analysis = JSON.parse(result._body);
@@ -169,7 +174,7 @@ export class AnovaAnalysisComponent {
   }
 
   public get_keys(object): Array<string> {
-      if (!isNullOrUndefined(object)) {
+    if (!isNullOrUndefined(object)) {
       return Object.keys(object);
     }
     return null;

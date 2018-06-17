@@ -9,7 +9,7 @@ import {Observable} from "rxjs/Observable";
 import {PlotService} from "../../../../shared/util/plot-service";
 import {EntityService} from "../../../../shared/util/entity-service";
 import {TempStorageService} from "../../../../shared/modules/helper/temp-storage-service";
-import indexOf = require("core-js/fn/array/index-of");
+import * as _ from "lodash.clonedeep";
 
 @Component({
   selector: 'show-running-experiment',
@@ -38,9 +38,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
   private experiment_ended: boolean;
   private timestamp: string;
   private stage_details: string;
-
   private decimal_places: number;
-  private all_data: StepEntity[];
 
   public experiment_id: string;
   public experiment: Experiment;
@@ -55,16 +53,17 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
   public scale: string;
   public is_qq_plot_rendered: boolean;
 
-  public selected_stage_for_qq_js: string;
-  public qqJSPlotIsRendered: boolean;
   public is_enough_data_for_plots: boolean;
   public is_all_stages_selected: boolean;
 
+  public callbackRetrieved: boolean;
+
   public incoming_data_type: object;
 
-  public available_steps = {};
+  public available_steps = {}; // main data structure difference with successful-experiment component
 
   public selected_stage: any;
+
   public oedaCallback: OedaCallbackEntity;
 
   public step_no: any;
@@ -81,22 +80,20 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
   ) {
 
     this.layout.setHeader("Experiment Results", "");
+    this.callbackRetrieved = false;
     this.dataAvailable = false;
     this.is_all_stages_selected = false;
     this.is_qq_plot_rendered = false;
-    this.qqJSPlotIsRendered = false;
     this.is_enough_data_for_plots = false;
     this.experiment_ended = false;
     this.is_collapsed = true;
     this.first_render_of_page = true;
-    this.all_data = [];
     this.scale = "Normal";
     this.first_render_of_plots = true;
     this.decimal_places = 3;
     this.distribution = "Norm";
     this.available_distributions = ['Norm', 'Gamma', 'Logistic', 'T', 'Uniform', 'Lognorm', 'Loggamma'];
     this.incoming_data_type = null;
-    this.selected_stage_for_qq_js = "Select a stage";
     this.oedaCallback = this.entityService.create_oeda_callback_entity();
 
 
@@ -105,7 +102,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     this.histogramLogDivId = "histogram_log";
     this.filterSummaryId = "filterSummary";
     this.qqPlotDivId = "qqPlot";
-    this.step_no = "1"; // initially selected step is "ANOVA step"
+    this.step_no = 1; // initially selected step is "ANOVA step"
 
     // subscribe to router event
     this.activated_route.params.subscribe((params: Params) => {
@@ -134,46 +131,6 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
               if (!isNullOrUndefined(targetSystem)) {
                 this.targetSystem = targetSystem;
                 this.targetSystem.id = this.experiment.targetSystemId;
-
-                // initially selected stage is "All Stages"
-                this.selected_stage = {"number": -1, "knobs": {}};
-                this.selected_stage.knobs = this.entityService.populate_knob_objects_with_variables(this.selected_stage.knobs, this.targetSystem.defaultVariables, true);
-
-                // retrieve stages
-                this.apiService.loadAvailableStepsAndStagesWithExperimentId(this.experiment_id).subscribe(steps => {
-                  if (!isNullOrUndefined(steps)) {
-                    for (let step_no in steps) {
-                      if (steps.hasOwnProperty(step_no)) {
-                        let new_stages = [];
-                        // push initially selected stage to top of each step
-                        new_stages.push(this.selected_stage);
-
-                        // iterate actual stage tuples to merge
-                        for (let stage of steps[step_no]) {
-                          // round knob values of stages to provided decimal places
-                          if (!isNullOrUndefined(stage["knobs"])) {
-                            stage["knobs"] = this.entityService.round_values(stage["knobs"], this.decimal_places);
-                            stage["knobs"] = this.entityService.populate_knob_objects_with_variables(stage["knobs"], this.targetSystem.defaultVariables, false);
-                            if (!isNullOrUndefined(stage["stage_result"])) {
-                              stage["stage_result"] = Number(stage["stage_result"].toFixed(this.decimal_places));
-                            }
-                          }
-                          new_stages.push(stage);
-                        }
-                        steps[step_no] = new_stages;
-
-                        if (step_no == "1") {
-                          steps[step_no]["name"] = "ANOVA";
-                        }
-                      }
-
-                    }
-                    this.available_steps = steps;
-                    console.log("this.available_steps", this.available_steps);
-                    this.dataAvailable = true;
-                  }
-                });
-
                 // polling using Timer (2 sec interval) for real-time data visualization
                 this.timer = Observable.timer(1000, 2000);
                 this.subscription = this.timer.subscribe(() => {
@@ -204,6 +161,8 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
         ctrl.oedaCallback["status"] = oedaCallback.status;
         ctrl.oedaCallback["stage_counter"] = oedaCallback.stage_counter;
         ctrl.oedaCallback["step_no"] = oedaCallback.step_no;
+        ctrl.oedaCallback["step_name"] = oedaCallback.step_name;
+        ctrl.callbackRetrieved = true;
 
         // keywords (index, size) are same for the first two cases, but they indicate different things
         if (oedaCallback.status === "PROCESSING") {
@@ -224,35 +183,49 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
             if (ctrl.first_render_of_page) {
               ctrl.apiService.loadAllDataPointsOfExperiment(ctrl.experiment_id).subscribe(response => {
                 let is_successful_fetch = ctrl.process_response(response);
-                if (ctrl.incoming_data_type == null)
-                  ctrl.incoming_data_type = ctrl.entityService.get_candidate_data_type(ctrl.experiment, ctrl.targetSystem, ctrl.all_data[0]);
-
+                ctrl.dataAvailable = true; // should be placed before drawing all plots to render required html components but after processing response
+                if (ctrl.incoming_data_type == null) {
+                  // first stage data, start from 1 because All Stages tuple is located in [0], make All Stages of first step "selected"
+                  ctrl.selected_stage = ctrl.available_steps[ctrl.step_no]["stages"][0];
+                  let first_stage_data = ctrl.available_steps[ctrl.step_no]["stages"][1];
+                  ctrl.incoming_data_type = ctrl.entityService.get_candidate_data_type(ctrl.experiment, ctrl.targetSystem, first_stage_data);
+                }
                 if (is_successful_fetch && !isNullOrUndefined(ctrl.incoming_data_type)) {
                   ctrl.first_render_of_page = false;
                   ctrl.draw_all_plots();
                 }
               });
-            } else {
+            }
+            else {
               if (ctrl.timestamp == undefined) {
                 ctrl.timestamp = "-1";
               }
               ctrl.apiService.loadAllDataPointsOfRunningExperiment(ctrl.experiment_id, ctrl.timestamp).subscribe(response => {
                 ctrl.process_response(response);
-                if (ctrl.incoming_data_type == null)
-                  ctrl.incoming_data_type = ctrl.entityService.get_candidate_data_type(ctrl.experiment, ctrl.targetSystem, ctrl.all_data[0]);
+                ctrl.dataAvailable = true; // should be placed before drawing all plots to render required html components but after processing response
+
+                if (ctrl.incoming_data_type == null) {
+                  let first_stage_data = ctrl.available_steps[ctrl.step_no]["stages"][1];
+                  ctrl.incoming_data_type = ctrl.entityService.get_candidate_data_type(ctrl.experiment, ctrl.targetSystem, first_stage_data);
+                }
                 ctrl.draw_all_plots();
               });
             }
           }
 
-        } else if (oedaCallback.status == "EXPERIMENT_STAGE_DONE") {
+        } else if (oedaCallback.status == "EXPERIMENT_DONE") {
           if (oedaCallback.remaining_time_and_stages["remaining_stages"] == 0) {
-            ctrl.disable_polling("Success", "Data is up-to-date, stopped polling.");
-
-            // switch to successful experiment page to show other plots to the user
-            ctrl.router.navigate(["control/experiments/show/"+ctrl.experiment_id+"/success"]).then(() => {
-              console.log("navigated to successful experiments page");
+            // set temporary status to remove callback in backend
+            this.experiment.status = "POLLING_FINISHED";
+            this.apiService.updateExperiment(this.experiment).subscribe((resp) => {
+              ctrl.disable_polling("Success", "Data is up-to-date, stopped polling.");
+              // switch to successful experiment page to show other plots to the user
+              ctrl.router.navigate(["control/experiments/show/" + ctrl.experiment_id + "/success"]).then(() => {
+                console.log("Navigated to successful experiments page");
+              });
             });
+
+
           }
         }
       }
@@ -261,103 +234,130 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
 
   /** refactoring this method (integrating it into entityService) makes significant/drastic changes in user-experience
    * in terms of delays,
-   * spikes while validating/updating all_data.
+   * spikes while validating/updating available_steps.
    */
-  private process_response(response) {
+  private process_response(steps) {
     // hasOwnProperty checks are used to avoid inherited attributes
     const ctrl = this;
-    if (isNullOrUndefined(response)) {
+    if (isNullOrUndefined(steps)) {
       ctrl.notify.error("Error", "Cannot retrieve data from DB, please try again");
       return;
     }
     if (ctrl.first_render_of_page) {
       // we can retrieve one or more steps at first render
-      for (let stepIndex in response) {
-        if (response.hasOwnProperty(stepIndex)) {
+      for (let step_no in steps) {
+        if (steps.hasOwnProperty(step_no)) {
           // we can retrieve one or more stages within retrieved step(s)
           // distribute retrieved stages to empty step entities
           let step_entity = ctrl.entityService.create_step_entity();
+          step_entity.step_no = step_no;
 
-          for (let stageIndex in response[stepIndex]) {
-            if (response[stepIndex].hasOwnProperty(stageIndex)) {
-              let stage_object = response[stepIndex][stageIndex];
-              // distribute data points to empty bins
-              const new_entity = this.entityService.create_stage_entity();
-              new_entity.number = stage_object['number'].toString();
-              new_entity.values = stage_object['values'];
-              new_entity.knobs = ctrl.entityService.round_values(stage_object['knobs'], ctrl.decimal_places);
-              new_entity.stage_result = stage_object['stage_result'];
+          // for each new step, push "All Stages" to respective step's stages array
+          let all_stages_tpl = {"number": -1, "knobs": {}};
+          all_stages_tpl.knobs = ctrl.entityService.populate_knob_objects_with_variables(all_stages_tpl.knobs, ctrl.targetSystem.defaultVariables, true);
+          step_entity.stages.push(all_stages_tpl);
 
-              // as a guard against stage duplications
-              let existing_stage = ctrl.available_steps[step_entity.step_no].find(entity => entity.number === new_entity.number);
-              // stage does not exist yet
-              if (isNullOrUndefined(existing_stage)) {
-                new_entity["knobs"] = ctrl.entityService.populate_knob_objects_with_variables(new_entity["knobs"], ctrl.targetSystem.defaultVariables, false);
-                step_entity.stages.push(new_entity);
+          // iterate stages of retrieved step
+          for (let stage_no in steps[step_no]) {
+            if (steps[step_no].hasOwnProperty(stage_no)) {
+              let stage_object = steps[step_no][stage_no];
+              // sometimes stage_object can be {}, so avoid this case, we also retrieve step_name as key, so also filter out that
+              if (this.get_keys(stage_object).length !== 0) {
+                // distribute data points to empty bins
+                const stage_entity = this.entityService.create_stage_entity();
+                stage_entity.number = stage_object['number'];
+                stage_entity.values = stage_object['values'];
+                stage_entity.knobs = ctrl.entityService.round_values(stage_object['knobs'], ctrl.decimal_places);
+                stage_entity.knobs = ctrl.entityService.populate_knob_objects_with_variables(stage_entity.knobs, ctrl.targetSystem.defaultVariables, false);
+                stage_entity.stage_result = stage_object['stage_result'];
+
+                // get step_name from stage definition
+                step_entity.step_name = stage_object['step_name'];
+                step_entity.stages.push(stage_entity);
               }
-              // do not update timestamp here if we can't retrieve any data, just keep fetching with timestamp "-1"
-              // because backend is also updated accordingly, i.e. it continues to fetch all data if timestamp is -1
             }
           }
-          ctrl.available_steps[step_entity.step_no] = step_entity;
+          step_entity.stages.sort(this.entityService.sort_by('number', true, parseInt));
+          ctrl.available_steps[step_no] = step_entity;
         }
       }
-      console.log("available_steps after first_render", ctrl.available_steps);
+      // for the first_render we always get a new step, inform user
+      this.notify.success("Success", "New step has been fetched");
       ctrl.first_render_of_page = false;
       return true;
-    } else {
+    }
+    else {
       // we can retrieve one or more steps upon other polls
-      // so, iterate the these steps & their stages to concatenate data points
-
-      for (let stepIndex in response) {
-        if (response.hasOwnProperty(stepIndex)) {
-          // first check if we have any existing step tuple
-          let step = {};
-          if (this.available_steps.hasOwnProperty(stepIndex)) {
-            step = this.available_steps[stepIndex];
-          } else {
+      // so, iterate the these steps & their stages to concatenate respective data points
+      // corner case: we return sth like this from backend "new_tuples[step_no] = dict()", where dict can be empty
+      let timestamp_updated = false;
+      let new_step_added = false;
+      for (let step_no in steps) {
+        if (steps.hasOwnProperty(step_no)) {
+          let step: StepEntity;
+          if (this.available_steps.hasOwnProperty(step_no)) {
+            step = this.available_steps[step_no];
+          }
+          else {
+            // we retrieved a new step, update new_step_added flag to inform user at the end
             step = this.entityService.create_step_entity();
+            // for each step, check existence of "All Stages" tuple in step.stages
+            let all_stages_tpl = {"number": -1, "knobs": {}};
+            all_stages_tpl.knobs = ctrl.entityService.populate_knob_objects_with_variables(all_stages_tpl.knobs, ctrl.targetSystem.defaultVariables, true);
+            step.stages.push(all_stages_tpl);
+            new_step_added = true;
           }
 
-          for (let stageIndex in response[stepIndex]) {
-            if (response[stepIndex].hasOwnProperty(stageIndex)) {
-              let stage_object = response[stepIndex][stageIndex];
-              // tries to find the retrieved stage in available steps
-              let existing_stage = step["stages"].find(entity => entity.number === stage_object.number);
+          for (let stage_no in steps[step_no]) {
+            // check if we retrieve empty stages in steps (above-mentioned corner case)
+            if (steps[step_no].hasOwnProperty(stage_no) && this.get_keys(steps[step_no][stage_no]).length != 0 ){
+              let stage_object = steps[step_no][stage_no];
+              // find the retrieved stage in available stages
+              let existing_stage = step.stages.find(entity => entity['number'] === stage_object.number);
 
-              // we have found an existing stage
+              // we have found an existing stage, concat its values with existing one
               if (existing_stage !== undefined) {
                 // let stage_index = parsed_json_object['number'] - 1;
                 if (stage_object['values'].length > 0) {
-                  existing_stage.values = existing_stage.values.concat(stage_object['values']);
+                  existing_stage['values'] = existing_stage['values'].concat(stage_object['values']);
                 }
                 // update whole tuple by finding index and replacing
                 const existing_stage_idx = step["stages"].indexOf(stage_object);
-                step["stages"][existing_stage_idx] = existing_stage;
+                step.stages[existing_stage_idx] = existing_stage;
               }
               else {
                 // a new stage has been fetched, create a new bin for it, and push all the values to the bin,
-                // also push bin to all_data, round knob values to provided decimal places
+                // also push bin to available_steps, round knob values to provided decimal places
                 const number = stage_object.number;
                 const values = stage_object.values;
                 let knobs = ctrl.entityService.round_values(stage_object['knobs'], ctrl.decimal_places);
                 knobs = ctrl.entityService.populate_knob_objects_with_variables(knobs, ctrl.targetSystem.defaultVariables, false);
                 const new_stage = {"number": number, "knobs": knobs, "values": values};
-                step["stages"].push(new_stage);
-                this.available_steps[stage_object.step_no] = step;
+                step.stages.push(new_stage);
+                step.step_name = stage_object.step_name; // get step_name from stage definition
               }
               // update timestamp if we have retrieved any data
-              if (Number(stageIndex) == response[stepIndex].length - 1) {
+              // we need to update timestamp with last data of the last retrieved stage
+              // first, we get last stage
+              let stage_indices = this.get_keys(steps[step_no]); // ["1", "2", "3"...] note that they do not start from 0 because we save them DB starting from 1
+              let last_stage_idx = stage_indices.length;
+
+              if (Number(stage_no) == last_stage_idx) {
                 let data_point_length = stage_object['values'].length;
                 if (data_point_length > 0) {
                   ctrl.timestamp = stage_object.values[data_point_length - 1]['createdDate'];
-                  return true;
+                  timestamp_updated = true;
                 }
               }
             }
           }
+          step.stages.sort(this.entityService.sort_by('number', true, parseInt));
+          this.available_steps[step_no] = step;
         }
       }
+      if (new_step_added)
+        this.notify.success("Success", "New step has been fetched");
+      return timestamp_updated;
     }
   }
 
@@ -367,18 +367,20 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     // set it to false in case a new scale is selected
     ctrl.is_enough_data_for_plots = false;
 
-    // if "all stages" is selected
+    // if user has not selected anything, plot All Stages of the selected step
     if (ctrl.selected_stage.number == -1) {
-      ctrl.processedData = ctrl.entityService.process_all_stage_data(ctrl.all_data, "timestamp", "value", ctrl.scale, ctrl.incoming_data_type["name"], false);
+      ctrl.processedData = ctrl.entityService.process_stages(ctrl.available_steps[ctrl.step_no].stages, "timestamp", "value", ctrl.scale, ctrl.incoming_data_type["name"]);
       ctrl.stage_details = "All Stages";
     }
     // if any other stage is selected
     else {
-      ctrl.processedData = ctrl.all_data[ctrl.selected_stage.number - 1];
-      ctrl.processedData = ctrl.entityService.process_single_stage_data(ctrl.processedData,"timestamp", "value", ctrl.scale, ctrl.incoming_data_type["name"], false);
+      // All Stage tuple is located in stages[0]
+      ctrl.processedData = ctrl.available_steps[ctrl.step_no].stages[ctrl.selected_stage.number];
+      ctrl.processedData = ctrl.entityService.process_single_stage_data(ctrl.processedData,"timestamp", "value", ctrl.scale, ctrl.incoming_data_type["name"]);
       // ctrl.processedData is the stage object here
       ctrl.stage_details = ctrl.entityService.get_stage_details(ctrl.selected_stage);
     }
+
     if (!isNullOrUndefined(ctrl.processedData)) {
       // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
       const clonedData = JSON.parse(JSON.stringify(ctrl.processedData));
@@ -390,7 +392,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
 
       // just to override the text in div
       // if user previously clicked in the chart; but new data has come, so we should update div that tells user updated threshold and number of points to filtered.
-      document.getElementById(ctrl.filterSummaryId).innerHTML = "<p>Threshold for 95-percentile: <b>" + ctrl.initial_threshold_for_scatter_plot + "</b> and # of points to be removed: <b>" + ctrl.nr_points_to_be_filtered + "</b></p>";
+      // document.getElementById(ctrl.filterSummaryId).innerHTML = "<p>Threshold for 95-percentile: <b>" + ctrl.initial_threshold_for_scatter_plot + "</b> and # of points to be removed: <b>" + ctrl.nr_points_to_be_filtered + "</b></p>";
 
       if (ctrl.first_render_of_plots) {
         ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot(ctrl.divId, ctrl.filterSummaryId, ctrl.processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_plot, ctrl.stage_details, ctrl.decimal_places);
@@ -418,7 +420,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** called when stage dropdown (All Stages, Stage 1 [...], Stage 2 [...], ...) in main page is changed */
+  /** called when stage (All Stages, Stage 1 [...], Stage 2 [...], ...) in experiment-stages-paginator is changed */
   stage_changed(selected_stage) {
     if (selected_stage !== null)
       this.selected_stage = selected_stage;
@@ -526,5 +528,8 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     });
   }
 
+  public stepNoChanged(step_no) {
+    this.step_no = step_no;
+  }
 
 }

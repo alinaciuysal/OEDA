@@ -348,7 +348,7 @@ export class PlotService {
       return;
     }
 
-    const data_for_x_axis = ctrl.entityService.process_single_stage_data(data1, null, null, scale, incoming_data_type_name, true);
+    const data_for_x_axis = ctrl.entityService.process_single_stage_data(data1, null, null, scale, incoming_data_type_name);
 
     // retrieve data for the newly selected stage
     const data2 = ctrl.entityService.get_data_from_local_structure(all_data, other_stage_number);
@@ -356,7 +356,7 @@ export class PlotService {
       ctrl.notify.error("Error", "Selected stage might not contain data. Please select another stage.");
       return;
     }
-    const data_for_y_axis = ctrl.entityService.process_single_stage_data(data2, null, null, scale, incoming_data_type_name, true);
+    const data_for_y_axis = ctrl.entityService.process_single_stage_data(data2, null, null, scale, incoming_data_type_name);
 
     var tm = mean(data_for_x_axis);
     var td = Math.sqrt(variance(data_for_x_axis));

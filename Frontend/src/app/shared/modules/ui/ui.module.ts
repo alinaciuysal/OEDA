@@ -12,6 +12,8 @@ import {TtestAnalysisComponent} from "./ttest-analysis.component";
 import {DataTableModule} from "angular2-datatable";
 import {IncomingDataTypesComponent} from "./incoming-data-types-optimization";
 import {IncomingDataTypesAnalysisComponent} from "./incoming-data-types-analysis";
+import {ExperimentStagesPaginatorRunningComponent} from "./experiment-stages-paginator-running";
+import {AnalysisRunningComponent} from "./analysis-running";
 
 const uiElements = [
   DebugElementComponent,
@@ -20,10 +22,12 @@ const uiElements = [
   ExperimentDetailsComponent,
   ExperimentStagesComponent,
   ExperimentStagesPaginatorComponent,
+  ExperimentStagesPaginatorRunningComponent,
   AnovaAnalysisComponent,
   TtestAnalysisComponent,
   IncomingDataTypesComponent,
-  IncomingDataTypesAnalysisComponent
+  IncomingDataTypesAnalysisComponent,
+  AnalysisRunningComponent
 ];
 
 @NgModule({

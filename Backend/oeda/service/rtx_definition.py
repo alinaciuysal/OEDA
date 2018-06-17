@@ -19,6 +19,7 @@ class RTXDefinition:
     remaining_time_and_stages = None
     incoming_data_types = None
     step_no = None
+    step_name = None
     considered_data_types = []
 
     def __init__(self, oeda_experiment, oeda_target, oeda_callback, oeda_stop_request):
@@ -55,6 +56,7 @@ class RTXDefinition:
     def run_oeda_callback(self, dictionary):
         dictionary['stage_counter'] = self.stage_counter
         dictionary['step_no'] = self.step_no
+        dictionary['step_name'] = self.step_name
         self._oeda_callback(dictionary, self.id)
 
     """ saves the data provided by the primary data provider
@@ -82,7 +84,7 @@ class RTXDefinition:
 
     @staticmethod
     def setup_stage(wf, knobs):
-        db().save_stage(experiment_id=wf.id, step_no=wf.step_no, stage_no=wf.stage_counter, knobs=knobs)
+        db().save_stage(experiment_id=wf.id, step_no=wf.step_no, step_name=wf.step_name, stage_no=wf.stage_counter, knobs=knobs)
 
     @staticmethod
     def calculate_result(wf):

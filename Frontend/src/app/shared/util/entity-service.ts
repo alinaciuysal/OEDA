@@ -37,15 +37,11 @@ export class EntityService {
   }
 
   /** parses single stage data with given attributes & scale, and returns values in array */
-  public process_single_stage_data(single_stage_object, xAttribute, yAttribute, scale, incoming_data_type_name, called_for_successful_experiment): Array<number> {
+  public process_single_stage_data(single_stage_object, xAttribute, yAttribute, scale, incoming_data_type_name): Array<number> {
     const ctrl = this;
     try {
       if (single_stage_object !== undefined) {
         const processedData = [];
-        // Parsing string into json should only be done here.
-        // if (called_for_successful_experiment) {
-        //   single_stage_object = JSON.parse(single_stage_object);
-        // }
         single_stage_object.values.forEach(function(data_point) {
           // filter out points that are retrieved from other data providers, o/w they will be undefined
           if (!isNullOrUndefined(data_point["payload"][incoming_data_type_name])){
@@ -89,15 +85,15 @@ export class EntityService {
     }
   }
 
-  /** stage object contains more than one stages here */
-  public process_all_stage_data(all_stage_object, xAttribute, yAttribute, scale, incoming_data_type_name, called_for_successful_experiment): Array<number> {
+  /** all_stage_object can contain more than one stages here */
+  public process_all_stage_data(all_stage_object, xAttribute, yAttribute, scale, incoming_data_type_name): Array<number> {
     const ctrl = this;
     try {
       if (all_stage_object !== undefined) {
         const processedData = [];
 
         all_stage_object.forEach(function(single_stage_object) {
-          const data_array = ctrl.process_single_stage_data(single_stage_object, xAttribute, yAttribute, scale, incoming_data_type_name, called_for_successful_experiment);
+          const data_array = ctrl.process_single_stage_data(single_stage_object, xAttribute, yAttribute, scale, incoming_data_type_name);
           data_array.forEach(function(data_value){
             processedData.push(data_value);
           });
@@ -105,6 +101,30 @@ export class EntityService {
         return processedData;
       } else {
         this.notify.error("Error", "Failed to process all stage data");
+      }
+    } catch (err) {
+      this.notify.error("Error", err.message);
+      throw err;
+    }
+  }
+
+  /** data structure that is used for running and successful experiments are different
+   * we pass key (step_no) - value (stages) pairs to this fcn from running exp. page to parse all data of all stages of single step*/
+  public process_stages(stages, xAttribute, yAttribute, scale, incoming_data_type_name): Array<number> {
+    const ctrl = this;
+    try {
+      if (stages !== undefined) {
+        let processedData = [];
+        stages.forEach(function(single_stage_object) {
+          // iterates each stage but not All Stages tuple, it's just for displaying purposes
+          if (Number(single_stage_object.number) !== -1) {
+            const data_array = ctrl.process_single_stage_data(single_stage_object, xAttribute, yAttribute, scale, incoming_data_type_name);
+            processedData = processedData.concat(data_array);
+          }
+        });
+        return processedData;
+      } else {
+        this.notify.error("Error", "Failed to process all stage data for running experiment");
       }
     } catch (err) {
       this.notify.error("Error", err.message);
@@ -143,7 +163,6 @@ export class EntityService {
             if (steps_and_stages[step_number].hasOwnProperty(stage_index)) {
               let stage_object = steps_and_stages[step_number][stage_index];
               if (!this.isEmptyObject(stage_object)) {
-                console.log("stage_object", stage_object);
                 // distribute data points to empty bins
                 const new_entity = this.create_stage_entity();
                 new_entity.number = stage_object['number'].toString();
@@ -223,7 +242,9 @@ export class EntityService {
       total_experiments: 0,
       stage_counter: null,
       current_knob: new Map<string, number>(),
-      remaining_time_and_stages: {}
+      remaining_time_and_stages: {},
+      step_name: "",
+      step_no: 0
     };
   }
 
@@ -248,7 +269,7 @@ export class EntityService {
     return {
       step_no: "",
       stages: [],
-      name: ""
+      step_name: ""
     }
   }
 
@@ -269,6 +290,7 @@ export class EntityService {
         values.forEach(function(tuple) {
           if(tuple.payload.hasOwnProperty(incoming_data_type.name) && !retrieved) {
             retrieved = true;
+            return retrieved;
           }
         });
       }
@@ -330,6 +352,8 @@ export class EntityService {
    * iterates given object and round their values to given decimal number
    */
   public round_values(iterable_object: any, decimal: number) {
+    if (iterable_object == undefined)
+      return iterable_object;
     Object.getOwnPropertyNames(iterable_object).forEach(key => {
       let value = iterable_object[key];
       iterable_object[key] = Number(value.toFixed(decimal));
@@ -364,7 +388,7 @@ export class EntityService {
         }
       } else {
         // this case is for populating all_stage, initially stageKnobs is an empty Map
-        // so it will insert min & max accoringly for non-forever strategies.
+        // so it will insert min & max accordingly.
         let min_max_map = {};
         min_max_map["min"] = target_system_knob.min;
         min_max_map["max"] = target_system_knob.max;
@@ -419,7 +443,7 @@ export class EntityService {
    * @param obj, object whose emptiness will be tested
    * @returns {boolean}
    */
-  public isEmptyObject(obj){
+  public isEmptyObject(obj): boolean {
     return JSON.stringify(obj) === '{}';
   }
 }

@@ -30,8 +30,16 @@ class ExperimentController(Resource):
             content = request.get_json()
             status = content["status"]
 
-            # kill thread and return respective messages
-            if status == "INTERRUPTED":
+            if status == "POLLING_FINISHED":
+                # just remove dict from callbackDict if we receive respective signal
+                # but do not touch experiment status because it can already be updated after workflow execution
+                pop_from_dict(experiment_id, None)
+                resp = jsonify({"message": "Polling is stopped and callback is removed"})
+                resp.status_code = 200
+                return
+
+            # kill thread and return respective messages if an interrupt signal is received & update db
+            elif status == "INTERRUPTED":
                 kill_experiment(experiment_id=experiment_id)
                 # also remove callback dict from callbackDict
                 pop_from_dict(experiment_id, None)

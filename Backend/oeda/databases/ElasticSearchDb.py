@@ -189,7 +189,7 @@ class ElasticSearchDb(Database):
             error("TransportError while updating experiment status. Check type mappings in experiment_db_config.json.")
             raise err2
 
-    def save_stage(self, experiment_id, step_no, stage_no, knobs, stage_result=None):
+    def save_stage(self, experiment_id, step_no, step_name, stage_no, knobs, stage_result=None):
         stage_id = self.create_stage_id(experiment_id, str(step_no), str(stage_no))
         body = dict()
         body["number"] = stage_no
@@ -197,6 +197,7 @@ class ElasticSearchDb(Database):
         body["createdDate"] = datetime.now().isoformat(' ')
         body["experiment_id"] = experiment_id
         body["step_no"] = step_no
+        body["step_name"] = step_name
 
         if stage_result:
             body["stage_result"] = stage_result
@@ -359,7 +360,7 @@ class ElasticSearchDb(Database):
                 "range": {
                     "createdDate": {
                         "gt": timestamp,
-                        "format": "yyyy-MM-dd HH:mm:ss.SSSSSS"
+                        "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"
                     }
                 }
             }

@@ -112,7 +112,7 @@ export interface StageEntity {
 export interface StepEntity {
   step_no: string,
   stages: object[],
-  name: string
+  step_name: string
 }
 
 
@@ -150,6 +150,8 @@ export interface OedaCallbackEntity {
   stage_counter: number,
   current_knob: any,
   remaining_time_and_stages: any
+  step_no: number,
+  step_name: string
 }
 
 export interface Configuration {

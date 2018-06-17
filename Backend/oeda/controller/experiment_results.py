@@ -54,6 +54,7 @@ def get_all_stage_data(experiment_id, timestamp=None):
                     stage_and_data = {
                         "knobs": stage["knobs"],
                         "number": stage["number"],
+                        "step_name": stage["step_name"],
                         "values": data_points
                     }
                     # also append stage_result if there are any

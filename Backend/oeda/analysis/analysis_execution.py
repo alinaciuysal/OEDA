@@ -314,8 +314,9 @@ def start_bogp(wf, sorted_significant_interactions):
     # k, v example: "route_random_sigma, exploration_percentage": {"optimizer_iterations": 3,"PR(>F)": 0.13678788369818956, "optimizer_iterations_in_design": 8 ...}
     # after changing knobs parameter of experiment.executionStrategy, perform experimentation for each interaction (v)
     optimal_tuples = []
+    optimizer_run = 1 # to create step_name to be passed to oedaCallback
     for k, v in sorted_significant_interactions.items():
-        print("k: ", k, " v: ", v)
+        print("k: ", k, " v: ", v, "optimizer_run: ", optimizer_run)
         # here chVars are {u'route_random_sigma': [0, 0.4], u'exploration_percentage': [0, 0.4, 0.6]}
         # print(experiment["changeableVariables"])
         # if there is only one x value in key, then fetch min & max values from chVars
@@ -338,6 +339,8 @@ def start_bogp(wf, sorted_significant_interactions):
 
         # set new values in wf
         wf.execution_strategy = newExecutionStrategy
+        wf.step_name = "Bayesian Optimization - Run: " + str(optimizer_run)
+        optimizer_run += 1
 
         # perform desired optimization process
         # after each experimentation, we will get best value & knob related with that value
@@ -348,17 +351,18 @@ def start_bogp(wf, sorted_significant_interactions):
             optimal_knob, optimal_result = start_self_optimizer_strategy(wf)
             optimal_tuples.append((optimal_knob, optimal_result))
             info("> Saving optimal knob at the end of Bayesian process (scikit): " + str(optimal_knob) + ", " + str(optimal_result))
-            db().save_stage(experiment_id=wf.id, step_no=wf.step_no, stage_no=stage_no, knobs=optimal_knob, stage_result=optimal_result)
+            db().save_stage(experiment_id=wf.id, step_no=wf.step_no, step_name=wf.step_name, stage_no=stage_no, knobs=optimal_knob, stage_result=optimal_result)
         elif wf.execution_strategy["type"] == 'mlr_mbo':
             optimal_knob, optimal_result = start_mlr_mbo_strategy(wf)
             optimal_tuples.append((optimal_knob, optimal_result))
-            db().save_stage(experiment_id=wf.id, step_no=wf.step_no, stage_no=stage_no, knobs=optimal_knob, stage_result=optimal_result)
+            db().save_stage(experiment_id=wf.id, step_no=wf.step_no, step_name=wf.step_name, stage_no=stage_no, knobs=optimal_knob, stage_result=optimal_result)
             info("> Saving optimal knob at the end of Bayesian process (mlr-mbo): " + str(optimal_knob) + ", " + str(optimal_result))
 
         # increment step_no by one as we treat each run of optimization as one step
         wf.step_no += 1
         # also reset stage_counter
         wf.stage_counter = 1
+        delattr(wf, 'experimentCounter')
         # also update experiment's numberOfSteps
         db().update_experiment(experiment_id=wf.id, field='numberOfSteps', value=wf.step_no)
 

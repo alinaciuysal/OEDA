@@ -1,9 +1,7 @@
 from flask_restful import Resource
 from oeda.databases import db
-from oeda.analysis.analysis_execution import get_tuples
 from flask import jsonify, request
 from elasticsearch.exceptions import TransportError
-from oeda.log import *
 
 class AnalysisController(Resource):
 
@@ -23,4 +21,4 @@ class AnalysisController(Resource):
             else:
                 return {"message": "Cannot get analysis results"}, 404
         except TransportError:
-            return {"message": "Analysis result does not exist in database, please conduct another experiment"}, 404
+            return {"message": "Analysis result does not exist in database (yet)"}, 404

@@ -16,6 +16,7 @@ def start_three_phase_analysis(wf):
     info("> Starting experimentFunction for ANOVA, setting step_no to 1, updating numberOfSteps in experiment")
     # set step_no to 1 initially and update experiment, because it will be used in front-end
     wf.step_no = 1
+    wf.step_name = "ANOVA"
     db().update_experiment(experiment_id=wf.id, field='numberOfSteps', value=wf.step_no)
 
     start_step_strategy(wf)
@@ -52,22 +53,26 @@ def start_three_phase_analysis(wf):
             info("> Starting T-test, step_no: " + str(wf.step_no) + " re-setting stage_counter")
             # perform experiments with default & best knobs in another step
             # also save this to experiment in ES
-            # there is no need to increment step_no because at the last stage of bogp, it gets incremented
-            # but we need to reset stage_counter and remove experimentCounter attribute, it will be assigned properly in experimentFunction(wf)
+            # there is no need to increment step_no and remove experimentCounter because at the last stage of bogp, it gets incremented & removed
+            # but we need to reset stage_counter
             wf.stage_counter = 1
-            delattr(wf, 'experimentCounter')
             db().update_experiment(experiment_id=wf.id, field='numberOfSteps', value=wf.step_no)
 
             # prepare knobs accordingly
             wf.execution_strategy["knobs"] = [default_knob, best_knob]
             # set tTestSampleSize as executionStr sample_size
             wf.execution_strategy["sample_size"] = wf.analysis["tTestSampleSize"]
-
+            wf.step_name = "T-test"
             start_sequential_strategy(wf=wf)
             # perform T-test
             t_test_result = start_two_sample_tests(wf=wf)
             info("> T-test result is saved to DB:" + str(t_test_result))
     else:
         error("> ANOVA failed")
+
+    # indicate the end of whole execution
+    wf.run_oeda_callback({"status": "EXPERIMENT_DONE",
+                          "experiment_counter": wf.experimentCounter, "total_experiments": wf.totalExperiments,
+                          "remaining_time_and_stages": wf.remaining_time_and_stages})
 
     info(">")

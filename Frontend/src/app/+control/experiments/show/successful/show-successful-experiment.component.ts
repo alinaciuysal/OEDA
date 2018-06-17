@@ -114,7 +114,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
       // draw graphs for all_data
       if (ctrl.selected_stage.number === -1) {
         try {
-          let processedData = ctrl.entityService.process_all_stage_data(stage_object, "timestamp", "value", ctrl.scale, ctrl.incoming_data_type["name"], true);
+          let processedData = ctrl.entityService.process_all_stage_data(stage_object, "timestamp", "value", ctrl.scale, ctrl.incoming_data_type["name"]);
           if (!isNullOrUndefined(processedData)) {
             // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
             const clonedData = JSON.parse(JSON.stringify(processedData));
@@ -135,7 +135,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
       // draw graphs for selected stage data
       else {
         try {
-          let processedData = ctrl.entityService.process_single_stage_data(stage_object,"timestamp", "value", ctrl.scale, ctrl.incoming_data_type["name"], true);
+          let processedData = ctrl.entityService.process_single_stage_data(stage_object,"timestamp", "value", ctrl.scale, ctrl.incoming_data_type["name"]);
           if (!isNullOrUndefined(processedData)) {
             const clonedData = JSON.parse(JSON.stringify(processedData));
             ctrl.initial_threshold_for_scatter_chart = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value', ctrl.decimal_places);
@@ -173,6 +173,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     if (selected_stage !== null) {
       // find same stage from available ones for bayesian steps
       console.log("selected_stage", selected_stage);
+      // there is no step with number "best" for anova & t-test
       if (typeof(selected_stage.number) == 'string') {
         if(selected_stage.number.includes("best")) {
           console.log("stages", this.available_steps[this.step_no]);
@@ -180,41 +181,45 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
           ctrl.notify.success("", "You selected best configuration (Stage " + selected_stage.number + ") of this step");
         }
       }
-      // because there is no "best" step for anova & t-test
       ctrl.selected_stage = selected_stage;
     }
 
-    if (this.entityService.scale_allowed(this.scale, this.incoming_data_type["scale"])) {
-      if (!isNullOrUndefined(ctrl.selected_stage.number)) {
-        if (ctrl.selected_stage.number === -1) {
-          if (!isNullOrUndefined(ctrl.all_data)) {
-            // redraw plots with all data that was previously retrieved
-            ctrl.draw_all_plots(ctrl.all_data);
+    if (!isNullOrUndefined(this.incoming_data_type)) {
+      if (this.entityService.scale_allowed(this.scale, this.incoming_data_type["scale"])) {
+        if (!isNullOrUndefined(ctrl.selected_stage.number)) {
+          if (ctrl.selected_stage.number === -1) {
+            if (!isNullOrUndefined(ctrl.all_data)) {
+              // redraw plots with all data that was previously retrieved
+              ctrl.draw_all_plots(ctrl.all_data);
+            } else {
+              // fetch data from server again and draw plots
+              ctrl.fetch_data();
+            }
           } else {
-            // fetch data from server again and draw plots
-            ctrl.fetch_data();
+            /*
+              Draw plots for the selected stage by retrieving it from local storage
+            */
+            const stage_data = ctrl.entityService.get_data_from_local_structure(ctrl.all_data, ctrl.selected_stage.number);
+            if (!isNullOrUndefined(stage_data)) {
+              ctrl.draw_all_plots(stage_data);
+            } else {
+              ctrl.notify.error("", "Please select another stage");
+              return;
+            }
           }
         } else {
-          /*
-            Draw plots for the selected stage by retrieving it from local storage
-          */
-          const stage_data = ctrl.entityService.get_data_from_local_structure(ctrl.all_data, ctrl.selected_stage.number);
-          if (!isNullOrUndefined(stage_data)) {
-            ctrl.draw_all_plots(stage_data);
-          } else {
-            ctrl.notify.error("", "Please select another stage");
-            return;
-          }
+          ctrl.notify.error("Error", "Stage number is null or undefined, please try again");
+          return;
         }
       } else {
-        ctrl.notify.error("Error", "Stage number is null or undefined, please try again");
-        return;
+        // inform user and remove graphs from page for now
+        this.is_enough_data_for_plots = false;
+        this.notify.error(this.scale + " scale cannot be applied to " + this.incoming_data_type["name"]);
       }
     } else {
-      // inform user and remove graphs from page for now
-      this.is_enough_data_for_plots = false;
-      this.notify.error(this.scale + " scale cannot be applied to " + this.incoming_data_type["name"]);
+      this.notify.error("Please select an incoming data type");
     }
+
   }
 
   /** called when incoming data type of the target system is changed

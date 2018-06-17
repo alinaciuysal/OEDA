@@ -40,7 +40,7 @@ class Database:
         """ updates experiment status with provided id, field, and value """
         pass
 
-    def save_stage(self, experiment_id, step_no, stage_no, knobs):
+    def save_stage(self, experiment_id, step_no, step_name, stage_no, knobs, stage_result=None):
         """ saves stage of an OEDA experiment with provided step no, stage_no and configuration """
         pass
 

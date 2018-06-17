@@ -35,12 +35,13 @@
       "mappings": {
         "stage": {
           "properties":     {
-            "experiment_id": {"type": "keyword"},
-            "step_no":       { "type": "keyword" },
-            "number":       { "type": "text"     },
-            "knobs":        { "type": "object"  },
-            "createdDate":  { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"},
-            "stage_result": { "type": "float" }
+            "experiment_id":              { "type": "keyword"  },
+            "step_no":                    { "type": "keyword"  },
+            "step_name":                  { "type": "text"     },
+            "number":                     { "type": "text"     },
+            "knobs":                      { "type": "object"   },
+            "createdDate":                { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"},
+            "stage_result":               { "type": "float" }
           }
         }
       }

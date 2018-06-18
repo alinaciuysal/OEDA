@@ -48,8 +48,10 @@ app.get('/', function (req, res) {
 app.post('/', function (req, res) {
     if (req.body) {
         console.log("Got value changes: x:" + req.body.x + " - y:" + req.body.y);
-        x = req.body.x || x;
-        y = req.body.y || y
+        x = parseFloat(req.body.x);
+        y = parseFloat(req.body.y);
+        // x = req.body.x || x;
+        // y = req.body.y || y
     }
     res.send("ok");
 });

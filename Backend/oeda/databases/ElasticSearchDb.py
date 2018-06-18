@@ -285,6 +285,9 @@ class ElasticSearchDb(Database):
             raise err2
 
     def get_aggregation(self, experiment_id, step_no, stage_no, aggregation_name, field):
+
+        self.es.indices.refresh(index=self.data_point_index)
+
         stage_id = self.create_stage_id(experiment_id, step_no, stage_no)
         exact_field_name = "payload" + "." + str(field)
         query = {

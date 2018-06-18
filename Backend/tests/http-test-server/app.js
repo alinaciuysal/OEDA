@@ -29,8 +29,8 @@ function initial_fcn(rnd, x, y) {
     return rnd * ( 0.4 + -1 * (0.3 * (1 - x) * x + y * (2 - y) * 0.3 + x * y / 100));
 }
 
-function three_hump_camel(x, y) {
-    return 2 * Math.pow(x, 2) * - 1.05 * Math.pow(x, 4) + Math.pow(x, 6) / 6 + x * y + Math.pow(y, 2);
+function three_hump_camel(rnd, x, y) {
+    return rnd * (2 * Math.pow(x, 2) - 1.05 * Math.pow(x, 4) + Math.pow(x, 6) / 6 + x * y + Math.pow(y, 2));
 }
 
 app.get('/', function (req, res) {

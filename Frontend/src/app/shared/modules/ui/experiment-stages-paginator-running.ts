@@ -33,7 +33,7 @@ import {isNullOrUndefined} from "util";
         </div>
         <div class="panel-body" style="padding-top: 20px; padding-left: 2%">
           <div class="table-responsive">
-            <table style="margin-top: 20px" class="table table-bordered table-hover" [mfData]="available_steps[step_no]['stages']" #mf="mfDataTable" [mfRowsOnPage]="3" >
+            <table style="margin-top: 20px" class="table table-bordered table-hover" [mfData]="available_steps[step_no]['stages']" #mf="mfDataTable" [mfRowsOnPage]="10" >
               <thead>
                 <tr>
                   <th>

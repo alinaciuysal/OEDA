@@ -33,7 +33,7 @@ import {isNullOrUndefined} from "util";
         </div>
         <div class="panel-body" style="padding-top: 20px; padding-left: 2%">
           <div class="table-responsive">
-            <table style="margin-top: 20px" class="table table-bordered table-hover" [mfData]="available_steps[step_no]" #mf="mfDataTable" [mfRowsOnPage]="3" >
+            <table style="margin-top: 20px" class="table table-bordered table-hover" [mfData]="available_steps[step_no]" #mf="mfDataTable" [mfRowsOnPage]="10">
               <thead>
                 <tr>
                   <th>
@@ -80,12 +80,13 @@ import {isNullOrUndefined} from "util";
                   
                 </tr>
                 </tbody>
-                <tfoot *ngIf="get_keys(available_steps[step_no]).length > 3">
-                <tr>
-                  <td colspan="12">
-                    <mfBootstrapPaginator [rowsOnPageSet]="[3,10,25,100]"></mfBootstrapPaginator>
-                  </td>
-                </tr>
+                <!--<tfoot *ngIf="get_keys(available_steps[step_no]).length > 10">-->
+                <tfoot>
+                  <tr>
+                    <td colspan="12">
+                      <mfBootstrapPaginator [rowsOnPageSet]="[5,10,25]"></mfBootstrapPaginator>
+                    </td>
+                  </tr>
                 </tfoot>
               </table>
           </div>

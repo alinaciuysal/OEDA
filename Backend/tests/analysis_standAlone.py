@@ -17,22 +17,25 @@ def start_workflow_with_anova(experiment_id, step_no, key, alpha, nrOfImportantF
     if performAnova:
         save_anova(experiment_id, step_no, stage_ids, samples, knobs, key)
 
-    retrieved = db().get_analysis(experiment_id=experiment_id, step_no=step_no, analysis_name='two-way-anova')
-    significant_interactions = get_significant_interactions(retrieved['anova_result'], alpha, nrOfImportantFactors)
-    significant_interactions = assign_iterations(experiment, significant_interactions, executionStrategyType)
-    print("ssi", significant_interactions)
+    # retrieved = db().get_analysis(experiment_id=experiment_id, step_no=step_no, analysis_name='two-way-anova')
+    # significant_interactions = get_significant_interactions(retrieved['anova_result'], alpha, nrOfImportantFactors)
+    # significant_interactions = assign_iterations(experiment, significant_interactions, executionStrategyType)
+    # print("ssi", significant_interactions)
 
 def save_anova(experiment_id, step_no, stage_ids, samples, knobs, key):
     test = FactorialAnova(stage_ids=stage_ids, y_key=key, knob_keys=None, stages_count=len(stage_ids))
     aov_table, aov_table_sqr = test.run(data=samples, knobs=knobs)
+    print(json.dumps(aov_table, indent=4))
 
     aov_table = delete_combination_notation(aov_table)
     aov_table_sqr = delete_combination_notation(aov_table_sqr)
 
+    print(json.dumps(aov_table, indent=4))
+
     # type(dd) is DefaultOrderedDict
     dod = iterate_anova_tables(aov_table=aov_table, aov_table_sqr=aov_table_sqr)
     print(json.dumps(dod, indent=4))
-    db().save_analysis(experiment_id=experiment_id, step_no=step_no, analysis_name=test.name, anova_result=dod)
+    # db().save_analysis(experiment_id=experiment_id, step_no=step_no, analysis_name=test.name, anova_result=dod)
 
 def start_workflow_with_ttest(experiment_id, key, alpha):
     experiment = db().get_experiment(experiment_id)
@@ -49,12 +52,6 @@ def start_workflow_with_ttest(experiment_id, key, alpha):
     # print(json.dumps(result, indent=4))
     # db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test1.name, result=result)
 
-
-
-
-
-
-
 def sort():
     tuples = []
     tuple_1 = ({"ep": 0.2, "rrs": 0.4}, 0.5555)
@@ -68,20 +65,16 @@ def sort():
     sorted_tuples = sorted(tuples, key=lambda x: x[1])
     print("sorted_tuples", sorted_tuples)
     print("best_knob", sorted_tuples[0][0], " best_value", sorted_tuples[0][1])
-    test_fcn(sorted_tuples[0][0])
-
-def test_fcn(x):
-    return x
 
 if __name__ == '__main__':
-    # nrOfImportantFactors = 3 # to be retrieved from analysis definition
-    # alpha = 0.5 # to be retrieved from analysis definition
-    # setup_experiment_database("elasticsearch", "localhost", 9200)
-    # experiment_id = "8dc0bf6a-6872-f1dd-4feb-167f87f2d067"
-    # step_no = "1" # 1 denotes step-strategy phase for ANOVA, last one denotes T-test, intermediate ones denote Bayesian Opt
-    # key = "overhead"
+    nrOfImportantFactors = 3 # to be retrieved from analysis definition
+    alpha = 0.05 # to be retrieved from analysis definition
+    setup_experiment_database("elasticsearch", "localhost", 9200)
+    experiment_id = "a8656212-f7b7-603b-3f48-068695845ed9"
+    step_no = "1" # 1 denotes step-strategy phase for ANOVA, last one denotes T-test, intermediate ones denote Bayesian Opt
+    key = "overhead"
     # set performAnova to true if there are data in DB & you want to save fresh anova result to DB
-    # start_workflow_with_anova(experiment_id, step_no, key, alpha, nrOfImportantFactors, 'self-optimizer')
+    start_workflow_with_anova(experiment_id, step_no, key, alpha, nrOfImportantFactors, 'self-optimizer', True)
     # start_workflow_with_ttest(experiment_id=experiment_id, key=key, alpha=alpha)
     # asd = db().get_experiment(experiment_id=experiment_id)["numberOfSteps"]
     # all_stage_data = get_all_stage_data(experiment_id=experiment_id)
@@ -89,6 +82,4 @@ if __name__ == '__main__':
     # print(all_stage_data.keys())
     # print(all_stage_data[1])
     # stage_ids, stages = db().get_stages(experiment_id=experiment_id, step_no=step_no)
-    # print(json.dumps(stages, indent=4))
-    sort()
 

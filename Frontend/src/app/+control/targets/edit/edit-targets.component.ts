@@ -6,6 +6,7 @@ import {ActivatedRoute, Params, Router} from "@angular/router";
 import {UUID} from "angular2-uuid";
 import {NotificationsService} from "angular2-notifications/dist";
 import * as _ from "lodash.clonedeep";
+import * as lodash from "lodash";
 import {isNullOrUndefined} from "util";
 
 @Component({
@@ -410,7 +411,6 @@ export class EditTargetsComponent implements OnInit {
         || isNullOrUndefined(this.target.changeableVariables[i].scale)
         || isNullOrUndefined(this.target.changeableVariables[i].min)
         || isNullOrUndefined(this.target.changeableVariables[i].max)
-        // || isNullOrUndefined(this.target.changeableVariables[i].default)
         || this.target.changeableVariables[i].min > this.target.changeableVariables[i].max) {
         this.errorButtonLabel = "Provide valid inputs for changeable variable(s)";
         return true;
@@ -494,6 +494,19 @@ export class EditTargetsComponent implements OnInit {
 
     // push each knob into defaultVariables array if ts is created from config
     for (let knob of this.selectedConfiguration.knobs) {
+      // iterate min & max values of each knob to convert int to float
+      knob["min"] = knob["min"].toFixed(2);
+      knob["max"] = knob["max"].toFixed(2);
+      // try to guess default value of target system if not provided via api
+      // https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript
+      if(isNullOrUndefined(knob["default"])) {
+        let randomDefault = lodash.random(knob["min"], knob["max"]);
+        knob["default"] = randomDefault.toFixed(2);
+      }
+      // default value is retrieved from api, so convert it to float
+      else {
+        knob["default"] = knob["default"].toFixed(2);
+      }
       this.target.defaultVariables.push(_(knob));
     }
   }

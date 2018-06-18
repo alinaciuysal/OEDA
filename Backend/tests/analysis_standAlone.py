@@ -11,11 +11,11 @@ pp = pprint.PrettyPrinter(indent=4)
 def start_workflow_with_anova(experiment_id, step_no, key, alpha, nrOfImportantFactors, executionStrategyType, performAnova=False):
     stage_ids, samples, knobs = get_tuples(experiment_id, step_no, key)
     experiment = db().get_experiment(experiment_id)
-    print(experiment)
+    print(json.dumps(experiment, indent=4))
     print(stage_ids)
-    print(knobs)
-    if performAnova:
-        save_anova(experiment_id, step_no, stage_ids, samples, knobs, key)
+    print(json.dumps(experiment, indent=4))
+    # if performAnova:
+    #     save_anova(experiment_id, step_no, stage_ids, samples, knobs, key)
 
     # retrieved = db().get_analysis(experiment_id=experiment_id, step_no=step_no, analysis_name='two-way-anova')
     # significant_interactions = get_significant_interactions(retrieved['anova_result'], alpha, nrOfImportantFactors)
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     nrOfImportantFactors = 3 # to be retrieved from analysis definition
     alpha = 0.05 # to be retrieved from analysis definition
     setup_experiment_database("elasticsearch", "localhost", 9200)
-    experiment_id = "a8656212-f7b7-603b-3f48-068695845ed9"
+    experiment_id = "2b4fff74-c6ba-4469-7036-3fc4a3726e48"
     step_no = "1" # 1 denotes step-strategy phase for ANOVA, last one denotes T-test, intermediate ones denote Bayesian Opt
     key = "overhead"
     # set performAnova to true if there are data in DB & you want to save fresh anova result to DB

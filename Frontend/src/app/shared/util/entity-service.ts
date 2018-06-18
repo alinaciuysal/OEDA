@@ -21,7 +21,7 @@ export class EntityService {
   private decimal_places: number;
 
   constructor (public notify: NotificationsService, public log: LoggerService) {
-    this.decimal_places = 3;
+    this.decimal_places = 2;
   }
 
   /** returns data of the selected stage from all_data structure */
@@ -356,7 +356,9 @@ export class EntityService {
       return iterable_object;
     Object.getOwnPropertyNames(iterable_object).forEach(key => {
       let value = iterable_object[key];
-      iterable_object[key] = Number(value.toFixed(decimal));
+      if(typeof(value) == 'string') {
+        iterable_object[key] = Number(value).toFixed(decimal);
+      }
     });
     return iterable_object;
   }

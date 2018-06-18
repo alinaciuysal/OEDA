@@ -87,15 +87,13 @@ export class CreateExperimentsComponent implements OnInit {
           let knobArr = [];
           let factors = chVar.factorValues.split(",");
           for (let factor of factors) {
-            knobArr.push(Number(factor));
+            knobArr.push(Number(factor).toFixed(2));
           }
           knobs[chVar.name] = knobArr;
-
         }
       }
       this.experiment.changeableVariables = knobs;
       this.experiment.executionStrategy.knobs = knobs; // also set executionStrategy knobs here
-      console.log(this.experiment);
       this.api.saveExperiment(this.experiment).subscribe(
         (success) => {
           this.notify.success("Success", "Experiment saved");

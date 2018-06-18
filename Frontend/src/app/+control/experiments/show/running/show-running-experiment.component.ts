@@ -90,7 +90,7 @@ export class ShowRunningExperimentComponent implements OnInit, OnDestroy {
     this.first_render_of_page = true;
     this.scale = "Normal";
     this.first_render_of_plots = true;
-    this.decimal_places = 3;
+    this.decimal_places = 2;
     this.distribution = "Norm";
     this.available_distributions = ['Norm', 'Gamma', 'Logistic', 'T', 'Uniform', 'Lognorm', 'Loggamma'];
     this.incoming_data_type = null;

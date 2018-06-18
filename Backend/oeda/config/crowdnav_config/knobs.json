@@ -3,37 +3,37 @@
     "name": "route_random_sigma",
     "description": "the randomization sigma of edge weights",
     "scale": "Metric",
-    "min": 0,
+    "min": 0.0,
     "max": 0.6,
-    "default": 0
+    "default": 1.0
   }, {
     "name": "exploration_percentage",
     "description": "the percentage of routes we want to use for exploration",
     "scale": "Metric",
-    "min": 0,
+    "min": 0.0,
     "max": 0.6,
-    "default": 0
+    "default": 0.0
   }, {
     "name": "max_speed_and_length_factor",
     "description": "how much the length/speed influences the routing",
     "scale": "Metric",
-    "min": 1,
+    "min": 1.0,
     "max": 2.5,
-    "default": 1
+    "default": 1.0
   }, {
     "name": "average_edge_duration_factor",
     "description": "how much the averageEdgeFactor influences the routing",
     "scale": "Metric",
-    "min": 1,
+    "min": 1.0,
     "max": 2.5,
-    "default": 1
+    "default": 1.0
   }, {
     "name": "freshness_update_factor",
     "description": "how much the freshnessUpdateFactor influences the routing",
     "scale": "Metric",
-    "min": 5,
-    "max": 20,
-    "default": 5
+    "min": 5.0,
+    "max": 20.0,
+    "default": 5.0
   }, {
     "name": "freshness_cut_off_value",
     "description": "if data is older than this we do not consider it in the algorithm",

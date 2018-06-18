@@ -16,14 +16,14 @@ setup(
         'flask_cors',
         'elasticsearch>=6.0.0,<7.0.0', # elasticsearch integration
         'statsmodels', # statistics and statistical testing
-        'numpy', # scientific computing
+        'numpy>=1.14.2', # scientific computing
         'requests', # http integreation
         'freetype-py',
         'pypng',
         'matplotlib',
         'pyjwt',
         'backports.ssl_match_hostname',
-        'scikit-optimize', # gauss optimizer
+        'scikit-optimize>=0.5.2', # gauss optimizer
         'kafka', # integration with kafka
         'paho-mqtt',
         'pandas',

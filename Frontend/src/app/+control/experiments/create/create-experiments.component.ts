@@ -348,7 +348,7 @@ export class CreateExperimentsComponent implements OnInit {
                 }
                 else {
                   // now check intervals
-                  if (factor < chVar["min"] || factor > chVar["max"]) {
+                  if (Number(factor) < Number(chVar["min"]) || Number(factor) > Number(chVar["max"])) {
                     this.errorButtonLabelAnova = "Provide values within min & max values of changeable variable(s)";
                     return true;
                   }

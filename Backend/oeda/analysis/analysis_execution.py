@@ -323,7 +323,6 @@ def start_bogp(wf, sorted_significant_interactions):
         # convert values to float because their original type is unicode and skicit gives error about it
         if len(params) == 1:
             knobs[k] = sorted(knobs[k])
-            print("sorted knobs[k]: ", knobs[k])
             min_value = knobs[k][0]
             max_value = knobs[k][-1]
             new_knob[str(k)] = [float(min_value), float(max_value)]

@@ -427,7 +427,6 @@ class ElasticSearchDb(Database):
             sources = stages[1]
             for idx, stage_id in enumerate(stage_ids):
                 data_points = self.get_data_points(experiment_id=experiment_id, step_no=step_no, stage_no=idx + 1) # because stages start from 1 whereas idx start from 0
-                print("DATA_POINTS", data_points)
                 if len(data_points) > 0:
                     data[stage_id] = [d for d in data_points]
                     knobs[stage_id] = sources[idx]["knobs"]

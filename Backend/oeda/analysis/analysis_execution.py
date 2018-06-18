@@ -314,20 +314,24 @@ def start_bogp(wf, sorted_significant_interactions):
     optimal_tuples = []
     optimizer_run = 1 # to create step_name to be passed to oedaCallback
     for k, v in sorted_significant_interactions.items():
-        print("k: ", k, " v: ", v, "optimizer_run: ", optimizer_run)
+        print("k: ", k, " v: ", v)
         # here chVars are {u'route_random_sigma': [0, 0.4], u'exploration_percentage': [0, 0.4, 0.6]}
         # print(experiment["changeableVariables"])
-        # if there is only one x value in key, then fetch min & max values from chVars
+        # if there is only one x value in key, then fetch min & max values from chVars after sorting them because user can provide unsorted values in UI
         new_knob = {}
         params = str(k).split(', ')
+        # convert values to float because their original type is unicode and skicit gives error about it
         if len(params) == 1:
+            knobs[k] = sorted(knobs[k])
+            print("sorted knobs[k]: ", knobs[k])
             min_value = knobs[k][0]
             max_value = knobs[k][-1]
-            new_knob[str(k)] = [min_value, max_value]
+            new_knob[str(k)] = [float(min_value), float(max_value)]
         else:
             for parameter in params:
-                all_values = knobs[parameter] # e.g. [0, 0.2, 0.4]
-                new_knob[parameter] = [all_values[0], all_values[-1]]
+                all_values = knobs[parameter] # user can provide different values [0, 0.2, 0.4], [0, 0.4, 0.2] etc.
+                all_values = sorted(all_values)
+                new_knob[parameter] = [float(all_values[0]), float(all_values[-1])]
 
         # prepare everything needed for experimentation
         # fetch optimizer_iterations and optimizer_iterations_in_design from assigned_iterations
@@ -338,7 +342,6 @@ def start_bogp(wf, sorted_significant_interactions):
         # set new values in wf
         wf.execution_strategy = newExecutionStrategy
         wf.step_name = "Bayesian Optimization - Run: " + str(optimizer_run)
-        optimizer_run += 1
 
         # perform desired optimization process
         # after each experimentation, we will get best value & knob related with that value
@@ -355,6 +358,8 @@ def start_bogp(wf, sorted_significant_interactions):
             optimal_tuples.append((optimal_knob, optimal_result))
             db().save_stage(experiment_id=wf.id, step_no=wf.step_no, step_name=wf.step_name, stage_no=stage_no, knobs=optimal_knob, stage_result=optimal_result)
             info("> Saving optimal knob at the end of Bayesian process (mlr-mbo): " + str(optimal_knob) + ", " + str(optimal_result))
+
+        optimizer_run += 1
 
         # increment step_no by one as we treat each run of optimization as one step
         wf.step_no += 1

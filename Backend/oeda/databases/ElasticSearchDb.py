@@ -236,6 +236,8 @@ class ElasticSearchDb(Database):
         }
 
         try:
+            # before retrieving stages, refresh index
+            self.es.indices.refresh(index=self.stage_index)
             res = self.es.search(index=self.stage_index, doc_type=self.stage_type_name, body=query, size=10000, sort='createdDate')
             _ids = [r["_id"] for r in res["hits"]["hits"]]
             _sources = [r["_source"] for r in res["hits"]["hits"]]
@@ -273,6 +275,8 @@ class ElasticSearchDb(Database):
             }
         }
         try:
+            # before retrieving data points, refresh index
+            self.es.indices.refresh(index=self.data_point_index)
             # https://stackoverflow.com/questions/9084536/sorting-by-multiple-params-in-pyes-and-elasticsearch
             # sorting is required for proper visualization of data
             res = self.es.search(index=self.data_point_index, body=query, size=10000, sort='createdDate')
@@ -285,9 +289,8 @@ class ElasticSearchDb(Database):
             raise err2
 
     def get_aggregation(self, experiment_id, step_no, stage_no, aggregation_name, field):
-
+        # before retrieving aggregation(s), refresh index
         self.es.indices.refresh(index=self.data_point_index)
-
         stage_id = self.create_stage_id(experiment_id, step_no, stage_no)
         exact_field_name = "payload" + "." + str(field)
         query = {
@@ -424,7 +427,8 @@ class ElasticSearchDb(Database):
             sources = stages[1]
             for idx, stage_id in enumerate(stage_ids):
                 data_points = self.get_data_points(experiment_id=experiment_id, step_no=step_no, stage_no=idx + 1) # because stages start from 1 whereas idx start from 0
-                if len(data_points) > 1:
+                print("DATA_POINTS", data_points)
+                if len(data_points) > 0:
                     data[stage_id] = [d for d in data_points]
                     knobs[stage_id] = sources[idx]["knobs"]
             # return value 1 (data): is a key-value pair where key is stage_id and value is array of all data points of that stage,

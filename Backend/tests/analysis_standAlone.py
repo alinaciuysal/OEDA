@@ -22,6 +22,11 @@ def start_workflow_with_anova(experiment_id, step_no, key, alpha, nrOfImportantF
     # significant_interactions = assign_iterations(experiment, significant_interactions, executionStrategyType)
     # print("ssi", significant_interactions)
 
+def test_data_points(experiment_id, step_no):
+    data, knobs = db().get_data_for_analysis(experiment_id, step_no)
+    print("data", data)
+    print("knobs", knobs)
+
 def save_anova(experiment_id, step_no, stage_ids, samples, knobs, key):
     test = FactorialAnova(stage_ids=stage_ids, y_key=key, knob_keys=None, stages_count=len(stage_ids))
     aov_table, aov_table_sqr = test.run(data=samples, knobs=knobs)
@@ -73,8 +78,9 @@ if __name__ == '__main__':
     experiment_id = "2b4fff74-c6ba-4469-7036-3fc4a3726e48"
     step_no = "1" # 1 denotes step-strategy phase for ANOVA, last one denotes T-test, intermediate ones denote Bayesian Opt
     key = "overhead"
+    test_data_points(experiment_id, step_no)
     # set performAnova to true if there are data in DB & you want to save fresh anova result to DB
-    start_workflow_with_anova(experiment_id, step_no, key, alpha, nrOfImportantFactors, 'self-optimizer', True)
+    # start_workflow_with_anova(experiment_id, step_no, key, alpha, nrOfImportantFactors, 'self-optimizer', True)
     # start_workflow_with_ttest(experiment_id=experiment_id, key=key, alpha=alpha)
     # asd = db().get_experiment(experiment_id=experiment_id)["numberOfSteps"]
     # all_stage_data = get_all_stage_data(experiment_id=experiment_id)

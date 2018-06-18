@@ -55,17 +55,17 @@ class FactorialAnova(Analysis):
         # dataframe_data["exploration_percentage"] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.2, 0.2]
 
         df = pd.DataFrame(dataframe_data)
-        # print df
-        # print "------------------"
+        print df
+        print "------------------"
 
         formula = self.create_formula()
         # formula = "overhead ~ route_random_sigma * exploration_percentage"
-        # print formula
-        # print "------------------"
+        print formula
+        print "------------------"
 
         data_lm = ols(formula, data=dataframe_data).fit()
-        # print data_lm.summary()
-        # print "------------------"
+        print data_lm.summary()
+        print "------------------"
 
         aov_table = anova_lm(data_lm, typ=2)
         aov_table_sqr = deepcopy(aov_table)

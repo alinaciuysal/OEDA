@@ -57,7 +57,6 @@ def experimentFunction(wf, exp):
         while i < sample_size:
             # we start with the primary data provider using blocking returnData
             new_data = wf.primary_data_provider["instance"].returnData()
-            print(new_data)
             if new_data is not None:
                 try:
                     wf = wf.primary_data_provider["data_reducer"](new_data, wf)

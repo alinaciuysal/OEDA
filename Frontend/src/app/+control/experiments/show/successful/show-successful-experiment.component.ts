@@ -306,7 +306,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
             } else if (step_no == this.experiment.numberOfSteps.toString()) {
               steps[step_no]["name"] = "T-test";
             } else {
-              steps[step_no]["name"] = "Bayesian Run - " + step_no.toString();
+              steps[step_no]["name"] = "Bayesian Run - " + (Number(step_no) - 1); // actual bayesian step is 2, but we need to show it as if it's 1
             }
           }
           this.available_steps = steps;

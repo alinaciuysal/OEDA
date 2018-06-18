@@ -1,0 +1,17 @@
+[
+  {
+    "name": "x",
+    "description": "x parameter of the function",
+    "scale": "Metric",
+    "min": -5,
+    "max": 5,
+    "default": 0
+  }, {
+    "name": "y",
+    "description": "y parameter of the function",
+    "scale": "Metric",
+    "min": -5,
+    "max": 5,
+    "default": 0
+  }
+]

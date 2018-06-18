@@ -4,7 +4,7 @@ from flask import Flask
 from flask_restful import Api
 
 from oeda.controller.targets import TargetController, TargetsListController
-from oeda.controller.crowdnav_configuration import CrowdNavConfigController
+from oeda.controller.configuration import ConfigController
 from oeda.controller.experiments import ExperimentsListController, ExperimentController
 from oeda.controller.experiment_results import StageResultsWithExperimentIdController, AllStageResultsWithExperimentIdController
 from oeda.controller.running_experiment_results import RunningAllStageResultsWithExperimentIdController, OEDACallbackController
@@ -91,7 +91,7 @@ api.add_resource(RunningAllStageResultsWithExperimentIdController, '/api/running
 api.add_resource(QQPlotController, '/api/qqPlot/<string:experiment_id>/<string:step_no>/<string:stage_no>/<string:distribution>/<string:scale>/<string:incoming_data_type_name>')
 api.add_resource(OEDACallbackController, '/api/running_experiment_results/oeda_callback/<string:experiment_id>')
 
-api.add_resource(CrowdNavConfigController, '/api/config/crowdnav')
+api.add_resource(ConfigController, '/api/config')
 
 api.add_resource(ExecutionSchedulerController, '/api/execution_scheduler')
 

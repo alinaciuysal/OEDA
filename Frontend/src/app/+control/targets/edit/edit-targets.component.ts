@@ -54,15 +54,18 @@ export class EditTargetsComponent implements OnInit {
         this.originalTarget = _(this.target);
 
         // retrieve config json object via the api provided at localhost:5000/api/config/crowdnav
-        this.api.getConfigFromAPI("/crowdnav").subscribe((config) => {
-            if (!isNullOrUndefined(config)) {
-
-              // open the modal in frontend
-              this.availableConfigurations.push(config);
-              // this.traverse_json_object(config);
-              this.configsAvailable = true;
-              document.getElementById("openModalButton").click();
+        this.api.getConfigFromAPI().subscribe((configs) => {
+            for (let idx in configs) {
+              if (configs.hasOwnProperty(idx)) {
+                console.log(configs);
+                if (!isNullOrUndefined(configs[idx])) {
+                  // open the modal in UI
+                  this.availableConfigurations.push(configs[idx]);
+                  this.configsAvailable = true;
+                }
+              }
             }
+            document.getElementById("openModalButton").click();
           }
         );
 
@@ -285,7 +288,6 @@ export class EditTargetsComponent implements OnInit {
     }
   }
 
-
   hasErrors(): boolean {
     let nr_of_selected_primary_data_providers = 0;
 
@@ -408,7 +410,7 @@ export class EditTargetsComponent implements OnInit {
         || isNullOrUndefined(this.target.changeableVariables[i].scale)
         || isNullOrUndefined(this.target.changeableVariables[i].min)
         || isNullOrUndefined(this.target.changeableVariables[i].max)
-        || isNullOrUndefined(this.target.changeableVariables[i].default)
+        // || isNullOrUndefined(this.target.changeableVariables[i].default)
         || this.target.changeableVariables[i].min > this.target.changeableVariables[i].max) {
         this.errorButtonLabel = "Provide valid inputs for changeable variable(s)";
         return true;
@@ -483,6 +485,10 @@ export class EditTargetsComponent implements OnInit {
       this.target.changeProvider['kafka_uri'] = this.selectedConfiguration['kafkaHost'];
       this.target.changeProvider['type'] = 'kafka_producer';
       this.target.changeProvider['topic'] = this.selectedConfiguration['kafkaCommandsTopic'];
+      this.target.changeProvider['serializer'] = 'JSON';
+    } else if (this.selectedConfiguration.hasOwnProperty("url")) {
+      this.target.changeProvider['url'] = this.selectedConfiguration['url'];
+      this.target.changeProvider['type'] = 'http_request';
       this.target.changeProvider['serializer'] = 'JSON';
     }
 

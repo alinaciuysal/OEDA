@@ -278,10 +278,9 @@
                     </tr>
                     </thead>
                     <tbody class="bigTable">
-                    <tr *ngFor="let knob of selectedConfiguration.knobs; let i = index;">
+                    <tr *ngFor="let knob of selectedConfiguration.knobs">
                       <td>{{knob.name}}</td>
                       <td>{{knob.description}}</td>
-                      <!--<td> <label><input type="checkbox" value="{{i}}"></label></td>-->
                       <td>
                         <div class="btn btn-xs btn-orange" (click)="addChangeableVariable(knob)">
                           <i class="fa fa-plus push-5-r"></i> Add

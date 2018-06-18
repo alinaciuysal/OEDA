@@ -48,10 +48,13 @@ app.get('/', function (req, res) {
 app.post('/', function (req, res) {
     if (req.body) {
         console.log("Got value changes: x:" + req.body.x + " - y:" + req.body.y);
-        x = parseFloat(req.body.x);
-        y = parseFloat(req.body.y);
-        // x = req.body.x || x;
-        // y = req.body.y || y
+
+        if (typeof(req.body.x) != "undefined") {
+            x = parseFloat(req.body.x);
+        }
+        if (typeof(req.body.y) != "undefined") {
+            y = parseFloat(req.body.y);
+        }
     }
     res.send("ok");
 });

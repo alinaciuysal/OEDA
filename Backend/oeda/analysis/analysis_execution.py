@@ -39,8 +39,8 @@ def start_two_sample_tests(wf):
     key = wf.analysis["data_type"]
     mean_diff = 0.1 # as in crowdnav-elastic-ttest-sample-size/definition.py # TODO: get it from user ??
 
+    # this part will test this way of t-test: Default --> Best configuration
     stage_ids, samples, knobs = get_tuples(experiment_id=experiment_id, step_no=wf.step_no, key=key)
-
     test1 = Ttest(stage_ids=stage_ids, y_key=key, alpha=alpha)
     result = test1.run(data=samples, knobs=knobs)
 
@@ -53,8 +53,22 @@ def start_two_sample_tests(wf):
 
     db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test1.name, result=result, knobs=knobs)
 
-    # if we want to integrate following tests, they should be saved as another step_no, just increment it before saving
+    # this part will test this way of t-test: Best --> Default configuration
+    stage_ids, samples, knobs = get_tuples(experiment_id=experiment_id, step_no=wf.step_no, key=key, reverse=True)
+    test2 = Ttest(stage_ids=stage_ids, y_key=key, alpha=alpha)
+    result2 = test2.run(data=samples, knobs=knobs)
 
+    # prepare default & optimal knobs in reverse order
+    stage_no = len(wf.execution_strategy["knobs"])
+    knobs = {}
+    for tpl in wf.execution_strategy["knobs"]:
+        knobs[stage_no] = tpl
+        stage_no -= 1
+
+    analysis_name = test2.name + "Reverse"
+    db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=analysis_name, result=result2, knobs=knobs)
+
+    # if we want to integrate following tests, they should be saved as another step_no, just increment it before saving
     # x1 = samples[0]
     # x2 = samples[1]
     # pooled_std = sqrt((np.var(x1) + np.var(x2)) / 2)
@@ -67,7 +81,7 @@ def start_two_sample_tests(wf):
     # test3 = TtestSampleSizeEstimation(stage_ids=stage_ids, y_key=key, effect_size=None, mean_diff=mean_diff)
     # result3 = test3.run(data=samples, knobs=knobs)
     # db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test3.name, result=result3)
-    return result
+    return result, result2
 
 
 ##########################
@@ -167,9 +181,14 @@ def start_factorial_tests(wf):
         return False
 
 
-def get_tuples(experiment_id, step_no, key):
-    stage_ids = db().get_stages(experiment_id, step_no)[0]
+def get_tuples(experiment_id, step_no, key, reverse=False):
+    if reverse:
+        stage_ids = db().get_stages(experiment_id, step_no)[0][::-1]
+    else:
+        stage_ids = db().get_stages(experiment_id, step_no)[0]
     data, knobs = db().get_data_for_analysis(experiment_id, step_no)
+    print("reverse: ", reverse, "stage_ids", stage_ids, "knobs", knobs)
+
     extract_inner_values(key=key, stage_ids=stage_ids, data=data)
     # parse data & knobs (k-v pairs) to a proper array of values
     samples = [data[stage_id] for stage_id in stage_ids]

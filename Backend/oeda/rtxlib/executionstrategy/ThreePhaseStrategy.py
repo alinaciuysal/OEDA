@@ -64,7 +64,6 @@ def start_three_phase_analysis(wf):
             db().update_experiment(experiment_id=wf.id, field='numberOfSteps', value=wf.step_no)
 
             # prepare knobs accordingly
-            # wf.execution_strategy["knobs"] = [best_knob, default_knob]
             wf.execution_strategy["knobs"] = [default_knob, best_knob]
             # set tTestSampleSize as executionStr sample_size
             wf.execution_strategy["sample_size"] = wf.analysis["tTestSampleSize"]
@@ -72,8 +71,11 @@ def start_three_phase_analysis(wf):
 
             start_sequential_strategy(wf=wf)
             # perform T-test
-            t_test_result = start_two_sample_tests(wf=wf)
-            info("> T-test result is saved to DB:" + str(t_test_result))
+            result, reverseResult = start_two_sample_tests(wf=wf)
+            # result of Best --> Default tail
+            info("> T-test result: " + str(result))
+            # result of Default --> Best tail
+            info("> T-test reverseResult: " + str(reverseResult))
     else:
         error("> ANOVA failed")
 

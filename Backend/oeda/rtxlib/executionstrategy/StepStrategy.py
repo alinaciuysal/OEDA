@@ -4,6 +4,7 @@ from oeda.rtxlib.execution import experimentFunction
 import itertools
 from oeda.rtxlib.executionstrategy import applyInitKnobs
 from oeda.rtxlib.executionstrategy import applyDefaultKnobs
+from oeda.rtxlib.executionstrategy import parseKnobs
 
 def start_step_strategy(wf):
     applyInitKnobs(wf)
@@ -25,6 +26,7 @@ def start_step_strategy(wf):
 
 def step_execution(wf, knob):
     """ runs a single step_execution experiment """
+    knob = parseKnobs(knob)
     debug("knob in step_execution" + str(knob), Fore.GREEN)
     # create a new experiment to run in execution
     exp = dict()

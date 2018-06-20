@@ -31,14 +31,11 @@ import {Component, Input, EventEmitter, Output, OnChanges, SimpleChanges} from "
   `
 })
 export class LabeledInputComponent implements OnChanges {
-
-
   @Output() modelChanged = new EventEmitter();
-  @Input() info = null;
   @Input() inputType = "text";
 
-  @Input() minNumber = 0;
-  @Input() maxNumber = 100;
+  @Input() minNumber;
+  @Input() maxNumber;
 
   @Input() colSize = 6;
   @Input() name: any;

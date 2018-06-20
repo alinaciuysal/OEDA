@@ -22,8 +22,8 @@ def matplot1():
     ax = fig.gca(projection='3d')
 
     # Make data.
-    X = np.arange(-2, 2, 0.05)
-    Y = np.arange(-2, 2, 0.05)
+    X = np.arange(-5, 5, 0.01)
+    Y = np.arange(-5, 5, 0.01)
     X, Y = np.meshgrid(X, Y)
     zs = np.array([camel_3(x, y) for x, y in zip(np.ravel(X), np.ravel(Y))])
     Z = zs.reshape(X.shape)
@@ -38,9 +38,9 @@ def matplot1():
                            linewidth=0, antialiased=False)
 
     # Customize the z axis.
-    ax.set_zlim(0, 9)
+    ax.set_zlim(0, 2048)
     ax.zaxis.set_major_locator(LinearLocator(10))
-    ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+    # ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
 
     ax.set_xlabel('x')
     ax.set_ylabel('y')
@@ -50,7 +50,7 @@ def matplot1():
     fig.colorbar(surf, shrink=0.5, aspect=5)
 
     plt.show()
-    fig.savefig("plot.pdf", bbox_inches='tight')
+    fig.savefig("plot55.pdf", bbox_inches='tight')
 
 def plotly():
     plotly.offline.plot({
@@ -75,4 +75,5 @@ def matplot2():
     plt.show()
 
 if __name__ == '__main__':
+    print(camel_3(5, 5))
     matplot1()

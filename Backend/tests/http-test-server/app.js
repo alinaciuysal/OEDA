@@ -19,9 +19,9 @@ app.use(bodyParser.urlencoded({extended: true}));
  *  see: https://en.wikipedia.org/wiki/Test_functions_for_optimization
  */
 
-/** the main config variable */
-var x = 0.0;
-var y = 0.0;
+/** the main config variable(s) */
+global.x = undefined;
+global.y = undefined;
 
 var enableRandom = true;
 
@@ -38,22 +38,29 @@ app.get('/', function (req, res) {
     if (enableRandom) {
         rnd = Math.random()
     }
-    res.send(JSON.stringify({
-        x: x,
-        y: y,
-        result: three_hump_camel(rnd, x, y)
-    }));
+    console.log("x:" + global.x + " - y:" + global.y);
+
+    if (global.x !== undefined && global.y !== undefined) {
+        res.send(JSON.stringify({
+            x: global.x,
+            y: global.y,
+            result: three_hump_camel(rnd, x, y)
+        }));
+    } else {
+        console.log('x and/or y is not set');
+        res.status(404).send('x and/or y is not set');
+    }
+
 });
 
 app.post('/', function (req, res) {
     if (req.body) {
-        console.log("Got value changes: x:" + req.body.x + " - y:" + req.body.y);
-
+        // update retrieved x and/or y
         if (typeof(req.body.x) !== "undefined") {
-            x = parseFloat(req.body.x);
+            global.x = parseFloat(req.body.x);
         }
         if (typeof(req.body.y) !== "undefined") {
-            y = parseFloat(req.body.y);
+            global.y = parseFloat(req.body.y);
         }
     }
     res.send("ok");

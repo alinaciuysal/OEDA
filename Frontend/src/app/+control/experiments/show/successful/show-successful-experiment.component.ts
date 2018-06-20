@@ -277,6 +277,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     // initially selected stage is "All Stages"
     this.selected_stage = {"number": -1, "knobs": {}};
     this.selected_stage.knobs = this.entityService.populate_knob_objects_with_variables(this.selected_stage.knobs, this.targetSystem.defaultVariables, true);
+    console.log("selected_stage knobs", this.selected_stage.knobs);
 
     this.apiService.loadAvailableStepsAndStagesWithExperimentId(this.experiment_id).subscribe(steps => {
       if (!isNullOrUndefined(steps)) {

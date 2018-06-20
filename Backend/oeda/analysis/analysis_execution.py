@@ -371,9 +371,10 @@ def start_bogp(wf, sorted_significant_interactions):
         intermediate_tuples = sorted(optimal_tuples, key=lambda x: x[1])
         info("> Intermediate_tuples & values " + str(intermediate_tuples))
         intermediate_knobs = intermediate_tuples[0][0]
-        info("> intermediate_knobs 11 " + str(intermediate_knobs))
+        info("> intermediate_knobs " + str(intermediate_knobs))
         # find best configuration for intermediate runs and apply it on target system (if applicable)
         if wf.change_provider["changesApplicable"]:
+            info("> applying changes using intermediate_knobs " + str(intermediate_knobs))
             wf.change_provider["instance"].applyChange(intermediate_knobs)
 
 

@@ -122,8 +122,16 @@ export class TtestAnalysisComponent {
           this.results = analysis["result"]; // {different_averages: .., effect_size: .., ...}
           delete this.results["alpha"]; // no need to show it in the table, we already show it in the row
           console.log(this.results);
-          // naming convention with backend
-          this.statistical_significance = (this.results["different_averages"] == true);
+
+          // statistical significance is true under these two conditions
+          let avg_condition = (this.results["different_averages"] == true);
+          // http://trendingsideways.com/index.php/cohens-d-formula/
+          // http://staff.bath.ac.uk/pssiw/stats2/page2/page14/page14.html
+          // https://en.wikipedia.org/wiki/Effect_size#Coefficient_of_determination
+          // let effect_size_condition = (this.results["effect_size"] > this.tTestEffectSize);
+          // this.statistical_significance = avg_condition && effect_size_condition;
+          this.statistical_significance = avg_condition;
+
 
           this.notify.success("Success", "Analysis results are retrieved");
           this.retrieved = true;

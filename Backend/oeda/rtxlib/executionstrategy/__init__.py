@@ -29,5 +29,13 @@ def create_knob_from_default(wf):
     for definition in wf._oeda_target["defaultVariables"]:
         key = definition["name"]
         value = definition["default"]
-        knob[key] = value
+        knob[key] = float(value)
     return knob
+
+''' converts values from unicode to float. 
+    not applied to SelfOptimizerStrategy and mlrMBO strategy, 
+    as they are converted to float according to their min & max values '''
+def parseKnobs(knobs):
+    for knob in knobs:
+        knobs[knob] = float(knobs[knob])
+    return knobs

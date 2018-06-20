@@ -30,6 +30,7 @@ class TargetController(Resource):
             resp.status_code = 200
             return resp
         except Exception as e:
+            print(e)
             tb = traceback.format_exc()
             print(tb)
             return {"error": e.message}, 404

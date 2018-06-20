@@ -65,7 +65,7 @@ import {isNullOrUndefined} from "util";
                   <td *ngFor="let knob_key_name of ordered_keys" data-toggle="tooltip" title="Click to draw plots">
                     <!-- all stage variables that we make experiment with (if strategy is not forever) -- format: [min, max]-->
                     <span *ngIf="item.number === -1 && is_included_in_experiment(knob_key_name) && experiment.executionStrategy.type !== 'forever'">
-                      <b>[{{item.knobs[knob_key_name].min}} - {{item.knobs[knob_key_name].max}}]</b>
+                      <b>[{{item.knobs[knob_key_name].min}}, {{item.knobs[knob_key_name].max}}]</b>
                     </span>
     
                     <!-- all stage variables that we do "not" make experiment with (if strategy is not forever) -- format: default_value -->

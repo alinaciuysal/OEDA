@@ -19,6 +19,9 @@ def start_three_phase_analysis(wf):
     wf.step_name = "ANOVA"
     db().update_experiment(experiment_id=wf.id, field='numberOfSteps', value=wf.step_no)
 
+    default_knob = create_knob_from_default(wf=wf)
+    info("> Default knob for Workflow, " + str(default_knob))
+
     start_step_strategy(wf)
     info("> Starting ANOVA, step_no is still 1")
 
@@ -44,10 +47,12 @@ def start_three_phase_analysis(wf):
             wf.resetExperimentCounter(wf)
             db().update_experiment(experiment_id=wf.id, field='numberOfSteps', value=wf.step_no)
 
+            # return back to default before bayesian
+            wf.change_provider["instance"].applyChange(default_knob)
+
             best_knob, best_result = start_bogp(wf=wf, sorted_significant_interactions=sorted_significant_interactions)
-            default_knob = create_knob_from_default(wf=wf)
+
             info("> Step no for T-test, " + str(wf.step_no))
-            info("> Default knob for T-test, " + str(default_knob))
             info("> Best knob for T-test," + str(best_knob))
 
             info("> Starting T-test, step_no: " + str(wf.step_no) + " re-setting stage_counter")
@@ -59,18 +64,22 @@ def start_three_phase_analysis(wf):
             db().update_experiment(experiment_id=wf.id, field='numberOfSteps', value=wf.step_no)
 
             # prepare knobs accordingly
+            # wf.execution_strategy["knobs"] = [best_knob, default_knob]
             wf.execution_strategy["knobs"] = [default_knob, best_knob]
             # set tTestSampleSize as executionStr sample_size
             wf.execution_strategy["sample_size"] = wf.analysis["tTestSampleSize"]
             wf.step_name = "T-test"
+
             start_sequential_strategy(wf=wf)
             # perform T-test
             t_test_result = start_two_sample_tests(wf=wf)
             info("> T-test result is saved to DB:" + str(t_test_result))
-            info("> Reverting back to default configuration:" + str(default_knob))
-            wf.change_provider["instance"].applyChange(default_knob)
     else:
         error("> ANOVA failed")
+
+    # return back to default
+    info("> Reverting back to default configuration:" + str(default_knob))
+    wf.change_provider["instance"].applyChange(default_knob)
 
     # indicate the end of whole execution
     wf.run_oeda_callback({"status": "EXPERIMENT_DONE",

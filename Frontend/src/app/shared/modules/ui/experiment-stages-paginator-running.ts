@@ -47,7 +47,7 @@ import {isNullOrUndefined} from "util";
               </thead>
               <tbody class="bigTable">
                 <tr *ngFor="let item of mf.data" (click)="onRowClick(item)" [class.active]="item.number == selected_row">
-                  <td *ngIf="item.number === -1 && experiment.executionStrategy.type !== 'forever'" data-toggle="tooltip" title="Default configuration values are shown on this row">
+                  <td *ngIf="item.number === -1" data-toggle="tooltip" title="Default configuration values are shown on this row">
                     <b>All Stages</b>
                   </td>
                   <td *ngIf="item.number !== -1" data-toggle="tooltip" title="Click to draw plots">
@@ -57,7 +57,7 @@ import {isNullOrUndefined} from "util";
                   <td *ngFor="let knob_key_name of ordered_keys" data-toggle="tooltip" title="Click to draw plots">
                     <!-- all stage variables that we make experiment with -- format: [min, max]-->
                     <span *ngIf="item.number === -1 && is_included_in_experiment(knob_key_name)">
-                      <b>[{{item.knobs[knob_key_name].min}} - {{item.knobs[knob_key_name].max}}]</b>
+                      <b>[{{item.knobs[knob_key_name].min}}, {{item.knobs[knob_key_name].max}}]</b>
                     </span>
     
                     <!-- all stage variables that we do "not" make experiment with -- format: default_value -->

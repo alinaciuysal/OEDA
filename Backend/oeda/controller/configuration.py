@@ -31,7 +31,7 @@ class ConfigController(Resource):
                 {
                     "name": "Black-box function",
                     "description": "Three-hump camel function with randomness",
-                    "changesApplicable": False,
+                    "changesApplicable": True, # yes, we can change internal x & y values of black-box fcn (although it won't effect the last result)
                     "url": "http://localhost:3003",
                     "knobs": black_box_knobs,
                     "dataProviders": black_box_data_providers

@@ -163,9 +163,7 @@ export class EditTargetsComponent implements OnInit {
         this.target.incomingDataTypes = this.target.incomingDataTypes.filter(dataType => dataType.name !== dataProvider.incomingDataTypes[i].name);
       }
     }
-
     this.target.dataProviders.splice(index, 1);
-
   }
 
   addIncomingDataType() {
@@ -244,13 +242,10 @@ export class EditTargetsComponent implements OnInit {
   saveChanges() {
     const ctrl = this;
     if (!ctrl.hasErrors()) {
-
-      if (!this.targetCreatedFromConfig) {
-        // for this case, all of the variables provided by the user will be taken as defaultVariables
-        this.target.defaultVariables = _(this.target.changeableVariables);
-      }
-
+      this.target.defaultVariables = _(this.target.changeableVariables);
       ctrl.target.name = ctrl.target.name.trim();
+      console.log(ctrl.target);
+
       // new ts will be created in first case
       if (ctrl.router.url.indexOf("/create") !== -1) {
         // check for validity of target system
@@ -411,6 +406,7 @@ export class EditTargetsComponent implements OnInit {
         || isNullOrUndefined(this.target.changeableVariables[i].scale)
         || isNullOrUndefined(this.target.changeableVariables[i].min)
         || isNullOrUndefined(this.target.changeableVariables[i].max)
+        || isNullOrUndefined(this.target.changeableVariables[i].default)
         || this.target.changeableVariables[i].min > this.target.changeableVariables[i].max) {
         this.errorButtonLabel = "Provide valid inputs for changeable variable(s)";
         return true;
@@ -492,20 +488,14 @@ export class EditTargetsComponent implements OnInit {
       this.target.changeProvider['serializer'] = 'JSON';
     }
 
-    // push each knob into defaultVariables array if ts is created from config
+    // push each knob into defaultVariables array
     for (let knob of this.selectedConfiguration.knobs) {
-      // iterate min & max values of each knob to convert int to float
-      knob["min"] = knob["min"].toFixed(2);
-      knob["max"] = knob["max"].toFixed(2);
       // try to guess default value of target system if not provided via api
       // https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript
       if(isNullOrUndefined(knob["default"])) {
         let randomDefault = lodash.random(knob["min"], knob["max"]);
-        knob["default"] = randomDefault.toFixed(2);
-      }
-      // default value is retrieved from api, so convert it to float
-      else {
-        knob["default"] = knob["default"].toFixed(2);
+        // knob["default"] = randomDefault.toFixed(2);
+        knob["default"] = randomDefault;
       }
       this.target.defaultVariables.push(_(knob));
     }

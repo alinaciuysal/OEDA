@@ -8,6 +8,7 @@
 - [R](https://www.r-project.org/)
 - [SUMO](http://sumo.dlr.de/wiki/Downloads)
 - [CrowdNav](https://github.com/alinaciuysal/CrowdNav/tree/oeda)
+- [Node.js and npm](https://www.npmjs.com/get-npm)
 
 #### [Installation](https://github.com/alinaciuysal/OEDA/wiki/Installation)
 
@@ -15,3 +16,6 @@
 
 #### _Contact_ 
 [Ali Naci Uysal](mailto:ali.uysal@tum.de) or [Dr. Ilias Gerostathopoulos](http://www4.in.tum.de/~gerostat/)
+
+***
+## Online manual with subtitles can be found [here](https://youtu.be/JfgcnUO_o8g)

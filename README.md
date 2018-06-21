@@ -12,10 +12,10 @@
 
 #### [Installation](https://github.com/alinaciuysal/OEDA/wiki/Installation)
 
-#### [Instructions to Use](https://github.com/alinaciuysal/OEDA/wiki/Instructions-to-Use)
+#### [Applying OEDA to CrowdNav](https://github.com/alinaciuysal/OEDA/wiki/Applying-OEDA-to-CrowdNav)
 
 #### _Contact_ 
 [Ali Naci Uysal](mailto:ali.uysal@tum.de) or [Dr. Ilias Gerostathopoulos](http://www4.in.tum.de/~gerostat/)
 
 ***
-## Online manual with subtitles can be found [here](https://youtu.be/JfgcnUO_o8g)
+## Online manual (with subtitles) to optimize a noisy black-box function can be found [here](https://youtu.be/JfgcnUO_o8g)

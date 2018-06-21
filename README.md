@@ -4,10 +4,10 @@ This appendix is supplementary material to the ECSA 2018 submission "A Tool for 
 
 ## Video illustration (with subtitles) accompanying our submission can be found on [Youtube](https://youtu.be/JfgcnUO_o8g)
 
-## [Evaluating OEDA by using it to optimize CrowdNav](https://github.com/alinaciuysal/OEDA/wiki/Applying-OEDA-to-CrowdNav)
+## Evaluating feasibility of OEDA by using it to optimize CrowdNav
+Please check the [separate page](https://github.com/alinaciuysal/OEDA/wiki/Applying-OEDA-to-CrowdNav). 
 
-## OEDA Getting Started Guide
-
+## OEDA -- Getting Started
 
 ### Required Dependencies
 - [Zookeeper & Kafka](https://kafka.apache.org/quickstart#quickstart_startserver)

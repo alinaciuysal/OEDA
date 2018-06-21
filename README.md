@@ -12,7 +12,7 @@
 
 #### [Installation](https://github.com/alinaciuysal/OEDA/wiki/Installation)
 
-#### [Instructions to Use](https://github.com/alinaciuysal/OEDA/wiki/Instructions-to-Use)
+#### [Instructions to use version in master branch](https://github.com/alinaciuysal/OEDA/wiki/Instructions-to-Use-version-in-master-branch)
 
 #### _Contact_ 
 [Ali Naci Uysal](mailto:ali.uysal@tum.de) or [Dr. Ilias Gerostathopoulos](http://www4.in.tum.de/~gerostat/)

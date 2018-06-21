@@ -2,6 +2,8 @@ import {Component, Input} from "@angular/core";
 import {isNullOrUndefined} from "util";
 import {OEDAApiService} from "../api/oeda-api.service";
 import {NotificationsService} from "angular2-notifications/dist";
+import {EntityService} from "../../util/entity-service";
+import * as _ from "lodash";
 
 @Component({
   selector: 'anova-analysis',
@@ -21,41 +23,43 @@ import {NotificationsService} from "angular2-notifications/dist";
         <div class="panel-body" *ngIf="!analysis_is_collapsed && retrieved">
           <div clasS="row" style="padding-left: 1%">
 
-            <div class="col-md-2">
+            <div class="col-md-3">
               <div class="sub-title">Analysis Type</div>
               <div>
                 <input type="text" name="analysis_type" value="{{experiment.analysis.type}}" disabled>
               </div>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-3">
               <div class="sub-title">Analysis Method</div>
               <div>
                 <input type="text" name="analysis_name" value="{{analysis_name}}" disabled>
               </div>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-3">
               <div class="sub-title">Number of Important Factors</div>
               <div>
                 <input type="text" name="nrOfImportantFactors" value="{{nrOfImportantFactors}}" disabled>
               </div>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-3">
               <div class="sub-title">Alpha</div>
               <div>
                 <input type="text" name="anovaAlpha" value="{{anovaAlpha}}" disabled>
               </div>
             </div>
-
-            <div class="col-md-2" *ngIf="eligible_for_next_step">
-              <div class="sub-title">
-                <h4><span class="label label-success"><i class="fa fa-check"></i> Significant factor(s) are marked with *</span></h4>
+          </div>
+          
+          <div class="row" style="padding-left: 1%">
+            <div class="col-md-6" *ngIf="eligible_for_next_step">
+              <div class="sub-title" style="overflow:hidden">
+                <h4><span class="label label-success"><i class="fa fa-check"></i> Significant factor(s) are marked with *, but only {{experiment.analysis.nrOfImportantFactors}} among best one(s) are selected</span></h4>
               </div>
             </div>
 
-            <div class="col-md-2" *ngIf="!eligible_for_next_step">
+            <div class="col-md-6" *ngIf="!eligible_for_next_step">
               <div class="sub-title">
                 <h4><span class="label label-danger"><i class="fa fa-close"></i> Significant factor(s) are not found</span></h4>
               </div>
@@ -99,6 +103,7 @@ export class AnovaAnalysisComponent {
   @Input() targetSystem: any;
   @Input() experiment: any;
   @Input() step_no: any;
+  @Input() for_successful_experiment: boolean;
 
   public analysis_is_collapsed: boolean;
   public properties: any;
@@ -110,7 +115,7 @@ export class AnovaAnalysisComponent {
   public anovaAlpha: number;
   public retrieved: boolean; // keep track of retrieval status
 
-  constructor(private apiService: OEDAApiService, private notify: NotificationsService) {
+  constructor(private apiService: OEDAApiService, private notify: NotificationsService, private entityService: EntityService) {
     this.analysis_is_collapsed = true;
     this.retrieved = false;
     this.analysis_name = "two-way-anova";
@@ -119,6 +124,10 @@ export class AnovaAnalysisComponent {
   public btnClicked(): void {
     // first case with empty results
     if (this.analysis_is_collapsed && isNullOrUndefined(this.results)) {
+      // adjust retrieved step_no to always show anova results in UI for running-experiment
+      if (this.step_no !== 1 && !this.for_successful_experiment) {
+        this.step_no = 1;
+      }
       this.apiService.getAnalysis(this.experiment, this.step_no, this.analysis_name).subscribe(
         (result) => {
           let analysis = JSON.parse(result._body);
@@ -129,6 +138,10 @@ export class AnovaAnalysisComponent {
           delete analysis['result'];
 
           // naming convention with backend server
+
+          console.log(analysis["anova_result"]);
+          // analysis["anova_result"] = _.sortBy(analysis["anova_result"], [function(o) { return o["PR(>F)"]; }]);
+
           this.results = analysis["anova_result"]; // {C(x): {F: 0.2, PR(>F): 0.4} ... }
           this.properties = this.get_keys(this.results); // Residual, exploration_percentage etc.
           // concatenate inner keys of tuples
@@ -143,19 +156,27 @@ export class AnovaAnalysisComponent {
           }
           this.inner_keys = allKeys;
           let new_properties = [];
-          // mark the ones less than alpha for now, might be changed. see get_significant_interactions method in Backend
-          for (let prop of this.properties) {
-            // create tuples based on selection or not
-            let new_prop = {};
-            new_prop["name"] = prop;
-            if (!isNullOrUndefined(this.results[prop]['PR(>F)'])) {
-              if (this.results[prop]['PR(>F)'] < this.experiment.analysis['anovaAlpha']) {
-                new_prop["is_selected"] = true;
+          // if anova was successful, mark the ones less than alpha
+          if (this.eligible_for_next_step) {
+            for (let prop of this.properties) {
+              // create tuples based on selection or not
+              let new_prop = {};
+              new_prop["name"] = prop;
+              if (!isNullOrUndefined(this.results[prop]['PR(>F)'])) {
+                if (this.results[prop]['PR(>F)'] < this.experiment.analysis['anovaAlpha']) {
+                  new_prop["is_selected"] = true;
+                }
               }
+              new_properties.push(new_prop);
             }
-            new_properties.push(new_prop);
+          } else {
+            for (let prop of this.properties) {
+              let new_prop = {"name": prop};
+              new_properties.push(new_prop);
+            }
           }
           this.properties = new_properties;
+
           console.log(this.properties);
 
           this.notify.success("Success", "Analysis results are retrieved");
@@ -169,7 +190,7 @@ export class AnovaAnalysisComponent {
   }
 
   public get_keys(object): Array<string> {
-      if (!isNullOrUndefined(object)) {
+    if (!isNullOrUndefined(object)) {
       return Object.keys(object);
     }
     return null;

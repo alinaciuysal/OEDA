@@ -1,9 +1,8 @@
 from oeda.databases import setup_experiment_database, setup_user_database, db
 from oeda.analysis.factorial_tests import FactorialAnova
-from oeda.analysis.two_sample_tests import Ttest
-from oeda.analysis.analysis_execution import delete_combination_notation, \
-    iterate_anova_tables, get_significant_interactions, get_tuples, assign_iterations
-from oeda.controller.experiment_results import get_all_stage_data
+from oeda.analysis.analysis_execution import delete_combination_notation, iterate_anova_tables, get_tuples
+from collections import OrderedDict
+from oeda.utilities.Structures import DefaultOrderedDict
 import json
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
@@ -11,13 +10,11 @@ pp = pprint.PrettyPrinter(indent=4)
 def start_workflow_with_anova(experiment_id, step_no, key, alpha, nrOfImportantFactors, executionStrategyType, performAnova=False):
     stage_ids, samples, knobs = get_tuples(experiment_id, step_no, key)
     experiment = db().get_experiment(experiment_id)
-    print(json.dumps(experiment, indent=4))
-    print(stage_ids)
-    print(json.dumps(experiment, indent=4))
-    # if performAnova:
-    #     save_anova(experiment_id, step_no, stage_ids, samples, knobs, key)
+    if performAnova:
+        save_anova(experiment_id, step_no, stage_ids, samples, knobs, key)
 
-    # retrieved = db().get_analysis(experiment_id=experiment_id, step_no=step_no, analysis_name='two-way-anova')
+    retrieved = db().get_analysis(experiment_id=experiment_id, step_no=step_no, analysis_name='two-way-anova')
+    print(json.dumps(retrieved, indent=4))
     # significant_interactions = get_significant_interactions(retrieved['anova_result'], alpha, nrOfImportantFactors)
     # significant_interactions = assign_iterations(experiment, significant_interactions, executionStrategyType)
     # print("ssi", significant_interactions)
@@ -30,17 +27,13 @@ def test_data_points(experiment_id, step_no):
 def save_anova(experiment_id, step_no, stage_ids, samples, knobs, key):
     test = FactorialAnova(stage_ids=stage_ids, y_key=key, knob_keys=None, stages_count=len(stage_ids))
     aov_table, aov_table_sqr = test.run(data=samples, knobs=knobs)
-    print(json.dumps(aov_table, indent=4))
 
     aov_table = delete_combination_notation(aov_table)
     aov_table_sqr = delete_combination_notation(aov_table_sqr)
 
-    print(json.dumps(aov_table, indent=4))
-
     # type(dd) is DefaultOrderedDict
     dod = iterate_anova_tables(aov_table=aov_table, aov_table_sqr=aov_table_sqr)
-    print(json.dumps(dod, indent=4))
-    # db().save_analysis(experiment_id=experiment_id, step_no=step_no, analysis_name=test.name, anova_result=dod)
+    db().save_analysis(experiment_id=experiment_id, step_no=step_no, analysis_name=test.name, anova_result=dod)
 
 def start_workflow_with_ttest(experiment_id, key, alpha):
     experiment = db().get_experiment(experiment_id)
@@ -75,12 +68,11 @@ if __name__ == '__main__':
     nrOfImportantFactors = 3 # to be retrieved from analysis definition
     alpha = 0.05 # to be retrieved from analysis definition
     setup_experiment_database("elasticsearch", "localhost", 9200)
-    experiment_id = "2b4fff74-c6ba-4469-7036-3fc4a3726e48"
+    experiment_id = "c40f9c99-9f52-9258-ee80-bd2f3398b2f7"
     step_no = "1" # 1 denotes step-strategy phase for ANOVA, last one denotes T-test, intermediate ones denote Bayesian Opt
     key = "overhead"
-    test_data_points(experiment_id, step_no)
-    # set performAnova to true if there are data in DB & you want to save fresh anova result to DB
-    # start_workflow_with_anova(experiment_id, step_no, key, alpha, nrOfImportantFactors, 'self-optimizer', True)
+    # test_data_points(experiment_id, step_no)
+    start_workflow_with_anova(experiment_id, step_no, key, alpha, nrOfImportantFactors, 'self-optimizer')
     # start_workflow_with_ttest(experiment_id=experiment_id, key=key, alpha=alpha)
     # asd = db().get_experiment(experiment_id=experiment_id)["numberOfSteps"]
     # all_stage_data = get_all_stage_data(experiment_id=experiment_id)

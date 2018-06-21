@@ -24,7 +24,7 @@
 
   <!-- Show ANOVA analysis section for first and bayesian opt. steps, user will see final result just after end of experiment
         So, there's no need to add another component to show t-test results in running-experiments-->
-  <analysis-running [experiment]="experiment" [targetSystem]="targetSystem" [step_no]="step_no" *ngIf="dataAvailable"></analysis-running>
+  <anova-analysis [experiment]="experiment" [targetSystem]="targetSystem" [step_no]="step_no" [for_successful_experiment]="false" *ngIf="dataAvailable"></anova-analysis>
 
   <!-- Experiment Stages with paginator -->
   <experiment-stages-paginator-running *ngIf="dataAvailable"

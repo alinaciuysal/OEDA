@@ -153,11 +153,13 @@ export class CreateExperimentsComponent implements OnInit {
       this.experiment.executionStrategy.type = "self_optimizer";
       this.acquisitionMethodChanged("gp_hedge");
       // set changeableVariable.min, changeableVariable.max as default value for factorValues for each chVar
-      for (let chVar of this.targetSystem.changeableVariables) {
+      for (let i = 0; i < this.targetSystem.changeableVariables.length; i++) {
+        let chVar = this.targetSystem.changeableVariables[i];
         chVar.factorValues = chVar.min + ", " + chVar.max;
-        // also set is_selected flags of these variables
-        chVar.is_selected = true;
+        // set is_selected flag via click method
+        this.changeable_variable_checkbox_clicked(i);
       }
+      console.log(this.targetSystem.changeableVariables);
 
     } else {
       this.notify.error("Error", "Cannot fetch selected target system, please try again");
@@ -185,6 +187,7 @@ export class CreateExperimentsComponent implements OnInit {
    */
   public changeable_variable_checkbox_clicked(changeableVariable_index): void {
     let changeableVariable = this.targetSystem.changeableVariables[changeableVariable_index];
+    console.log("chVar after click", changeableVariable);
     if (isNullOrUndefined(changeableVariable.is_selected)) {
       changeableVariable.is_selected = true;
     }
@@ -330,16 +333,15 @@ export class CreateExperimentsComponent implements OnInit {
 
     // TODO: some corner cases:
     // TODO: 1) [0.3, 0.4; 0.5]
-    // TODO: 2) [0.9, 0.3, 0.98] --> order is not checked
-    // TODO: 3) [0, 0.6, 0.3, 0.6] --> duplicates are not checked
     // TODO: re-factor if-else statements
     // validate comma separated values of selected variables
     for (let chVar of this.targetSystem.changeableVariables) {
-      if (chVar.is_selected) {
+      if (chVar.is_selected == true) {
         if (hasOwnProperty(chVar, "factorValues")) {
           if (!isNullOrUndefined(chVar["factorValues"])) {
             let factors = chVar["factorValues"].split(",");
-            if (factors.length != 0) {
+            console.log("chVar: " + chVar.name + " factors: " + factors + " len:" + factors.length);
+            if (factors.length >= 2) {
               for (let factor of factors) {
                 factor = factor.trim();
                 if (!isNumeric(factor)){
@@ -356,7 +358,7 @@ export class CreateExperimentsComponent implements OnInit {
               }
             }
             else {
-              this.errorButtonLabelAnova = "Provide valid value(s) for factor values";
+              this.errorButtonLabelAnova = "Provide at least two factor values for " + chVar.name;
               return true;
             }
           }
@@ -365,13 +367,8 @@ export class CreateExperimentsComponent implements OnInit {
             return true;
           }
         }
-        else {
-          this.errorButtonLabelAnova = "Provide valid value(s) for factor values";
-          return true;
-        }
       }
     }
-
     return false;
   }
 

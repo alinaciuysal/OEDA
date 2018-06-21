@@ -9,7 +9,6 @@ import {Observable} from "rxjs/Observable";
 import {PlotService} from "../../../../shared/util/plot-service";
 import {EntityService} from "../../../../shared/util/entity-service";
 import {TempStorageService} from "../../../../shared/modules/helper/temp-storage-service";
-import * as _ from "lodash.clonedeep";
 
 @Component({
   selector: 'show-running-experiment',

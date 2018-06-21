@@ -18,7 +18,7 @@
 
 
   <!-- Show analysis sections for relevant steps-->
-  <anova-analysis *ngIf="step_no == 1" [experiment]="experiment" [targetSystem]="targetSystem" [step_no]="step_no"></anova-analysis>
+  <anova-analysis *ngIf="step_no == 1" [experiment]="experiment" [targetSystem]="targetSystem" [step_no]="step_no" [for_successful_experiment]="true"></anova-analysis>
 
   <ttest-analysis *ngIf="step_no == experiment.numberOfSteps" [experiment]="experiment" [targetSystem]="targetSystem" [step_no]="step_no"></ttest-analysis>
 

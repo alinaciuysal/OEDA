@@ -53,35 +53,20 @@ def start_two_sample_tests(wf):
 
     db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test1.name, result=result, knobs=knobs)
 
-    # this part will test this way of t-test: Best --> Default configuration
-    stage_ids, samples, knobs = get_tuples(experiment_id=experiment_id, step_no=wf.step_no, key=key, reverse=True)
-    test2 = Ttest(stage_ids=stage_ids, y_key=key, alpha=alpha)
-    result2 = test2.run(data=samples, knobs=knobs)
-
-    # prepare default & optimal knobs in reverse order
-    stage_no = len(wf.execution_strategy["knobs"])
-    knobs = {}
-    for tpl in wf.execution_strategy["knobs"]:
-        knobs[stage_no] = tpl
-        stage_no -= 1
-
-    analysis_name = test2.name + "Reverse"
-    db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=analysis_name, result=result2, knobs=knobs)
-
     # if we want to integrate following tests, they should be saved as another step_no, just increment it before saving
     # x1 = samples[0]
     # x2 = samples[1]
     # pooled_std = sqrt((np.var(x1) + np.var(x2)) / 2)
     # effect_size = mean_diff / pooled_std
-    effect_size = wf.analysis["tTestEffectSize"]
-    test2 = TtestPower(stage_ids=stage_ids, y_key=key, effect_size=effect_size)
+    # effect_size = wf.analysis["tTestEffectSize"]
+    # test2 = TtestPower(stage_ids=stage_ids, y_key=key, effect_size=effect_size)
     # result2 = test2.run(data=samples, knobs=knobs)
     # db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test2.name, result=result2)
     #
     # test3 = TtestSampleSizeEstimation(stage_ids=stage_ids, y_key=key, effect_size=None, mean_diff=mean_diff)
     # result3 = test3.run(data=samples, knobs=knobs)
     # db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test3.name, result=result3)
-    return result, result2
+    return result
 
 
 ##########################
@@ -168,8 +153,12 @@ def start_factorial_tests(wf):
             # resultDict e.g. {'PR(>F)': 0.0949496951695454, 'F': 2.8232330924997346 ...
             dod = iterate_anova_tables(aov_table=aov_table, aov_table_sqr=aov_table_sqr)
 
+            # sort PR(>F) values in ascending order, and None values should be in the end
+            # https://stackoverflow.com/questions/48234072/how-to-sort-a-list-and-handle-none-values-properly
+            dd = OrderedDict(sorted(dod.items(), key=lambda item: (item[1]['PR(>F)'] is None, item[1]['PR(>F)'])))
+
             # from now on, caller functions should fetch result from DB
-            db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test.name, anova_result=dod, knobs=knobs)
+            db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test.name, anova_result=dd, knobs=knobs)
             return True
         except Exception as e:
             print("error in factorial tests, while performing anova")
@@ -181,14 +170,9 @@ def start_factorial_tests(wf):
         return False
 
 
-def get_tuples(experiment_id, step_no, key, reverse=False):
-    if reverse:
-        stage_ids = db().get_stages(experiment_id, step_no)[0][::-1]
-    else:
-        stage_ids = db().get_stages(experiment_id, step_no)[0]
+def get_tuples(experiment_id, step_no, key):
+    stage_ids = db().get_stages(experiment_id, step_no)[0]
     data, knobs = db().get_data_for_analysis(experiment_id, step_no)
-    print("reverse: ", reverse, "stage_ids", stage_ids, "knobs", knobs)
-
     extract_inner_values(key=key, stage_ids=stage_ids, data=data)
     # parse data & knobs (k-v pairs) to a proper array of values
     samples = [data[stage_id] for stage_id in stage_ids]

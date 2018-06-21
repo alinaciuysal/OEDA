@@ -92,33 +92,6 @@ import {NotificationsService} from "angular2-notifications/dist";
             </div>
           </div>
         </div>
-
-        <!--Best to Default tail-->
-        <div class="panel-body" *ngIf="!analysis_is_collapsed && retrieved">
-          <div class="col-md-12">
-            <div class="sub-title">
-              Results of Best --> Default tail
-            </div>
-
-            <div class="table-responsive">
-
-              <table class="table table-striped table-bordered table-hover">
-                <thead>
-                <th style="padding-left: 1%" *ngFor="let key of get_keys(reverseResults)">{{key}}</th>
-                </thead>
-
-                <tbody>
-                <!-- Single row multiple values for t-test -->
-                <tr>
-                  <td *ngFor="let key of get_keys(reverseResults)" style="padding-left: 1%">
-                    {{reverseResults[key]}}
-                  </td>
-                </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   `
@@ -131,7 +104,6 @@ export class TtestAnalysisComponent {
 
   public analysis_is_collapsed: boolean;
   public results: any; // keeps track of keys & values in Default --> Best tail
-  public reverseResults: any; // keeps track of keys & values in Best --> Default tail
   public analysis_name: string;
   public tTestAlpha: number;
   public tTestEffectSize: number;
@@ -147,49 +119,34 @@ export class TtestAnalysisComponent {
   public btnClicked(): void {
     // first case with empty results
     if (this.analysis_is_collapsed && isNullOrUndefined(this.results)) {
-      // get Default --> Best tail result
+      // get Default --> Best tail result of T-test
       this.apiService.getAnalysis(this.experiment, this.step_no, this.analysis_name).subscribe(
         (result) => {
-          if(!isNullOrUndefined(result)) {
-
-          }
           let analysis = JSON.parse(result._body);
           this.tTestAlpha = this.experiment.analysis["tTestAlpha"];
           this.tTestEffectSize = this.experiment.analysis["tTestEffectSize"];
           this.results = analysis["result"]; // {different_averages: .., effect_size: .., ...}
           delete this.results["alpha"]; // no need to show it in the table, we already show it in the row
-          console.log("11111", this.results);
 
-          // now get Best --> Default result, naming convention with backend
-          let reverseAnalysisName = this.analysis_name + "Reverse";
-          this.apiService.getAnalysis(this.experiment, this.step_no, reverseAnalysisName).subscribe(
-            (reverseResult) => {
-              let reverseAnalysis = JSON.parse(reverseResult._body);
-              this.reverseResults = reverseAnalysis["result"]; // {different_averages: .., effect_size: .., ...}
-              delete this.reverseResults["alpha"]; // no need to show it in the table, we already show it in the row
-              console.log("222222", this.reverseResults);
+          // http://trendingsideways.com/index.php/cohens-d-formula/
+          // http://staff.bath.ac.uk/pssiw/stats2/page2/page14/page14.html
+          // https://en.wikipedia.org/wiki/Effect_size#Coefficient_of_determination
+          let direction = this.experiment.considered_data_types[0]["criteria"];
+          let direction_validity = false;
+          if (direction === 'Maximize') {
+            // for valid case, we should have a negative effect_size
+            if (this.results["effect_size"] < -1 * this.tTestEffectSize) {
+              direction_validity = true;
+            }
+          } else {
+            if (this.results["effect_size"] > this.tTestEffectSize) {
+              direction_validity = true;
+            }
+          }
+          this.statistical_significance = (this.results["different_averages"] == true && direction_validity);
 
-              // now determine statistical significance based on 4 conditions
-              let different_average_condition = (this.results["different_averages"] == true);
-              let different_average_condition_reverse = (this.reverseResults["different_averages"] == true);
-
-              // let different_average_condition = (this.results["different_averages"] == true);
-              // let different_average_condition = (this.results["different_averages"] == true);
-
-              // http://trendingsideways.com/index.php/cohens-d-formula/
-              // http://staff.bath.ac.uk/pssiw/stats2/page2/page14/page14.html
-              // https://en.wikipedia.org/wiki/Effect_size#Coefficient_of_determination
-              // let effect_size_condition = (this.results["effect_size"] > this.tTestEffectSize);
-              // this.statistical_significance = avg_condition && effect_size_condition;
-              this.statistical_significance = different_average_condition && different_average_condition_reverse;
-
-
-              this.notify.success("Success", "Analysis results are retrieved");
-              this.retrieved = true;
-            }, error2 => {
-              this.retrieved = false;
-              this.notify.error("", error2.message);
-            });
+          this.notify.success("Success", "Analysis results are retrieved");
+          this.retrieved = true;
 
         }, error1 => {
           this.retrieved = false;

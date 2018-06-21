@@ -70,12 +70,9 @@ def start_three_phase_analysis(wf):
             wf.step_name = "T-test"
 
             start_sequential_strategy(wf=wf)
-            # perform T-test
-            result, reverseResult = start_two_sample_tests(wf=wf)
-            # result of Best --> Default tail
+            result = start_two_sample_tests(wf=wf)
+            # Best --> Default tail of T-test
             info("> T-test result: " + str(result))
-            # result of Default --> Best tail
-            info("> T-test reverseResult: " + str(reverseResult))
     else:
         error("> ANOVA failed")
 

@@ -8,6 +8,7 @@
 - [R](https://www.r-project.org/)
 - [SUMO](http://sumo.dlr.de/wiki/Downloads)
 - [CrowdNav](https://github.com/alinaciuysal/CrowdNav/tree/oeda)
+- [Node.js and npm](https://www.npmjs.com/get-npm)
 
 #### [Installation](https://github.com/alinaciuysal/OEDA/wiki/Installation)
 

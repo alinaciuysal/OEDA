@@ -18,4 +18,4 @@
 [Ali Naci Uysal](mailto:ali.uysal@tum.de) or [Dr. Ilias Gerostathopoulos](http://www4.in.tum.de/~gerostat/)
 
 ***
-## Online manual with subtitles can be found [here](https://youtu.be/JfgcnUO_o8g) for [ecsa18 branch](https://github.com/alinaciuysal/OEDA/tree/ecsa18)
+## Online manual (with subtitles) to optimize a noisy black-box function can be found [here](https://youtu.be/JfgcnUO_o8g)

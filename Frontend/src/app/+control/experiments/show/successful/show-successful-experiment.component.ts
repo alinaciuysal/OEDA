@@ -38,10 +38,9 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
   public is_enough_data_for_plots: boolean;
   public is_all_stages_selected: boolean;
   public available_steps = [];
-
   public selected_stage: any;
-
   public step_no: any;
+  public totalNumberOfStagesForBO: number;
 
   constructor(private layout: LayoutService,
               private apiService: OEDAApiService,
@@ -172,7 +171,6 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     const ctrl = this;
     if (selected_stage !== null) {
       // find same stage from available ones for bayesian steps
-      console.log("selected_stage", selected_stage);
       // there is no step with number "best" for anova & t-test
       if (typeof(selected_stage.number) == 'string') {
         if(selected_stage.number.includes("best")) {
@@ -260,7 +258,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     this.incoming_data_type = null;
     this.all_data = [];
     this.retrieved_data_length = 0;
-
+    this.totalNumberOfStagesForBO = 0;
     this.selected_stage = {};
     this.dataAvailable = false;
   }
@@ -273,11 +271,9 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
 
   private prepareStages() {
     this.setValues();
-
     // initially selected stage is "All Stages"
     this.selected_stage = {"number": -1, "knobs": {}};
     this.selected_stage.knobs = this.entityService.populate_knob_objects_with_variables(this.selected_stage.knobs, this.targetSystem.defaultVariables, true);
-    console.log("selected_stage knobs", this.selected_stage.knobs);
 
     this.apiService.loadAvailableStepsAndStagesWithExperimentId(this.experiment_id).subscribe(steps => {
       if (!isNullOrUndefined(steps)) {
@@ -297,6 +293,11 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
                 if (!isNullOrUndefined(stage["stage_result"])) {
                   stage["stage_result"] = Number(stage["stage_result"].toFixed(this.decimal_places));
                 }
+              }
+
+              // calculate total number of stages for bayesian opt.
+              if (stage["number"] !== "best" && Number(step_no) != 1 && Number(step_no) != this.experiment.numberOfSteps) {
+                this.totalNumberOfStagesForBO += 1;
               }
               new_stages.push(stage);
             }
@@ -347,5 +348,4 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
   get_keys(object) : Array<string> {
     return this.entityService.get_keys(object);
   }
-
 }

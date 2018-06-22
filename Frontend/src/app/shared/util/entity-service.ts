@@ -357,7 +357,9 @@ export class EntityService {
     Object.getOwnPropertyNames(iterable_object).forEach(key => {
       let value = iterable_object[key];
       if(typeof(value) == 'string') {
-        iterable_object[key] = Number(value).toFixed(decimal);
+        iterable_object[key] = parseFloat(Number(value).toFixed(decimal));
+      } else if (typeof(value) == 'number') {
+        iterable_object[key] = parseFloat(value.toFixed(decimal));
       }
     });
     return iterable_object;

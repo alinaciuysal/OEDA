@@ -153,12 +153,8 @@ def start_factorial_tests(wf):
             # resultDict e.g. {'PR(>F)': 0.0949496951695454, 'F': 2.8232330924997346 ...
             dod = iterate_anova_tables(aov_table=aov_table, aov_table_sqr=aov_table_sqr)
 
-            # sort PR(>F) values in ascending order, and None values should be in the end
-            # https://stackoverflow.com/questions/48234072/how-to-sort-a-list-and-handle-none-values-properly
-            dd = OrderedDict(sorted(dod.items(), key=lambda item: (item[1]['PR(>F)'] is None, item[1]['PR(>F)'])))
-
             # from now on, caller functions should fetch result from DB
-            db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test.name, anova_result=dd, knobs=knobs)
+            db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test.name, anova_result=dod, knobs=knobs)
             return True
         except Exception as e:
             print("error in factorial tests, while performing anova")

@@ -17,10 +17,20 @@
   </div>
 
 
-  <!-- Show analysis sections for relevant steps-->
+  <!-- Show analysis sections for relevant steps (first and last step) -->
   <anova-analysis *ngIf="step_no == 1" [experiment]="experiment" [targetSystem]="targetSystem" [step_no]="step_no" [for_successful_experiment]="true"></anova-analysis>
 
   <ttest-analysis *ngIf="step_no == experiment.numberOfSteps" [experiment]="experiment" [targetSystem]="targetSystem" [step_no]="step_no"></ttest-analysis>
+
+  <!--Show informative section related with numberOfInteractions -->
+
+  <div class="col-md-12" *ngIf="step_no !== 1 && step_no !== experiment.numberOfSteps">
+    <div class="panel panel-default chartJs">
+      <div class="panel-heading">
+        <span>We selected 8 iterations for this step, but you gave {{experiment.executionStrategy.optimizer_iterations}} while creating the experiment</span>
+      </div>
+    </div>
+  </div>
 
   <!-- Experiment Stages with paginator -->
   <experiment-stages-paginator [experiment]="experiment"

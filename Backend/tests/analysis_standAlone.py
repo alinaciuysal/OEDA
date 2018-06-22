@@ -9,20 +9,13 @@ pp = pprint.PrettyPrinter(indent=4)
 
 def start_workflow_with_anova(experiment_id, step_no, key, alpha, nrOfImportantFactors, executionStrategyType, performAnova=False):
     stage_ids, samples, knobs = get_tuples(experiment_id, step_no, key)
-    experiment = db().get_experiment(experiment_id)
     if performAnova:
         save_anova(experiment_id, step_no, stage_ids, samples, knobs, key)
 
     retrieved = db().get_analysis(experiment_id=experiment_id, step_no=step_no, analysis_name='two-way-anova')
-    print(json.dumps(retrieved, indent=4))
     # significant_interactions = get_significant_interactions(retrieved['anova_result'], alpha, nrOfImportantFactors)
     # significant_interactions = assign_iterations(experiment, significant_interactions, executionStrategyType)
     # print("ssi", significant_interactions)
-
-def test_data_points(experiment_id, step_no):
-    data, knobs = db().get_data_for_analysis(experiment_id, step_no)
-    print("data", data)
-    print("knobs", knobs)
 
 def save_anova(experiment_id, step_no, stage_ids, samples, knobs, key):
     test = FactorialAnova(stage_ids=stage_ids, y_key=key, knob_keys=None, stages_count=len(stage_ids))
@@ -33,7 +26,12 @@ def save_anova(experiment_id, step_no, stage_ids, samples, knobs, key):
 
     # type(dd) is DefaultOrderedDict
     dod = iterate_anova_tables(aov_table=aov_table, aov_table_sqr=aov_table_sqr)
-    db().save_analysis(experiment_id=experiment_id, step_no=step_no, analysis_name=test.name, anova_result=dod)
+    print("before")
+    print(json.dumps(dod, indent=4))
+    dd = OrderedDict(sorted(dod.items(), key=lambda item: (item[1]['PR(>F)'] is None, item[1]['PR(>F)'])))
+    print("AFTER")
+    print(json.dumps(dd, indent=4))
+    db().save_analysis(experiment_id=experiment_id, step_no=step_no, analysis_name=test.name, anova_result=dd)
 
 def start_workflow_with_ttest(experiment_id, key, alpha):
     experiment = db().get_experiment(experiment_id)
@@ -68,11 +66,11 @@ if __name__ == '__main__':
     nrOfImportantFactors = 3 # to be retrieved from analysis definition
     alpha = 0.05 # to be retrieved from analysis definition
     setup_experiment_database("elasticsearch", "localhost", 9200)
-    experiment_id = "c40f9c99-9f52-9258-ee80-bd2f3398b2f7"
+    experiment_id = "b274db4c-5450-de1a-5582-d7908cd072f8"
     step_no = "1" # 1 denotes step-strategy phase for ANOVA, last one denotes T-test, intermediate ones denote Bayesian Opt
     key = "overhead"
     # test_data_points(experiment_id, step_no)
-    start_workflow_with_anova(experiment_id, step_no, key, alpha, nrOfImportantFactors, 'self-optimizer')
+    start_workflow_with_anova(experiment_id, step_no, key, alpha, nrOfImportantFactors, 'self-optimizer', True)
     # start_workflow_with_ttest(experiment_id=experiment_id, key=key, alpha=alpha)
     # asd = db().get_experiment(experiment_id=experiment_id)["numberOfSteps"]
     # all_stage_data = get_all_stage_data(experiment_id=experiment_id)

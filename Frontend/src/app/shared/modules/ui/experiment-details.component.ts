@@ -414,30 +414,7 @@ import {isNullOrUndefined} from "util";
           </div>
         </div>
       </div>
-
-      <div class="panel panel-default chartJs" *ngIf="experiment.executionStrategy.type === 'forever'">
-        <div class="panel-heading">
-          <div class="card-title">
-            <div class="title pull-left">Default Configuration of {{targetSystem.name}}</div>
-          </div>
-        </div>
-        <div class="panel-body" style="padding-top: 20px">
-          <div class="table-responsive" style="padding-top: 20px">
-            <table>
-              <thead>
-              <th style="width: 5%">Name</th>
-              <th style="width: 5%">Default</th>
-              </thead>
-              <tbody>
-              <tr *ngFor="let key of get_keys(experiment.executionStrategy.knobs)" style="padding-top: 1%">
-                <td style="padding-top: 1%">{{key}}</td>
-                <td>{{experiment.executionStrategy.knobs[key]}}</td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      
     </div>
 
     <!-- Modal for stop experiment-->

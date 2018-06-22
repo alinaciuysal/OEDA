@@ -55,7 +55,7 @@ import * as _ from "lodash";
           <div class="row" style="padding-left: 1%">
             <div class="col-md-6" *ngIf="eligible_for_next_step">
               <div class="sub-title" style="overflow:hidden">
-                <h4><span class="label label-success"><i class="fa fa-check"></i> Significant factor(s) are marked with *, but only {{experiment.analysis.nrOfImportantFactors}} among best one(s) are selected</span></h4>
+                <h4><span class="label label-success"><i class="fa fa-check"></i> Significant factor(s) selected for Bayesian Optimization are marked with *</span></h4>
               </div>
             </div>
 
@@ -80,13 +80,13 @@ import * as _ from "lodash";
   
                 <tbody>
                 <!-- Multiple row multiple values for anova -->
-                <tr *ngFor="let property of properties">
+                <tr *ngFor="let key of ordered_keys">
                   <td style="padding-left: 1%">
-                    <span *ngIf="!property['is_selected']">{{property.name}}</span>
-                    <span *ngIf="property['is_selected']" style="color: #4cae4c">{{property.name}} *</span>
+                    <span *ngIf="!results[key]['is_selected']">{{key}}</span>
+                    <span *ngIf="results[key]['is_selected']" style="color: #4cae4c">{{key}} *</span>
                   </td>
-                  <td *ngFor="let k of get_keys(results[property.name])" style="padding-left: 1%">
-                    {{results[property.name][k]|| "&nbsp;" }}
+                  <td *ngFor="let k of get_keys(results[key])" style="padding-left: 1%">
+                      {{results[key][k]|| "&nbsp;" }}
                   </td>
                 </tr>
                 </tbody>
@@ -106,7 +106,7 @@ export class AnovaAnalysisComponent {
   @Input() for_successful_experiment: boolean;
 
   public analysis_is_collapsed: boolean;
-  public properties: any;
+  public ordered_keys: any; // keeps track of ordered keys that are sorted in backend's controller w.r.t. PR(>F) in ascending order
   public inner_keys: any;
   public results: any; // keeps track of keys & values in incoming obj
   public analysis_name: string;
@@ -119,6 +119,8 @@ export class AnovaAnalysisComponent {
     this.analysis_is_collapsed = true;
     this.retrieved = false;
     this.analysis_name = "two-way-anova";
+    this.inner_keys = [];
+    this.ordered_keys = [];
   }
 
   public btnClicked(): void {
@@ -138,46 +140,36 @@ export class AnovaAnalysisComponent {
           delete analysis['result'];
 
           // naming convention with backend server
-
-          console.log(analysis["anova_result"]);
-          // analysis["anova_result"] = _.sortBy(analysis["anova_result"], [function(o) { return o["PR(>F)"]; }]);
-
           this.results = analysis["anova_result"]; // {C(x): {F: 0.2, PR(>F): 0.4} ... }
-          this.properties = this.get_keys(this.results); // Residual, exploration_percentage etc.
-          // concatenate inner keys of tuples
-          let allKeys = [];
-          for (let property of this.properties) {
-            let tuple = this.results[property];
+          this.ordered_keys = analysis["ordered_keys"]; // Residual, exploration_percentage etc. ordered w.r.t PR(>F)
+
+          // concatenate inner keys of tuples, e.g. F, PR(>F), df, eta_sq ...
+          for (let key of this.ordered_keys) {
+            let tuple = this.results[key];
             for (let key of this.get_keys(tuple)) {
-              if (!allKeys.includes(key)) {
-                allKeys.push(key);
+              if (!this.inner_keys.includes(key)) {
+                this.inner_keys.push(key);
               }
             }
           }
-          this.inner_keys = allKeys;
-          let new_properties = [];
-          // if anova was successful, mark the ones less than alpha
+          console.log("this.inner_keys", this.inner_keys);
+
+          // if anova was successful, mark the ones less than alpha, also consider nrOfImportantFactors that was provided by user
+          let nrSelectedInteractions = 0;
           if (this.eligible_for_next_step) {
-            for (let prop of this.properties) {
-              // create tuples based on selection or not
-              let new_prop = {};
-              new_prop["name"] = prop;
-              if (!isNullOrUndefined(this.results[prop]['PR(>F)'])) {
-                if (this.results[prop]['PR(>F)'] < this.experiment.analysis['anovaAlpha']) {
-                  new_prop["is_selected"] = true;
+            for (let key of this.ordered_keys) {
+              if (nrSelectedInteractions < this.experiment.analysis.nrOfImportantFactors) {
+                if (!isNullOrUndefined(this.results[key]['PR(>F)'])) {
+                  if (this.results[key]['PR(>F)'] < this.experiment.analysis['anovaAlpha']) {
+                    this.results[key]["is_selected"] = true;
+                    nrSelectedInteractions += 1;
+                  }
                 }
               }
-              new_properties.push(new_prop);
-            }
-          } else {
-            for (let prop of this.properties) {
-              let new_prop = {"name": prop};
-              new_properties.push(new_prop);
             }
           }
-          this.properties = new_properties;
-
-          console.log(this.properties);
+          console.log("this.results", this.results);
+          console.log("this.ordered_keys", this.ordered_keys);
 
           this.notify.success("Success", "Analysis results are retrieved");
           this.retrieved = true;
@@ -189,9 +181,13 @@ export class AnovaAnalysisComponent {
     this.analysis_is_collapsed = !this.analysis_is_collapsed;
   }
 
+  // returns keys that do not include "is_selected" key,
+  // as we already mark it visually in first cell(s) of table
   public get_keys(object): Array<string> {
     if (!isNullOrUndefined(object)) {
-      return Object.keys(object);
+      let original_keys = Object.keys(object);
+      original_keys = original_keys.filter(value => value !== 'is_selected');
+      return original_keys;
     }
     return null;
   }

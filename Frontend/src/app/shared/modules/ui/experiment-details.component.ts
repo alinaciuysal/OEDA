@@ -36,7 +36,7 @@ import {isNullOrUndefined} from "util";
     </div>
 
     <!-- Experiment Name & Description -->
-    <div class="col-md-12" [hidden]="is_collapsed" style="border-top: 3px groove green; border-right: 3px groove green; border-left: 3px groove green">
+    <div class="col-md-12" [hidden]="is_collapsed" style="border-top: 3px groove #5cb85c; border-right: 3px groove #5cb85c; border-left: 3px groove #5cb85c">
       <div class="panel panel-default chartJs">
         <div class="panel-body">
           <div class="row">
@@ -50,7 +50,7 @@ import {isNullOrUndefined} from "util";
     </div>
 
     <!-- Data Providers & Change Provider -->
-    <div class="col-md-12" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed" style="border-right: 3px groove green; border-left: 3px groove green">
+    <div class="col-md-12" [hidden]="is_collapsed" style="border-right: 3px groove #5cb85c; border-left: 3px groove #5cb85c">
 
       <!-- Primary Data Provider & Secondary Data Provider(s)-->
       <div class="col-md-6" style="padding-left: 0">
@@ -338,7 +338,7 @@ import {isNullOrUndefined} from "util";
     </div>
 
     <!-- Incoming Data Types -->
-    <div class="col-md-12" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed" style="padding-left:0; padding-right: 0; border-right: 3px groove green; border-left: 3px groove green">
+    <div class="col-md-12" [hidden]="is_collapsed" style="border-right: 3px groove #5cb85c; border-left: 3px groove #5cb85c">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">
@@ -375,46 +375,96 @@ import {isNullOrUndefined} from "util";
       </div>
     </div>
     
-    <!-- Experiment Variables -->
-    <div class="col-md-12" *ngIf="targetSystem.name !== ''" [hidden]="is_collapsed" style="padding-left:0; padding-right: 0; border-bottom: 3px groove green; border-right: 3px groove green; border-left: 3px groove green">
-      <!-- Experiment variables (or default variables for forever)-->
+    <!-- ANOVA Properties -->
+    <div class="col-md-12" [hidden]="is_collapsed" style="border-right: 3px groove #5cb85c; border-left: 3px groove #5cb85c">
       
-      <div class="panel panel-default chartJs" *ngIf="experiment.changeableVariables.length > 0 && experiment.executionStrategy.type !== 'forever'">
+      <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">
-            <div class="title pull-left">Experiment Variables</div>
+            <div class="title pull-left">Factorial ANOVA Details</div>
           </div>
         </div>
-        
-        <div class="panel-body">
-          <div class="row" *ngFor="let knobArr of experiment.changeableVariables">
-            <div class="row" style="padding-left: 1%" *ngFor="let knobKey of get_keys(knobArr)">
-              <labeled-input name="Name" [model]="knobArr[knobKey]" key="name" [colSize]="3" disabled="true"></labeled-input>
-              <span *ngIf="experiment.analysis.type == 'no_analysis' || experiment.analysis.type == 'bayesian_opt'">
-                  <labeled-input inputType="number" name="Experiment Min" [model]="knobArr[knobKey]" key="min" [colSize]="2" [disabled]="true"></labeled-input>
-                  <labeled-input inputType="number" name="Experiment Max" [model]="knobArr[knobKey]" key="max" [colSize]="2" [disabled]="true"></labeled-input>
-                  <labeled-input inputType="number" name="Default" [model]="knobArr[knobKey]" key="default" [colSize]="2" [disabled]="true"></labeled-input>
-                  <labeled-input *ngIf="experiment.executionStrategy.type == 'sequential'" inputType="number" name="Experiment Value" [model]="knobArr[knobKey]" key="target" [colSize]="2" [disabled]="true"></labeled-input>
-                  <labeled-input *ngIf="experiment.executionStrategy.type == 'step_explorer'" inputType="number" name="Step Size" [model]="knobArr[knobKey]" key="step" [colSize]="2" [disabled]="true"></labeled-input>
-                  <labeled-input-select *ngIf="experiment.executionStrategy.type == 'step_explorer'" name="Steps" [model]="knobArr[knobKey]" key="levels" [options]="knobArr[knobKey]['levels']" [colSize]="3" [disabled]=true></labeled-input-select>
-                </span>
-  
-              <span *ngIf="experiment.analysis.type == 'two_sample_tests' || experiment.analysis.type == 'factorial_tests' || experiment.analysis.type == 'one_sample_tests' || experiment.analysis.type == 'n_sample_tests'">
-                  <labeled-input inputType="number" name="Experiment Min" [model]="knobArr[knobKey]" key="min" [colSize]="2" [disabled]="true"></labeled-input>
-                  <labeled-input inputType="number" name="Experiment Max" [model]="knobArr[knobKey]" key="max" [colSize]="2" [disabled]="true"></labeled-input>
-                  <labeled-input inputType="number" name="Default" [model]="knobArr[knobKey]" key="default" [colSize]="2" [disabled]="true"></labeled-input>
-                  <labeled-input *ngIf="experiment.analysis.method == 'one_factor_two_values' || experiment.analysis.method == 'two_factors_one_value' || experiment.analysis.type == 'one_sample_tests' || experiment.analysis.type == 'n_sample_tests'" 
-                                 inputType="number" name="Experiment Value" [model]="knobArr[knobKey]" key="target" [colSize]="2" [disabled]="true"></labeled-input>
-                  <labeled-input *ngIf="experiment.analysis.type == 'factorial_tests'" inputType="number" name="Step Size" [model]="knobArr[knobKey]" key="step" [colSize]="2" [disabled]="true"></labeled-input>
-                  <labeled-input-select *ngIf="experiment.analysis.type == 'factorial_tests'" name="Levels" [model]="knobArr[knobKey]" key="levels" [options]="knobArr[knobKey]['levels']" [colSize]="3" [disabled]=true></labeled-input-select>
-                </span>
-  
-            </div>
-            <hr class="col-md-12">
+
+        <div class="panel-body" style="padding-top: 20px">
+          
+          <!--Factors-->
+          <div class="table-responsive" style="padding-top: 20px">
+            <table style="margin-top: 5px" class="table table-striped table-bordered table-hover">
+              <thead>
+              <th style="padding-left: 1%">Name</th>
+              <th style="padding-left: 1%">Factors</th>
+              </thead>
+              <tbody>
+              <tr *ngFor="let name of get_keys(experiment.changeableVariables)" style="padding-left: 1%">
+                <td>{{name}}</td>
+                <td>{{experiment.changeableVariables[name]}}</td>
+              </tr>
+              </tbody>
+            </table>
           </div>
+
+          <!-- Sample Size for ANOVA -->
+          <labeled-input [disabled]="true" inputType="number" name="Number of samples collected for each configuration"
+                         [model]="experiment.analysis" key="sample_size" [colSize]="3" [minNumber]="1" tooltipTitle='Number of samples to be collected from each experiment'></labeled-input>
+
+          <!-- Alpha -->
+          <labeled-input [disabled]="true" inputType="number" name="Significance level (alpha)" [model]="experiment.analysis" key="anovaAlpha" [colSize]="3" tooltipTitle='Alpha value that will be used as significance threshold for analysis phase'></labeled-input>
+
+          <!-- Number of Important Factors -->
+          <labeled-input [disabled]="true" inputType="number" name="Maximum number of significant ANOVA interactions" [model]="experiment.analysis" key="nrOfImportantFactors" [colSize]="3" tooltipTitle='Maximum number of significant interactions to consider in step #2, should be at least 1'></labeled-input>
         </div>
       </div>
-      
+    </div>
+
+    <!-- Bayesian optimization properties -->
+    <div class="col-md-12" [hidden]="is_collapsed" style="border-right: 3px groove #5cb85c; border-left: 3px groove #5cb85c">
+
+      <div class="panel panel-default chartJs">
+        <div class="panel-heading">
+          <div class="card-title">
+            <div class="title pull-left">Bayesian Optimization Details</div>
+          </div>
+        </div>
+
+        <div class="panel-body" style="padding-top: 20px">
+          <!-- executionStrategy type -->
+          <labeled-input [disabled]="true" name="Optimizer Type" [model]="experiment.executionStrategy" key="type" [colSize]="3"></labeled-input>
+
+          <!-- Acquisition method -->
+          <labeled-input [disabled]="true" name="Acquisition Method" [model]="experiment.executionStrategy" key="acquisition_method" [colSize]="3"></labeled-input>
+
+          <!-- optimizer_iterations -->
+          <labeled-input [disabled]="true" inputType="number" name="Number of iterations for each optimizer run" [model]="experiment.executionStrategy" key="optimizer_iterations" [colSize]="3"></labeled-input>
+
+          <!-- sample size -->
+          <labeled-input [disabled]="true" inputType="number" name="Number of samples collected for each configuration" [model]="experiment.executionStrategy" key="sample_size" [colSize]="3" tooltipTitle='Number of samples to be collected from each optimization experiment'></labeled-input>
+
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- T-test properties -->
+    <div class="col-md-12" [hidden]="is_collapsed" style="border-right: 3px groove #5cb85c; border-left: 3px groove #5cb85c; border-bottom: 3px groove #5cb85c;">
+      <div class="panel panel-default chartJs">
+        <div class="panel-heading">
+          <div class="card-title">
+            <div class="title pull-left">T-test Details</div>
+          </div>
+        </div>
+        <div class="panel-body" style="padding-top: 20px">
+    
+          <!-- Alpha -->
+          <labeled-input [disabled]="true" inputType="number" name="Significance level (alpha)" [model]="experiment.analysis" key="tTestAlpha" [colSize]="3" tooltipTitle='Alpha value that will be used as significance threshold for step #3'></labeled-input>
+    
+          <!-- Cohen's coefficient -->
+          <labeled-input [disabled]="true" inputType="number" name="Minimum effect size (Cohen's d coefficient)" [model]="experiment.analysis" key="tTestEffectSize" [colSize]="3" tooltipTitle='Alpha value that will be used as significance threshold for Bayesian Optimization Step'></labeled-input>
+    
+          <!-- sample size for optimization -->
+          <labeled-input [disabled]="true" inputType="number" name="Number of samples collected for default & best configurations" [model]="experiment.analysis" key="tTestSampleSize" [colSize]="3" [minNumber]="1" tooltipTitle='Number of samples to be collected for both default configuration of target system and best knobs of optimization process'></labeled-input>
+        </div>
+      </div>
     </div>
 
     <!-- Modal for stop experiment-->

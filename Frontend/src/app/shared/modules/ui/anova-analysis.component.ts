@@ -12,10 +12,10 @@ import * as _ from "lodash";
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <button type="button" class="btn btn-success" (click)="btnClicked()">
-            <span *ngIf="analysis_is_collapsed">Show ANOVA Details</span>
+            <span *ngIf="analysis_is_collapsed">Show ANOVA Results</span>
             <i *ngIf="analysis_is_collapsed" class="fa fa-angle-double-down" aria-hidden="true"></i>
 
-            <span *ngIf="!analysis_is_collapsed">Hide ANOVA Details</span>
+            <span *ngIf="!analysis_is_collapsed">Hide ANOVA Results</span>
             <i *ngIf="!analysis_is_collapsed" class="fa fa-angle-double-up" aria-hidden="true"></i>
           </button>
         </div>

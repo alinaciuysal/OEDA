@@ -1,45 +1,33 @@
 from flask_restful import Resource
 from oeda.databases import db
-from oeda.analysis.analysis_execution import get_tuples
 from flask import jsonify, request
+from elasticsearch.exceptions import TransportError
+from collections import OrderedDict
+import json
 
 class AnalysisController(Resource):
 
     @staticmethod
-    def post(experiment_id):
+    def post(experiment_id, step_no, analysis_name):
         if experiment_id is None:
             return {"error": "experiment_id cannot be null"}, 404
 
-        experiment = request.get_json()
-        key = experiment["analysis"]["data_type"]
-
-        # naming conventions
-        test_names = []
-        if experiment["analysis"]["type"] == 'factorial_tests':
-            test_names = ["two-way-anova"]
-
-        elif experiment["analysis"]["type"] == 'two_sample_tests':
-            test_names = ["t-test", "t-test-power", "t-test-sample-estimation"]
-
-        elif experiment["analysis"]["type"] == 'one_sample_tests':
-            test_names = ["dagostino-pearson", "anderson-darling", "kolmogorov-smirnov", "shapiro-wilk"]
-
-        elif experiment["analysis"]["type"] == 'n_sample_tests':
-            test_names = ["one-way-anova", "kruskal-wallis", "levene", "bartlett", "fligner-killeen"]
-
-        elif experiment["analysis"]["type"] == 'no_analysis':
-            return {"error": "Analysis was not specified for this experiment"}, 404
-
-        elif experiment["analysis"]["type"] == 'bayesian_opt':
-            return {"error": "Analysis was not specified for bayesian optimization"}, 404
-
-        stage_ids, samples, knobs = get_tuples(experiment_id, key)
-
         test_results = {}
-        for test_name in test_names:
-            res = db().get_analysis(experiment_id, stage_ids, test_name)
-            test_results[test_name] = res
+        try:
+            res = db().get_analysis(experiment_id, step_no, analysis_name)
 
-        resp = jsonify(test_results)
-        resp.status_code = 200
-        return resp
+            if res:
+                # sort PR(>F) values in ascending order for ANOVA results, and None values should be in the end
+                # https://stackoverflow.com/questions/48234072/how-to-sort-a-list-and-handle-none-values-properly
+                if analysis_name == 'two-way-anova':
+                    res["anova_result"] = OrderedDict(sorted(res["anova_result"].items(), key=lambda item: (item[1]['PR(>F)'] is None, item[1]['PR(>F)'])))
+                    res["ordered_keys"] = list(res["anova_result"].keys())
+                print(json.dumps(res, indent=4))
+                test_results[analysis_name] = res
+                resp = jsonify(res)
+                resp.status_code = 200
+                return resp
+            else:
+                return {"message": "Cannot get analysis results"}, 404
+        except TransportError:
+            return {"message": "Analysis result does not exist in database (yet)"}, 404

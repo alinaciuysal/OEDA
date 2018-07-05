@@ -54,15 +54,14 @@ class AnalysisTest(unittest.TestCase):
         random_experiment_id = random.choice(experiment_ids)
         self.assertTrue(random_experiment_id)
         # tries to sample an experiment with number of stages >= n
-        # TODO: can be problematic if there are n stages but experiment is somehow interrupted
-        # TODO: and there are no data points in one or more of the stages
-        while db().get_stages_count(experiment_id=random_experiment_id) < AnalysisTest.n:
-            random_experiment_id = random.choice(experiment_ids)
-        self.assertTrue(random_experiment_id)
+        # TODO: update w.r.t new db mappings
+        # while db().get_stages_count(experiment_id=random_experiment_id) < AnalysisTest.n:
+        #     random_experiment_id = random.choice(experiment_ids)
+        # self.assertTrue(random_experiment_id)
         AnalysisTest.experiment_id = random_experiment_id
 
     def test_c_data_points(self):
-        data, knobs = db().get_data_for_analysis(AnalysisTest.experiment_id)
+        data, knobs = db().get_data_for_analysis(AnalysisTest.experiment_id, AnalysisTest.stage_no)
         self.assertTrue(data)
         self.assertTrue(knobs)
         AnalysisTest.data = data
@@ -247,10 +246,6 @@ class AnalysisTest(unittest.TestCase):
             test = FactorialAnova(stage_ids=stage_ids, y_key=AnalysisTest.key, knob_keys=None, stages_count=len(stage_ids))
             result = test.run(data=samples, knobs=knobs)
             self.assertTrue(result is not None)
-            # TODO: Ilias, how can we save Factorial Analysis table to DB?
-            # db().save_analysis(AnalysisTest.stage_ids, test.name, result)
-            # retrieved = db().get_analysis(AnalysisTest.stage_ids, test.name)
-            # self.assertTrue(retrieved)
         except Exception as e:
             error_name = type(e).__name__
             self.assertTrue(error_name == "LinAlgError" or error_name == "ValueError")

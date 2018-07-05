@@ -156,8 +156,8 @@ class ElasticSearchDb(Database):
             error("TransportError while retrieving experiments. Check type mappings in experiment_db_config.json.")
             raise err2
 
-    def update_experiment_status(self, experiment_id, status):
-        body = {"doc": {"status": status}}
+    def update_experiment(self, experiment_id, field, value):
+        body = {"doc": {field: value}}
         try:
             self.es.update(index=self.experiment_index, doc_type=self.experiment_type_name, id=experiment_id, body=body)
         except ConnectionError as err:
@@ -167,8 +167,8 @@ class ElasticSearchDb(Database):
             error("TransportError while updating experiment status. Check type mappings in experiment_db_config.json.")
             raise err2
 
-    def update_target_system_status(self, target_system_id, status):
-        body = {"doc": {"status": status}}
+    def update_target_system(self, target_system_id, field, value):
+        body = {"doc": {field: value}}
         try:
             self.es.update(index=self.target_system_index, doc_type=self.target_system_type_name, id=target_system_id, body=body)
         except ConnectionError as err1:
@@ -189,13 +189,19 @@ class ElasticSearchDb(Database):
             error("TransportError while updating experiment status. Check type mappings in experiment_db_config.json.")
             raise err2
 
-    def save_stage(self, stage_no, knobs, experiment_id):
-        stage_id = self.create_stage_id(experiment_id, str(stage_no))
+    def save_stage(self, experiment_id, step_no, step_name, stage_no, knobs, stage_result=None):
+        stage_id = self.create_stage_id(experiment_id, str(step_no), str(stage_no))
         body = dict()
         body["number"] = stage_no
         body["knobs"] = knobs
         body["createdDate"] = datetime.now().isoformat(' ')
         body["experiment_id"] = experiment_id
+        body["step_no"] = step_no
+        body["step_name"] = step_name
+
+        if stage_result:
+            body["stage_result"] = stage_result
+
         try:
             self.es.index(index=self.stage_index, doc_type=self.stage_type_name, id=stage_id, body=body)
         except ConnectionError as err1:
@@ -205,9 +211,9 @@ class ElasticSearchDb(Database):
             error("TransportError while saving stage. Check type mappings in experiment_db_config.json.")
             raise err2
 
-    def update_stage(self, experiment_id, stage_no, stage_result):
-        stage_id = self.create_stage_id(experiment_id, str(stage_no))
-        body = {"doc": {"stage_result": stage_result}}
+    def update_stage(self, experiment_id, step_no, stage_no, field, value):
+        stage_id = self.create_stage_id(experiment_id, str(step_no), str(stage_no))
+        body = {"doc": {field: value}}
         try:
             self.es.update(index=self.stage_index, doc_type=self.stage_type_name, id=stage_id, body=body)
         except ConnectionError as err1:
@@ -217,16 +223,21 @@ class ElasticSearchDb(Database):
             error("TransportError while updating stage result. Check type mappings in experiment_db_config.json.")
             raise err2
 
-    def get_stages(self, experiment_id):
+    def get_stages(self, experiment_id, step_no):
         query = {
             "query": {
                 "match": {
-                    "experiment_id": str(experiment_id)
+                    "experiment_id": str(experiment_id),
                 }
+            },
+            "post_filter": {
+                "term": {"step_no": str(step_no)}
             }
         }
 
         try:
+            # before retrieving stages, refresh index
+            self.es.indices.refresh(index=self.stage_index)
             res = self.es.search(index=self.stage_index, doc_type=self.stage_type_name, body=query, size=10000, sort='createdDate')
             _ids = [r["_id"] for r in res["hits"]["hits"]]
             _sources = [r["_source"] for r in res["hits"]["hits"]]
@@ -238,41 +249,9 @@ class ElasticSearchDb(Database):
             error("TransportError while retrieving stages. Check type mappings in experiment_db_config.json.")
             raise err2
 
-    def get_stages_after(self, experiment_id, timestamp):
-        query = {
-            "query": {
-                "has_parent": {
-                    "parent_type": "experiment",
-                    "query": {
-                        "match": {
-                            "_id": str(experiment_id)
-                        }
-                    }
-                }
-            },
-            "post_filter": {
-                "range": {
-                    "createdDate": {
-                        "gt": timestamp,
-                        "format": "yyyy-MM-dd HH:mm:ss.SSSSSS"
-                    }
-                }
-            }
-        }
-
-        try:
-            res = self.es.search(index=self.index, doc_type=self.stage_type_name, body=query, sort='createdDate')
-            return [r["_id"] for r in res["hits"]["hits"]], [r["_source"] for r in res["hits"]["hits"]]
-        except ConnectionError as err1:
-            error("ConnectionError while getting stage data. Check connection to elasticsearch.")
-            raise err1
-        except TransportError as err2:
-            error("TransportError while getting stage data. Check type mappings in experiment_db_config.json.")
-            raise err2
-
-    def save_data_point(self, payload, data_point_count, experiment_id, stage_no, secondary_data_provider_index):
-        data_point_id = Database.create_data_point_id(experiment_id, stage_no, data_point_count, secondary_data_provider_index)
-        stage_id = Database.create_stage_id(experiment_id, stage_no)
+    def save_data_point(self, experiment_id, step_no, stage_no, data_point_count, secondary_data_provider_index, payload):
+        data_point_id = Database.create_data_point_id(experiment_id, step_no, stage_no, data_point_count, secondary_data_provider_index)
+        stage_id = Database.create_stage_id(experiment_id, step_no, stage_no)
         body = dict()
         body["payload"] = payload
         body["createdDate"] = datetime.now().isoformat(' ')  # used to replace 'T' with ' '
@@ -286,8 +265,8 @@ class ElasticSearchDb(Database):
             error("TransportError while saving data point. Check type mappings in experiment_db_config.json.")
             raise err2
 
-    def get_data_points(self, experiment_id, stage_no):
-        stage_id = Database.create_stage_id(experiment_id, stage_no)
+    def get_data_points(self, experiment_id, step_no, stage_no):
+        stage_id = Database.create_stage_id(experiment_id, step_no, stage_no)
         query = {
             "query": {
                 "match": {
@@ -296,6 +275,8 @@ class ElasticSearchDb(Database):
             }
         }
         try:
+            # before retrieving data points, refresh index
+            self.es.indices.refresh(index=self.data_point_index)
             # https://stackoverflow.com/questions/9084536/sorting-by-multiple-params-in-pyes-and-elasticsearch
             # sorting is required for proper visualization of data
             res = self.es.search(index=self.data_point_index, body=query, size=10000, sort='createdDate')
@@ -307,8 +288,10 @@ class ElasticSearchDb(Database):
             error("TransportError while retrieving data points. Check type mappings in experiment_db_config.json.")
             raise err2
 
-    def get_aggregation(self, experiment_id, stage_no, aggregation_name, field):
-        stage_id = self.create_stage_id(experiment_id, stage_no)
+    def get_aggregation(self, experiment_id, step_no, stage_no, aggregation_name, field):
+        # before retrieving aggregation(s), refresh index
+        self.es.indices.refresh(index=self.data_point_index)
+        stage_id = self.create_stage_id(experiment_id, step_no, stage_no)
         exact_field_name = "payload" + "." + str(field)
         query = {
             "query": {
@@ -316,7 +299,6 @@ class ElasticSearchDb(Database):
                     "stage_id": str(stage_id)
                 }
             }
-
         }
         query["size"] = 0 # we are not interested in matching data points
 
@@ -345,8 +327,8 @@ class ElasticSearchDb(Database):
     # we are interested in the ratio of given field=value / number of all data that includes this field
     # so, we only return the doc_count here, another query should be issued to get 'count' of all points
     # if we had used res["hits"]["total"] here, it would be wrong because it also includes data from secondary providers
-    def get_count(self, experiment_id, stage_no, field, value):
-        stage_id = self.create_stage_id(experiment_id, stage_no)
+    def get_count(self, experiment_id, step_no, stage_no, field, value):
+        stage_id = self.create_stage_id(experiment_id, step_no, stage_no)
         exact_field_name = "payload" + "." + str(field)
         aggregation_key = "count_" + str(field)
         query = {
@@ -372,8 +354,8 @@ class ElasticSearchDb(Database):
             error("TransportError while retrieving aggregations. Check type mappings for experiments in experiment_db_config.json.")
             raise err2
 
-    def get_data_points_after(self, experiment_id, stage_no, timestamp):
-        stage_id = Database.create_stage_id(experiment_id, stage_no)
+    def get_data_points_after(self, experiment_id, step_no, stage_no, timestamp):
+        stage_id = Database.create_stage_id(experiment_id, step_no, stage_no)
         query = {
             "query": {
                 "match": {
@@ -384,7 +366,7 @@ class ElasticSearchDb(Database):
                 "range": {
                     "createdDate": {
                         "gt": timestamp,
-                        "format": "yyyy-MM-dd HH:mm:ss.SSSSSS"
+                        "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"
                     }
                 }
             }
@@ -414,23 +396,38 @@ class ElasticSearchDb(Database):
             error("TransportError while clearing database. Check type mappings for experiments in experiment_db_config.json.")
             raise err2
 
-    def get_stages_count(self, experiment_id):
-        res = self.es.get(index=self.experiment_index, doc_type=self.experiment_type_name, id=experiment_id, _source=["executionStrategy"])
-        if "stages_count" not in res["_source"]["executionStrategy"]:
-            error("'stages_count' does not exist in experiment strategy with id " + experiment_id)
-            return 0
-        return res["_source"]["executionStrategy"]["stages_count"]
+    def get_stages_count(self, experiment_id, step_no):
+        query = {
+            "query": {
+                "match": {
+                    "experiment_id": str(experiment_id),
+                }
+            },
+            "post_filter": {
+                "term": {"step_no": str(step_no)}
+            }
+        }
 
-    def get_data_for_analysis(self, experiment_id):
+        try:
+            res = self.es.search(index=self.stage_index, doc_type=self.stage_type_name, body=query, size=10000, sort='createdDate')
+            return len(res["hits"]["hits"])
+        except ConnectionError as err1:
+            error("ConnectionError while retrieving stage count. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while retrieving stage count. Check type mappings in experiment_db_config.json.")
+            raise err2
+
+    def get_data_for_analysis(self, experiment_id, step_no):
         data = dict()
         knobs = dict()
-        stages = self.get_stages(experiment_id=experiment_id)
+        stages = self.get_stages(experiment_id=experiment_id, step_no=step_no)
         if len(stages[0]) > 0 and len(stages[1]) > 0:
             stage_ids = stages[0]
             sources = stages[1]
             for idx, stage_id in enumerate(stage_ids):
-                data_points = self.get_data_points(experiment_id=experiment_id, stage_no=idx + 1) # because stages start from 1 whereas idx start from 0
-                if len(data_points) > 1:
+                data_points = self.get_data_points(experiment_id=experiment_id, step_no=step_no, stage_no=idx + 1) # because stages start from 1 whereas idx start from 0
+                if len(data_points) > 0:
                     data[stage_id] = [d for d in data_points]
                     knobs[stage_id] = sources[idx]["knobs"]
             # return value 1 (data): is a key-value pair where key is stage_id and value is array of all data points of that stage,
@@ -439,15 +436,18 @@ class ElasticSearchDb(Database):
         raise Exception("Cannot retrieve stage and data from db, please restart")
 
     # we had to distinguish between anova_result (json of json objects) with regular t_test result (single json object)
-    def save_analysis(self, experiment_id, stage_ids, analysis_name, result=None, anova_result=None):
-        analysis_id = Database.create_analysis_id(experiment_id, stage_ids, analysis_name)
-        print("analysis_id", analysis_id)
+    def save_analysis(self, experiment_id, step_no, analysis_name, knobs=None, result=None, anova_result=None):
+        analysis_id = Database.create_analysis_id(experiment_id, step_no, analysis_name)
         body = dict()
-        body["stage_ids"] = stage_ids
+        body["experiment_id"] = experiment_id
+        body["step_no"] = step_no
         body["name"] = analysis_name
         body["result"] = result
         body["anova_result"] = anova_result
         body["createdDate"] = datetime.now().isoformat(' ')
+
+        if knobs:
+            body["knobs"] = knobs
 
         try:
             self.es.index(index=self.analysis_index, doc_type=self.analysis_type_name, body=body, id=analysis_id)
@@ -458,9 +458,9 @@ class ElasticSearchDb(Database):
             error("TransportError while saving analysis. Check type mappings for analysis in experiment_db_config.json.")
             raise err2
 
-    def get_analysis(self, experiment_id, stage_ids, analysis_name):
+    def get_analysis(self, experiment_id, step_no, analysis_name):
         try:
-            analysis_id = Database.create_analysis_id(experiment_id, stage_ids, analysis_name)
+            analysis_id = Database.create_analysis_id(experiment_id, step_no, analysis_name)
             res = self.es.get(index=self.analysis_index, doc_type=self.analysis_type_name, id=analysis_id)
             return res["_source"]
         except ConnectionError as err1:
@@ -468,4 +468,16 @@ class ElasticSearchDb(Database):
             raise err1
         except TransportError as err2:
             error("TransportError while retrieving analysis. Check type mappings for analysis in experiment_db_config.json.")
+            raise err2
+
+    def update_analysis(self, experiment_id, step_no, analysis_name, field, value):
+        analysis_id = Database.create_analysis_id(experiment_id, step_no, analysis_name)
+        body = {"doc": {field: value}}
+        try:
+            self.es.update(index=self.analysis_index, doc_type=self.analysis_type_name, id=analysis_id, body=body)
+        except ConnectionError as err1:
+            error("ConnectionError while updating stage result. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while updating stage result. Check type mappings in experiment_db_config.json.")
             raise err2

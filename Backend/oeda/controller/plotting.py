@@ -16,29 +16,33 @@ class QQPlotController(Resource):
 
     availableScales = ["normal", "log"]
 
-    def get(self, experiment_id, stage_no, distribution, scale, incoming_data_type_name):
+    def get(self, experiment_id, step_no, stage_no, distribution, scale, incoming_data_type_name):
         try:
+            # required because we store them as number in db, but retrieve as string
+            step_no = int(step_no)
             if str(scale).lower() not in self.availableScales:
                 return {"error": "Provided scale is not supported"}, 404
 
             pts = []
-            # this case corresponds to all stage data
+            # this case corresponds to all stage data of the provided step
             if int(stage_no) == -1:
-                stages_and_data_points = get_all_stage_data(experiment_id=experiment_id)
-                if stages_and_data_points is None:
+                steps_and_stages = get_all_stage_data(experiment_id=experiment_id)
+                if steps_and_stages is None:
                     return {"error": "Data points cannot be retrieved for given experiment and/or stage"}, 404
-                for entity in stages_and_data_points:
-                    entity = json.loads(entity)
-                    if len(entity['values']) == 0:
-                        pass
 
-                    for data_point in entity['values']:
-                        # there might be payload data that does not include the selected data type. filter them out
-                        point = data_point["payload"].get(incoming_data_type_name)
-                        if point:
-                            pts.append(point)
+                for stage_no in steps_and_stages[step_no]:
+                    entity = steps_and_stages[step_no][stage_no]
+                    if 'values' in entity:
+                        if len(entity['values']) == 0:
+                            pass
+
+                        for data_point in entity['values']:
+                            # there might be payload data that does not include the selected data type. filter them out
+                            point = data_point["payload"].get(incoming_data_type_name)
+                            if point:
+                                pts.append(point)
             else:
-                data_points = db().get_data_points(experiment_id=experiment_id, stage_no=stage_no)
+                data_points = db().get_data_points(experiment_id=experiment_id, step_no=step_no, stage_no=stage_no)
                 if data_points is None:
                     return {"error": "Data points cannot be retrieved for given experiment and/or stage"}, 404
                 for data_point in data_points:

@@ -30,6 +30,7 @@ class TargetController(Resource):
             resp.status_code = 200
             return resp
         except Exception as e:
+            print(e)
             tb = traceback.format_exc()
             print(tb)
             return {"error": e.message}, 404
@@ -41,7 +42,7 @@ class TargetController(Resource):
                 return {"message": "target_id should not be null"}, 404
             content = request.get_json()
             status = content["status"]
-            db().update_target_system_status(target_id, status)
+            db().update_target_system(target_system_id=target_id, field="status", value=status)
             resp = jsonify({"message": "Target system status is updated"})
             resp.status_code = 200
             return resp

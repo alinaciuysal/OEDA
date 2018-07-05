@@ -15,33 +15,53 @@ app.use(bodyParser.urlencoded({extended: true}));
  *
  *  Additional random variance can be enabled
  *
- *  TODO: integrate more functions and allow selection.
+ *  TODO: integrate more functions and allow selection?
  *  see: https://en.wikipedia.org/wiki/Test_functions_for_optimization
  */
 
-/** the main config variable */
-var x = 0.0;
-var y = 0.0;
+/** the main config variable(s) */
+global.x = undefined;
+global.y = undefined;
 
 var enableRandom = true;
+
+function initial_fcn(rnd, x, y) {
+    return rnd * ( 0.4 + -1 * (0.3 * (1 - x) * x + y * (2 - y) * 0.3 + x * y / 100));
+}
+
+function three_hump_camel(rnd, x, y) {
+    return rnd * (2 * Math.pow(x, 2) - 1.05 * Math.pow(x, 4) + Math.pow(x, 6) / 6 + x * y + Math.pow(y, 2));
+}
 
 app.get('/', function (req, res) {
     var rnd = 1;
     if (enableRandom) {
         rnd = Math.random()
     }
-    res.send(JSON.stringify({
-        x: x,
-        y: y,
-        result: rnd * ( 0.4 + -1 * (0.3 * (1 - x) * x + y * (2 - y) * 0.3 + x * y / 100))
-    }));
+    console.log("x:" + global.x + " - y:" + global.y);
+
+    if (global.x !== undefined && global.y !== undefined) {
+        res.send(JSON.stringify({
+            x: global.x,
+            y: global.y,
+            result: three_hump_camel(rnd, x, y)
+        }));
+    } else {
+        console.log('x and/or y is not set');
+        res.status(404).send('x and/or y is not set');
+    }
+
 });
 
 app.post('/', function (req, res) {
     if (req.body) {
-        console.log("Got value changes: x:" + req.body.x + " - y:" + req.body.y);
-        x = req.body.x || x;
-        y = req.body.y || y
+        // update retrieved x and/or y
+        if (typeof(req.body.x) !== "undefined") {
+            global.x = parseFloat(req.body.x);
+        }
+        if (typeof(req.body.y) !== "undefined") {
+            global.y = parseFloat(req.body.y);
+        }
     }
     res.send("ok");
 });

@@ -18,6 +18,7 @@ class FactorialAnova(Analysis):
 
     name = "two-way-anova"
 
+    # TODO: refactor Analysis classes because we don't have stage_ids associated with analysis tuple in ES anymore
     def __init__(self, stage_ids, y_key, knob_keys, stages_count):
         super(FactorialAnova, self).__init__(stage_ids, y_key)
         self.knob_keys = knob_keys
@@ -54,25 +55,23 @@ class FactorialAnova(Analysis):
         # dataframe_data["exploration_percentage"] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.2, 0.2]
 
         df = pd.DataFrame(dataframe_data)
-        # print df
-        # print "------------------"
+        print df
+        print "------------------"
 
         formula = self.create_formula()
         # formula = "overhead ~ route_random_sigma * exploration_percentage"
-        # print formula
-        # print "------------------"
+        print formula
+        print "------------------"
 
         data_lm = ols(formula, data=dataframe_data).fit()
-        # print data_lm.summary()
-        # print "------------------"
+        print data_lm.summary()
+        print "------------------"
 
         aov_table = anova_lm(data_lm, typ=2)
-        aov_table_sqr= deepcopy(aov_table)
+        aov_table_sqr = deepcopy(aov_table)
         self.eta_squared(aov_table_sqr)
         self.omega_squared(aov_table_sqr)
-        # with pd.option_context('display.max_rows', self.stages_count, 'display.max_columns', 6, 'max_colwidth', 10000):
-        #     print(aov_table)
-        # print "------------------"
+        # TODO: aov_table = aov_table[aov_table["omega_sq"] > min_effect_size] can also be integrated
 
         # remove same cols, see: https://stackoverflow.com/questions/13411544/delete-column-from-pandas-dataframe-using-del-df-column-name
         columns = ['sum_sq', 'df', 'F', 'PR(>F)']

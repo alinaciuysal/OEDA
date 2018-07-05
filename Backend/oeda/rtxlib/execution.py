@@ -1,5 +1,4 @@
 from oeda.log import *
-from colorama import Fore
 import traceback
 
 def _defaultChangeProvider(variables,wf):
@@ -9,11 +8,7 @@ def _defaultChangeProvider(variables,wf):
 def experimentFunction(wf, exp):
 
     if hasattr(wf, "experimentCounter"):
-        if wf.execution_strategy["type"] == "forever":
-            wf.remaining_time_and_stages['remaining_stages'] = 'Infinite'
-            wf.remaining_time_and_stages['remaining_time'] = 'Infinite'
-        else:
-            wf.remaining_time_and_stages['remaining_stages'] = wf.totalExperiments - wf.experimentCounter
+        wf.remaining_time_and_stages['remaining_stages'] = wf.totalExperiments - wf.experimentCounter
 
     """ executes a given experiment stage """
     start_time = current_milli_time()
@@ -29,8 +24,6 @@ def experimentFunction(wf, exp):
     # start
     info(">")
     info("> KnobValues     | " + str(exp["knobs"]))
-    # create new state
-    # exp["state"] = wf.state_initializer(dict(), wf)
 
     try:
         wf.change_provider["instance"].applyChange(change_creator(exp["knobs"], wf))
@@ -45,7 +38,7 @@ def experimentFunction(wf, exp):
             new_data = wf.primary_data_provider["instance"].returnData()
             if new_data is not None:
                 i += 1
-                # NEW - we call back to oeda and give us infos there
+                # we callback to oeda and give us info there
                 wf.run_oeda_callback({"experiment": exp,
                                       "status": "IGNORING_SAMPLES",
                                       "index": i,
@@ -118,13 +111,9 @@ def experimentFunction(wf, exp):
         wf.experimentCounter = 1
 
     duration = current_milli_time() - start_time
-    if wf.execution_strategy["type"] != "forever":
-        wf.remaining_time_and_stages['remaining_stages'] = wf.totalExperiments - wf.experimentCounter
-        wf.remaining_time_and_stages['remaining_time'] = str(wf.remaining_time_and_stages['remaining_stages'] * duration / 1000)
+    wf.remaining_time_and_stages['remaining_stages'] = wf.totalExperiments - wf.experimentCounter
+    wf.remaining_time_and_stages['remaining_time'] = str(wf.remaining_time_and_stages['remaining_stages'] * duration / 1000)
 
-    wf.run_oeda_callback({"experiment": exp, "status": "EXPERIMENT_STAGE_DONE",
-                          "experiment_counter": wf.experimentCounter, "total_experiments": wf.totalExperiments,
-                          "remaining_time_and_stages": wf.remaining_time_and_stages})
     # do not show stats for forever strategy
     if wf.totalExperiments > 0:
         info("> Statistics     | " + str(wf.experimentCounter) + "/" + str(wf.totalExperiments)

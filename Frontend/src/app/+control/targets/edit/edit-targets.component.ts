@@ -6,6 +6,7 @@ import {ActivatedRoute, Params, Router} from "@angular/router";
 import {UUID} from "angular2-uuid";
 import {NotificationsService} from "angular2-notifications/dist";
 import * as _ from "lodash.clonedeep";
+import * as lodash from "lodash";
 import {isNullOrUndefined} from "util";
 
 @Component({
@@ -32,34 +33,8 @@ export class EditTargetsComponent implements OnInit {
   configsAvailable = false;
   targetCreatedFromConfig: boolean = false;
 
-  public aggregateFunctionsMetric: any;
-  public aggregateFunctionsBoolean: any;
-
   /* tslint:disable */
   ngOnInit(): void {
-
-    this.aggregateFunctionsMetric = [
-      {key:'avg',label:'Average'},
-      {key:'min',label:'Min'},
-      {key:'max',label:'Max'},
-      {key:'count',label:'Count'},
-      {key:'sum',label:'Sum'},
-      {key:'percentiles-1', label:'1st Percentile'},
-      {key:'percentiles-5', label:'5th Percentile'},
-      {key:'percentiles-25', label:'25th Percentile'},
-      {key:'percentiles-50', label:'50th Percentile (median)'},
-      {key:'percentiles-75', label:'75th Percentile'},
-      {key:'percentiles-95', label:'95th Percentile'},
-      {key:'percentiles-99', label:'99th Percentile'},
-      {key:'sum_of_squares', label:'Sum of Squares'},
-      {key:'variance', label:'Variance'},
-      {key:'std_deviation', label:'Std. Deviation'}
-    ];
-    this.aggregateFunctionsBoolean = [
-      {key:'ratio-True',label:'True Ratio'},
-      {key:'ratio-False',label:'False Ratio'}
-    ];
-
     const ctrl = this;
     this.layout.setHeader("Target System", "");
     this.route.params.subscribe((params: Params) => {
@@ -80,15 +55,18 @@ export class EditTargetsComponent implements OnInit {
         this.originalTarget = _(this.target);
 
         // retrieve config json object via the api provided at localhost:5000/api/config/crowdnav
-        this.api.getConfigFromAPI("/crowdnav").subscribe((config) => {
-            if (!isNullOrUndefined(config)) {
-
-              // open the modal in frontend
-              this.availableConfigurations.push(config);
-              // this.traverse_json_object(config);
-              this.configsAvailable = true;
-              document.getElementById("openModalButton").click();
+        this.api.getConfigFromAPI().subscribe((configs) => {
+            for (let idx in configs) {
+              if (configs.hasOwnProperty(idx)) {
+                console.log(configs);
+                if (!isNullOrUndefined(configs[idx])) {
+                  // open the modal in UI
+                  this.availableConfigurations.push(configs[idx]);
+                  this.configsAvailable = true;
+                }
+              }
             }
+            document.getElementById("openModalButton").click();
           }
         );
 
@@ -120,6 +98,7 @@ export class EditTargetsComponent implements OnInit {
       "secondaryDataProviders": [],
       "changeProvider": {
         "type": "",
+        "changesApplicable": false
       },
       "name": "",
       "status": "READY",
@@ -184,9 +163,7 @@ export class EditTargetsComponent implements OnInit {
         this.target.incomingDataTypes = this.target.incomingDataTypes.filter(dataType => dataType.name !== dataProvider.incomingDataTypes[i].name);
       }
     }
-
     this.target.dataProviders.splice(index, 1);
-
   }
 
   addIncomingDataType() {
@@ -197,18 +174,6 @@ export class EditTargetsComponent implements OnInit {
     if (this.target.incomingDataTypes.length == 1) {
       this.target.incomingDataTypes[0]["is_default"] = true;
     }
-  }
-
-  // if user adds a data type via configuration modal, then event is an object of SimpleEvent etc.
-  // but if he/she just clicks the checkbox, it is either true or false
-  data_type_checkbox_clicked(event, data_type_index) {
-    if (typeof event == "boolean") {
-      let data_type = this.target.incomingDataTypes[data_type_index];
-      data_type["is_default"] = !data_type["is_default"];
-      // main reason for this function is to refresh defaultAggregationFcn modal upon click
-      data_type["defaultAggregationFcn"] = null;
-    }
-
   }
 
   // removes incoming data type from target system as well as from data provider if it does not contain any variables after deletion
@@ -277,13 +242,10 @@ export class EditTargetsComponent implements OnInit {
   saveChanges() {
     const ctrl = this;
     if (!ctrl.hasErrors()) {
-
-      if (!this.targetCreatedFromConfig) {
-        // for this case, all of the variables provided by the user will be taken as defaultVariables
-        this.target.defaultVariables = _(this.target.changeableVariables);
-      }
-
+      this.target.defaultVariables = _(this.target.changeableVariables);
       ctrl.target.name = ctrl.target.name.trim();
+      console.log(ctrl.target);
+
       // new ts will be created in first case
       if (ctrl.router.url.indexOf("/create") !== -1) {
         // check for validity of target system
@@ -321,7 +283,6 @@ export class EditTargetsComponent implements OnInit {
       }
     }
   }
-
 
   hasErrors(): boolean {
     let nr_of_selected_primary_data_providers = 0;
@@ -423,24 +384,6 @@ export class EditTargetsComponent implements OnInit {
       }
     }
 
-    // first check number of default incoming data types
-    let nr_of_default_data_types = 0;
-    for (let i = 0; i < this.target.incomingDataTypes.length; i++) {
-      if (this.target.incomingDataTypes[i].is_default == true) {
-        nr_of_default_data_types += 1;
-      }
-    }
-
-    if (nr_of_default_data_types == 0) {
-      this.errorButtonLabel = "Provide one default data type for analysis";
-      return true;
-    }
-
-    if (nr_of_default_data_types > 1) {
-      this.errorButtonLabel = "Only one default data type is allowed for analysis";
-      return true;
-    }
-
     // now check attributes of incoming data types
     for (let i = 0; i < this.target.incomingDataTypes.length; i++) {
       if (this.target.incomingDataTypes[i].name == null
@@ -451,12 +394,6 @@ export class EditTargetsComponent implements OnInit {
           || isNullOrUndefined(this.target.incomingDataTypes[i].criteria)) {
         this.errorButtonLabel = "Provide valid inputs for incoming data type(s)";
         return true;
-      }
-      if (this.target.incomingDataTypes[i].is_default == true) {
-        if (isNullOrUndefined(this.target.incomingDataTypes[i].defaultAggregationFcn)) {
-          this.errorButtonLabel = "Provide default aggregation function for " + this.target.incomingDataTypes[i].name + " data type";
-          return true;
-        }
       }
     }
 
@@ -496,15 +433,6 @@ export class EditTargetsComponent implements OnInit {
         }
       }
     }
-    if (this.target.changeProvider.type == null || this.target.changeProvider.type === "" ||
-        this.target.changeProvider.type == null || this.target.changeProvider.type === "" ||
-        this.target.changeProvider.type == null || this.target.changeProvider.type === "" ||
-        this.target.changeProvider.type == null || this.target.changeProvider.type === "" ||
-        this.target.changeProvider.type == null || this.target.changeProvider.type === "" ||
-        this.target.changeProvider.type == null || this.target.changeProvider.type === "") {
-      this.errorButtonLabel = "Provide valid inputs for change provider";
-      return true;
-    }
 
     if (this.target.name == null || this.target.name === "") {
       this.errorButtonLabel = "Provide valid target system name";
@@ -518,6 +446,16 @@ export class EditTargetsComponent implements OnInit {
 
     if (this.target.incomingDataTypes.length === 0) {
       this.errorButtonLabel = "Provide at least one incoming data type";
+      return true;
+    }
+
+    if (isNullOrUndefined(this.target.changeProvider.changesApplicable)) {
+      this.errorButtonLabel = "Provide True or False for applicability of changes to target system on the run-time";
+      return true;
+    }
+
+    if (this.target.changeProvider.type == "") {
+      this.errorButtonLabel = "Provide a change provider type";
       return true;
     }
 
@@ -536,6 +474,7 @@ export class EditTargetsComponent implements OnInit {
     this.targetCreatedFromConfig = true;
     this.target['name'] = this.selectedConfiguration['name'];
     this.target['description'] = this.selectedConfiguration['description'];
+    this.target.changeProvider['changesApplicable'] = this.selectedConfiguration['changesApplicable'];
 
     // kafkaHost attribute is retrieved from api
     if (this.selectedConfiguration.hasOwnProperty("kafkaHost")) {
@@ -543,10 +482,21 @@ export class EditTargetsComponent implements OnInit {
       this.target.changeProvider['type'] = 'kafka_producer';
       this.target.changeProvider['topic'] = this.selectedConfiguration['kafkaCommandsTopic'];
       this.target.changeProvider['serializer'] = 'JSON';
+    } else if (this.selectedConfiguration.hasOwnProperty("url")) {
+      this.target.changeProvider['url'] = this.selectedConfiguration['url'];
+      this.target.changeProvider['type'] = 'http_request';
+      this.target.changeProvider['serializer'] = 'JSON';
     }
 
-    // push each knob into defaultVariables array if ts is created from config
+    // push each knob into defaultVariables array
     for (let knob of this.selectedConfiguration.knobs) {
+      // try to guess default value of target system if not provided via api
+      // https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript
+      if(isNullOrUndefined(knob["default"])) {
+        let randomDefault = lodash.random(knob["min"], knob["max"]);
+        // knob["default"] = randomDefault.toFixed(2);
+        knob["default"] = randomDefault;
+      }
       this.target.defaultVariables.push(_(knob));
     }
   }

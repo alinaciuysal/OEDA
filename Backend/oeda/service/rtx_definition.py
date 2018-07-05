@@ -6,7 +6,6 @@ from oeda.utilities.MathUtility import take_inverse
 class RTXDefinition:
 
     name = None
-    folder = None
     _oeda_experiment = None
     _oeda_target = None
     _oeda_callback = None
@@ -15,10 +14,12 @@ class RTXDefinition:
     secondary_data_providers = []
     change_provider = None
     id = None
-    stage_counter = None
+    stage_counter = None # for each different step, this stage counter is reset to 1
     all_knobs = None
     remaining_time_and_stages = None
     incoming_data_types = None
+    step_no = None
+    step_name = None
     considered_data_types = []
 
     def __init__(self, oeda_experiment, oeda_target, oeda_callback, oeda_stop_request):
@@ -48,37 +49,24 @@ class RTXDefinition:
                 self.secondary_data_providers.append(dp)
 
         execution_strategy = oeda_experiment["executionStrategy"]
-        knobs = parse_knobs(execution_strategy["type"], execution_strategy["knobs"])
-        execution_strategy["knobs"] = knobs
-
         self.execution_strategy = execution_strategy
-        self.state_initializer = RTXDefinition.state_initializer
         self.evaluator = RTXDefinition.evaluator
-        self.folder = None
         self.setup_stage = RTXDefinition.setup_stage
-
-        # if execution_strategy["type"] == "step_explorer" or execution_strategy["type"] == "sequential":
-        #     knob_values = get_knob_values(execution_strategy["type"], execution_strategy["knobs"])
-        #     knob_keys = get_knob_keys(execution_strategy["type"], execution_strategy["knobs"])
-        #     self.all_knobs = get_all_knobs(knob_keys, knob_values)
+        self.resetExperimentCounter = RTXDefinition.resetExperimentCounter
 
     def run_oeda_callback(self, dictionary):
         dictionary['stage_counter'] = self.stage_counter
+        dictionary['step_no'] = self.step_no
+        dictionary['step_name'] = self.step_name
         self._oeda_callback(dictionary, self.id)
 
     """ saves the data provided by the primary data provider
         new_data is sth like {'overhead' : 1.22253, 'minimalCosts': '200.2522', ...} but count is same for all keys """
     @staticmethod
     def primary_data_reducer(new_data, wf):
-        db().save_data_point(new_data, wf.primary_data_counter, wf.id, wf.stage_counter, None)
+        db().save_data_point(experiment_id=wf.id, step_no=wf.step_no, stage_no=wf.stage_counter,
+                             data_point_count=wf.primary_data_counter, secondary_data_provider_index=None, payload=new_data)
         wf.primary_data_counter += 1
-        # for index, (data_type_name, data_type_value) in enumerate(new_data.items()):
-        #     data_type_count = str(data_type_name) + "_cnt"
-        #     cnt = state.get(data_type_count)
-        #     if index == 0:  # perform save operation only once
-        #         db().save_data_point(new_data, cnt, wf.id, wf.stage_counter, None)
-        #     state[str(data_type_name)] = (state[str(data_type_name)] * cnt + data_type_value) / (cnt + 1)
-        #     state[data_type_count] += 1
         if wf._oeda_stop_request.isSet():
             raise RuntimeError("Experiment interrupted from OEDA while reducing primary data.")
         return wf
@@ -90,75 +78,48 @@ class RTXDefinition:
         declare another secondary data provider for this purpose """
     @staticmethod
     def secondary_data_reducer(new_data, wf, idx):
-        db().save_data_point(new_data, wf.secondary_data_counter, wf.id, wf.stage_counter, idx)
+        db().save_data_point(experiment_id=wf.id, step_no=wf.step_no, stage_no=wf.stage_counter,
+                             data_point_count=wf.secondary_data_counter, secondary_data_provider_index=idx, payload=new_data)
         wf.secondary_data_counter += 1
-        # for index, (data_type_name, data_type_value) in enumerate(new_data.items()):
-        #     data_type_count = str(data_type_name) + "_cnt"
-        #     cnt = state.get(data_type_count)
-        #     if index == 0:  # perform save operation only once by passing index of data provider(idx)
-        #         db().save_data_point(new_data, cnt, wf.id, wf.stage_counter, idx)
-        #     state[data_type_count] += 1
-        # return state
         return wf
 
     @staticmethod
-    def state_initializer(state, wf):
-
-        for data_type in wf.primary_data_provider["incomingDataTypes"]:
-            data_type_name = str(data_type["name"])
-            data_type_count = data_type_name + "_cnt"
-            state[data_type_name] = 0
-            state[data_type_count] = 0
-
-        if len(wf.secondary_data_providers) > 0:
-            # initialize all secondary data types, not only the hard-coded ones; as well as their counts to 0
-            for dp in wf.secondary_data_providers:
-                for data_type in dp["incomingDataTypes"]:
-                    data_type_name = str(data_type["name"])
-                    data_type_count = data_type_name + "_cnt"
-                    state[data_type_name] = 0
-                    state[data_type_count] = 0
-
-        return state
-
-    @staticmethod
-    def setup_stage(wf, stage_knob):
-        db().save_stage(wf.stage_counter, stage_knob, wf.id)
+    def setup_stage(wf, knobs):
+        db().save_stage(experiment_id=wf.id, step_no=wf.step_no, step_name=wf.step_name, stage_no=wf.stage_counter, knobs=knobs)
 
     @staticmethod
     def calculate_result(wf):
-        weighted_sum = 0
-        for data_type in wf.considered_data_types:
-            data_type_name = data_type["name"]
-            data_type_aggregate_function = str(data_type['aggregateFunction'])
-            aggs = db().get_aggregation(wf.id, wf.stage_counter, "stats", data_type_name)
-            if data_type["scale"] == "Boolean":
-                # now data_type_aggregate_function is either count-True or count-False
-                field_value = data_type_aggregate_function.split("-")[1] # fetch value
-                field_value = 1 if field_value == 'True' else 0 # because we store them in binary, not in True/False
-                count = db().get_count(wf.id, wf.stage_counter, data_type_name, field_value)
-                total = db().get_aggregation(wf.id, wf.stage_counter, "stats", data_type_name)["count"]
-                value = float(count) / total
+        data_type = wf.considered_data_types[0]
+        data_type_name = data_type["name"]
+        data_type_aggregate_function = str(data_type['aggregateFunction'])
+        if data_type["scale"] == "Boolean":
+            # now data_type_aggregate_function is either count-True or count-False
+            field_value = data_type_aggregate_function.split("-")[1] # fetch value
+            field_value = 1 if field_value == 'True' else 0 # because we store them in binary, not in True/False
+            count = db().get_count(wf.id, wf.stage_counter, data_type_name, field_value)
+            total = db().get_aggregation(wf.id, wf.step_no, wf.stage_counter, "stats", data_type_name)["count"]
+            value = float(count) / total
+        else:
+            if 'percentiles' in data_type_aggregate_function:
+                # we have percentiles-25, percentiles-50 etc and parse it to use percentiles as outer aggregate_function
+                aggregate_function, percentile_number = data_type_aggregate_function.split("-")
+                values = db().get_aggregation(wf.id, wf.step_no, wf.stage_counter, aggregate_function, data_type_name)
+                value = values[str(float(percentile_number))]
             else:
-                if 'percentiles' in data_type_aggregate_function:
-                    # we have percentiles-25, percentiles-50 etc and parse it to use percentiles as outer aggregate_function
-                    aggregate_function, percentile_number = data_type_aggregate_function.split("-")
-                    values = db().get_aggregation(wf.id, wf.stage_counter, aggregate_function, data_type_name)
-                    value = values[str(float(percentile_number))]
-                else:
-                    aggregate_function = "stats"
-                    if data_type_aggregate_function in ['sum_of_squares', 'variance', 'std_deviation']:
-                        aggregate_function = "extended_stats"
-                    values = db().get_aggregation(wf.id, wf.stage_counter, aggregate_function, data_type_name)
-                    value = values[data_type_aggregate_function] # retrieve exact value from response
-            if value is not None and isnan(float(value)) is False:
-                # maximization criteria before calculating the result
-                if data_type["criteria"] == "Maximize":
-                    value = take_inverse(value)
-                weighted_sum += value * float(data_type["weight"]) / 100
-            info("data_type_name: " + data_type_name + " value: " + str(value) + " weight: " + str(data_type["weight"]) + " weighted_sum: " + str(weighted_sum))
-        result = weighted_sum
-        return result
+                aggregate_function = "stats"
+                if data_type_aggregate_function in ['sum_of_squares', 'variance', 'std_deviation']:
+                    aggregate_function = "extended_stats"
+                values = db().get_aggregation(wf.id, wf.step_no, wf.stage_counter, aggregate_function, data_type_name)
+                value = values[data_type_aggregate_function] # retrieve exact value from response
+        if value is not None and isnan(float(value)) is False:
+            # maximization criteria before calculating the result
+            if data_type["criteria"] == "Maximize":
+                value = take_inverse(value)
+            info("data_type_name: " + data_type_name + " value: " + str(value))
+            return value
+        else:
+            error("data_type_name: " + data_type_name + " value: 0")
+            return 0
 
     @staticmethod
     def evaluator(wf):
@@ -166,9 +127,14 @@ class RTXDefinition:
         result = RTXDefinition.calculate_result(wf)
         info("---------------- result")
         info(result)
-        db().update_stage(wf.id, wf.stage_counter, result)
-        wf.stage_counter += 1 # this must be done after all calculations
+        db().update_stage(experiment_id=wf.id, step_no=wf.step_no, stage_no=wf.stage_counter, field="stage_result", value=result)
+        wf.stage_counter += 1 # this must be done after all calculations of a single stage
         return result
+
+    @staticmethod
+    def resetExperimentCounter(wf):
+        if hasattr(wf, "experimentCounter"):
+            delattr(wf, "experimentCounter")
 
 
 def get_knob_values(strategy_type, knobs):
@@ -197,9 +163,6 @@ def get_knob_values(strategy_type, knobs):
             parameters_values += [parameter_values]
         return reduce(lambda list1, list2: [x + y for x in list1 for y in list2], parameters_values)
 
-    if strategy_type == "random":
-        return [config.values() for config in knobs]
-
 
 def get_knob_keys(strategy_type, knobs):
 
@@ -209,9 +172,6 @@ def get_knob_keys(strategy_type, knobs):
 
     if strategy_type == "step_explorer":
         return knobs.keys()
-
-    if strategy_type == "random":
-        return knobs[0].keys()
 
 
 def get_all_knobs(knob_keys, knob_values):
@@ -224,40 +184,3 @@ def get_all_knobs(knob_keys, knob_values):
             index += 1
         all_knobs.append(knobs)
     return all_knobs
-
-
-def parse_knobs(strategy_type, knobs):
-    print("KNOBS", knobs)
-    if strategy_type == 'step_explorer':
-        new_knobs = {}
-        for knobArr in knobs:
-            # there is only one knob in knobArr for step str.
-            knob = knobArr[0]
-            new_knobs[knob["name"]] = ([knob["min"], knob["max"]], knob["step"])
-        return new_knobs
-    elif strategy_type == 'sequential':
-        new_knobs = []
-        for knobArr in knobs:
-            # knob with a single value
-            if len(knobArr) == 1:
-                new_knob = {}
-                new_knob[knobArr[0]["name"]] = knobArr[0]["target"]
-                new_knobs.append(new_knob)
-            else:
-                new_knob = {}
-                # knob with different keys & values
-                for knob in knobArr:
-                    new_knob[knob["name"]] = knob["target"]
-                new_knobs.append(new_knob)
-        return new_knobs
-    else:
-        # case for no_analysis or bayesian_opt
-        new_knobs = {}
-        for knobArr in knobs:
-            # there is only one knob in knobArr for this case as user can't add them as configurations
-            knob = knobArr[0]
-            new_knobs[knob["name"]] = [knob["min"], knob["max"]]
-        print(new_knobs)
-        return new_knobs
-
-

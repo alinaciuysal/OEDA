@@ -132,7 +132,7 @@ export class IncomingDataTypesAnalysisComponent {
       }
     }
 
-    // propogate changes to parent component if there's at least one selected data type
+    // propagate changes to parent component if there's at least one selected data type
     for (let i = 0; i < this.targetSystem.incomingDataTypes.length; i++) {
       let data_type = this.targetSystem.incomingDataTypes[i];
       if (data_type["is_considered"] == true) {

@@ -30,20 +30,20 @@ export class OEDAApiService extends RESTService {
     return this.doGETPublicRequest("/running_experiment_results/" + experiment_id + "/" + timestamp)
   }
 
-  public loadAvailableStagesWithExperimentId(experiment_id: string): Observable<any> {
-    return this.doGETPublicRequest("/stages/" + experiment_id)
+  public loadAvailableStepsAndStagesWithExperimentId(experiment_id: string): Observable<any> {
+    return this.doGETPublicRequest("/steps/" + experiment_id)
   }
 
   public getOedaCallback(experiment_id: string): Observable<any> {
     return this.doGETPublicRequest("/running_experiment_results/oeda_callback/" + experiment_id)
   }
 
-  public getQQPlot(experiment_id: string, stage_no: string, distribution: string, scale: string, incoming_data_type_name: string): Observable<any> {
-    return this.doGETPublicRequest("/qqPlot/" + experiment_id + "/" + stage_no + "/" + distribution + "/" + scale + "/" + incoming_data_type_name);
+  public getQQPlot(experiment_id: string, step_no: any, stage_no: string, distribution: string, scale: string, incoming_data_type_name: string): Observable<any> {
+    return this.doGETPublicRequest("/qqPlot/" + experiment_id + "/" + step_no + "/" + stage_no + "/" + distribution + "/" + scale + "/" + incoming_data_type_name);
   }
 
-  public getConfigFromAPI(url: string): Observable<any> {
-    return this.doGETPublicRequestForConfig(url)
+  public getConfigFromAPI(): Observable<any> {
+    return this.doGETPublicRequestForConfig()
   }
 
   public saveExperiment(experiment: Experiment): Observable<any> {
@@ -79,8 +79,8 @@ export class OEDAApiService extends RESTService {
     return this.doPOSTPublicRequest("/auth/register", user);
   }
 
-  public getAnalysis(experiment: Experiment): Observable<any> {
-    return this.doPOSTPublicRequest("/analysis/" + experiment.id, experiment);
+  public getAnalysis(experiment: Experiment, step_no: any, analysis_name: string): Observable<any> {
+    return this.doPOSTPublicRequest("/analysis/" + experiment.id + "/" + step_no + "/" + analysis_name, experiment);
   }
 
   // remove for production
@@ -99,6 +99,7 @@ export interface Experiment {
   executionStrategy: ExecutionStrategy,
   considered_data_types: object[],
   analysis: any
+  numberOfSteps: number
 }
 
 export interface StageEntity {
@@ -106,6 +107,12 @@ export interface StageEntity {
   values: object[],
   knobs: any,
   stage_result: number
+}
+
+export interface StepEntity {
+  step_no: string,
+  stages: object[],
+  step_name: string
 }
 
 
@@ -128,7 +135,6 @@ export interface ExecutionStrategy {
   sample_size: number,
   knobs: any,
   stages_count: number,
-  optimizer_iterations_in_design: number,
   optimizer_iterations: number,
   acquisition_method: any
 }
@@ -144,6 +150,8 @@ export interface OedaCallbackEntity {
   stage_counter: number,
   current_knob: any,
   remaining_time_and_stages: any
+  step_no: number,
+  step_name: string
 }
 
 export interface Configuration {

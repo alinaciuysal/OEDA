@@ -1,7 +1,15 @@
 import {NotificationsService} from "angular2-notifications";
 import {LoggerService} from "../modules/helper/logger.service";
 import {Injectable} from "@angular/core";
-import {StageEntity, Experiment, OedaCallbackEntity, UserEntity, Target, ExecutionStrategy} from "../modules/api/oeda-api.service";
+import {
+  StageEntity,
+  Experiment,
+  OedaCallbackEntity,
+  UserEntity,
+  Target,
+  ExecutionStrategy,
+  StepEntity
+} from "../modules/api/oeda-api.service";
 
 import {isNullOrUndefined} from "util";
 import {UUID} from "angular2-uuid";
@@ -12,8 +20,8 @@ export class EntityService {
 
   private decimal_places: number;
 
-  constructor(public notify: NotificationsService, public log: LoggerService) {
-    this.decimal_places = 3;
+  constructor (public notify: NotificationsService, public log: LoggerService) {
+    this.decimal_places = 2;
   }
 
   /** returns data of the selected stage from all_data structure */
@@ -29,15 +37,11 @@ export class EntityService {
   }
 
   /** parses single stage data with given attributes & scale, and returns values in array */
-  public process_single_stage_data(single_stage_object, xAttribute, yAttribute, scale, incoming_data_type_name, called_for_successful_experiment): Array<number> {
+  public process_single_stage_data(single_stage_object, xAttribute, yAttribute, scale, incoming_data_type_name): Array<number> {
     const ctrl = this;
     try {
       if (single_stage_object !== undefined) {
         const processedData = [];
-        // Parsing string into json should only be done here.
-        // if (called_for_successful_experiment) {
-        //   single_stage_object = JSON.parse(single_stage_object);
-        // }
         single_stage_object.values.forEach(function(data_point) {
           // filter out points that are retrieved from other data providers, o/w they will be undefined
           if (!isNullOrUndefined(data_point["payload"][incoming_data_type_name])){
@@ -81,15 +85,15 @@ export class EntityService {
     }
   }
 
-  /** stage object contains more than one stages here */
-  public process_all_stage_data(all_stage_object, xAttribute, yAttribute, scale, incoming_data_type_name, called_for_successful_experiment): Array<number> {
+  /** all_stage_object can contain more than one stages here */
+  public process_all_stage_data(all_stage_object, xAttribute, yAttribute, scale, incoming_data_type_name): Array<number> {
     const ctrl = this;
     try {
       if (all_stage_object !== undefined) {
         const processedData = [];
 
         all_stage_object.forEach(function(single_stage_object) {
-          const data_array = ctrl.process_single_stage_data(single_stage_object, xAttribute, yAttribute, scale, incoming_data_type_name, called_for_successful_experiment);
+          const data_array = ctrl.process_single_stage_data(single_stage_object, xAttribute, yAttribute, scale, incoming_data_type_name);
           data_array.forEach(function(data_value){
             processedData.push(data_value);
           });
@@ -97,6 +101,30 @@ export class EntityService {
         return processedData;
       } else {
         this.notify.error("Error", "Failed to process all stage data");
+      }
+    } catch (err) {
+      this.notify.error("Error", err.message);
+      throw err;
+    }
+  }
+
+  /** data structure that is used for running and successful experiments are different
+   * we pass key (step_no) - value (stages) pairs to this fcn from running exp. page to parse all data of all stages of single step*/
+  public process_stages(stages, xAttribute, yAttribute, scale, incoming_data_type_name): Array<number> {
+    const ctrl = this;
+    try {
+      if (stages !== undefined) {
+        let processedData = [];
+        stages.forEach(function(single_stage_object) {
+          // iterates each stage but not All Stages tuple, it's just for displaying purposes
+          if (Number(single_stage_object.number) !== -1) {
+            const data_array = ctrl.process_single_stage_data(single_stage_object, xAttribute, yAttribute, scale, incoming_data_type_name);
+            processedData = processedData.concat(data_array);
+          }
+        });
+        return processedData;
+      } else {
+        this.notify.error("Error", "Failed to process all stage data for running experiment");
       }
     } catch (err) {
       this.notify.error("Error", err.message);
@@ -120,28 +148,40 @@ export class EntityService {
   }
 
   /** parses static response object returned from server, creates new stage-point tuple(s) and pushes them to the all_data (array of json strings) */
-  public process_response_for_successful_experiment(response, all_data): StageEntity[] {
-    if (isNullOrUndefined(response)) {
+  public process_response_for_successful_experiment(steps_and_stages, step_no, all_data): StageEntity[] {
+    if (isNullOrUndefined(steps_and_stages)) {
       this.notify.error("Error", "Cannot retrieve data from DB, please try again");
       return;
     }
 
-    // we can retrieve more than one array of stages and data points
-    for (const index in response) {
-      if (response.hasOwnProperty(index)) {
-        const parsed_json_object = JSON.parse(response[index]);
-        // distribute data points to empty bins
-        const new_entity = this.create_stage_entity();
-        new_entity.number = parsed_json_object['number'].toString();
-        new_entity.values = parsed_json_object['values'];
-        new_entity.knobs = parsed_json_object['knobs'];
-        // important assumption here: we retrieve stages and data points in a sorted manner with respect to created field
-        // thus, pushed new_entity will have a key of its "number" with this assumption
-        // e.g. [ 0: {number: 1, values: ..., knobs: [...]}, 1: {number: 2, values: ..., knobs: [...] }...]
-        all_data.push(new_entity);
+    // we can retrieve more than one step and multiple stages
+    for (const step_number in steps_and_stages) {
+      if (steps_and_stages.hasOwnProperty(step_number)) {
+        // we need to filter out the data that is specifically requested for the given step_no
+        if (step_number == step_no) {
+          for (const stage_index in steps_and_stages[step_number]) {
+            if (steps_and_stages[step_number].hasOwnProperty(stage_index)) {
+              let stage_object = steps_and_stages[step_number][stage_index];
+              if (!this.isEmptyObject(stage_object)) {
+                // distribute data points to empty bins
+                const new_entity = this.create_stage_entity();
+                new_entity.number = stage_object['number'].toString();
+                new_entity.values = stage_object['values'];
+                new_entity.knobs = stage_object['knobs'];
+                new_entity.stage_result = stage_object['stage_result'];
+
+                // important assumption here: we retrieve steps, stages and data points in a sorted manner w.r.t. createdDate field
+                // so all_data is sth like:
+                // [ 0: {number: 1, values: ..., knobs: [...]}, 1: {number: 2, values: ..., knobs: [...] }...]
+                all_data.push(new_entity);
+              }
+            }
+          }
+        }
       }
     }
     return all_data;
+
   }
 
   public create_experiment(execution_strategy): Experiment {
@@ -154,7 +194,8 @@ export class EntityService {
         "executionStrategy": execution_strategy,
         "changeableVariables": [], // used while creating an experiment
         "considered_data_types": [],
-        "analysis": {}
+        "analysis": {},
+        "numberOfSteps": 0
       }
   }
 
@@ -182,12 +223,11 @@ export class EntityService {
   public create_execution_strategy(): ExecutionStrategy {
     return {
       type: "",
-      sample_size: 40,
+      sample_size: 15,
       knobs: [],
       stages_count: 0,
       acquisition_method: "",
       optimizer_iterations: 10,
-      optimizer_iterations_in_design: 0
     }
   }
 
@@ -202,7 +242,9 @@ export class EntityService {
       total_experiments: 0,
       stage_counter: null,
       current_knob: new Map<string, number>(),
-      remaining_time_and_stages: {}
+      remaining_time_and_stages: {},
+      step_name: "",
+      step_no: 0
     };
   }
 
@@ -223,6 +265,14 @@ export class EntityService {
     }
   }
 
+  public create_step_entity(): StepEntity {
+    return {
+      step_no: "",
+      stages: [],
+      step_name: ""
+    }
+  }
+
   /** we do not allow user to take Log of Boolean (Nominal) data */
   public scale_allowed(user_selected_scale, data_scale) {
     if (user_selected_scale === "Log" && data_scale === "Boolean") {
@@ -240,6 +290,7 @@ export class EntityService {
         values.forEach(function(tuple) {
           if(tuple.payload.hasOwnProperty(incoming_data_type.name) && !retrieved) {
             retrieved = true;
+            return retrieved;
           }
         });
       }
@@ -282,30 +333,36 @@ export class EntityService {
 
   /**
    * for experiments, we pass string representation to scatter plots & histograms
-   * @param {selected_stage} JSON representation of selected stage object
-   * @returns {string}
+   * @param selected_stage = JSON representation of selected stage object
+   * @returns string
    */
   public get_stage_details(selected_stage: any): string {
     let details: string = "Stage: ";
-    details += selected_stage["number"] + " ";
+    details += selected_stage["number"] + " \n";
     let json_str = JSON.stringify(selected_stage["knobs"]);
     json_str = json_str.replace(/["']/g, "");
-    json_str = json_str.replace(",", ", ");
-    json_str = json_str.replace("{", "[");
-    json_str = json_str.replace("}", "]");
+    // json_str = json_str.replace(",", ", ");
+    // json_str = json_str.replace("{", "[");
+    // json_str = json_str.replace("}", "]");
     details += json_str;
     return details;
   }
 
   /**
-   * iterates given knob object and round their values to given decimal number
+   * iterates given object and round their values to given decimal number
    */
-  public round_knob_values(iterable_knob_object: any, decimal: number) {
-    Object.getOwnPropertyNames(iterable_knob_object).forEach(key => {
-      let value = iterable_knob_object[key];
-      iterable_knob_object[key] = Number(value.toFixed(decimal));
+  public round_values(iterable_object: any, decimal: number) {
+    if (iterable_object == undefined)
+      return iterable_object;
+    Object.getOwnPropertyNames(iterable_object).forEach(key => {
+      let value = iterable_object[key];
+      if(typeof(value) == 'string') {
+        iterable_object[key] = parseFloat(Number(value).toFixed(decimal));
+      } else if (typeof(value) == 'number') {
+        iterable_object[key] = parseFloat(value.toFixed(decimal));
+      }
     });
-    return iterable_knob_object;
+    return iterable_object;
   }
 
   /** returns keys of the given map */
@@ -325,27 +382,26 @@ export class EntityService {
    * targetSystemVariables: object[]
    * return value -> stageKnobs
    */
-  public populate_knob_objects_with_variables(stageKnobs: any, targetSystemVariables: any, for_all_stages: boolean, execution_strategy_type: string) {
+  public populate_knob_objects_with_variables(stageKnobs: any, targetSystemVariables: any, for_all_stages: boolean) {
     let ctrl = this;
     let knob_keys = ctrl.get_keys(stageKnobs);
-    if (execution_strategy_type !== 'forever') {
-      targetSystemVariables.forEach(function(target_system_knob) {
-        if (knob_keys.length > 0 && !for_all_stages) {
-          if (!knob_keys.includes(target_system_knob.name)) {
-            stageKnobs[target_system_knob.name] = target_system_knob.default;
-          }
-        } else {
-          // this case is for populating all_stage, initially stageKnobs is an empty Map
-          // so it will insert min & max accoringly for non-forever strategies.
-          let min_max_map = {};
-          min_max_map["min"] = target_system_knob.min;
-          min_max_map["max"] = target_system_knob.max;
-          min_max_map["default"] = target_system_knob.default;
-          stageKnobs[target_system_knob.name] = min_max_map;
-
+    targetSystemVariables.forEach(function(target_system_knob) {
+      if (knob_keys.length > 0 && !for_all_stages) {
+        if (!knob_keys.includes(target_system_knob.name)) {
+          stageKnobs[target_system_knob.name] = target_system_knob.default;
         }
-      });
-    }
+      } else {
+        // this case is for populating all_stage, initially stageKnobs is an empty Map
+        // so it will insert min & max accordingly.
+        let min_max_map = {};
+        min_max_map["min"] = target_system_knob.min;
+        min_max_map["max"] = target_system_knob.max;
+        min_max_map["default"] = target_system_knob.default;
+        stageKnobs[target_system_knob.name] = min_max_map;
+
+      }
+    });
+
     return stageKnobs
   }
 
@@ -385,5 +441,13 @@ export class EntityService {
       map.set(attribute, value);
     });
     return map;
+  }
+
+  /**
+   * @param obj, object whose emptiness will be tested
+   * @returns {boolean}
+   */
+  public isEmptyObject(obj): boolean {
+    return JSON.stringify(obj) === '{}';
   }
 }

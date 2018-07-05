@@ -1,6 +1,9 @@
 from oeda.log import *
 from oeda.rtxlib.execution import experimentFunction
 from oeda.config.R_config import Config
+from oeda.rtxlib.executionstrategy import applyInitKnobs
+from oeda.rtxlib.executionstrategy import applyDefaultKnobs
+from operator import itemgetter
 import json
 import requests
 
@@ -10,6 +13,8 @@ connection_err_msg = {"error": "Connection with R server is failed"}
 
 
 def start_mlr_mbo_strategy(wf):
+    applyInitKnobs(wf)
+
     """ executes a self optimizing strategy """
     info("> ExecStrategy   | MLR", Fore.CYAN)
 
@@ -45,7 +50,11 @@ def start_mlr_mbo_strategy(wf):
         info("> ExecStrategy mlrMBO  | " + str(result), Fore.CYAN)
     else:
         error("> ExecStrategy mlrMBO  | error occurred, see the logs")
-    return
+
+    # finished
+    info(">")
+    applyDefaultKnobs(wf)
+    return result
 
 ''' initiates mlrMBO execution by sending variables in a HTTP POST request 
     return value of the request are proposals for the initial design, e.g.
@@ -113,6 +122,8 @@ def update_initial_design(wf, initial_design_values):
 ''' triggers R side to create acquisition criteria & MBO controll and calls initSMBO function '''
 def create_artifacts(wf):
     try:
+        # keeps track of all knobs that have been used in experimentation and find best one
+        knobs_and_results = []
         body = dict(
             id=wf.id
         )
@@ -134,14 +145,16 @@ def create_artifacts(wf):
                         if proposed_points:
                             exp = create_experiment_tuple(wf, proposed_points)
                             wf.setup_stage(wf, exp["knobs"])
-                            value = float(experimentFunction(wf, exp))
-                            successful_update = update_mbo_state(wf, proposed_points, value)
+                            result = float(experimentFunction(wf, exp))
+                            knobs_and_results.append((exp["knobs"], result))
+                            successful_update = update_mbo_state(wf, proposed_points, result)
                         else:
                             err_msg = {"error": "Error occurred while running experimentFunction and getting new proposed points"}
                             error(err_msg)
                             return None
                     iteration_index += 1
-                return finalize_optimization(wf)
+                finalize_optimization(wf)
+                return recreate_knob_from_optimizer_values(knobs_and_results)
             else:
                 err_msg = {"error": res["result"]}
                 error(err_msg)
@@ -230,3 +243,13 @@ def finalize_optimization(wf):
     except requests.ConnectionError as e:
         error(connection_err_msg)
         return None
+
+
+def recreate_knob_from_optimizer_values(knobs_and_results):
+    """ recreates knob values from a variable
+        independent of criteria for data type (minimization, maximization), we will get minimal result
+        because it's already handled it in wf.evaluator """
+    info("knobs_and_results | " + str(knobs_and_results))
+    knobs_and_results = sorted(knobs_and_results, key=lambda x: x[1])
+    info("sorted knobs_and_results | " + str(knobs_and_results))
+    return knobs_and_results[0][0], knobs_and_results[0][1] # 0: knob_object, 1: value

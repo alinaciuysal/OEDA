@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from "@angular/core";
+import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
 import {OedaCallbackEntity} from "../api/oeda-api.service";
 import {isNullOrUndefined} from "util";
 
@@ -32,13 +32,11 @@ import {isNullOrUndefined} from "util";
                   <option *ngFor="let i of available_stages; let first_stage = first;" [ngValue]="i">
                     <div *ngIf="first_stage">All Stages</div>
                     <div *ngIf="!first_stage">Stage: {{ i.number }}
-                      <div *ngIf="experiment.executionStrategy.type !== 'forever'">
-                        <div *ngFor="let key of get_keys(i.knobs); let last_knob=last; let first_knob=first;">
-                          <b *ngIf="first_knob">[</b>
-                          <b>{{key}}: {{i.knobs[key]}}</b>
-                          <b *ngIf="!last_knob">,</b>
-                          <b *ngIf="last_knob">]</b>
-                        </div>
+                      <div *ngFor="let key of get_keys(i.knobs); let last_knob=last; let first_knob=first;">
+                        <b *ngIf="first_knob">[</b>
+                        <b>{{key}}: {{i.knobs[key]}}</b>
+                        <b *ngIf="!last_knob">,</b>
+                        <b *ngIf="last_knob">]</b>
                       </div>
                     </div>
                   </option>
@@ -71,20 +69,23 @@ import {isNullOrUndefined} from "util";
   `
 })
 
-export class ExperimentStagesComponent {
+export class ExperimentStagesComponent implements OnInit {
   @Output() scaleChanged = new EventEmitter();
   @Output() incomingDataTypeChanged = new EventEmitter();
   @Output() stageChanged = new EventEmitter();
 
   @Input() experiment: any;
   @Input() selected_stage: any;
-  @Input() available_stages: any;
+  @Input() available_steps: any;
+  @Input() step_no: any;
   @Input() targetSystem: any;
   @Input() incoming_data_type: object;
   @Input() scale: string;
   @Input() hidden: boolean;
   @Input() for_successful_experiment: boolean;
   @Input() oedaCallback: OedaCallbackEntity;
+
+  public available_stages = [];
 
   @Input() onScaleChange = (ev) => {
     this.scaleChanged.emit(ev);
@@ -97,6 +98,11 @@ export class ExperimentStagesComponent {
   @Input() onIncomingDataTypeChange = (ev) => {
     this.incomingDataTypeChanged.emit(ev);
   };
+
+  ngOnInit() {
+    // prepare available_stages due to legacy logic
+    this.available_stages = this.available_steps[this.step_no]["stages"];
+  }
 
   /** returns keys of the given map */
   get_keys(object) : Array<string> {

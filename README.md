@@ -12,10 +12,9 @@
 
 #### [Installation](https://github.com/alinaciuysal/OEDA/wiki/Installation)
 
-#### [Instructions to use version in master branch (deprecated)](https://github.com/alinaciuysal/OEDA/wiki/Instructions-to-Use-version-in-master-branch)
+#### [Instructions to use](https://github.com/alinaciuysal/OEDA/wiki/Instructions-to-use-expert-mode)
 
 #### _Contact_ 
 [Ali Naci Uysal](mailto:ali.uysal@tum.de) or [Dr. Ilias Gerostathopoulos](http://www4.in.tum.de/~gerostat/)
 
 ***
-## Online manual (with subtitles) to optimize a noisy black-box function can be found [here](https://youtu.be/JfgcnUO_o8g)

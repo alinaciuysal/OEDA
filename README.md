@@ -2,7 +2,7 @@
 
 This appendix is supplementary material to the ECSA 2018 submission "A Tool for Online Experiment-Driven Adaptation" by Ilias Gerostathopoulos, Ali Naci Uysal, Christian Prehofer and Tomas Bures.
 
-## Video illustration (with subtitles) accompanying our submission can be found on [Youtube](https://youtu.be/JfgcnUO_o8g)
+## Video illustration (with subtitles) accompanying our tool can be found on [Youtube](https://youtu.be/JfgcnUO_o8g)
 
 ## Evaluating feasibility of OEDA by using it to optimize CrowdNav
 Please check the [separate page](https://github.com/alinaciuysal/OEDA/wiki/Applying-OEDA-to-CrowdNav). 
@@ -20,15 +20,12 @@ Please check the [separate page](https://github.com/alinaciuysal/OEDA/wiki/Apply
 
 ### [Installation](https://github.com/alinaciuysal/OEDA/wiki/Installation)
 
-<<<<<<< HEAD
-#### [Instructions to use version in master branch (deprecated)](https://github.com/alinaciuysal/OEDA/wiki/Instructions-to-Use-version-in-master-branch)
-=======
+
+#### [Instructions to use](https://github.com/alinaciuysal/OEDA/wiki/Instructions-to-use)
+
+
 ### Guide 
 The best way to get started with using OEDA is to watch the above video. 
->>>>>>> ecsa18
 
 #### _Contact_ 
 [Ali Naci Uysal](mailto:ali.uysal@tum.de) or [Dr. Ilias Gerostathopoulos](http://www4.in.tum.de/~gerostat/)
-
-***
-## Online manual (with subtitles) to optimize a noisy black-box function can be found [here](https://youtu.be/JfgcnUO_o8g)

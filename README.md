@@ -1,6 +1,6 @@
 # Online Appendix
 
-This appendix is supplementary material to the ECSA 2018 submission "A Tool for Online Experiment-Driven Adaptation" by Ilias Gerostathopoulos, Ali Naci Uysal, Christian Prehofer and Tomas Bures.
+This appendix is supplementary material to the submission "A Tool for Online Experiment-Driven Adaptation" by Ilias Gerostathopoulos, Ali Naci Uysal, Christian Prehofer and Tomas Bures.
 
 ## Video illustration (with subtitles) accompanying our tool can be found on [Youtube](https://youtu.be/JfgcnUO_o8g)
 

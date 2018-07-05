@@ -12,7 +12,7 @@
 
 #### [Installation](https://github.com/alinaciuysal/OEDA/wiki/Installation)
 
-#### [Instructions to use](https://github.com/alinaciuysal/OEDA/wiki/Instructions-to-use-expert-mode)
+#### [Instructions to use](https://github.com/alinaciuysal/OEDA/wiki/Instructions-to-use)
 
 #### _Contact_ 
 [Ali Naci Uysal](mailto:ali.uysal@tum.de) or [Dr. Ilias Gerostathopoulos](http://www4.in.tum.de/~gerostat/)

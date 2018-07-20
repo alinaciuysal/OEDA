@@ -254,6 +254,7 @@ scikit-optimize v0.5.2, (https://github.com/scikit-optimize/scikit-optimize), Co
 matplotlib v2.2.2, (https://github.com/matplotlib/matplotlib), Copyright (c) 2012 - Matplotlib Development Team
 numpy v1.14.2, (https://github.com/numpy/numpy), Copyright (c) 2005-2017, NumPy Developers.
 statsmodels v0.9.0, (https://github.com/statsmodels/statsmodels) - Copyright (c) 2006, Jonathan E. Taylor, Copyright (c) 2006-2008 Scipy Developers., Copyright (c) 2009-2012 Statsmodels Developers.
+freetype-py v2.0.0.post6, (https://github.com/rougier/freetype-py) - Copyright (c) 2011-2014, Nicolas P. Rougier
 
 All rights reserved.
 
@@ -334,7 +335,6 @@ All rights reserved.
 GNU General Public License (GPL)
 -----------------------------------------------------------------------
 The OEDA project bundles the following files under GNU General Public License (GPL):
-freetype-py v2.0.0.post6, (https://github.com/rougier/freetype-py) - Copyright (c) 2011-2014, Nicolas P. Rougier
 mlrMBO-API, (https://github.com/alinaciuysal/mlrMBO-API), Copyright (c) 2018 Ali Naci Uysal (ali.uysal@tum.de), Ilias Gerostathopoulos(gerostat@in.tum.de)
 All rights reserved.
 THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.

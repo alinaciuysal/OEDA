@@ -399,18 +399,32 @@ export class EditTargetsComponent implements OnInit {
 
     // check for attributes of changeable variables
     for (let i = 0; i < this.target.changeableVariables.length; i++) {
-      if (this.target.changeableVariables[i].name == null
-        || this.target.changeableVariables[i].length === 0
-        || this.target.changeableVariables[i].description == null
-        || this.target.changeableVariables[i].description === 0
-        || isNullOrUndefined(this.target.changeableVariables[i].scale)
-        || isNullOrUndefined(this.target.changeableVariables[i].min)
-        || isNullOrUndefined(this.target.changeableVariables[i].max)
-        || isNullOrUndefined(this.target.changeableVariables[i].default)
-        || this.target.changeableVariables[i].min > this.target.changeableVariables[i].max) {
-        this.errorButtonLabel = "Provide valid inputs for changeable variable(s)";
-        return true;
+      if (this.target.changeableVariables[i].scale !== 'Boolean') {
+        if (this.target.changeableVariables[i].name == null
+          || this.target.changeableVariables[i].length === 0
+          || this.target.changeableVariables[i].description == null
+          || this.target.changeableVariables[i].description === 0
+          || isNullOrUndefined(this.target.changeableVariables[i].scale)
+          || isNullOrUndefined(this.target.changeableVariables[i].min)
+          || isNullOrUndefined(this.target.changeableVariables[i].max)
+          || isNullOrUndefined(this.target.changeableVariables[i].default)
+          || this.target.changeableVariables[i].min > this.target.changeableVariables[i].max) {
+          this.errorButtonLabel = "Provide valid inputs for changeable variable(s)";
+          return true;
+        }
+      } else {
+        if (this.target.changeableVariables[i].name == null
+          || this.target.changeableVariables[i].length === 0
+          || this.target.changeableVariables[i].description == null
+          || this.target.changeableVariables[i].description === 0
+          || isNullOrUndefined(this.target.changeableVariables[i].scale)
+          || isNullOrUndefined(this.target.changeableVariables[i].default)
+          || isNullOrUndefined(this.target.changeableVariables[i].value)) {
+          this.errorButtonLabel = "Provide valid inputs for changeable variable(s)";
+          return true;
+        }
       }
+
 
       // if ch. var. is not created from configuration, check its default values
       if (this.target.changeableVariables[i]["disabled"] == false) {

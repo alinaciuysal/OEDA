@@ -1,6 +1,7 @@
 from flask import jsonify
 from flask_restful import Resource
 from oeda.config.crowdnav_config import Config as CrowdNavConfig
+from oeda.config.platooning_config import Config as PlatooningConfig
 import traceback
 import json
 
@@ -15,6 +16,9 @@ class ConfigController(Resource):
             black_box_knobs = json.loads(open('oeda/config/black_box_config/knobs.json').read())
             black_box_data_providers = json.loads(open('oeda/config/black_box_config/dataProviders.json').read())
 
+            platooning_knobs = json.loads(open('oeda/config/platooning_config/knobs.json').read())
+            platooning_data_providers = json.loads(open('oeda/config/platooning_config/dataProviders.json').read())
+
             data = [
                 {
                     "name": "CrowdNav",
@@ -27,6 +31,17 @@ class ConfigController(Resource):
                     "changesApplicable": True, # if we can change target system's default configuration on-the-fly
                     "knobs": crowd_nav_knobs, # used to populate changeableVariables in OEDA
                     "dataProviders": crowd_nav_data_providers # used to populate dataProviders in OEDA
+                },
+                {
+                    "name": "Platooning",
+                    "description": "Car Platooning Simulation based on SUMO",
+                    "kafkaTopicCarData": PlatooningConfig.kafkaTopicCarData,
+                    # "kafkaTopicPlatooningData": PlatooningConfig.kafkaTopicPlatooningData,
+                    "kafkaHost": PlatooningConfig.kafkaHost,
+                    "kafkaCommandsTopic": PlatooningConfig.kafkaPlatooningCommandsTopic, # for now, kafkaHost and kafkaCommandsTopic are only fetched & used for populating change provider entity in OEDA
+                    "changesApplicable": True, # if we can change target system's default configuration on-the-fly
+                    "knobs": platooning_knobs, # used to populate changeableVariables in OEDA
+                    "dataProviders": platooning_data_providers # used to populate dataProviders in OEDA
                 },
                 {
                     "name": "Black-box function",

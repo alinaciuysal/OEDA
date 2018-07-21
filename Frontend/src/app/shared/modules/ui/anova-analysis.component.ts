@@ -152,7 +152,6 @@ export class AnovaAnalysisComponent {
               }
             }
           }
-          console.log("this.inner_keys", this.inner_keys);
 
           // if anova was successful, mark the ones less than alpha, also consider nrOfImportantFactors that was provided by user
           let nrSelectedInteractions = 0;
@@ -168,9 +167,6 @@ export class AnovaAnalysisComponent {
               }
             }
           }
-          console.log("this.results", this.results);
-          console.log("this.ordered_keys", this.ordered_keys);
-
           this.notify.success("Success", "Analysis results are retrieved");
           this.retrieved = true;
         }, error1 => {

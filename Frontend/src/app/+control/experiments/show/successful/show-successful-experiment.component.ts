@@ -174,7 +174,6 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
       // there is no step with number "best" for anova & t-test
       if (typeof(selected_stage.number) == 'string') {
         if(selected_stage.number.includes("best")) {
-          console.log("stages", this.available_steps[this.step_no]);
           selected_stage = this.available_steps[this.step_no].find(x => x.stage_result == selected_stage.stage_result);
           ctrl.notify.success("", "You selected best configuration (Stage " + selected_stage.number + ") of this step");
         }

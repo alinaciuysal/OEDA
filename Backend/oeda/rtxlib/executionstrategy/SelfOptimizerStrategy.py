@@ -23,7 +23,10 @@ def start_self_optimizer_strategy(wf):
     # we fill the arrays and use the index to map from gauss-optimizer-value to variable
     for key in knobs:
         variables.append(key)
-        tpl = tuple([float(knobs[key][0]), float(knobs[key][1])])
+        # values in knobs might come unordered, so sort them to avoid dimension errors of scikit
+        min_value = min(float(knobs[key][0]), float(knobs[key][1]))
+        max_value = max(float(knobs[key][0]), float(knobs[key][1]))
+        tpl = tuple([min_value, max_value])
         range_tuples.append(tpl)
     # we give the minimization function a callback to execute
     # it uses the return value (it tries to minimize it) to select new knobs to test

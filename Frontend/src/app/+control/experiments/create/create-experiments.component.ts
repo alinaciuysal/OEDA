@@ -340,7 +340,6 @@ export class CreateExperimentsComponent implements OnInit {
         if (hasOwnProperty(chVar, "factorValues")) {
           if (!isNullOrUndefined(chVar["factorValues"])) {
             let factors = chVar["factorValues"].split(",");
-            console.log("chVar: " + chVar.name + " factors: " + factors + " len:" + factors.length);
             if (factors.length >= 2) {
               for (let factor of factors) {
                 factor = factor.trim();

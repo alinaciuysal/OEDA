@@ -176,21 +176,21 @@
                                 [options]="[{key:'Minimize',label:'Minimize'},
                                 {key:'Maximize',label:'Maximize'}]"></labeled-input-select>
 
-          <labeled-input name="Default Data Type for Analysis?"
-                         [model]="input"
-                         key="is_default"
-                         [colSize]="5"
-                         inputType="checkbox"
-                         data-toggle="tooltip" title="Select the default data type to perform statistical tests during analysis phases"
-                          (modelChanged)="data_type_checkbox_clicked($event, i)"></labeled-input>
+          <!--<labeled-input name="Default Data Type for Analysis?"-->
+                         <!--[model]="input"-->
+                         <!--key="is_default"-->
+                         <!--[colSize]="5"-->
+                         <!--inputType="checkbox"-->
+                         <!--data-toggle="tooltip" title="Select the default data type to perform statistical tests during analysis phases"-->
+                          <!--(modelChanged)="data_type_checkbox_clicked($event, i)"></labeled-input>-->
 
-          <labeled-input-select *ngIf="input['scale'] == 'Boolean'"
-                                name="Default Aggregation Function for Analysis" [model]="input" key="defaultAggregationFcn" [colSize]="5"
-                                [options]=aggregateFunctionsBoolean></labeled-input-select>
+          <!--<labeled-input-select *ngIf="input['scale'] == 'Boolean'"-->
+                                <!--name="Default Aggregation Function for Analysis" [model]="input" key="defaultAggregationFcn" [colSize]="5"-->
+                                <!--[options]=aggregateFunctionsBoolean></labeled-input-select>-->
 
-          <labeled-input-select *ngIf="input['scale'] != 'Boolean'"
-                                name="Default Aggregation Function for Analysis" [model]="input" key="defaultAggregationFcn" [colSize]="5"
-                                [options]=aggregateFunctionsMetric></labeled-input-select>
+          <!--<labeled-input-select *ngIf="input['scale'] != 'Boolean'"-->
+                                <!--name="Default Aggregation Function for Analysis" [model]="input" key="defaultAggregationFcn" [colSize]="5"-->
+                                <!--[options]=aggregateFunctionsMetric></labeled-input-select>-->
           <hr class="col-md-12">
         </div>
       </div>
@@ -204,7 +204,7 @@
         <div class="card-title">
           <div class="title pull-left">Changeable Variables</div>
 
-          <div class="title" style="padding-left: 15%"><a data-toggle="modal" data-target="#changeableVariableModal"><i class="fa fa-info fa-lg"></i></a></div>
+          <div class="title" style="padding-left: 15%"><a data-toggle="modal" data-target="#changeableVariableModal"> <i class="fa fa-info fa-lg"></i></a></div>
 
           <div class="pull-right">
             <div (click)="addChangeableVariable(null)" class="btn btn-xs btn-orange"><i class="fa fa-plus push-5-r"></i> Add Changeable Variable</div>
@@ -223,14 +223,14 @@
           <labeled-input name="Description" [model]="input" key="description" [colSize]="12"></labeled-input>
           <labeled-input name="Minimum Value" inputType="number" [model]="input" key="min" [colSize]="3"></labeled-input>
           <labeled-input name="Maximum Value" inputType="number" [model]="input" key="max" [colSize]="3"></labeled-input>
-          <labeled-input name="Default Value" inputType="number" [model]="input" key="default" [colSize]="3" disabled="{{input.disabled}}" data-toggle="tooltip" title="Value in the default configuration"></labeled-input>
+          <labeled-input *ngIf="input['scale'] !== 'Boolean'" name="Default Value" inputType="number" [model]="input" key="default" [colSize]="3"
+                         data-toggle="tooltip" title="If configuration (selected from available ones) has a default value, it's shown here. If not, we tried to guess it with randomization."></labeled-input>
           <labeled-input-select name="Scale" [model]="input" key="scale" [colSize]="5"
                                 [options]="[{key:'Ordinal',label:'Ordinal'},
                                 {key:'Metric',label:'Metric'},
                                 {key:'Boolean',label:'Boolean (Nominal)'},
                                 {key:'Ratio', label:'Ratio'}]"
                                 data-toggle="tooltip" title="Select Boolean scale for boolean values">
-            <!--TODO: add more informative scale tips here-->
           </labeled-input-select>
           <hr class="col-md-12">
         </div>

@@ -344,7 +344,7 @@
   <div class="col-md-12" *ngIf="targetSystem.name !== ''">
 
     <!-- Analysis & Execution Strategy -->
-    <div class="col-md-12" style="padding-left: 0">
+    <div class="col-md-12" style="padding-left: 0; padding-right: 0">
 
       <!-- Analysis -->
       <div class="panel panel-default chartJs">
@@ -356,7 +356,7 @@
             </div>
           </div>
         </div>
-        <div class="panel-body" style="padding-top: 20px">
+        <div class="panel-body">
           <labeled-input-select name="Type" [model]="experiment.analysis" key="type" [colSize]="6"
                                 [options]="[
                                     {key:'one_sample_tests',label:'One Sample Tests'},
@@ -434,8 +434,11 @@
           </div>
 
           <!-- Execution Strategy for any type of analysis -->
-          <labeled-input *ngIf="experiment.analysis.type != 'bayesian_opt' && experiment.analysis.type != 'no_analysis'"
-            inputType="number" name="Sample Size per Stage" [model]="experiment.executionStrategy" key="sample_size" [colSize]="6" [minNumber]="1" tooltipTitle='Number of samples to be collected from each experiment'></labeled-input>
+          <div *ngIf="experiment.analysis.type != 'bayesian_opt' && experiment.analysis.type != 'no_analysis'">
+            <labeled-input
+              inputType="number" name="Sample Size per Stage" [model]="experiment.executionStrategy" key="sample_size" [colSize]="6" [minNumber]="1" tooltipTitle='Number of samples to be collected from each experiment'>
+            </labeled-input>
+          </div>
 
         </div>
       </div>

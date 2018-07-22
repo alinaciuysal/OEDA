@@ -239,7 +239,7 @@ export class EntityService {
         const values = stage_data.values;
         values.forEach(function(tuple) {
           if(tuple.payload.hasOwnProperty(incoming_data_type.name) && !retrieved) {
-            retrieved = true;
+            return true;
           }
         });
       }

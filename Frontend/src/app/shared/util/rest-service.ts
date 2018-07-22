@@ -83,13 +83,12 @@ export class RESTService {
   }
 
   /** does a public http get request to the given URL and returns type T */
-  public doGETPublicRequestForConfig<T>(url: string): Observable<T> {
-    return this.http.get(this.configBackendURL + url, this.requestOptions)
+  public doGETPublicRequestForConfig<T>(): Observable<T> {
+    return this.http.get(this.configBackendURL, this.requestOptions)
       .map((res: Response) => res.json())
       .catch((error: any) => {
         const errorMsg = JSON.parse(error._body);
         this.notify.error("Error", errorMsg.error || errorMsg.message);
-        this.log.error("GET@" + url, error);
         return Observable.throw(error || 'Server error');
       })
   }

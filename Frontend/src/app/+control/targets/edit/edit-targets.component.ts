@@ -6,6 +6,7 @@ import {ActivatedRoute, Params, Router} from "@angular/router";
 import {UUID} from "angular2-uuid";
 import {NotificationsService} from "angular2-notifications/dist";
 import * as _ from "lodash.clonedeep";
+import * as lodash from "lodash";
 import {isNullOrUndefined} from "util";
 
 @Component({
@@ -79,12 +80,12 @@ export class EditTargetsComponent implements OnInit {
         this.target = this.createTarget();
         this.originalTarget = _(this.target);
 
-        // retrieve config json object via the api provided at localhost:5000/api/config/crowdnav
-        this.api.getConfigFromAPI("/crowdnav").subscribe((config) => {
-            if (!isNullOrUndefined(config)) {
+        // retrieve config json object via the api provided at localhost:5000/api/config
+        this.api.getConfigFromAPI().subscribe((configs) => {
+            if (!isNullOrUndefined(configs)) {
 
               // open the modal in frontend
-              this.availableConfigurations.push(config);
+              this.availableConfigurations = configs;
               // this.traverse_json_object(config);
               this.configsAvailable = true;
               document.getElementById("openModalButton").click();
@@ -201,15 +202,15 @@ export class EditTargetsComponent implements OnInit {
 
   // if user adds a data type via configuration modal, then event is an object of SimpleEvent etc.
   // but if he/she just clicks the checkbox, it is either true or false
-  data_type_checkbox_clicked(event, data_type_index) {
-    if (typeof event == "boolean") {
-      let data_type = this.target.incomingDataTypes[data_type_index];
-      data_type["is_default"] = !data_type["is_default"];
-      // main reason for this function is to refresh defaultAggregationFcn modal upon click
-      data_type["defaultAggregationFcn"] = null;
-    }
-
-  }
+  // data_type_checkbox_clicked(event, data_type_index) {
+  //   if (typeof event == "boolean") {
+  //     let data_type = this.target.incomingDataTypes[data_type_index];
+  //     data_type["is_default"] = !data_type["is_default"];
+  //     // main reason for this function is to refresh defaultAggregationFcn modal upon click
+  //     data_type["defaultAggregationFcn"] = null;
+  //   }
+  //
+  // }
 
   // removes incoming data type from target system as well as from data provider if it does not contain any variables after deletion
   removeIncoming(index) {
@@ -424,22 +425,22 @@ export class EditTargetsComponent implements OnInit {
     }
 
     // first check number of default incoming data types
-    let nr_of_default_data_types = 0;
-    for (let i = 0; i < this.target.incomingDataTypes.length; i++) {
-      if (this.target.incomingDataTypes[i].is_default == true) {
-        nr_of_default_data_types += 1;
-      }
-    }
-
-    if (nr_of_default_data_types == 0) {
-      this.errorButtonLabel = "Provide one default data type for analysis";
-      return true;
-    }
-
-    if (nr_of_default_data_types > 1) {
-      this.errorButtonLabel = "Only one default data type is allowed for analysis";
-      return true;
-    }
+    // let nr_of_default_data_types = 0;
+    // for (let i = 0; i < this.target.incomingDataTypes.length; i++) {
+    //   if (this.target.incomingDataTypes[i].is_default == true) {
+    //     nr_of_default_data_types += 1;
+    //   }
+    // }
+    //
+    // if (nr_of_default_data_types == 0) {
+    //   this.errorButtonLabel = "Provide one default data type for analysis";
+    //   return true;
+    // }
+    //
+    // if (nr_of_default_data_types > 1) {
+    //   this.errorButtonLabel = "Only one default data type is allowed for analysis";
+    //   return true;
+    // }
 
     // now check attributes of incoming data types
     for (let i = 0; i < this.target.incomingDataTypes.length; i++) {
@@ -452,12 +453,12 @@ export class EditTargetsComponent implements OnInit {
         this.errorButtonLabel = "Provide valid inputs for incoming data type(s)";
         return true;
       }
-      if (this.target.incomingDataTypes[i].is_default == true) {
-        if (isNullOrUndefined(this.target.incomingDataTypes[i].defaultAggregationFcn)) {
-          this.errorButtonLabel = "Provide default aggregation function for " + this.target.incomingDataTypes[i].name + " data type";
-          return true;
-        }
-      }
+      // if (this.target.incomingDataTypes[i].is_default == true) {
+      //   if (isNullOrUndefined(this.target.incomingDataTypes[i].defaultAggregationFcn)) {
+      //     this.errorButtonLabel = "Provide default aggregation function for " + this.target.incomingDataTypes[i].name + " data type";
+      //     return true;
+      //   }
+      // }
     }
 
     // check for attributes of changeable variables
@@ -543,10 +544,21 @@ export class EditTargetsComponent implements OnInit {
       this.target.changeProvider['type'] = 'kafka_producer';
       this.target.changeProvider['topic'] = this.selectedConfiguration['kafkaCommandsTopic'];
       this.target.changeProvider['serializer'] = 'JSON';
+    } else if (this.selectedConfiguration.hasOwnProperty("url")) {
+      this.target.changeProvider['url'] = this.selectedConfiguration['url'];
+      this.target.changeProvider['type'] = 'http_request';
+      this.target.changeProvider['serializer'] = 'JSON';
     }
 
     // push each knob into defaultVariables array if ts is created from config
     for (let knob of this.selectedConfiguration.knobs) {
+      // try to guess default value of target system if not provided via api
+      // https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript
+      if(isNullOrUndefined(knob["default"])) {
+        let randomDefault = lodash.random(knob["min"], knob["max"]);
+        // knob["default"] = randomDefault.toFixed(2);
+        knob["default"] = randomDefault;
+      }
       this.target.defaultVariables.push(_(knob));
     }
   }

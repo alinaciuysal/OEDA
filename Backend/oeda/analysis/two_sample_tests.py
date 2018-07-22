@@ -19,7 +19,6 @@ class TwoSampleTest(Analysis):
             warn("Cannot run " + self.name + " on more than two samples.")
             warn("Comparing only the first two samples.")
 
-        from math import log
         self.y1 = [log(d) for d in data[0]]
         self.y2 = [log(d) for d in data[1]]
 

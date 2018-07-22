@@ -9,7 +9,7 @@
   "index_definitions": {
     "experiment": {
       "name": "experiment",
-      "index_name": "oeda_experiment",
+      "index_name": "oeda_experiment_expert_mode",
       "mappings": {
         "experiment": {
           "properties": {
@@ -31,7 +31,7 @@
     },
     "stage": {
       "name": "stage",
-      "index_name": "oeda_stage",
+      "index_name": "oeda_stage_expert_mode",
       "mappings": {
         "stage": {
           "properties":     {
@@ -46,7 +46,7 @@
     },
     "analysis": {
       "name": "analysis",
-      "index_name": "oeda_analysis",
+      "index_name": "oeda_analysis_expert_mode",
       "mappings": {
         "analysis": {
           "properties": {
@@ -67,7 +67,7 @@
     },
     "data_point": {
       "name": "data_point",
-      "index_name": "oeda_data_point",
+      "index_name": "oeda_data_point_expert_mode",
       "mappings": {
         "data_point": {
           "properties": {
@@ -80,7 +80,7 @@
     },
     "target_system": {
       "name": "target_system",
-      "index_name": "oeda_target_system",
+      "index_name": "oeda_target_system_expert_mode",
       "mappings": {
         "target_system": {
           "properties": {

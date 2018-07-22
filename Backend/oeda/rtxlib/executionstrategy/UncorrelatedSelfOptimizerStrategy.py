@@ -19,8 +19,10 @@ def start_uncorrelated_self_optimizer_strategy(wf):
     total_result = dict()
     # we fill the arrays and use the index to map from gauss-optimizer-value to variable
     for key in knobs:
+        min_value = min(float(knobs[key][0]), float(knobs[key][1]))
+        max_value = max(float(knobs[key][0]), float(knobs[key][1]))
         optimal_knob_value = optimizeOneVariable(wf, wf.execution_strategy["optimizer_iterations"], key,
-                                                 (knobs[key][0], knobs[key][1]))
+                                                 (min_value, max_value))
         info("> optimal_knob_value      | " + str(optimal_knob_value), Fore.CYAN)
 
         if type(optimal_knob_value) is list:

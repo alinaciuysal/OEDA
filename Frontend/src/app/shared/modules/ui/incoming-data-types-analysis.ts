@@ -7,7 +7,7 @@ import {EntityService} from "../../util/entity-service";
 @Component({
   selector: 'incoming-data-types-analysis',
   template: `
-    <div class="col-md-12" *ngIf="targetSystem.name !== '' && experiment.analysis.type !== undefined">
+    <div class="col-md-12" *ngIf="targetSystem.name !== '' && experiment.analysis.type !== undefined" style="padding-left: 0; padding-right: 0;">
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">

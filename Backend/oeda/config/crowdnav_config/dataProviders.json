@@ -12,9 +12,7 @@
         "description": "overhead of the trips",
         "scale": "Metric",
         "dataProviderName": "Trips",
-        "criteria": "Minimize",
-        "is_default": true,
-        "defaultAggregationFcn": "avg"
+        "criteria": "Minimize"
       }, {
         "name": "complaint",
         "description": "indicates complaint (in a uniformly distributed manner) if overhead of a trip is greater than 2.5",

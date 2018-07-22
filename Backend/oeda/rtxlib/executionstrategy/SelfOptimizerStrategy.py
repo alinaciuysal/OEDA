@@ -21,7 +21,9 @@ def start_self_optimizer_strategy(wf):
     # we fill the arrays and use the index to map from gauss-optimizer-value to variable
     for key in knobs:
         variables += [key]
-        range_tuples += [(knobs[key][0], knobs[key][1])]
+        min_value = min(float(knobs[key][0]), float(knobs[key][1]))
+        max_value = max(float(knobs[key][0]), float(knobs[key][1]))
+        range_tuples += [(min_value, max_value)]
     # we give the minimization function a callback to execute
     # it uses the return value (it tries to minimize it) to select new knobs to test
     optimizer_result = gp_minimize(lambda opti_values: self_optimizer_execution(wf, opti_values, variables),

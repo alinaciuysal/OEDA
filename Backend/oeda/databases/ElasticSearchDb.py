@@ -106,6 +106,7 @@ class ElasticSearchDb(Database):
                     "match_all": {}
                 }
             }
+            self.es.indices.refresh(index=self.target_system_index)
             res = self.es.search(index=self.target_system_index, doc_type=self.target_system_type_name, body=query)
             return [r["_id"] for r in res["hits"]["hits"]], [r["_source"] for r in res["hits"]["hits"]]
         except ConnectionError as err1:
@@ -147,6 +148,7 @@ class ElasticSearchDb(Database):
             }
         }
         try:
+            self.es.indices.refresh(index=self.experiment_index)
             res = self.es.search(index=self.experiment_index, doc_type=self.experiment_type_name, body=query, sort='createdDate')
             return [r["_id"] for r in res["hits"]["hits"]], [r["_source"] for r in res["hits"]["hits"]]
         except ConnectionError as err1:
@@ -227,6 +229,8 @@ class ElasticSearchDb(Database):
         }
 
         try:
+            # before retrieving stages, refresh index
+            self.es.indices.refresh(index=self.stage_index)
             res = self.es.search(index=self.stage_index, doc_type=self.stage_type_name, body=query, size=10000, sort='createdDate')
             _ids = [r["_id"] for r in res["hits"]["hits"]]
             _sources = [r["_source"] for r in res["hits"]["hits"]]
@@ -261,7 +265,9 @@ class ElasticSearchDb(Database):
         }
 
         try:
-            res = self.es.search(index=self.index, doc_type=self.stage_type_name, body=query, sort='createdDate')
+            # before retrieving stages, refresh index
+            self.es.indices.refresh(index=self.stage_index)
+            res = self.es.search(index=self.stage_index, doc_type=self.stage_type_name, body=query, sort='createdDate')
             return [r["_id"] for r in res["hits"]["hits"]], [r["_source"] for r in res["hits"]["hits"]]
         except ConnectionError as err1:
             error("ConnectionError while getting stage data. Check connection to elasticsearch.")
@@ -296,6 +302,8 @@ class ElasticSearchDb(Database):
             }
         }
         try:
+            # before retrieving data points, refresh index
+            self.es.indices.refresh(index=self.data_point_index)
             # https://stackoverflow.com/questions/9084536/sorting-by-multiple-params-in-pyes-and-elasticsearch
             # sorting is required for proper visualization of data
             res = self.es.search(index=self.data_point_index, body=query, size=10000, sort='createdDate')
@@ -308,6 +316,7 @@ class ElasticSearchDb(Database):
             raise err2
 
     def get_aggregation(self, experiment_id, stage_no, aggregation_name, field):
+        self.es.indices.refresh(index=self.data_point_index)
         stage_id = self.create_stage_id(experiment_id, stage_no)
         exact_field_name = "payload" + "." + str(field)
         query = {
@@ -363,6 +372,8 @@ class ElasticSearchDb(Database):
             }
         }
         try:
+            # before retrieving count, refresh index
+            self.es.indices.refresh(index=self.data_point_index)
             res = self.es.search(index=self.data_point_index, body=query)
             return res["aggregations"][aggregation_key]["doc_count"]
         except ConnectionError as err1:
@@ -390,6 +401,8 @@ class ElasticSearchDb(Database):
             }
         }
         try:
+            # before retrieving count, refresh index
+            self.es.indices.refresh(index=self.data_point_index)
             # https://stackoverflow.com/questions/9084536/sorting-by-multiple-params-in-pyes-and-elasticsearch
             # sorting is required for proper visualization of data
             res = self.es.search(index=self.data_point_index, doc_type=self.data_point_type_name, body=query, size=10000, sort='createdDate')

@@ -42,8 +42,8 @@ export class OEDAApiService extends RESTService {
     return this.doGETPublicRequest("/qqPlot/" + experiment_id + "/" + stage_no + "/" + distribution + "/" + scale + "/" + incoming_data_type_name);
   }
 
-  public getConfigFromAPI(url: string): Observable<any> {
-    return this.doGETPublicRequestForConfig(url)
+  public getConfigFromAPI(): Observable<any> {
+    return this.doGETPublicRequestForConfig()
   }
 
   public saveExperiment(experiment: Experiment): Observable<any> {

@@ -11,13 +11,13 @@
         "name": "fuelConsumption",
         "description": "average fuel consumption of a car during its trip",
         "scale": "Metric",
-        "dataProviderName": "Speed_fuel_consumption",
+        "dataProviderName": "Performance",
         "criteria": "Minimize"
       }, {
         "name": "speed",
         "description": "average speed of a car during its trip",
         "scale": "Metric",
-        "dataProviderName": "Speed_fuel_consumption",
+        "dataProviderName": "Performance",
         "criteria": "Maximize"
       }, {
         "name": "overhead",

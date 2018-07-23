@@ -95,8 +95,12 @@ class RTXDefinition:
         if data_type["scale"] == "Boolean":
             # now data_type_aggregate_function is either count-True or count-False
             field_value = data_type_aggregate_function.split("-")[1] # fetch value
-            field_value = 1 if field_value == 'True' else 0 # because we store them in binary, not in True/False
-            count = db().get_count(wf.id, wf.stage_counter, data_type_name, field_value)
+            # we store them in binary, not in True/False
+            if field_value == 'True':
+                field_value = 1
+            else:
+                field_value = 0
+            count = db().get_count(wf.id, wf.step_no, wf.stage_counter, data_type_name, field_value)
             total = db().get_aggregation(wf.id, wf.step_no, wf.stage_counter, "stats", data_type_name)["count"]
             value = float(count) / total
         else:

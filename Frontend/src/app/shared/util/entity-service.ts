@@ -341,7 +341,7 @@ export class EntityService {
     details += selected_stage["number"] + " \n";
     let json_str = JSON.stringify(selected_stage["knobs"]);
     json_str = json_str.replace(/["']/g, "");
-    // json_str = json_str.replace(",", ", ");
+    json_str = json_str.replace(/,/g, ", ");
     // json_str = json_str.replace("{", "[");
     // json_str = json_str.replace("}", "]");
     details += json_str;

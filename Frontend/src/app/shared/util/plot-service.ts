@@ -217,6 +217,11 @@ export class PlotService {
     return this.apiService.getQQPlot(experiment_id, step_no, selected_stage.number.toString(), distribution, scale, incoming_data_type_name);
   }
 
+  /** retrieves qq plot image from the server */
+  public retrieve_box_plot_image(experiment_id, step_no, selected_stage, scale, incoming_data_type_name): Observable<any> {
+    return this.apiService.getBoxPlot(experiment_id, step_no, selected_stage.number.toString(), scale, incoming_data_type_name);
+  }
+
   /** dstributes data to bins for histogram*/
   public categorize_data(data: any, decimal_places) {
     const bins = [];

@@ -9,7 +9,7 @@ from oeda.controller.experiments import ExperimentsListController, ExperimentCon
 from oeda.controller.experiment_results import StageResultsWithExperimentIdController, AllStageResultsWithExperimentIdController
 from oeda.controller.running_experiment_results import RunningAllStageResultsWithExperimentIdController, OEDACallbackController
 from oeda.controller.stages import StageController
-from oeda.controller.plotting import QQPlotController
+from oeda.controller.plotting import QQPlotController, BoxPlotController
 from oeda.controller.users import UserRegisterController, UserListController, UserController, UserLoginController
 from oeda.controller.execution_scheduler import ExecutionSchedulerController
 from oeda.controller.deletedb import DeleteDBController
@@ -89,6 +89,7 @@ api.add_resource(StageController, '/api/steps/<string:experiment_id>')
 api.add_resource(RunningAllStageResultsWithExperimentIdController, '/api/running_experiment_results/<string:experiment_id>/<string:timestamp>')
 
 api.add_resource(QQPlotController, '/api/qqPlot/<string:experiment_id>/<string:step_no>/<string:stage_no>/<string:distribution>/<string:scale>/<string:incoming_data_type_name>')
+api.add_resource(BoxPlotController, '/api/boxPlot/<string:experiment_id>/<string:step_no>/<string:stage_no>/<string:scale>/<string:incoming_data_type_name>')
 api.add_resource(OEDACallbackController, '/api/running_experiment_results/oeda_callback/<string:experiment_id>')
 
 api.add_resource(ConfigController, '/api/config')
@@ -118,5 +119,5 @@ if __name__ == '__main__':
     from oeda.databases import setup_experiment_database
     setup_experiment_database("elasticsearch", "localhost", "9200")
     from oeda.service.execution_scheduler import initialize_execution_scheduler
-    initialize_execution_scheduler(10)
+    initialize_execution_scheduler(120)
     IOLoop.instance().start()

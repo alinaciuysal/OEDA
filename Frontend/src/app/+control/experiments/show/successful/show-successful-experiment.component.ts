@@ -35,6 +35,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
   public distribution: string;
   public scale: string;
   public is_qq_plot_rendered: boolean;
+  public is_box_plot_rendered: boolean;
   public is_enough_data_for_plots: boolean;
   public is_all_stages_selected: boolean;
   public available_steps = [];
@@ -110,6 +111,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     const ctrl = this;
     if (stage_object !== undefined && stage_object.length !== 0) {
       ctrl.selectDistributionAndDrawQQPlot(ctrl.distribution);
+      ctrl.selectDistributionAndDrawBoxPlot();
       // draw graphs for all_data
       if (ctrl.selected_stage.number === -1) {
         try {
@@ -118,6 +120,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
             // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
             const clonedData = JSON.parse(JSON.stringify(processedData));
             ctrl.initial_threshold_for_scatter_chart = ctrl.plotService.calculate_threshold_for_given_percentile(clonedData, 95, 'value', ctrl.decimal_places);
+            ctrl.stage_details = "All Stages";
             ctrl.scatter_plot = ctrl.plotService.draw_scatter_plot("chartdiv", "filterSummary", processedData, ctrl.incoming_data_type["name"], ctrl.initial_threshold_for_scatter_chart, "All Stages", ctrl.decimal_places);
             ctrl.histogram = ctrl.plotService.draw_histogram("histogram", processedData, ctrl.incoming_data_type["name"], "All Stages", ctrl.decimal_places);
             ctrl.is_enough_data_for_plots = true;
@@ -163,6 +166,18 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
       this.notify.error("Error", err.message);
     });
   }
+
+  /** called when theoretical distribution in QQ Plot's dropdown is changed */
+  public selectDistributionAndDrawBoxPlot() {
+    this.plotService.retrieve_box_plot_image(this.experiment_id, this.step_no, this.selected_stage, this.scale, this.incoming_data_type["name"]).subscribe(response => {
+      const imageSrc = 'data:image/jpg;base64,' + response;
+      document.getElementById("boxPlot").setAttribute('src', imageSrc);
+      this.is_box_plot_rendered = true;
+    }, err => {
+      this.notify.error("Error", err.message);
+    });
+  }
+
 
   /** called when stage dropdown (All Stages, Stage 1 [...], Stage 2 [...], ...) in main page is changed
    *  if stage name is sth like 'final_1' or 'final_2' etc. then it represents the best result of whole process
@@ -251,6 +266,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
     this.dataAvailable = false;
     this.is_all_stages_selected = false;
     this.is_qq_plot_rendered = false;
+    this.is_box_plot_rendered = false;
     this.is_enough_data_for_plots = false;
     this.is_collapsed = true;
     this.first_render_of_page = true;

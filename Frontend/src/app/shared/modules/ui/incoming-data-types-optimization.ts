@@ -1,4 +1,4 @@
-import {Component, Input} from "@angular/core";
+import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {isNullOrUndefined} from "util";
 import {OEDAApiService} from "../api/oeda-api.service";
 import {NotificationsService} from "angular2-notifications/dist";
@@ -75,6 +75,7 @@ import {EntityService} from "../../util/entity-service";
 export class IncomingDataTypesOptimizationComponent {
   @Input() targetSystem: any;
   @Input() experiment: any;
+  @Output() optimizationDataTypeChanged = new EventEmitter();
 
   public aggregateFunctionsMetric: any;
   public aggregateFunctionsBoolean: any;
@@ -157,6 +158,17 @@ export class IncomingDataTypesOptimizationComponent {
         data_type["weight"] = undefined;
       }
     }
+
+    // propogate changes to parent component if there's at least one selected data type
+    for (let i = 0; i < this.targetSystem.incomingDataTypes.length; i++) {
+      let data_type = this.targetSystem.incomingDataTypes[i];
+      if (data_type["is_considered"] == true) {
+        this.optimizationDataTypeChanged.emit(data_type);
+        return;
+      }
+    }
+    // no dataType is selected, send null
+    this.optimizationDataTypeChanged.emit(null);
   }
 
   // check if user has selected a data coming from primary dp.

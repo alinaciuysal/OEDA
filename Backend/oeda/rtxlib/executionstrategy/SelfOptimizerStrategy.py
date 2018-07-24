@@ -9,8 +9,9 @@ def start_self_optimizer_strategy(wf):
     """ executes a self optimizing strategy """
     info("> ExecStrategy   | SelfOptimizer", Fore.CYAN)
     acquisition_method = wf.execution_strategy["acquisition_method"]
-    wf.totalExperiments = wf.execution_strategy["optimizer_iterations"]
+    optimizer_iterations = wf.execution_strategy["optimizer_iterations"]
     optimizer_iterations_in_design = wf.execution_strategy["optimizer_iterations_in_design"]
+    wf.totalExperiments = optimizer_iterations + optimizer_iterations_in_design
     info("> Optimizer      | " + acquisition_method, Fore.CYAN)
 
     # we look at the ranges the user has specified in the knobs

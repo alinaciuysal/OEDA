@@ -405,7 +405,7 @@ import {isNullOrUndefined} from "util";
                   <labeled-input inputType="number" name="Experiment Min" [model]="knobArr[knobKey]" key="min" [colSize]="2" [disabled]="true"></labeled-input>
                   <labeled-input inputType="number" name="Experiment Max" [model]="knobArr[knobKey]" key="max" [colSize]="2" [disabled]="true"></labeled-input>
                   <labeled-input inputType="number" name="Default" [model]="knobArr[knobKey]" key="default" [colSize]="2" [disabled]="true"></labeled-input>
-                  <labeled-input *ngIf="experiment.analysis.method == 'one_factor_two_values' || experiment.analysis.method == 'two_factors_one_value' || experiment.analysis.type == 'one_sample_tests' || experiment.analysis.type == 'n_sample_tests'" 
+                  <labeled-input *ngIf="experiment.analysis.type == 'two_sample_tests' || experiment.analysis.type == 'one_sample_tests' || experiment.analysis.type == 'n_sample_tests'" 
                                  inputType="number" name="Experiment Value" [model]="knobArr[knobKey]" key="target" [colSize]="2" [disabled]="true"></labeled-input>
                   <labeled-input *ngIf="experiment.analysis.type == 'factorial_tests'" inputType="number" name="Step Size" [model]="knobArr[knobKey]" key="step" [colSize]="2" [disabled]="true"></labeled-input>
                   <labeled-input-select *ngIf="experiment.analysis.type == 'factorial_tests'" name="Levels" [model]="knobArr[knobKey]" key="levels" [options]="knobArr[knobKey]['levels']" [colSize]="3" [disabled]=true></labeled-input-select>

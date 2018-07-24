@@ -311,7 +311,6 @@ export class CreateExperimentsComponent implements OnInit {
         data_type["label"] = this.originalTargetSystem.incomingDataTypes[i]["name"];
         this.data_types_for_analysis.push(data_type);
       }
-      console.log(this.originalTargetSystem.incomingDataTypes);
 
     } else {
       this.notify.error("Error", "Cannot fetch selected target system, please try again");
@@ -325,31 +324,23 @@ export class CreateExperimentsComponent implements OnInit {
     if (ctrl.experiment.analysis.type === 'two_sample_tests') {
       if (isNullOrUndefined(variable.target)) {
         ctrl.notify.error("Error", "Provide target value for changeable variable(s)");
+        return;
       } else {
         // check number of already-added variables for different analysis options
-        if (ctrl.experiment.analysis.method === 'one_factor_two_values') {
-          if (ctrl.experiment.changeableVariables.length == 2) {
-            ctrl.notify.error("Error", "2 factors have already been specified for T-test (One Variable Two Factors)");
-            return;
-          } else if (ctrl.experiment.changeableVariables.length == 1) {
-            let existingKnob = ctrl.experiment.changeableVariables[0][0];
-            if (existingKnob.name != variable.name) {
-              ctrl.notify.error("Error", "You can't add two different variables for T-test (One Variable Two Factors)");
-              return;
-            }
-          }
-          // ch. var is empty or there's one variable. check boundaries
-          if (!isNullOrUndefined(variable.target) && variable.target <= variable.max && variable.target >= variable.min) {
-            // ch. var is empty, just push
-            knobArr.push(_(variable));
-            ctrl.experiment.changeableVariables.push(knobArr);
-            return;
-          } else {
-            ctrl.notify.error("Error", "Provide valid value(s) for variable");
-            return;
-          }
+        if (ctrl.experiment.changeableVariables.length == 2) {
+          ctrl.notify.error("Error", "2 factors have already been specified for T-test");
+          return;
         }
-        // two_factors_one_value option & adding two or more variables for sequential str. are handled via addVariablesFor2FactorAndSeqTest() fcn
+        // ch. var is empty or there's one variable. check boundaries
+        if (!isNullOrUndefined(variable.target) && variable.target <= variable.max && variable.target >= variable.min) {
+          // ch. var is empty, just push
+          knobArr.push(_(variable));
+          ctrl.experiment.changeableVariables.push(knobArr);
+          return;
+        } else {
+          ctrl.notify.error("Error", "Provide valid value(s) for variable");
+          return;
+        }
       }
     } else {
       // because factorial_tests (anova) is similar to step str., we handle it here
@@ -414,17 +405,15 @@ export class CreateExperimentsComponent implements OnInit {
   // assuming that user has provided different configurations for variables and wants them to use for the selected analysis test
   addVariablesFor2FactorAndSeqTest() {
     let number_of_desired_variables: number;
-    if (this.experiment.analysis.method === 'two_factors_one_value' || this.experiment.analysis.type == 'one_sample_tests') {
-
-      if (this.experiment.analysis.method === 'two_factors_one_value')
-        number_of_desired_variables = 2;
-      else if (this.experiment.analysis.type === 'one_sample_tests')
-        number_of_desired_variables = 1;
-
-      if (this.experiment.changeableVariables.length >= number_of_desired_variables) {
-        this.notify.error("Error", "You can't exceed " + number_of_desired_variables + " variable(s) for this test");
-        return;
-      }
+    if (this.experiment.analysis.type == 'two_sample_tests') {
+      number_of_desired_variables = 2;
+    }
+    else if (this.experiment.analysis.type == 'one_sample_tests') {
+      number_of_desired_variables = 1;
+    }
+    if (this.experiment.changeableVariables.length >= number_of_desired_variables) {
+      this.notify.error("Error", "You can't exceed " + number_of_desired_variables + " variable(s) for this test");
+      return;
     }
 
     // check boundaries of selected variables
@@ -540,7 +529,7 @@ export class CreateExperimentsComponent implements OnInit {
 
     if (this.experiment.analysis.type == 'two_sample_tests') {
       // check if target system has enough factors for t-test with 2 factors
-      if (this.targetSystem.changeableVariables.length < 2 && method == 'two_factors_one_value') {
+      if (this.targetSystem.changeableVariables.length < 2) {
         this.notify.error("Error", "This target system definition does not have two changeable variables");
         return;
       }
@@ -602,7 +591,6 @@ export class CreateExperimentsComponent implements OnInit {
             }
           }
         }
-        console.log(levels);
         knob.levels = levels;
       }
       if (stage_counts.length !== 0) {
@@ -646,7 +634,6 @@ export class CreateExperimentsComponent implements OnInit {
   }
 
   public is_changeable_variable_selected(i): boolean {
-
     // checks if at least one variable is selected for proper visualization of tables
     if (isNullOrUndefined(i)) {
       for (let changeableVariable of this.targetSystem.changeableVariables) {
@@ -654,7 +641,6 @@ export class CreateExperimentsComponent implements OnInit {
           return true;
         }
       }
-      return false;
     } else {
       // just checks if variable in given index is selected or not
       let variable = this.targetSystem.changeableVariables[i];
@@ -679,12 +665,13 @@ export class CreateExperimentsComponent implements OnInit {
     if (changeableVariable.is_selected && this.experiment.analysis.type == 'factorial_tests') {
       changeableVariable.step = changeableVariable.max - changeableVariable.min;
     }
+    console.log("changeableVariable in changeable_variable_checkbox_clicked", changeableVariable);
   }
 
 
   // checks if user has added proper number of variables to the definition
   public hasErrorsAnalysis() {
-    if (this.experiment.analysis.type !== 'bayesian_opt') {
+    if (this.experiment.analysis.type !== 'bayesian_opt' && this.experiment.analysis.type !== 'no_analysis') {
       let chVarLen = this.experiment.changeableVariables.length;
       let analysis_method = this.experiment.analysis.method;
       let analysis_type = this.experiment.analysis.type;
@@ -700,14 +687,8 @@ export class CreateExperimentsComponent implements OnInit {
       }
 
       // two_sample_tests checks
-      if (chVarLen != 2) {
-        if (analysis_method == 'two_factors_one_value') {
-          this.errorButtonLabelChangeableVariables = "Select and provide 1 value for each of 2 factors";
-          return true;
-        } else if (analysis_method == 'one_factor_two_values') {
-          this.errorButtonLabelChangeableVariables = "Select and provide 2 different values for a single variable";
-          return true;
-        }
+      if (chVarLen != 2 && analysis_type == 'two_sample_tests') {
+        this.errorButtonLabelChangeableVariables = "Select and provide 2 values of changeable variables for two sample tests";
       }
 
       // so n is used for both number of factors in factorial anova & sample size for n_sample_test
@@ -754,64 +735,49 @@ export class CreateExperimentsComponent implements OnInit {
   // checks if user has selected proper number of variables for analysis tests
   // and checks if user selected at least one variable to be added to experiment.changeableVariables
   public hasErrors2FactorAndSequential() {
-    if (this.experiment.analysis.method == 'two_factors_one_value') {
-      let number_of_desired_variables = 2;
-      let nr = 0;
-      for (let chVar of this.targetSystem.changeableVariables) {
-        if (chVar["is_selected"] == true && !isNullOrUndefined(chVar["target"]))
-          nr += 1;
-        // check boundaries
-        if (chVar.target < chVar.min || chVar.target > chVar.max) {
-          this.errorButtonLabelChangeableVariables = "Provide valid value(s)";
-          return true;
-        }
+    let nr = 0;
 
-      }
-      if (nr < number_of_desired_variables || nr > number_of_desired_variables) {
-        this.errorButtonLabelChangeableVariables = "Select and provide values for " + number_of_desired_variables + " different variables";
+    for (let chVar of this.targetSystem.changeableVariables) {
+      if (chVar["is_selected"] == true && isNullOrUndefined(chVar["target"])) {
+        this.errorButtonLabelChangeableVariables = "Provide target value(s)";
+        console.log("11111111111111111");
         return true;
       }
-      return false;
-    }
-    else if (this.experiment.executionStrategy.type == 'sequential') {
-      let nr = 0;
 
-      for (let chVar of this.targetSystem.changeableVariables) {
-        if (chVar["is_selected"] == true && isNullOrUndefined(chVar["target"])) {
-          this.errorButtonLabelChangeableVariables = "Provide target value(s)";
-          return true;
-        }
-
-        // check boundaries
-        if (chVar.target < chVar.min || chVar.target > chVar.max) {
-          this.errorButtonLabelChangeableVariables = "Provide valid value(s)";
-          return true;
-        }
-
-        if (chVar["is_selected"] == true && !isNullOrUndefined(chVar["target"]))
-          nr += 1;
-      }
-      if (nr == 0 && (this.experiment.analysis.type == 'one_sample_tests' || this.experiment.analysis.type == 'n_sample_tests') ) {
-        this.errorButtonLabelChangeableVariables = "Select and provide value(s) for at least one variable";
+      // check boundaries
+      if (chVar["is_selected"] == true && (chVar.target < chVar.min || chVar.target > chVar.max)) {
+        this.errorButtonLabelChangeableVariables = "Provide valid value(s)";
+        console.log("22222222222222222");
         return true;
       }
-      return false;
+
+      if (chVar["is_selected"] == true && !isNullOrUndefined(chVar["target"]))
+        nr += 1;
     }
+    if (nr == 0) {
+      this.errorButtonLabelChangeableVariables = "Select and provide value(s) for at least one variable";
+      console.log("33333333333333");
+      return true;
+    }
+    return false;
   }
 
   // allows user to see changeable variables once necessary fields have been selected for analysis options
   public showVariables() {
     // general for all types of analysis, exec. str.
-    if (isNullOrUndefined(this.experiment.executionStrategy.sample_size) || this.experiment.executionStrategy.sample_size < 0)
+    if (isNullOrUndefined(this.experiment.executionStrategy.sample_size) || this.experiment.executionStrategy.sample_size < 0) {
       return false;
+    }
 
     // general for all types of analysis
-    if (isNullOrUndefined(this.experiment.analysis.alpha) || this.experiment.analysis.alpha <= 0 || this.experiment.analysis.alpha >= 1)
+    if (isNullOrUndefined(this.experiment.analysis.alpha) || this.experiment.analysis.alpha <= 0 || this.experiment.analysis.alpha >= 1) {
       return false;
+    }
 
     // general for all types of analysis
-    if (isNullOrUndefined(this.experiment.analysis.data_type))
+    if (isNullOrUndefined(this.experiment.analysis.data_type)) {
       return false;
+    }
 
     let analysis_type = this.experiment.analysis.type;
     if (analysis_type == 'two_sample_tests') {
@@ -841,6 +807,10 @@ export class CreateExperimentsComponent implements OnInit {
   }
 
   public analysisDataTypeChanged(data_type) {
+    this.experiment.analysis.data_type = data_type;
+  }
+
+  public optimizationDataTypeChanged(data_type) {
     this.experiment.analysis.data_type = data_type;
   }
 

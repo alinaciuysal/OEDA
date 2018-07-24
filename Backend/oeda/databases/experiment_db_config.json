@@ -1,0 +1,114 @@
+{
+  "db_type": "elasticsearch",
+  "host": "localhost",
+  "port": 9200,
+  "settings": {
+    "number_of_shards" : 1,
+    "number_of_replicas" : 1
+  },
+  "index_definitions": {
+    "experiment": {
+      "name": "experiment",
+      "index_name": "oeda_experiment_expert_mode",
+      "mappings": {
+        "experiment": {
+          "properties": {
+            "executionStrategy": {
+              "type": "nested",
+              "properties": {
+                "knobs":                   { "type": "object"  },
+                "sample_size":             { "type": "integer" },
+                "type":                    { "type": "keyword" },
+                "stages_count":            { "type": "integer" }
+              }
+            },
+            "createdDate":                  { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"},
+            "targetSystemId":           { "type": "keyword"  },
+            "variable_to_be_optimized": { "type": "keyword"  }
+          }
+        }
+      }
+    },
+    "stage": {
+      "name": "stage",
+      "index_name": "oeda_stage_expert_mode",
+      "mappings": {
+        "stage": {
+          "properties":     {
+            "experiment_id": {"type": "keyword"},
+            "number":       { "type": "integer" },
+            "knobs":        { "type": "object"  },
+            "createdDate":  { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"},
+            "stage_result": { "type": "float" }
+          }
+        }
+      }
+    },
+    "analysis": {
+      "name": "analysis",
+      "index_name": "oeda_analysis_expert_mode",
+      "mappings": {
+        "analysis": {
+          "properties": {
+            "stage_ids":   { "type": "keyword" },
+            "name":          { "type": "keyword" },
+            "result":        { "type": "object"  },
+            "anova_result":
+            {
+              "type": "nested",
+              "dynamic": true,
+              "properties": {}
+            },
+            "data_type":        { "type": "object"  },
+            "createdDate":       { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"}
+          }
+        }
+      }
+    },
+    "data_point": {
+      "name": "data_point",
+      "index_name": "oeda_data_point_expert_mode",
+      "mappings": {
+        "data_point": {
+          "properties": {
+            "stage_id": { "type": "keyword"},
+            "payload":  { "type": "object"  },
+            "createdDate":  { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"}
+          }
+        }
+      }
+    },
+    "target_system": {
+      "name": "target_system",
+      "index_name": "oeda_target_system_expert_mode",
+      "mappings": {
+        "target_system": {
+          "properties": {
+            "primary_data_provider": {
+              "type": "nested",
+              "properties": {
+                "type":          { "type": "keyword" },
+                "serializer":    { "type": "keyword" },
+                "ignore_first_n_samples":  { "type": "integer" }
+              }
+            },
+            "secondary_data_providers": {
+              "type": "nested"
+            },
+            "change_provider": {
+              "type": "nested",
+              "properties": {
+                "type":          { "type": "keyword" },
+                "serializer":    { "type": "keyword" }
+              }
+            },
+            "name":         { "type": "keyword"  },
+            "description":  { "type": "text"     },
+            "status":       { "type": "keyword"  },
+            "createdDate":      { "type": "date", "format": "yyyy-MM-dd HH||yyyy-MM-dd HH:mm||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSSSSS"}
+          }
+        }
+      }
+    }
+  }
+}

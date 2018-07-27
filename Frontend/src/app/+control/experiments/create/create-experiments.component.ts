@@ -665,7 +665,6 @@ export class CreateExperimentsComponent implements OnInit {
     if (changeableVariable.is_selected && this.experiment.analysis.type == 'factorial_tests') {
       changeableVariable.step = changeableVariable.max - changeableVariable.min;
     }
-    console.log("changeableVariable in changeable_variable_checkbox_clicked", changeableVariable);
   }
 
 
@@ -740,14 +739,12 @@ export class CreateExperimentsComponent implements OnInit {
     for (let chVar of this.targetSystem.changeableVariables) {
       if (chVar["is_selected"] == true && isNullOrUndefined(chVar["target"])) {
         this.errorButtonLabelChangeableVariables = "Provide target value(s)";
-        console.log("11111111111111111");
         return true;
       }
 
       // check boundaries
       if (chVar["is_selected"] == true && (chVar.target < chVar.min || chVar.target > chVar.max)) {
         this.errorButtonLabelChangeableVariables = "Provide valid value(s)";
-        console.log("22222222222222222");
         return true;
       }
 
@@ -756,7 +753,6 @@ export class CreateExperimentsComponent implements OnInit {
     }
     if (nr == 0) {
       this.errorButtonLabelChangeableVariables = "Select and provide value(s) for at least one variable";
-      console.log("33333333333333");
       return true;
     }
     return false;

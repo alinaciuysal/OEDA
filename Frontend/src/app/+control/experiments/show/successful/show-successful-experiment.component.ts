@@ -51,7 +51,7 @@ export class ShowSuccessfulExperimentComponent implements OnInit {
               private activated_route: ActivatedRoute,
               private router: Router,
               private notify: NotificationsService) {
-    this.decimal_places = 2;
+    this.decimal_places = 4;
 
     this.scale = "Normal";
     this.stage_details = "All Stages";

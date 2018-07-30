@@ -86,7 +86,8 @@ import * as _ from "lodash";
                     <span *ngIf="results[key]['is_selected']" style="color: #4cae4c">{{key}} *</span>
                   </td>
                   <td *ngFor="let k of get_keys(results[key])" style="padding-left: 1%">
-                      {{results[key][k]|| "&nbsp;" }}
+                    <span *ngIf='results[key][k] == undefined'>&nbsp;</span>
+                    <span *ngIf='results[key][k] != undefined'>{{results[key][k]}}</span>
                   </td>
                 </tr>
                 </tbody>
@@ -142,7 +143,7 @@ export class AnovaAnalysisComponent {
           // naming convention with backend server
           this.results = analysis["anova_result"]; // {C(x): {F: 0.2, PR(>F): 0.4} ... }
           this.ordered_keys = analysis["ordered_keys"]; // Residual, exploration_percentage etc. ordered w.r.t PR(>F)
-
+          console.log(this.results);
           // concatenate inner keys of tuples, e.g. F, PR(>F), df, eta_sq ...
           for (let key of this.ordered_keys) {
             let tuple = this.results[key];

@@ -434,7 +434,7 @@ import {isNullOrUndefined} from "util";
           <labeled-input [disabled]="true" name="Acquisition Method" [model]="experiment.executionStrategy" key="acquisition_method" [colSize]="3"></labeled-input>
 
           <!-- optimizer_iterations -->
-          <labeled-input [disabled]="true" inputType="number" name="Number of iterations for each optimizer run" [model]="experiment.executionStrategy" key="optimizer_iterations" [colSize]="3"></labeled-input>
+          <labeled-input [disabled]="true" inputType="number" name="Total number of iterations" [model]="experiment.executionStrategy" key="optimizer_iterations" [colSize]="3"></labeled-input>
 
           <!-- sample size -->
           <labeled-input [disabled]="true" inputType="number" name="Number of samples collected for each configuration" [model]="experiment.executionStrategy" key="sample_size" [colSize]="3" tooltipTitle='Number of samples to be collected from each optimization experiment'></labeled-input>

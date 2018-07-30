@@ -62,5 +62,5 @@ class TargetsListController(Resource):
         for _ in targets:
             new_targets[i]["id"] = ids[i]
             i += 1
-
+        new_targets = sorted(new_targets, key=lambda x: x["name"])
         return new_targets

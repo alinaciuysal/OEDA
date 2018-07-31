@@ -4,14 +4,14 @@
     "description": "Controls the random noise introduced to avoid giving the same routes",
     "scale": "Metric",
     "min": 0.0,
-    "max": 0.6,
+    "max": 0.3,
     "default": 0.0
   }, {
     "name": "exploration_percentage",
     "description": "Controls the ratio of smart cars used as explorers",
     "scale": "Metric",
     "min": 0.0,
-    "max": 0.6,
+    "max": 0.3,
     "default": 0.0
   }, {
     "name": "static_info_weight",

@@ -119,5 +119,5 @@ if __name__ == '__main__':
     from oeda.databases import setup_experiment_database
     setup_experiment_database("elasticsearch", "localhost", "9200")
     from oeda.service.execution_scheduler import initialize_execution_scheduler
-    initialize_execution_scheduler(10)
+    initialize_execution_scheduler(120)
     IOLoop.instance().start()

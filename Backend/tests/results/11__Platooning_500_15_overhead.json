@@ -1,0 +1,211 @@
+{
+    "experiment": {
+        "analysis": {
+            "alpha": 0.05, 
+            "data_type": {
+                "aggregateFunction": "avg", 
+                "criteria": "Minimize", 
+                "dataProviderName": "Performance", 
+                "description": "overhead of the trip", 
+                "disabled": true, 
+                "is_considered": true, 
+                "is_default": true, 
+                "name": "overhead", 
+                "scale": "Metric", 
+                "weight": 100
+            }, 
+            "inner_type": "self_optimizer", 
+            "method": "self_optimizer", 
+            "type": "bayesian_opt"
+        }, 
+        "changeableVariables": [
+            [
+                {
+                    "default": 500, 
+                    "description": "Cars try to catchup the platoon-ahead if it's closer than this value (in m.)", 
+                    "max": 3000, 
+                    "min": 10, 
+                    "name": "catchupDistance", 
+                    "scale": "Metric"
+                }
+            ]
+        ], 
+        "considered_data_types": [
+            {
+                "aggregateFunction": "avg", 
+                "criteria": "Minimize", 
+                "dataProviderName": "Performance", 
+                "description": "overhead of the trip", 
+                "disabled": true, 
+                "is_considered": true, 
+                "is_default": true, 
+                "name": "overhead", 
+                "scale": "Metric", 
+                "weight": 100
+            }
+        ], 
+        "createdDate": "2018-07-26 10:55:52.300000", 
+        "description": "catchupDistance, 5 design, 10 optimizer iterations, 500 ticks", 
+        "executionStrategy": {
+            "acquisition_method": "gp_hedge", 
+            "knobs": [
+                [
+                    {
+                        "default": 500, 
+                        "description": "Cars try to catchup the platoon-ahead if it's closer than this value (in m.)", 
+                        "max": 3000, 
+                        "min": 10, 
+                        "name": "catchupDistance", 
+                        "scale": "Metric"
+                    }
+                ]
+            ], 
+            "optimizer_iterations": 10, 
+            "optimizer_iterations_in_design": 5, 
+            "sample_size": 500, 
+            "stages_count": 15, 
+            "type": "self_optimizer"
+        }, 
+        "id": "1b20d770-d46a-db9b-734b-f080133786e7", 
+        "name": "Experiment #11 to reduce average overheads", 
+        "status": "SUCCESS", 
+        "targetSystemId": "63db4f95-cadc-9324-d875-3b38f38891e4"
+    }, 
+    "stages": [
+        {
+            "createdDate": "2018-07-26 10:55:55.136000", 
+            "experiment_id": "1b20d770-d46a-db9b-734b-f080133786e7", 
+            "knobs": {
+                "catchupDistance": 122.23049625204636
+            }, 
+            "number": 1, 
+            "stage_result": 1.530497639656067
+        }, 
+        {
+            "createdDate": "2018-07-26 12:30:13.099000", 
+            "experiment_id": "1b20d770-d46a-db9b-734b-f080133786e7", 
+            "knobs": {
+                "catchupDistance": 2999.7973792323064
+            }, 
+            "number": 13, 
+            "stage_result": 1.5361199865341186
+        }, 
+        {
+            "createdDate": "2018-07-26 12:33:51.554000", 
+            "experiment_id": "1b20d770-d46a-db9b-734b-f080133786e7", 
+            "knobs": {
+                "catchupDistance": 2999.887365513867
+            }, 
+            "number": 15, 
+            "stage_result": 1.5485068686008454
+        }, 
+        {
+            "createdDate": "2018-07-26 12:32:00.750000", 
+            "experiment_id": "1b20d770-d46a-db9b-734b-f080133786e7", 
+            "knobs": {
+                "catchupDistance": 2999.386208385297
+            }, 
+            "number": 14, 
+            "stage_result": 1.5485079982280732
+        }, 
+        {
+            "createdDate": "2018-07-26 12:15:04.933000", 
+            "experiment_id": "1b20d770-d46a-db9b-734b-f080133786e7", 
+            "knobs": {
+                "catchupDistance": 2468.9718912074636
+            }, 
+            "number": 5, 
+            "stage_result": 1.5493925542831422
+        }, 
+        {
+            "createdDate": "2018-07-26 12:24:22.699000", 
+            "experiment_id": "1b20d770-d46a-db9b-734b-f080133786e7", 
+            "knobs": {
+                "catchupDistance": 10.0
+            }, 
+            "number": 10, 
+            "stage_result": 1.5594605584144592
+        }, 
+        {
+            "createdDate": "2018-07-26 12:11:18.494000", 
+            "experiment_id": "1b20d770-d46a-db9b-734b-f080133786e7", 
+            "knobs": {
+                "catchupDistance": 2406.8905216666185
+            }, 
+            "number": 3, 
+            "stage_result": 1.5644571828842162
+        }, 
+        {
+            "createdDate": "2018-07-26 12:18:46.545000", 
+            "experiment_id": "1b20d770-d46a-db9b-734b-f080133786e7", 
+            "knobs": {
+                "catchupDistance": 10.0
+            }, 
+            "number": 7, 
+            "stage_result": 1.5670094828605654
+        }, 
+        {
+            "createdDate": "2018-07-26 12:20:41.962000", 
+            "experiment_id": "1b20d770-d46a-db9b-734b-f080133786e7", 
+            "knobs": {
+                "catchupDistance": 10.517506825464517
+            }, 
+            "number": 8, 
+            "stage_result": 1.5684057886600495
+        }, 
+        {
+            "createdDate": "2018-07-26 12:22:30.873000", 
+            "experiment_id": "1b20d770-d46a-db9b-734b-f080133786e7", 
+            "knobs": {
+                "catchupDistance": 10.0
+            }, 
+            "number": 9, 
+            "stage_result": 1.5810360739231109
+        }, 
+        {
+            "createdDate": "2018-07-26 12:16:54.832000", 
+            "experiment_id": "1b20d770-d46a-db9b-734b-f080133786e7", 
+            "knobs": {
+                "catchupDistance": 3000.0
+            }, 
+            "number": 6, 
+            "stage_result": 1.5835738434791566
+        }, 
+        {
+            "createdDate": "2018-07-26 12:13:07.531000", 
+            "experiment_id": "1b20d770-d46a-db9b-734b-f080133786e7", 
+            "knobs": {
+                "catchupDistance": 1942.3033171517898
+            }, 
+            "number": 4, 
+            "stage_result": 1.5919890677928925
+        }, 
+        {
+            "createdDate": "2018-07-26 12:09:28.457000", 
+            "experiment_id": "1b20d770-d46a-db9b-734b-f080133786e7", 
+            "knobs": {
+                "catchupDistance": 1101.003611262632
+            }, 
+            "number": 2, 
+            "stage_result": 1.6045698344707489
+        }, 
+        {
+            "createdDate": "2018-07-26 12:28:22.037000", 
+            "experiment_id": "1b20d770-d46a-db9b-734b-f080133786e7", 
+            "knobs": {
+                "catchupDistance": 10.136285837670096
+            }, 
+            "number": 12, 
+            "stage_result": 1.6052442061901093
+        }, 
+        {
+            "createdDate": "2018-07-26 12:26:17.008000", 
+            "experiment_id": "1b20d770-d46a-db9b-734b-f080133786e7", 
+            "knobs": {
+                "catchupDistance": 2999.6394716274567
+            }, 
+            "number": 11, 
+            "stage_result": 1.6192987530231475
+        }
+    ]
+}

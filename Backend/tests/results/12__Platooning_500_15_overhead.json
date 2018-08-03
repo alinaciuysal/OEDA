@@ -1,0 +1,212 @@
+{
+    "experiment": {
+        "analysis": {
+            "alpha": 0.05, 
+            "data_type": {
+                "aggregateFunction": "avg", 
+                "criteria": "Minimize", 
+                "dataProviderName": "Performance", 
+                "description": "overhead of the trip", 
+                "disabled": true, 
+                "is_considered": true, 
+                "is_default": true, 
+                "name": "overhead", 
+                "scale": "Metric", 
+                "weight": 100
+            }, 
+            "inner_type": "self_optimizer", 
+            "method": "self_optimizer", 
+            "n": 5, 
+            "type": "bayesian_opt"
+        }, 
+        "changeableVariables": [
+            [
+                {
+                    "default": 10, 
+                    "description": "Controls maximum number of cars allowed for a platoon", 
+                    "max": 250, 
+                    "min": 2, 
+                    "name": "maxVehiclesInPlatoon", 
+                    "scale": "Metric"
+                }
+            ]
+        ], 
+        "considered_data_types": [
+            {
+                "aggregateFunction": "avg", 
+                "criteria": "Minimize", 
+                "dataProviderName": "Performance", 
+                "description": "overhead of the trip", 
+                "disabled": true, 
+                "is_considered": true, 
+                "is_default": true, 
+                "name": "overhead", 
+                "scale": "Metric", 
+                "weight": 100
+            }
+        ], 
+        "createdDate": "2018-07-26 13:09:20.133000", 
+        "description": "maxVehiclesInPlatoon, 5 design, 10 optimizer iterations, 500 ticks", 
+        "executionStrategy": {
+            "acquisition_method": "gp_hedge", 
+            "knobs": [
+                [
+                    {
+                        "default": 10, 
+                        "description": "Controls maximum number of cars allowed for a platoon", 
+                        "max": 250, 
+                        "min": 2, 
+                        "name": "maxVehiclesInPlatoon", 
+                        "scale": "Metric"
+                    }
+                ]
+            ], 
+            "optimizer_iterations": 10, 
+            "optimizer_iterations_in_design": 5, 
+            "sample_size": 500, 
+            "stages_count": 15, 
+            "type": "self_optimizer"
+        }, 
+        "id": "61b42d2d-3525-7e1a-78d3-77a6c3bf5bd1", 
+        "name": "Experiment #12 to reduce average overheads", 
+        "status": "SUCCESS", 
+        "targetSystemId": "63db4f95-cadc-9324-d875-3b38f38891e4"
+    }, 
+    "stages": [
+        {
+            "createdDate": "2018-07-26 13:34:09.700000", 
+            "experiment_id": "61b42d2d-3525-7e1a-78d3-77a6c3bf5bd1", 
+            "knobs": {
+                "maxVehiclesInPlatoon": 2.0
+            }, 
+            "number": 12, 
+            "stage_result": 1.375887609243393
+        }, 
+        {
+            "createdDate": "2018-07-26 13:37:59.267000", 
+            "experiment_id": "61b42d2d-3525-7e1a-78d3-77a6c3bf5bd1", 
+            "knobs": {
+                "maxVehiclesInPlatoon": 2.0
+            }, 
+            "number": 14, 
+            "stage_result": 1.386495798587799
+        }, 
+        {
+            "createdDate": "2018-07-26 13:32:19.538000", 
+            "experiment_id": "61b42d2d-3525-7e1a-78d3-77a6c3bf5bd1", 
+            "knobs": {
+                "maxVehiclesInPlatoon": 2.0
+            }, 
+            "number": 11, 
+            "stage_result": 1.3894252920150756
+        }, 
+        {
+            "createdDate": "2018-07-26 13:36:02.383000", 
+            "experiment_id": "61b42d2d-3525-7e1a-78d3-77a6c3bf5bd1", 
+            "knobs": {
+                "maxVehiclesInPlatoon": 2.0
+            }, 
+            "number": 13, 
+            "stage_result": 1.4292114775180818
+        }, 
+        {
+            "createdDate": "2018-07-26 13:24:39.933000", 
+            "experiment_id": "61b42d2d-3525-7e1a-78d3-77a6c3bf5bd1", 
+            "knobs": {
+                "maxVehiclesInPlatoon": 2.0
+            }, 
+            "number": 8, 
+            "stage_result": 1.4322117562294006
+        }, 
+        {
+            "createdDate": "2018-07-26 13:22:47.827000", 
+            "experiment_id": "61b42d2d-3525-7e1a-78d3-77a6c3bf5bd1", 
+            "knobs": {
+                "maxVehiclesInPlatoon": 15.890540836029457
+            }, 
+            "number": 7, 
+            "stage_result": 1.5731848802566528
+        }, 
+        {
+            "createdDate": "2018-07-26 13:11:22.891000", 
+            "experiment_id": "61b42d2d-3525-7e1a-78d3-77a6c3bf5bd1", 
+            "knobs": {
+                "maxVehiclesInPlatoon": 33.32802227639219
+            }, 
+            "number": 2, 
+            "stage_result": 1.6173957653045654
+        }, 
+        {
+            "createdDate": "2018-07-26 13:09:23.186000", 
+            "experiment_id": "61b42d2d-3525-7e1a-78d3-77a6c3bf5bd1", 
+            "knobs": {
+                "maxVehiclesInPlatoon": 30.75307981569426
+            }, 
+            "number": 1, 
+            "stage_result": 1.6218516631126403
+        }, 
+        {
+            "createdDate": "2018-07-26 13:39:59.014000", 
+            "experiment_id": "61b42d2d-3525-7e1a-78d3-77a6c3bf5bd1", 
+            "knobs": {
+                "maxVehiclesInPlatoon": 169.13923942070326
+            }, 
+            "number": 15, 
+            "stage_result": 1.6831787374019624
+        }, 
+        {
+            "createdDate": "2018-07-26 13:20:43.221000", 
+            "experiment_id": "61b42d2d-3525-7e1a-78d3-77a6c3bf5bd1", 
+            "knobs": {
+                "maxVehiclesInPlatoon": 64.35478322406044
+            }, 
+            "number": 6, 
+            "stage_result": 1.6860522694587707
+        }, 
+        {
+            "createdDate": "2018-07-26 13:13:16.544000", 
+            "experiment_id": "61b42d2d-3525-7e1a-78d3-77a6c3bf5bd1", 
+            "knobs": {
+                "maxVehiclesInPlatoon": 198.2362478488877
+            }, 
+            "number": 3, 
+            "stage_result": 1.7589402301311492
+        }, 
+        {
+            "createdDate": "2018-07-26 13:29:53.340000", 
+            "experiment_id": "61b42d2d-3525-7e1a-78d3-77a6c3bf5bd1", 
+            "knobs": {
+                "maxVehiclesInPlatoon": 91.72949278959273
+            }, 
+            "number": 10, 
+            "stage_result": 1.8147559670209885
+        }, 
+        {
+            "createdDate": "2018-07-26 13:18:09.998000", 
+            "experiment_id": "61b42d2d-3525-7e1a-78d3-77a6c3bf5bd1", 
+            "knobs": {
+                "maxVehiclesInPlatoon": 126.24496077014274
+            }, 
+            "number": 5, 
+            "stage_result": 1.9082158904075623
+        }, 
+        {
+            "createdDate": "2018-07-26 13:15:38.790000", 
+            "experiment_id": "61b42d2d-3525-7e1a-78d3-77a6c3bf5bd1", 
+            "knobs": {
+                "maxVehiclesInPlatoon": 128.76586237617153
+            }, 
+            "number": 4, 
+            "stage_result": 1.9310040266513824
+        }, 
+        {
+            "createdDate": "2018-07-26 13:26:35.532000", 
+            "experiment_id": "61b42d2d-3525-7e1a-78d3-77a6c3bf5bd1", 
+            "knobs": {
+                "maxVehiclesInPlatoon": 250.0
+            }, 
+            "number": 9, 
+            "stage_result": 2.1000061795711518
+        }
+    ]
+}

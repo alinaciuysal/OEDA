@@ -1,0 +1,1456 @@
+{
+    "experiment": {
+        "analysis": {
+            "alpha": 0.05, 
+            "data_type": {
+                "aggregateFunction": "avg", 
+                "criteria": "Minimize", 
+                "dataProviderName": "Performance", 
+                "description": "overhead of the trip", 
+                "disabled": true, 
+                "is_considered": true, 
+                "is_default": true, 
+                "name": "overhead", 
+                "scale": "Metric", 
+                "weight": 100
+            }, 
+            "inner_type": "self_optimizer", 
+            "method": "self_optimizer", 
+            "type": "bayesian_opt"
+        }, 
+        "changeableVariables": [
+            [
+                {
+                    "default": 10, 
+                    "description": "Controls maximum number of cars allowed for a platoon", 
+                    "max": 250, 
+                    "min": 2, 
+                    "name": "maxVehiclesInPlatoon", 
+                    "scale": "Metric"
+                }
+            ], 
+            [
+                {
+                    "default": 500, 
+                    "description": "Cars try to catchup the platoon-ahead if it's closer than this value (in m.)", 
+                    "max": 3000, 
+                    "min": 10, 
+                    "name": "catchupDistance", 
+                    "scale": "Metric"
+                }
+            ], 
+            [
+                {
+                    "default": 500, 
+                    "description": "Gap (in m.) below which cars are considered as a platoon", 
+                    "max": 3000, 
+                    "min": 10, 
+                    "name": "maxPlatoonGap", 
+                    "scale": "Metric"
+                }
+            ], 
+            [
+                {
+                    "default": 10, 
+                    "description": "Time (in secs.) until a car which maintains a distance larger than maxPlatoonGap from its leader within the platoon is split off", 
+                    "max": 350, 
+                    "min": 1, 
+                    "name": "platoonSplitTime", 
+                    "scale": "Metric"
+                }
+            ], 
+            [
+                {
+                    "default": 3000, 
+                    "description": "Distance (in m.) that is used to determine a car's joining condition to a platoon (if car's arrival position is within the arrival interval of a platoon)", 
+                    "max": 3000, 
+                    "min": 5, 
+                    "name": "joinDistance", 
+                    "scale": "Metric"
+                }
+            ]
+        ], 
+        "considered_data_types": [
+            {
+                "aggregateFunction": "avg", 
+                "criteria": "Minimize", 
+                "dataProviderName": "Performance", 
+                "description": "overhead of the trip", 
+                "disabled": true, 
+                "is_considered": true, 
+                "is_default": true, 
+                "name": "overhead", 
+                "scale": "Metric", 
+                "weight": 100
+            }
+        ], 
+        "createdDate": "2018-08-02 17:20:23.195000", 
+        "description": "Same configuration with Experiment #10", 
+        "executionStrategy": {
+            "acquisition_method": "gp_hedge", 
+            "knobs": [
+                [
+                    {
+                        "default": 10, 
+                        "description": "Controls maximum number of cars allowed for a platoon", 
+                        "max": 250, 
+                        "min": 2, 
+                        "name": "maxVehiclesInPlatoon", 
+                        "scale": "Metric"
+                    }
+                ], 
+                [
+                    {
+                        "default": 500, 
+                        "description": "Cars try to catchup the platoon-ahead if it's closer than this value (in m.)", 
+                        "max": 3000, 
+                        "min": 10, 
+                        "name": "catchupDistance", 
+                        "scale": "Metric"
+                    }
+                ], 
+                [
+                    {
+                        "default": 500, 
+                        "description": "Gap (in m.) below which cars are considered as a platoon", 
+                        "max": 3000, 
+                        "min": 10, 
+                        "name": "maxPlatoonGap", 
+                        "scale": "Metric"
+                    }
+                ], 
+                [
+                    {
+                        "default": 10, 
+                        "description": "Time (in secs.) until a car which maintains a distance larger than maxPlatoonGap from its leader within the platoon is split off", 
+                        "max": 350, 
+                        "min": 1, 
+                        "name": "platoonSplitTime", 
+                        "scale": "Metric"
+                    }
+                ], 
+                [
+                    {
+                        "default": 3000, 
+                        "description": "Distance (in m.) that is used to determine a car's joining condition to a platoon (if car's arrival position is within the arrival interval of a platoon)", 
+                        "max": 3000, 
+                        "min": 5, 
+                        "name": "joinDistance", 
+                        "scale": "Metric"
+                    }
+                ]
+            ], 
+            "optimizer_iterations": 80, 
+            "optimizer_iterations_in_design": 20, 
+            "sample_size": 500, 
+            "stages_count": 100, 
+            "type": "self_optimizer"
+        }, 
+        "id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+        "name": "Experiment #25 with Platooning to reduce average overheads", 
+        "status": "SUCCESS", 
+        "targetSystemId": "63db4f95-cadc-9324-d875-3b38f38891e4"
+    }, 
+    "stages": [
+        {
+            "createdDate": "2018-08-02 18:22:08.770000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 10.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 25, 
+            "stage_result": 1.350527938604355
+        }, 
+        {
+            "createdDate": "2018-08-02 19:21:23.758000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 48, 
+            "stage_result": 1.3521602172851563
+        }, 
+        {
+            "createdDate": "2018-08-02 18:19:30.722000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 24, 
+            "stage_result": 1.3523251538276673
+        }, 
+        {
+            "createdDate": "2018-08-02 20:24:27.532000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 74, 
+            "stage_result": 1.3525314297676083
+        }, 
+        {
+            "createdDate": "2018-08-02 19:19:09.858000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 47, 
+            "stage_result": 1.352763023614883
+        }, 
+        {
+            "createdDate": "2018-08-02 20:12:59.918000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 1928.8403361526202, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 69, 
+            "stage_result": 1.3528312356472016
+        }, 
+        {
+            "createdDate": "2018-08-02 20:17:31.383000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 71, 
+            "stage_result": 1.3534501667022705
+        }, 
+        {
+            "createdDate": "2018-08-02 19:13:42.039000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 167.07111893213747
+            }, 
+            "number": 45, 
+            "stage_result": 1.3541204054355622
+        }, 
+        {
+            "createdDate": "2018-08-02 19:59:22.288000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 63, 
+            "stage_result": 1.3543248322010042
+        }, 
+        {
+            "createdDate": "2018-08-02 20:10:45.777000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 68, 
+            "stage_result": 1.354504400730133
+        }, 
+        {
+            "createdDate": "2018-08-02 18:32:08.617000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 1053.3831376920075, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 193.40935794619986, 
+                "maxVehiclesInPlatoon": 78.6124649245432, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 29, 
+            "stage_result": 1.3548066666126253
+        }, 
+        {
+            "createdDate": "2018-08-02 19:23:34.999000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 95.46461586030037
+            }, 
+            "number": 49, 
+            "stage_result": 1.3549607968330384
+        }, 
+        {
+            "createdDate": "2018-08-02 19:47:48.378000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 10.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 58, 
+            "stage_result": 1.3549853129386902
+        }, 
+        {
+            "createdDate": "2018-08-02 19:11:24.563000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 44, 
+            "stage_result": 1.3551747903823852
+        }, 
+        {
+            "createdDate": "2018-08-02 20:15:15.268000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 70, 
+            "stage_result": 1.355466409921646
+        }, 
+        {
+            "createdDate": "2018-08-02 21:14:54.396000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.000000000000083, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 96, 
+            "stage_result": 1.3558036301136016
+        }, 
+        {
+            "createdDate": "2018-08-02 21:19:39.730000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 115.86674828432864, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 98, 
+            "stage_result": 1.3563868687152862
+        }, 
+        {
+            "createdDate": "2018-08-02 20:41:00.962000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 10.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 122.282194397515
+            }, 
+            "number": 82, 
+            "stage_result": 1.3564108345508579
+        }, 
+        {
+            "createdDate": "2018-08-02 21:02:48.755000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 91, 
+            "stage_result": 1.3564155712127686
+        }, 
+        {
+            "createdDate": "2018-08-02 18:24:25.956000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 10.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 26, 
+            "stage_result": 1.3574029200077058
+        }, 
+        {
+            "createdDate": "2018-08-02 18:58:40.454000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 855.0730533675529, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 2724.344086395841, 
+                "maxVehiclesInPlatoon": 228.087269302046, 
+                "platoonSplitTime": 114.27699061881216
+            }, 
+            "number": 39, 
+            "stage_result": 1.3574641854763032
+        }, 
+        {
+            "createdDate": "2018-08-02 19:01:14.194000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 2926.455165466355, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 36.14543870747666, 
+                "platoonSplitTime": 67.27327270175674
+            }, 
+            "number": 40, 
+            "stage_result": 1.3575961432456973
+        }, 
+        {
+            "createdDate": "2018-08-02 19:40:06.636000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 88.88727995064247
+            }, 
+            "number": 55, 
+            "stage_result": 1.357924561738968
+        }, 
+        {
+            "createdDate": "2018-08-02 20:28:45.048000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 10.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 79.10873710643892
+            }, 
+            "number": 76, 
+            "stage_result": 1.358045892238617
+        }, 
+        {
+            "createdDate": "2018-08-02 19:52:30.228000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 60, 
+            "stage_result": 1.3582120850086212
+        }, 
+        {
+            "createdDate": "2018-08-02 18:50:18.481000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 36, 
+            "stage_result": 1.358281534910202
+        }, 
+        {
+            "createdDate": "2018-08-02 18:27:10.947000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 10.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 27, 
+            "stage_result": 1.3584706633090975
+        }, 
+        {
+            "createdDate": "2018-08-02 19:37:11.485000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 10.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 198.57541489976694, 
+                "platoonSplitTime": 85.49337849381736
+            }, 
+            "number": 54, 
+            "stage_result": 1.3588950581550596
+        }, 
+        {
+            "createdDate": "2018-08-02 21:00:29.719000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 90, 
+            "stage_result": 1.3590078108310701
+        }, 
+        {
+            "createdDate": "2018-08-02 20:30:46.493000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 166.22967228681088
+            }, 
+            "number": 77, 
+            "stage_result": 1.3591675493717197
+        }, 
+        {
+            "createdDate": "2018-08-02 19:57:07.490000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 62, 
+            "stage_result": 1.3592286789417267
+        }, 
+        {
+            "createdDate": "2018-08-02 18:34:43.668000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 30, 
+            "stage_result": 1.3595841677188871
+        }, 
+        {
+            "createdDate": "2018-08-02 19:54:47.896000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 61, 
+            "stage_result": 1.3597462391853332
+        }, 
+        {
+            "createdDate": "2018-08-02 20:48:16.812000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 85, 
+            "stage_result": 1.3604729359149932
+        }, 
+        {
+            "createdDate": "2018-08-02 21:05:15.494000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 111.6097319431118, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 92, 
+            "stage_result": 1.3606022856235505
+        }, 
+        {
+            "createdDate": "2018-08-02 20:08:31.372000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 67, 
+            "stage_result": 1.3609611167907716
+        }, 
+        {
+            "createdDate": "2018-08-02 20:22:08.908000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 18.70133479072446
+            }, 
+            "number": 73, 
+            "stage_result": 1.3610280244350432
+        }, 
+        {
+            "createdDate": "2018-08-02 19:08:19.708000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 10.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 43, 
+            "stage_result": 1.3610665128231048
+        }, 
+        {
+            "createdDate": "2018-08-02 18:42:00.664000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 10.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 33, 
+            "stage_result": 1.361148107290268
+        }, 
+        {
+            "createdDate": "2018-08-02 21:24:31.986000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 115.36582811235564, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 100, 
+            "stage_result": 1.361777724981308
+        }, 
+        {
+            "createdDate": "2018-08-02 19:34:57.780000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 1264.9113775754809, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 191.61171135702958
+            }, 
+            "number": 53, 
+            "stage_result": 1.361778795003891
+        }, 
+        {
+            "createdDate": "2018-08-02 21:17:15.165000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 97, 
+            "stage_result": 1.362534608364105
+        }, 
+        {
+            "createdDate": "2018-08-02 20:19:54.181000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 72, 
+            "stage_result": 1.3627138183116911
+        }, 
+        {
+            "createdDate": "2018-08-02 20:03:59.775000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 65, 
+            "stage_result": 1.363100179195404
+        }, 
+        {
+            "createdDate": "2018-08-02 20:01:45.175000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 64, 
+            "stage_result": 1.3636367983818054
+        }, 
+        {
+            "createdDate": "2018-08-02 19:42:21.408000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 88.36520909218456
+            }, 
+            "number": 56, 
+            "stage_result": 1.3636894793510437
+        }, 
+        {
+            "createdDate": "2018-08-02 18:29:43.251000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 10.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 28, 
+            "stage_result": 1.3647199945449828
+        }, 
+        {
+            "createdDate": "2018-08-02 20:45:46.386000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 84, 
+            "stage_result": 1.3658725116252899
+        }, 
+        {
+            "createdDate": "2018-08-02 19:44:49.239000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 10.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 173.48094981102037
+            }, 
+            "number": 57, 
+            "stage_result": 1.3660240876674652
+        }, 
+        {
+            "createdDate": "2018-08-02 20:36:46.907000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 121.7553114602362, 
+                "platoonSplitTime": 188.15005836665472
+            }, 
+            "number": 80, 
+            "stage_result": 1.3666237533092498
+        }, 
+        {
+            "createdDate": "2018-08-02 20:06:13.110000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 1995.7353019416964, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 66, 
+            "stage_result": 1.3675057861804962
+        }, 
+        {
+            "createdDate": "2018-08-02 20:55:42.277000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 88, 
+            "stage_result": 1.367869743824005
+        }, 
+        {
+            "createdDate": "2018-08-02 20:53:05.484000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 87, 
+            "stage_result": 1.368370642185211
+        }, 
+        {
+            "createdDate": "2018-08-02 20:58:01.333000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 2084.551416745283, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 89, 
+            "stage_result": 1.3686059491634368
+        }, 
+        {
+            "createdDate": "2018-08-02 21:21:58.942000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 1580.6638951765733, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 99, 
+            "stage_result": 1.3688228075504305
+        }, 
+        {
+            "createdDate": "2018-08-02 21:10:04.005000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 94, 
+            "stage_result": 1.3690823984146119
+        }, 
+        {
+            "createdDate": "2018-08-02 19:31:51.013000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 139.8331278134684
+            }, 
+            "number": 52, 
+            "stage_result": 1.3692219831943513
+        }, 
+        {
+            "createdDate": "2018-08-02 18:17:20.728000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 2127.052507416517, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 1029.149150417586, 
+                "maxVehiclesInPlatoon": 66.5915509045874, 
+                "platoonSplitTime": 339.29550162146217
+            }, 
+            "number": 23, 
+            "stage_result": 1.3695594406127929
+        }, 
+        {
+            "createdDate": "2018-08-02 21:12:26.973000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 1592.9674355881143, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 95, 
+            "stage_result": 1.3705553739070893
+        }, 
+        {
+            "createdDate": "2018-08-02 20:50:42.095000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 2067.4703634663433, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 86, 
+            "stage_result": 1.3728704164028167
+        }, 
+        {
+            "createdDate": "2018-08-02 18:14:32.929000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 36.08534941299842, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 196.71847710353885, 
+                "platoonSplitTime": 326.2872080995061
+            }, 
+            "number": 22, 
+            "stage_result": 1.377286972761154
+        }, 
+        {
+            "createdDate": "2018-08-02 18:55:38.212000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 238.67264627668746
+            }, 
+            "number": 38, 
+            "stage_result": 1.3784092557430268
+        }, 
+        {
+            "createdDate": "2018-08-02 21:07:34.847000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 106.77282228879041, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 93, 
+            "stage_result": 1.37896871137619
+        }, 
+        {
+            "createdDate": "2018-08-02 20:38:46.174000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 462.9528928990591, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 39.441381309932446
+            }, 
+            "number": 81, 
+            "stage_result": 1.3835886282920837
+        }, 
+        {
+            "createdDate": "2018-08-02 20:43:11.874000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 123.41995779311983, 
+                "maxPlatoonGap": 2009.882094932624, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 83, 
+            "stage_result": 1.3847614653110505
+        }, 
+        {
+            "createdDate": "2018-08-02 18:37:09.088000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 2682.072469991977, 
+                "joinDistance": 126.27955515214764, 
+                "maxPlatoonGap": 189.19144737078298, 
+                "maxVehiclesInPlatoon": 161.8228192637265, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 31, 
+            "stage_result": 1.3997583096027375
+        }, 
+        {
+            "createdDate": "2018-08-02 20:26:40.242000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 10.0, 
+                "joinDistance": 302.27268673679816, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 75, 
+            "stage_result": 1.4019141011238099
+        }, 
+        {
+            "createdDate": "2018-08-02 17:38:52.670000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 873.6838206928954, 
+                "joinDistance": 198.8147336600436, 
+                "maxPlatoonGap": 2918.5131708400545, 
+                "maxVehiclesInPlatoon": 66.5886019903823, 
+                "platoonSplitTime": 248.39050781294125
+            }, 
+            "number": 8, 
+            "stage_result": 1.4151542780399322
+        }, 
+        {
+            "createdDate": "2018-08-02 19:03:37.468000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 2597.7101698388624, 
+                "joinDistance": 117.7284601651106, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 69.34490915086225
+            }, 
+            "number": 41, 
+            "stage_result": 1.416112702846527
+        }, 
+        {
+            "createdDate": "2018-08-02 20:32:51.768000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 10.0, 
+                "joinDistance": 280.051497531812, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 276.9844474815046
+            }, 
+            "number": 78, 
+            "stage_result": 1.4162536046504974
+        }, 
+        {
+            "createdDate": "2018-08-02 18:39:33.892000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 927.9596598998636, 
+                "joinDistance": 274.78748047833903, 
+                "maxPlatoonGap": 21.179300154692854, 
+                "maxVehiclesInPlatoon": 57.47368337052337, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 32, 
+            "stage_result": 1.4223862397670746
+        }, 
+        {
+            "createdDate": "2018-08-02 17:30:59.417000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 1330.3057846148831, 
+                "joinDistance": 131.87239167862805, 
+                "maxPlatoonGap": 414.0702420979337, 
+                "maxVehiclesInPlatoon": 30.443595919487525, 
+                "platoonSplitTime": 189.01932271468942
+            }, 
+            "number": 5, 
+            "stage_result": 1.4436994607448579
+        }, 
+        {
+            "createdDate": "2018-08-02 19:16:32.162000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 2939.0449970721247, 
+                "joinDistance": 352.40419747410346, 
+                "maxPlatoonGap": 1786.5299711003852, 
+                "maxVehiclesInPlatoon": 190.94234875300344, 
+                "platoonSplitTime": 250.95352655094425
+            }, 
+            "number": 46, 
+            "stage_result": 1.4464304027557373
+        }, 
+        {
+            "createdDate": "2018-08-02 18:12:04.755000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 10.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 21, 
+            "stage_result": 1.4572252781391142
+        }, 
+        {
+            "createdDate": "2018-08-02 18:53:11.440000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 2585.9400185175678, 
+                "joinDistance": 294.25995848915846, 
+                "maxPlatoonGap": 294.1899198849151, 
+                "maxVehiclesInPlatoon": 83.7300270919119, 
+                "platoonSplitTime": 138.28947187848854
+            }, 
+            "number": 37, 
+            "stage_result": 1.46674120593071
+        }, 
+        {
+            "createdDate": "2018-08-02 18:47:25.937000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 360.5459675806414, 
+                "maxPlatoonGap": 10.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 35, 
+            "stage_result": 1.4694025480747224
+        }, 
+        {
+            "createdDate": "2018-08-02 20:34:47.760000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 3000.0, 
+                "joinDistance": 396.22975711621115, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 250.0, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 79, 
+            "stage_result": 1.4890466051101685
+        }, 
+        {
+            "createdDate": "2018-08-02 18:45:06.284000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 93.05444384669403, 
+                "joinDistance": 467.1059792852191, 
+                "maxPlatoonGap": 1011.5358775501188, 
+                "maxVehiclesInPlatoon": 40.33270601548798, 
+                "platoonSplitTime": 1.0
+            }, 
+            "number": 34, 
+            "stage_result": 1.4926876678466798
+        }, 
+        {
+            "createdDate": "2018-08-02 19:50:00.990000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 10.0, 
+                "joinDistance": 5.0, 
+                "maxPlatoonGap": 3000.0, 
+                "maxVehiclesInPlatoon": 2.0, 
+                "platoonSplitTime": 277.89342765933435
+            }, 
+            "number": 59, 
+            "stage_result": 1.5081365089416503
+        }, 
+        {
+            "createdDate": "2018-08-02 17:33:45.769000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 892.4675111871533, 
+                "joinDistance": 513.351530492283, 
+                "maxPlatoonGap": 197.4314905440131, 
+                "maxVehiclesInPlatoon": 199.39190046288263, 
+                "platoonSplitTime": 129.805504401223
+            }, 
+            "number": 6, 
+            "stage_result": 1.5201138906478884
+        }, 
+        {
+            "createdDate": "2018-08-02 17:25:35.181000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 1691.854749969064, 
+                "joinDistance": 577.8934735661925, 
+                "maxPlatoonGap": 930.157932256464, 
+                "maxVehiclesInPlatoon": 176.20962252620305, 
+                "platoonSplitTime": 202.9361794216542
+            }, 
+            "number": 3, 
+            "stage_result": 1.5678767194747925
+        }, 
+        {
+            "createdDate": "2018-08-02 17:36:04.242000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 649.3492508322917, 
+                "joinDistance": 886.2455034820752, 
+                "maxPlatoonGap": 784.9376196331721, 
+                "maxVehiclesInPlatoon": 128.69936347975846, 
+                "platoonSplitTime": 135.26994094859737
+            }, 
+            "number": 7, 
+            "stage_result": 1.6061955199241638
+        }, 
+        {
+            "createdDate": "2018-08-02 17:53:34.591000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 1528.4989546243046, 
+                "joinDistance": 805.7613441076318, 
+                "maxPlatoonGap": 826.6072972402511, 
+                "maxVehiclesInPlatoon": 196.79191187367522, 
+                "platoonSplitTime": 8.570250541407626
+            }, 
+            "number": 14, 
+            "stage_result": 1.6155171382427216
+        }, 
+        {
+            "createdDate": "2018-08-02 19:06:02.290000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 231.43878125408312, 
+                "joinDistance": 1367.2894940672068, 
+                "maxPlatoonGap": 319.7835855788949, 
+                "maxVehiclesInPlatoon": 101.42552291745221, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 42, 
+            "stage_result": 1.6421747250556948
+        }, 
+        {
+            "createdDate": "2018-08-02 18:01:46.636000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 147.51244198025927, 
+                "joinDistance": 1718.4428892570184, 
+                "maxPlatoonGap": 2351.87645144468, 
+                "maxVehiclesInPlatoon": 26.503417767331108, 
+                "platoonSplitTime": 340.23461896622564
+            }, 
+            "number": 17, 
+            "stage_result": 1.6445725817680357
+        }, 
+        {
+            "createdDate": "2018-08-02 19:29:27.627000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 832.3099411902057, 
+                "joinDistance": 2171.350452764822, 
+                "maxPlatoonGap": 161.20263544066637, 
+                "maxVehiclesInPlatoon": 19.41757944961557, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 51, 
+            "stage_result": 1.6446556725502015
+        }, 
+        {
+            "createdDate": "2018-08-02 17:51:21.145000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 673.6384628404523, 
+                "joinDistance": 717.4574518031451, 
+                "maxPlatoonGap": 361.52808862138306, 
+                "maxVehiclesInPlatoon": 94.6758406772351, 
+                "platoonSplitTime": 171.14366615609742
+            }, 
+            "number": 13, 
+            "stage_result": 1.6475233254432677
+        }, 
+        {
+            "createdDate": "2018-08-02 17:20:31.278000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 2497.461164065379, 
+                "joinDistance": 1768.0609953690373, 
+                "maxPlatoonGap": 1205.4849690481021, 
+                "maxVehiclesInPlatoon": 86.13034587687743, 
+                "platoonSplitTime": 3.090012402886511
+            }, 
+            "number": 1, 
+            "stage_result": 1.6533623716831207
+        }, 
+        {
+            "createdDate": "2018-08-02 18:03:49.517000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 2439.653795671971, 
+                "joinDistance": 1219.434787116187, 
+                "maxPlatoonGap": 1511.0300430686302, 
+                "maxVehiclesInPlatoon": 95.49608939206435, 
+                "platoonSplitTime": 36.998500579510655
+            }, 
+            "number": 18, 
+            "stage_result": 1.7124105184078215
+        }, 
+        {
+            "createdDate": "2018-08-02 17:46:24.656000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 1864.2844098255518, 
+                "joinDistance": 984.0352672814564, 
+                "maxPlatoonGap": 1857.0881690566237, 
+                "maxVehiclesInPlatoon": 224.7486940192617, 
+                "platoonSplitTime": 282.84070971098845
+            }, 
+            "number": 11, 
+            "stage_result": 1.7137350158691407
+        }, 
+        {
+            "createdDate": "2018-08-02 17:41:10.823000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 651.4943917245413, 
+                "joinDistance": 920.6906896962697, 
+                "maxPlatoonGap": 1043.4238306265167, 
+                "maxVehiclesInPlatoon": 83.71810468802896, 
+                "platoonSplitTime": 49.11076766033569
+            }, 
+            "number": 9, 
+            "stage_result": 1.7157962415218353
+        }, 
+        {
+            "createdDate": "2018-08-02 17:56:10.099000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 2505.6863916497273, 
+                "joinDistance": 2090.67529239311, 
+                "maxPlatoonGap": 1789.7174449475415, 
+                "maxVehiclesInPlatoon": 237.54815249543753, 
+                "platoonSplitTime": 183.18623812642576
+            }, 
+            "number": 15, 
+            "stage_result": 1.7317590081691743
+        }, 
+        {
+            "createdDate": "2018-08-02 18:06:42.311000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 719.2498662337496, 
+                "joinDistance": 1512.9142284621419, 
+                "maxPlatoonGap": 86.35075344588674, 
+                "maxVehiclesInPlatoon": 225.90638757520543, 
+                "platoonSplitTime": 84.92655997555802
+            }, 
+            "number": 19, 
+            "stage_result": 1.736209874391556
+        }, 
+        {
+            "createdDate": "2018-08-02 17:43:43.858000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 2741.5402519808385, 
+                "joinDistance": 779.23746504538, 
+                "maxPlatoonGap": 1218.9079733410838, 
+                "maxVehiclesInPlatoon": 166.530842899805, 
+                "platoonSplitTime": 275.373361902025
+            }, 
+            "number": 10, 
+            "stage_result": 1.7410033235549927
+        }, 
+        {
+            "createdDate": "2018-08-02 17:48:40.930000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 545.9708176988295, 
+                "joinDistance": 2268.2469592568295, 
+                "maxPlatoonGap": 781.1824193878831, 
+                "maxVehiclesInPlatoon": 101.249261029067, 
+                "platoonSplitTime": 68.91168504434825
+            }, 
+            "number": 12, 
+            "stage_result": 1.7579261496067047
+        }, 
+        {
+            "createdDate": "2018-08-02 17:22:49.218000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 2234.8402194953196, 
+                "joinDistance": 1385.445614960142, 
+                "maxPlatoonGap": 2464.6370576086056, 
+                "maxVehiclesInPlatoon": 152.7263133983594, 
+                "platoonSplitTime": 54.02161647441474
+            }, 
+            "number": 2, 
+            "stage_result": 1.7994273097515106
+        }, 
+        {
+            "createdDate": "2018-08-02 17:27:53.999000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 2877.267272832581, 
+                "joinDistance": 2869.174402438967, 
+                "maxPlatoonGap": 1523.931702426198, 
+                "maxVehiclesInPlatoon": 234.1466209138557, 
+                "platoonSplitTime": 48.31337444837171
+            }, 
+            "number": 4, 
+            "stage_result": 1.820340653181076
+        }, 
+        {
+            "createdDate": "2018-08-02 17:58:37.710000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 1645.3090688122281, 
+                "joinDistance": 2663.7157051214244, 
+                "maxPlatoonGap": 2799.3295197013776, 
+                "maxVehiclesInPlatoon": 99.98640520012437, 
+                "platoonSplitTime": 317.8467077044018
+            }, 
+            "number": 16, 
+            "stage_result": 1.8797368211746215
+        }, 
+        {
+            "createdDate": "2018-08-02 18:09:04.957000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 229.2269188982842, 
+                "joinDistance": 2541.5521179529233, 
+                "maxPlatoonGap": 1930.46439369654, 
+                "maxVehiclesInPlatoon": 98.44808891683554, 
+                "platoonSplitTime": 118.17991834215835
+            }, 
+            "number": 20, 
+            "stage_result": 1.8864031324386596
+        }, 
+        {
+            "createdDate": "2018-08-02 19:26:04.025000", 
+            "experiment_id": "6662b732-3fa2-7a0e-01dd-790bd9b8a111", 
+            "knobs": {
+                "catchupDistance": 23.89467096511663, 
+                "joinDistance": 3000.0, 
+                "maxPlatoonGap": 77.6963399690474, 
+                "maxVehiclesInPlatoon": 165.61035829023785, 
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 50, 
+            "stage_result": 2.044851394891739
+        }
+    ]
+}

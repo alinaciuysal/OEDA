@@ -11,7 +11,7 @@ import {EntityService} from "../../util/entity-service";
       <div class="panel panel-default chartJs">
         <div class="panel-heading">
           <div class="card-title">
-            <div class="title pull-left">Incoming Data Types for Analysis</div>
+            <div class="title pull-left">Incoming Data Types</div>
           </div>
         </div>
         <div class="panel-body">

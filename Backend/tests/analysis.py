@@ -1,6 +1,17 @@
 from oeda.databases import setup_experiment_database, setup_user_database, db
 from collections import defaultdict
 from oeda.analysis.factorial_tests import FactorialAnova
+import json
+import os
+import shutil
+
+
+def delete_files(path):
+    for root, dirs, files in os.walk(path):
+        for f in files:
+            os.unlink(os.path.join(root, f))
+        for d in dirs:
+            shutil.rmtree(os.path.join(root, d))
 
 # there are >= 2 samples for anova
 def start_anova(id):
@@ -63,10 +74,37 @@ def iterate_anova_tables(aov_table, aov_table_sqr):
     return dd
 
 if __name__ == '__main__':
+    delete_files("./results")
+
     # setup_user_database()
     setup_experiment_database("elasticsearch", "localhost", 9200)
-    # id = "6dc62e9c-3625-85ca-657e-3b06cc269828"
-    # stage_ids = ["6dc62e9c-3625-85ca-657e-3b06cc269828#1", "6dc62e9c-3625-85ca-657e-3b06cc269828#2", "6dc62e9c-3625-85ca-657e-3b06cc269828#3", "6dc62e9c-3625-85ca-657e-3b06cc269828#4"]
+    experiment_ids = db().get_experiments()[0]
+
+    for exp_id in experiment_ids:
+        experiment = db().get_experiment(exp_id)
+        file_name = str(experiment["name"]).split("Experiment #")[1][:2].rstrip() + "_"
+
+        targetSystemId = experiment["targetSystemId"]
+        ts = db().get_target(targetSystemId)
+        if "Platooning" in ts["name"]:
+            file_name += "_Platooning_"
+        elif "CrowdNav" in ts["name"]:
+            file_name += "_CrowdNav_"
+
+        file_name += str(experiment["executionStrategy"]["sample_size"]) + "_"
+        file_name += str(experiment["executionStrategy"]["stages_count"]) + "_"
+        file_name += str(experiment["analysis"]["data_type"]["name"])
+
+
+        out_json = {}
+        out_json["experiment"] = experiment
+
+        stage_ids, stages = db().get_stages(exp_id)
+        stages = sorted(stages, key=lambda k: k['stage_result'])
+        out_json["stages"] = stages
+        with open('./results/' + file_name + '.json', 'w') as outfile:
+            json.dump(out_json, outfile, sort_keys=True, indent=4, ensure_ascii=False)
+
     # retrieved = db().get_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name="two-way-anova")
     # print(retrieved)
     #

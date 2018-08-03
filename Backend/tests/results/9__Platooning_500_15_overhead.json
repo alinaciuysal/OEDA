@@ -1,0 +1,211 @@
+{
+    "experiment": {
+        "analysis": {
+            "alpha": 0.05, 
+            "data_type": {
+                "aggregateFunction": "avg", 
+                "criteria": "Minimize", 
+                "dataProviderName": "Performance", 
+                "description": "overhead of the trip", 
+                "disabled": true, 
+                "is_considered": true, 
+                "is_default": true, 
+                "name": "overhead", 
+                "scale": "Metric", 
+                "weight": 100
+            }, 
+            "inner_type": "self_optimizer", 
+            "method": "self_optimizer", 
+            "type": "bayesian_opt"
+        }, 
+        "changeableVariables": [
+            [
+                {
+                    "default": 500, 
+                    "description": "Gap (in m.) below which cars are considered as a platoon", 
+                    "max": 3000, 
+                    "min": 10, 
+                    "name": "maxPlatoonGap", 
+                    "scale": "Metric"
+                }
+            ]
+        ], 
+        "considered_data_types": [
+            {
+                "aggregateFunction": "avg", 
+                "criteria": "Minimize", 
+                "dataProviderName": "Performance", 
+                "description": "overhead of the trip", 
+                "disabled": true, 
+                "is_considered": true, 
+                "is_default": true, 
+                "name": "overhead", 
+                "scale": "Metric", 
+                "weight": 100
+            }
+        ], 
+        "createdDate": "2018-07-25 22:09:39.924000", 
+        "description": "maxPlatoonGap, 5 design, 10 optimizer iterations, 500 ticks", 
+        "executionStrategy": {
+            "acquisition_method": "gp_hedge", 
+            "knobs": [
+                [
+                    {
+                        "default": 500, 
+                        "description": "Gap (in m.) below which cars are considered as a platoon", 
+                        "max": 3000, 
+                        "min": 10, 
+                        "name": "maxPlatoonGap", 
+                        "scale": "Metric"
+                    }
+                ]
+            ], 
+            "optimizer_iterations": 10, 
+            "optimizer_iterations_in_design": 5, 
+            "sample_size": 500, 
+            "stages_count": 15, 
+            "type": "self_optimizer"
+        }, 
+        "id": "6f5d6488-f188-ec00-e162-f1ec8f0225b4", 
+        "name": "Experiment #9 to reduce average overheads", 
+        "status": "SUCCESS", 
+        "targetSystemId": "63db4f95-cadc-9324-d875-3b38f38891e4"
+    }, 
+    "stages": [
+        {
+            "createdDate": "2018-07-25 22:09:45.467000", 
+            "experiment_id": "6f5d6488-f188-ec00-e162-f1ec8f0225b4", 
+            "knobs": {
+                "maxPlatoonGap": 1371.5279641303005
+            }, 
+            "number": 1, 
+            "stage_result": 1.3529382727146149
+        }, 
+        {
+            "createdDate": "2018-07-25 22:22:30.399000", 
+            "experiment_id": "6f5d6488-f188-ec00-e162-f1ec8f0225b4", 
+            "knobs": {
+                "maxPlatoonGap": 2999.8458125774814
+            }, 
+            "number": 7, 
+            "stage_result": 1.3539697904586792
+        }, 
+        {
+            "createdDate": "2018-07-25 22:11:51.998000", 
+            "experiment_id": "6f5d6488-f188-ec00-e162-f1ec8f0225b4", 
+            "knobs": {
+                "maxPlatoonGap": 2591.1121048592845
+            }, 
+            "number": 2, 
+            "stage_result": 1.3543325564861297
+        }, 
+        {
+            "createdDate": "2018-07-25 22:35:10.472000", 
+            "experiment_id": "6f5d6488-f188-ec00-e162-f1ec8f0225b4", 
+            "knobs": {
+                "maxPlatoonGap": 10.239211774547984
+            }, 
+            "number": 13, 
+            "stage_result": 1.3549561212062835
+        }, 
+        {
+            "createdDate": "2018-07-25 22:39:30.011000", 
+            "experiment_id": "6f5d6488-f188-ec00-e162-f1ec8f0225b4", 
+            "knobs": {
+                "maxPlatoonGap": 10.0
+            }, 
+            "number": 15, 
+            "stage_result": 1.3563095867633819
+        }, 
+        {
+            "createdDate": "2018-07-25 22:24:34.873000", 
+            "experiment_id": "6f5d6488-f188-ec00-e162-f1ec8f0225b4", 
+            "knobs": {
+                "maxPlatoonGap": 2999.8853251197484
+            }, 
+            "number": 8, 
+            "stage_result": 1.3585058488845825
+        }, 
+        {
+            "createdDate": "2018-07-25 22:13:55.394000", 
+            "experiment_id": "6f5d6488-f188-ec00-e162-f1ec8f0225b4", 
+            "knobs": {
+                "maxPlatoonGap": 1625.330087737764
+            }, 
+            "number": 3, 
+            "stage_result": 1.3585322940349578
+        }, 
+        {
+            "createdDate": "2018-07-25 22:30:52.696000", 
+            "experiment_id": "6f5d6488-f188-ec00-e162-f1ec8f0225b4", 
+            "knobs": {
+                "maxPlatoonGap": 10.0
+            }, 
+            "number": 11, 
+            "stage_result": 1.3590198788642887
+        }, 
+        {
+            "createdDate": "2018-07-25 22:16:08.733000", 
+            "experiment_id": "6f5d6488-f188-ec00-e162-f1ec8f0225b4", 
+            "knobs": {
+                "maxPlatoonGap": 592.07129405968
+            }, 
+            "number": 4, 
+            "stage_result": 1.35935861825943
+        }, 
+        {
+            "createdDate": "2018-07-25 22:18:11.293000", 
+            "experiment_id": "6f5d6488-f188-ec00-e162-f1ec8f0225b4", 
+            "knobs": {
+                "maxPlatoonGap": 2352.0259869937877
+            }, 
+            "number": 5, 
+            "stage_result": 1.3593794972896576
+        }, 
+        {
+            "createdDate": "2018-07-25 22:37:18.766000", 
+            "experiment_id": "6f5d6488-f188-ec00-e162-f1ec8f0225b4", 
+            "knobs": {
+                "maxPlatoonGap": 10.161196150719848
+            }, 
+            "number": 14, 
+            "stage_result": 1.3593972856998446
+        }, 
+        {
+            "createdDate": "2018-07-25 22:28:45.430000", 
+            "experiment_id": "6f5d6488-f188-ec00-e162-f1ec8f0225b4", 
+            "knobs": {
+                "maxPlatoonGap": 10.0
+            }, 
+            "number": 10, 
+            "stage_result": 1.3596539063453674
+        }, 
+        {
+            "createdDate": "2018-07-25 22:20:27.907000", 
+            "experiment_id": "6f5d6488-f188-ec00-e162-f1ec8f0225b4", 
+            "knobs": {
+                "maxPlatoonGap": 10.194136813854689
+            }, 
+            "number": 6, 
+            "stage_result": 1.3628670864105226
+        }, 
+        {
+            "createdDate": "2018-07-25 22:33:03.009000", 
+            "experiment_id": "6f5d6488-f188-ec00-e162-f1ec8f0225b4", 
+            "knobs": {
+                "maxPlatoonGap": 10.0
+            }, 
+            "number": 12, 
+            "stage_result": 1.3686095488071441
+        }, 
+        {
+            "createdDate": "2018-07-25 22:26:38.437000", 
+            "experiment_id": "6f5d6488-f188-ec00-e162-f1ec8f0225b4", 
+            "knobs": {
+                "maxPlatoonGap": 3000.0
+            }, 
+            "number": 9, 
+            "stage_result": 1.407989639520645
+        }
+    ]
+}

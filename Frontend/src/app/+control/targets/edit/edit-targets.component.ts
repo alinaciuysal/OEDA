@@ -62,7 +62,7 @@ export class EditTargetsComponent implements OnInit {
     ];
 
     const ctrl = this;
-    this.layout.setHeader("Target System", "");
+    this.layout.setHeader("Create / Edit Target System Definition", "");
     this.route.params.subscribe((params: Params) => {
       if (params['id']) {
         ctrl.pageTitle = "Edit Target System";

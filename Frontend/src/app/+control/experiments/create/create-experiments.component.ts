@@ -45,7 +45,7 @@ export class CreateExperimentsComponent implements OnInit {
     this.originalExperiment = _(this.experiment);
     this.defaultAlpha = 0.05; // default value to be added when an analysis is selected
     this.defaultTTestEffectSize = 0.7;
-    this.defaultTTestSampleSize = 25;
+    this.defaultTTestSampleSize = 1000;
     this.is_collapsed = true;
   }
 
@@ -142,10 +142,12 @@ export class CreateExperimentsComponent implements OnInit {
 
       // set default values
       this.experiment.analysis.type = "3_phase";
-      this.experiment.analysis.sample_size = 15; // same with the one in entityService's ExecutionStrategy.sample_size
+      this.experiment.analysis.sample_size = 500; // same with the one in entityService's ExecutionStrategy.sample_size
       this.experiment.analysis.n = this.targetSystem.changeableVariables.length; // set number of factor's default value
-      this.experiment.analysis.nrOfImportantFactors = Math.round(Number(this.experiment.analysis.n / 3));
-      this.experiment.analysis.anovaAlpha = this.defaultAlpha;
+      // this.experiment.analysis.nrOfImportantFactors = Math.round(Number(this.experiment.analysis.n / 3));
+      // this.experiment.analysis.anovaAlpha = this.defaultAlpha;
+      this.experiment.analysis.nrOfImportantFactors = 3;
+      this.experiment.analysis.anovaAlpha = 0.0005;
       this.experiment.analysis.tTestAlpha = this.defaultAlpha;
       this.experiment.analysis.tTestEffectSize = this.defaultTTestEffectSize;
       this.experiment.analysis.tTestSampleSize = this.defaultTTestSampleSize;

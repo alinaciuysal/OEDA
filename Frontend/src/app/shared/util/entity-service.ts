@@ -223,11 +223,11 @@ export class EntityService {
   public create_execution_strategy(): ExecutionStrategy {
     return {
       type: "",
-      sample_size: 15,
+      sample_size: 500,
       knobs: [],
       stages_count: 0,
       acquisition_method: "",
-      optimizer_iterations: 10,
+      optimizer_iterations: 15,
     }
   }
 

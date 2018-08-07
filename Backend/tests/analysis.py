@@ -4,7 +4,7 @@ from oeda.analysis.factorial_tests import FactorialAnova
 import json
 import os
 import shutil
-
+import errno
 
 def delete_files(path):
     for root, dirs, files in os.walk(path):
@@ -12,6 +12,14 @@ def delete_files(path):
             os.unlink(os.path.join(root, f))
         for d in dirs:
             shutil.rmtree(os.path.join(root, d))
+
+def make_sure_path_exists(path):
+    try:
+        os.makedirs(path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
+
 
 # there are >= 2 samples for anova
 def start_anova(id):
@@ -75,35 +83,48 @@ def iterate_anova_tables(aov_table, aov_table_sqr):
 
 if __name__ == '__main__':
     delete_files("./results")
+    make_sure_path_exists("./results/crowdnav")
+    make_sure_path_exists("./results/platooning")
 
-    # setup_user_database()
     setup_experiment_database("elasticsearch", "localhost", 9200)
     experiment_ids = db().get_experiments()[0]
 
+    crowdnav_results = []
+    platooning_results = []
     for exp_id in experiment_ids:
         experiment = db().get_experiment(exp_id)
-        file_name = str(experiment["name"]).split("Experiment #")[1][:2].rstrip() + "_"
+        if str(experiment["status"]) != "RUNNING":
+            file_name = str(experiment["name"]).split("Experiment #")[1][:2].rstrip() + "_"
+            print(file_name, experiment["status"])
 
-        targetSystemId = experiment["targetSystemId"]
-        ts = db().get_target(targetSystemId)
-        if "Platooning" in ts["name"]:
-            file_name += "_Platooning_"
-        elif "CrowdNav" in ts["name"]:
-            file_name += "_CrowdNav_"
-
-        file_name += str(experiment["executionStrategy"]["sample_size"]) + "_"
-        file_name += str(experiment["executionStrategy"]["stages_count"]) + "_"
-        file_name += str(experiment["analysis"]["data_type"]["name"])
+            targetSystemId = experiment["targetSystemId"]
+            ts = db().get_target(targetSystemId)
+            file_name += str(experiment["executionStrategy"]["sample_size"]) + "_"
+            file_name += str(experiment["executionStrategy"]["stages_count"]) + "_"
+            file_name += str(experiment["analysis"]["data_type"]["name"])
 
 
-        out_json = {}
-        out_json["experiment"] = experiment
+            out_json = {}
+            out_json["fn"] = file_name
+            out_json["experiment"] = experiment
 
-        stage_ids, stages = db().get_stages(exp_id)
-        stages = sorted(stages, key=lambda k: k['stage_result'])
-        out_json["stages"] = stages
-        with open('./results/' + file_name + '.json', 'w') as outfile:
-            json.dump(out_json, outfile, sort_keys=True, indent=4, ensure_ascii=False)
+            stage_ids, stages = db().get_stages(exp_id)
+            stages = sorted(stages, key=lambda k: k['stage_result'])
+            out_json["stages"] = stages
+            if "Platooning" in ts["name"]:
+                platooning_results.append(out_json)
+            elif "CrowdNav" in ts["name"]:
+                crowdnav_results.append(out_json)
+
+    for res1 in platooning_results:
+        fn = res1["fn"]
+        with open('./results/platooning/' + str(fn) + '.json', 'w') as outfile:
+            json.dump(res1, outfile, sort_keys=True, indent=4, ensure_ascii=False)
+
+    for res2 in crowdnav_results:
+        fn = res2["fn"]
+        with open('./results/crowdnav/' + str(fn) + '.json', 'w') as outfile2:
+            json.dump(res2, outfile2, sort_keys=True, indent=4, ensure_ascii=False)
 
     # retrieved = db().get_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name="two-way-anova")
     # print(retrieved)

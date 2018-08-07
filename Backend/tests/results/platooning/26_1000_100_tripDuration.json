@@ -149,6 +149,7 @@
         "status": "SUCCESS", 
         "targetSystemId": "63db4f95-cadc-9324-d875-3b38f38891e4"
     }, 
+    "fn": "26_1000_100_tripDuration", 
     "stages": [
         {
             "createdDate": "2018-08-03 04:05:49.813000", 

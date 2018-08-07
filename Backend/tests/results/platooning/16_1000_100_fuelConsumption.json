@@ -149,6 +149,7 @@
         "status": "SUCCESS", 
         "targetSystemId": "63db4f95-cadc-9324-d875-3b38f38891e4"
     }, 
+    "fn": "16_1000_100_fuelConsumption", 
     "stages": [
         {
             "createdDate": "2018-07-31 21:43:51.842000", 

@@ -1,0 +1,31 @@
+{
+    "nrOfExperiments": 63, 
+    "platooning": {
+        "nrOfExperiments": 39, 
+        "ttest": {
+            "failed": 1, 
+            "effect_size": 13, 
+            "pvalue": 0, 
+            "passed": 25
+        }, 
+        "anova": {
+            "failed": 0, 
+            "size_error": 0, 
+            "passed": 39
+        }
+    }, 
+    "crowdnav": {
+        "nrOfExperiments": 24, 
+        "ttest": {
+            "failed": 10, 
+            "effect_size": 9, 
+            "pvalue": 0, 
+            "passed": 0
+        }, 
+        "anova": {
+            "failed": 4, 
+            "size_error": 1, 
+            "passed": 19
+        }
+    }
+}

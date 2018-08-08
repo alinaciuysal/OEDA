@@ -1,0 +1,720 @@
+{
+    "experiment": {
+        "analysis": {
+            "alpha": 0.05, 
+            "data_type": {
+                "aggregateFunction": "avg", 
+                "criteria": "Minimize", 
+                "dataProviderName": "Trips", 
+                "description": "overhead of the trips", 
+                "disabled": true, 
+                "is_considered": true, 
+                "name": "overhead", 
+                "scale": "Metric", 
+                "weight": 100
+            }, 
+            "inner_type": "self_optimizer", 
+            "method": "self_optimizer", 
+            "type": "bayesian_opt"
+        }, 
+        "changeableVariables": [
+            [
+                {
+                    "default": 0, 
+                    "description": "Controls the random noise introduced to avoid giving the same routes", 
+                    "max": 0.3, 
+                    "min": 0, 
+                    "name": "route_randomization", 
+                    "scale": "Metric"
+                }
+            ], 
+            [
+                {
+                    "default": 0.2, 
+                    "description": "Controls the ratio of smart cars used as explorers", 
+                    "max": 0.3, 
+                    "min": 0, 
+                    "name": "exploration_percentage", 
+                    "scale": "Metric"
+                }
+            ], 
+            [
+                {
+                    "default": 1, 
+                    "description": "Controls the importance of static information (i.e. max speed, street length) on routing", 
+                    "max": 2.5, 
+                    "min": 1, 
+                    "name": "static_info_weight", 
+                    "scale": "Metric"
+                }
+            ], 
+            [
+                {
+                    "default": 1, 
+                    "description": "Controls the importance of static information (i.e. observed traffic) on routing", 
+                    "max": 2.5, 
+                    "min": 1, 
+                    "name": "dynamic_info_weight", 
+                    "scale": "Metric"
+                }
+            ], 
+            [
+                {
+                    "default": 5, 
+                    "description": "Controls the degree of exploration of the explorers", 
+                    "max": 20, 
+                    "min": 5, 
+                    "name": "exploration_weight", 
+                    "scale": "Metric"
+                }
+            ], 
+            [
+                {
+                    "default": 100, 
+                    "description": "Threshold for considering traffic-related data as stale and disregard them", 
+                    "max": 700, 
+                    "min": 100, 
+                    "name": "data_freshness_threshold", 
+                    "scale": "Metric"
+                }
+            ], 
+            [
+                {
+                    "default": 60, 
+                    "description": "Controls how often the router should be invoked to re-route a smart car", 
+                    "max": 70, 
+                    "min": 10, 
+                    "name": "re_routing_frequency", 
+                    "scale": "Metric"
+                }
+            ]
+        ], 
+        "considered_data_types": [
+            {
+                "aggregateFunction": "avg", 
+                "criteria": "Minimize", 
+                "dataProviderName": "Trips", 
+                "description": "overhead of the trips", 
+                "disabled": true, 
+                "is_considered": true, 
+                "name": "overhead", 
+                "scale": "Metric", 
+                "weight": 100
+            }
+        ], 
+        "createdDate": "2018-08-07 21:00:18.884000", 
+        "description": "35 iterations, 28 for design, 500 sample per stage, scikit", 
+        "executionStrategy": {
+            "acquisition_method": "gp_hedge", 
+            "knobs": [
+                [
+                    {
+                        "default": 0, 
+                        "description": "Controls the random noise introduced to avoid giving the same routes", 
+                        "max": 0.3, 
+                        "min": 0, 
+                        "name": "route_randomization", 
+                        "scale": "Metric"
+                    }
+                ], 
+                [
+                    {
+                        "default": 0.2, 
+                        "description": "Controls the ratio of smart cars used as explorers", 
+                        "max": 0.3, 
+                        "min": 0, 
+                        "name": "exploration_percentage", 
+                        "scale": "Metric"
+                    }
+                ], 
+                [
+                    {
+                        "default": 1, 
+                        "description": "Controls the importance of static information (i.e. max speed, street length) on routing", 
+                        "max": 2.5, 
+                        "min": 1, 
+                        "name": "static_info_weight", 
+                        "scale": "Metric"
+                    }
+                ], 
+                [
+                    {
+                        "default": 1, 
+                        "description": "Controls the importance of static information (i.e. observed traffic) on routing", 
+                        "max": 2.5, 
+                        "min": 1, 
+                        "name": "dynamic_info_weight", 
+                        "scale": "Metric"
+                    }
+                ], 
+                [
+                    {
+                        "default": 5, 
+                        "description": "Controls the degree of exploration of the explorers", 
+                        "max": 20, 
+                        "min": 5, 
+                        "name": "exploration_weight", 
+                        "scale": "Metric"
+                    }
+                ], 
+                [
+                    {
+                        "default": 100, 
+                        "description": "Threshold for considering traffic-related data as stale and disregard them", 
+                        "max": 700, 
+                        "min": 100, 
+                        "name": "data_freshness_threshold", 
+                        "scale": "Metric"
+                    }
+                ], 
+                [
+                    {
+                        "default": 60, 
+                        "description": "Controls how often the router should be invoked to re-route a smart car", 
+                        "max": 70, 
+                        "min": 10, 
+                        "name": "re_routing_frequency", 
+                        "scale": "Metric"
+                    }
+                ]
+            ], 
+            "optimizer_iterations": 7, 
+            "optimizer_iterations_in_design": 28, 
+            "sample_size": 500, 
+            "stages_count": 35, 
+            "type": "self_optimizer"
+        }, 
+        "id": "588fc8fc-a415-da04-815e-345e16306a92", 
+        "name": "Experiment #38 with CrowdNav to reduce average overheads", 
+        "status": "SUCCESS", 
+        "targetSystemId": "2d69f82d-cf27-29d4-0063-fcf01aebd861"
+    }, 
+    "fn": "38_500_35_overhead", 
+    "stages": [
+        {
+            "createdDate": "2018-08-07 22:32:20.939000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 470.70627164299054, 
+                "dynamic_info_weight": 2.0972584269602033, 
+                "exploration_percentage": 0.1154335828451633, 
+                "exploration_weight": 18.09991487598836, 
+                "re_routing_frequency": 53.87501794331654, 
+                "route_randomization": 0.13910130111803495, 
+                "static_info_weight": 2.2732100755748057
+            }, 
+            "number": 23, 
+            "stage_result": 1.9917748746871948
+        }, 
+        {
+            "createdDate": "2018-08-07 22:44:27.681000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 616.6184833799696, 
+                "dynamic_info_weight": 1.9778062454419727, 
+                "exploration_percentage": 0.02724013053284197, 
+                "exploration_weight": 18.042438272965782, 
+                "re_routing_frequency": 42.53513118478791, 
+                "route_randomization": 0.2043237648234015, 
+                "static_info_weight": 2.06487719277391
+            }, 
+            "number": 26, 
+            "stage_result": 2.0585610139369965
+        }, 
+        {
+            "createdDate": "2018-08-07 23:06:36.141000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 464.254872928765, 
+                "dynamic_info_weight": 2.1116393914440255, 
+                "exploration_percentage": 0.11449499572704003, 
+                "exploration_weight": 11.081882476768492, 
+                "re_routing_frequency": 48.43198251395824, 
+                "route_randomization": 0.11352666419942045, 
+                "static_info_weight": 2.252885723582517
+            }, 
+            "number": 32, 
+            "stage_result": 2.0764943437576293
+        }, 
+        {
+            "createdDate": "2018-08-07 21:00:28.504000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 631.4468252796275, 
+                "dynamic_info_weight": 2.409555296036496, 
+                "exploration_percentage": 0.16458513479099496, 
+                "exploration_weight": 8.056588386012995, 
+                "re_routing_frequency": 18.602769893050194, 
+                "route_randomization": 0.10965267893003809, 
+                "static_info_weight": 1.5067517030957833
+            }, 
+            "number": 1, 
+            "stage_result": 2.0826321675777435
+        }, 
+        {
+            "createdDate": "2018-08-07 23:10:02.461000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 499.46179266300726, 
+                "dynamic_info_weight": 1.8318350789158864, 
+                "exploration_percentage": 0.15636986925657978, 
+                "exploration_weight": 9.335146119345152, 
+                "re_routing_frequency": 10.285035931615004, 
+                "route_randomization": 0.21800559671488265, 
+                "static_info_weight": 1.8223320964682534
+            }, 
+            "number": 33, 
+            "stage_result": 2.097504452943802
+        }, 
+        {
+            "createdDate": "2018-08-07 21:22:24.370000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 308.68513587644566, 
+                "dynamic_info_weight": 1.7778572112755382, 
+                "exploration_percentage": 0.01983540549833916, 
+                "exploration_weight": 15.530546188138302, 
+                "re_routing_frequency": 30.471463968160073, 
+                "route_randomization": 0.15026188309981792, 
+                "static_info_weight": 2.3272399482597224
+            }, 
+            "number": 6, 
+            "stage_result": 2.0989147515296938
+        }, 
+        {
+            "createdDate": "2018-08-07 21:45:38.591000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 494.8443223142104, 
+                "dynamic_info_weight": 1.6369356082747044, 
+                "exploration_percentage": 0.06871550255847644, 
+                "exploration_weight": 5.517073971680787, 
+                "re_routing_frequency": 34.6698146686973, 
+                "route_randomization": 0.1538411686520538, 
+                "static_info_weight": 2.1383009587968083
+            }, 
+            "number": 11, 
+            "stage_result": 2.123300331830978
+        }, 
+        {
+            "createdDate": "2018-08-07 22:39:42.663000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 520.4753099903339, 
+                "dynamic_info_weight": 1.6395349028602006, 
+                "exploration_percentage": 0.0026639230934066066, 
+                "exploration_weight": 19.24024557941433, 
+                "re_routing_frequency": 13.9069669181889, 
+                "route_randomization": 0.1466033321933282, 
+                "static_info_weight": 1.8945405583123434
+            }, 
+            "number": 25, 
+            "stage_result": 2.154224685192108
+        }, 
+        {
+            "createdDate": "2018-08-07 22:59:07.162000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 472.73839785408234, 
+                "dynamic_info_weight": 2.0709912926790124, 
+                "exploration_percentage": 0.10723561111886461, 
+                "exploration_weight": 17.677757205098793, 
+                "re_routing_frequency": 54.114176512279876, 
+                "route_randomization": 0.14723149126092486, 
+                "static_info_weight": 2.138761690141661
+            }, 
+            "number": 30, 
+            "stage_result": 2.1677428216934205
+        }, 
+        {
+            "createdDate": "2018-08-07 23:18:30.355000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 343.7808853642565, 
+                "dynamic_info_weight": 2.2404180054842158, 
+                "exploration_percentage": 0.1168678208536127, 
+                "exploration_weight": 20.0, 
+                "re_routing_frequency": 60.7162708683433, 
+                "route_randomization": 0.16750638009460259, 
+                "static_info_weight": 2.169375481390583
+            }, 
+            "number": 35, 
+            "stage_result": 2.168624094247818
+        }, 
+        {
+            "createdDate": "2018-08-07 22:51:54.278000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 211.27051926969625, 
+                "dynamic_info_weight": 1.8243308593235164, 
+                "exploration_percentage": 0.07511888201579335, 
+                "exploration_weight": 6.373718955728898, 
+                "re_routing_frequency": 61.916243494625725, 
+                "route_randomization": 0.07335820561502955, 
+                "static_info_weight": 2.1461185958559343
+            }, 
+            "number": 28, 
+            "stage_result": 2.1726209723949435
+        }, 
+        {
+            "createdDate": "2018-08-07 22:16:21.874000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 543.4521802652555, 
+                "dynamic_info_weight": 1.51083739739483, 
+                "exploration_percentage": 0.20402572230080465, 
+                "exploration_weight": 6.503352311658855, 
+                "re_routing_frequency": 64.4531041057443, 
+                "route_randomization": 0.24023931503751395, 
+                "static_info_weight": 1.659643791576866
+            }, 
+            "number": 19, 
+            "stage_result": 2.1738924548625946
+        }, 
+        {
+            "createdDate": "2018-08-07 21:50:06.246000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 646.6954381136139, 
+                "dynamic_info_weight": 1.0251016700440532, 
+                "exploration_percentage": 0.16192654848926102, 
+                "exploration_weight": 5.795362195316022, 
+                "re_routing_frequency": 49.13545155789259, 
+                "route_randomization": 0.16692743567713447, 
+                "static_info_weight": 1.8423685790704278
+            }, 
+            "number": 12, 
+            "stage_result": 2.1762173001766203
+        }, 
+        {
+            "createdDate": "2018-08-07 21:42:01.391000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 388.65938597730513, 
+                "dynamic_info_weight": 1.630811325737086, 
+                "exploration_percentage": 0.22108840293935825, 
+                "exploration_weight": 12.929420880994222, 
+                "re_routing_frequency": 61.18347716576581, 
+                "route_randomization": 0.2736827152604764, 
+                "static_info_weight": 1.3668151089150664
+            }, 
+            "number": 10, 
+            "stage_result": 2.176371119379997
+        }, 
+        {
+            "createdDate": "2018-08-07 22:09:14.490000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 251.65869649219314, 
+                "dynamic_info_weight": 1.9367828298266925, 
+                "exploration_percentage": 0.017663505575344834, 
+                "exploration_weight": 17.02706152229369, 
+                "re_routing_frequency": 38.589302469976516, 
+                "route_randomization": 0.14482116183127355, 
+                "static_info_weight": 1.3465152740127198
+            }, 
+            "number": 17, 
+            "stage_result": 2.176772890329361
+        }, 
+        {
+            "createdDate": "2018-08-07 22:19:40.357000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 640.4912782287831, 
+                "dynamic_info_weight": 2.3700442491298404, 
+                "exploration_percentage": 0.13829916453291033, 
+                "exploration_weight": 9.821984117409482, 
+                "re_routing_frequency": 37.40716128783437, 
+                "route_randomization": 0.11842559778946443, 
+                "static_info_weight": 1.8785233631898188
+            }, 
+            "number": 20, 
+            "stage_result": 2.1816463556289674
+        }, 
+        {
+            "createdDate": "2018-08-07 23:14:51.885000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 337.0481804870615, 
+                "dynamic_info_weight": 2.2695844086583152, 
+                "exploration_percentage": 0.1152420763199604, 
+                "exploration_weight": 20.0, 
+                "re_routing_frequency": 32.240008898336576, 
+                "route_randomization": 0.04168203560419193, 
+                "static_info_weight": 2.272458819813986
+            }, 
+            "number": 34, 
+            "stage_result": 2.1967626149654387
+        }, 
+        {
+            "createdDate": "2018-08-07 22:12:51.724000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 550.0384598791331, 
+                "dynamic_info_weight": 1.2905664507957122, 
+                "exploration_percentage": 0.20560993727571744, 
+                "exploration_weight": 13.906517167721669, 
+                "re_routing_frequency": 59.12917689014315, 
+                "route_randomization": 0.18768131093724624, 
+                "static_info_weight": 1.5851843474231422
+            }, 
+            "number": 18, 
+            "stage_result": 2.221699367046356
+        }, 
+        {
+            "createdDate": "2018-08-07 21:32:31.661000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 497.87403132579084, 
+                "dynamic_info_weight": 2.168583526831058, 
+                "exploration_percentage": 0.19860373715042548, 
+                "exploration_weight": 8.632135963325442, 
+                "re_routing_frequency": 11.707445115280686, 
+                "route_randomization": 0.2798595828601522, 
+                "static_info_weight": 1.3373093228139377
+            }, 
+            "number": 8, 
+            "stage_result": 2.223427576780319
+        }, 
+        {
+            "createdDate": "2018-08-07 22:05:46.813000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 503.50764133452094, 
+                "dynamic_info_weight": 1.4269047102590302, 
+                "exploration_percentage": 0.12016473167068709, 
+                "exploration_weight": 10.194485180765373, 
+                "re_routing_frequency": 63.46091158819727, 
+                "route_randomization": 0.26015706805622685, 
+                "static_info_weight": 2.378778227447814
+            }, 
+            "number": 16, 
+            "stage_result": 2.226803479552269
+        }, 
+        {
+            "createdDate": "2018-08-07 21:53:37.904000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 191.0255454062575, 
+                "dynamic_info_weight": 1.107737113524367, 
+                "exploration_percentage": 0.1652158262667313, 
+                "exploration_weight": 12.377315461455815, 
+                "re_routing_frequency": 39.932399245261905, 
+                "route_randomization": 0.11234282028059515, 
+                "static_info_weight": 1.3427921633615696
+            }, 
+            "number": 13, 
+            "stage_result": 2.2364852415323258
+        }, 
+        {
+            "createdDate": "2018-08-07 21:27:44.226000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 520.7595937262117, 
+                "dynamic_info_weight": 1.430905018673089, 
+                "exploration_percentage": 0.26322890920554043, 
+                "exploration_weight": 10.869490664062605, 
+                "re_routing_frequency": 60.42137949238305, 
+                "route_randomization": 0.11513461792514895, 
+                "static_info_weight": 1.2887170157486016
+            }, 
+            "number": 7, 
+            "stage_result": 2.248594540834427
+        }, 
+        {
+            "createdDate": "2018-08-07 21:13:39.571000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 277.10780996202186, 
+                "dynamic_info_weight": 1.0003552424001618, 
+                "exploration_percentage": 0.15588695182605775, 
+                "exploration_weight": 18.74351706787745, 
+                "re_routing_frequency": 15.339631036229228, 
+                "route_randomization": 0.05249040172662486, 
+                "static_info_weight": 2.3541105992960496
+            }, 
+            "number": 4, 
+            "stage_result": 2.251043589353561
+        }, 
+        {
+            "createdDate": "2018-08-07 23:02:35.064000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 470.2613523390272, 
+                "dynamic_info_weight": 2.1036049949842535, 
+                "exploration_percentage": 0.139552642935421, 
+                "exploration_weight": 17.70687856676671, 
+                "re_routing_frequency": 52.90370735965709, 
+                "route_randomization": 0.13921081454773207, 
+                "static_info_weight": 2.4540546940910497
+            }, 
+            "number": 31, 
+            "stage_result": 2.2758372478485107
+        }, 
+        {
+            "createdDate": "2018-08-07 22:47:59.251000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 441.10275948979313, 
+                "dynamic_info_weight": 1.3095105374985958, 
+                "exploration_percentage": 0.13689157499017326, 
+                "exploration_weight": 18.755165129279007, 
+                "re_routing_frequency": 67.28230510149733, 
+                "route_randomization": 0.22279860981994426, 
+                "static_info_weight": 2.4682100334757244
+            }, 
+            "number": 27, 
+            "stage_result": 2.31267210483551
+        }, 
+        {
+            "createdDate": "2018-08-07 21:37:59.436000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 381.4733725909365, 
+                "dynamic_info_weight": 1.0925330462847735, 
+                "exploration_percentage": 0.14078621645509226, 
+                "exploration_weight": 17.16245542647544, 
+                "re_routing_frequency": 40.94198769352701, 
+                "route_randomization": 0.1931475089460093, 
+                "static_info_weight": 2.4909850087753904
+            }, 
+            "number": 9, 
+            "stage_result": 2.348681657075882
+        }, 
+        {
+            "createdDate": "2018-08-07 22:35:30.284000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 288.03035301329453, 
+                "dynamic_info_weight": 1.2083047123999353, 
+                "exploration_percentage": 0.24438719363832165, 
+                "exploration_weight": 9.532376473987815, 
+                "re_routing_frequency": 27.258967164783304, 
+                "route_randomization": 0.023311422374227068, 
+                "static_info_weight": 1.036692052805985
+            }, 
+            "number": 24, 
+            "stage_result": 2.36167303276062
+        }, 
+        {
+            "createdDate": "2018-08-07 21:09:23.795000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 388.1573515909838, 
+                "dynamic_info_weight": 2.286389428643141, 
+                "exploration_percentage": 0.12939648719403782, 
+                "exploration_weight": 17.305585439679405, 
+                "re_routing_frequency": 63.28027894203667, 
+                "route_randomization": 0.2995601044018151, 
+                "static_info_weight": 1.0742212598086298
+            }, 
+            "number": 3, 
+            "stage_result": 2.3757878432273865
+        }, 
+        {
+            "createdDate": "2018-08-07 22:23:42.301000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 367.4217204485627, 
+                "dynamic_info_weight": 2.491540794642253, 
+                "exploration_percentage": 0.19953447585883563, 
+                "exploration_weight": 6.803418869396031, 
+                "re_routing_frequency": 16.806022064160246, 
+                "route_randomization": 0.12426918718269707, 
+                "static_info_weight": 1.1073679661574216
+            }, 
+            "number": 21, 
+            "stage_result": 2.3780637772083284
+        }, 
+        {
+            "createdDate": "2018-08-07 22:01:42.186000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 579.9014221809742, 
+                "dynamic_info_weight": 2.193592275070961, 
+                "exploration_percentage": 0.2165873043034503, 
+                "exploration_weight": 15.358917511328357, 
+                "re_routing_frequency": 60.365338859379314, 
+                "route_randomization": 0.2946575185404354, 
+                "static_info_weight": 2.371119477950015
+            }, 
+            "number": 15, 
+            "stage_result": 2.38791803252697
+        }, 
+        {
+            "createdDate": "2018-08-07 22:28:15.498000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 477.4554403483689, 
+                "dynamic_info_weight": 1.1094668260037897, 
+                "exploration_percentage": 0.21921308805572717, 
+                "exploration_weight": 11.400065192183261, 
+                "re_routing_frequency": 58.82367505463109, 
+                "route_randomization": 0.14664764721908893, 
+                "static_info_weight": 2.343572449393224
+            }, 
+            "number": 22, 
+            "stage_result": 2.416540804386139
+        }, 
+        {
+            "createdDate": "2018-08-07 21:05:15.967000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 250.26563400321876, 
+                "dynamic_info_weight": 2.272594145833718, 
+                "exploration_percentage": 0.010364678108792604, 
+                "exploration_weight": 7.033131154728359, 
+                "re_routing_frequency": 42.06041334979626, 
+                "route_randomization": 0.17339838917300762, 
+                "static_info_weight": 1.0825045353637999
+            }, 
+            "number": 2, 
+            "stage_result": 2.4327459604740143
+        }, 
+        {
+            "createdDate": "2018-08-07 22:55:14.054000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 511.6152792454936, 
+                "dynamic_info_weight": 1.9863018895316678, 
+                "exploration_percentage": 0.05323462561673061, 
+                "exploration_weight": 20.0, 
+                "re_routing_frequency": 43.57631949544169, 
+                "route_randomization": 0.08510133134588665, 
+                "static_info_weight": 2.255553953071914
+            }, 
+            "number": 29, 
+            "stage_result": 2.4591280596256255
+        }, 
+        {
+            "createdDate": "2018-08-07 21:57:28.806000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 180.07976952902413, 
+                "dynamic_info_weight": 2.48308317546873, 
+                "exploration_percentage": 0.2956767687559422, 
+                "exploration_weight": 19.705888593004772, 
+                "re_routing_frequency": 44.858528293446675, 
+                "route_randomization": 0.19436642013628522, 
+                "static_info_weight": 1.737773535367629
+            }, 
+            "number": 14, 
+            "stage_result": 2.525071113944054
+        }, 
+        {
+            "createdDate": "2018-08-07 21:18:59.668000", 
+            "experiment_id": "588fc8fc-a415-da04-815e-345e16306a92", 
+            "knobs": {
+                "data_freshness_threshold": 348.87479061567086, 
+                "dynamic_info_weight": 1.1634788744699123, 
+                "exploration_percentage": 0.15169442558493987, 
+                "exploration_weight": 11.747854977538875, 
+                "re_routing_frequency": 67.60593882250227, 
+                "route_randomization": 0.016810048624281353, 
+                "static_info_weight": 1.5100762329096478
+            }, 
+            "number": 5, 
+            "stage_result": 2.5996272830963134
+        }
+    ]
+}

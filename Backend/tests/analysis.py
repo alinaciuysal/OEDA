@@ -5,6 +5,7 @@ import json
 import os
 import shutil
 import errno
+from pprint import pprint as pp
 
 def delete_files(path):
     for root, dirs, files in os.walk(path):
@@ -93,12 +94,14 @@ if __name__ == '__main__':
     platooning_results = []
     for exp_id in experiment_ids:
         experiment = db().get_experiment(exp_id)
-        if str(experiment["status"]) != "RUNNING":
+        if str(experiment["status"]) != "RUNNING" and str(experiment["status"]) != "ERROR":
             file_name = str(experiment["name"]).split("Experiment #")[1][:2].rstrip() + "_"
             print(file_name, experiment["status"])
 
             targetSystemId = experiment["targetSystemId"]
             ts = db().get_target(targetSystemId)
+
+
             file_name += str(experiment["executionStrategy"]["sample_size"]) + "_"
             file_name += str(experiment["executionStrategy"]["stages_count"]) + "_"
             file_name += str(experiment["analysis"]["data_type"]["name"])

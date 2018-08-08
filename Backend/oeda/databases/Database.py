@@ -99,6 +99,12 @@ class Database:
         """ returns analysis result for the given stages & analysis name """
         pass
 
+    def update_target(self, target_system_id, doc):
+        pass
+
+    def update_experiment(self, experiment_id, doc):
+        pass
+
     @staticmethod
     def create_stage_id(experiment_id, stage_no):
         return str(experiment_id) + "#" + str(stage_no)

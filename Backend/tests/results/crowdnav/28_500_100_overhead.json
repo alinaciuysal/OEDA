@@ -30,7 +30,7 @@
             ], 
             [
                 {
-                    "default": 0, 
+                    "default": 0.2, 
                     "description": "Controls the ratio of smart cars used as explorers", 
                     "max": 0.3, 
                     "min": 0, 
@@ -119,7 +119,7 @@
                 ], 
                 [
                     {
-                        "default": 0, 
+                        "default": 0.2, 
                         "description": "Controls the ratio of smart cars used as explorers", 
                         "max": 0.3, 
                         "min": 0, 

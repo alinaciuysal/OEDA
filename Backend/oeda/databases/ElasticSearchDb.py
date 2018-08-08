@@ -482,3 +482,25 @@ class ElasticSearchDb(Database):
         except TransportError as err2:
             error("TransportError while retrieving analysis. Check type mappings for analysis in experiment_db_config.json.")
             raise err2
+
+    def update_target(self, target_system_id, doc):
+        body = {"doc": doc}
+        try:
+            self.es.update(index=self.target_system_index, doc_type=self.target_system_type_name, id=target_system_id, body=body)
+        except ConnectionError as err1:
+            error("ConnectionError while updating target. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while updating target. Check type mappings in experiment_db_config.json.")
+            raise err2
+
+    def update_experiment(self, experiment_id, doc):
+        body = {"doc": doc}
+        try:
+            self.es.update(index=self.experiment_index, doc_type=self.experiment_type_name, id=experiment_id, body=body)
+        except ConnectionError as err1:
+            error("ConnectionError while updating experiment. Check connection to elasticsearch.")
+            raise err1
+        except TransportError as err2:
+            error("TransportError while updating experiment. Check type mappings in experiment_db_config.json.")
+            raise err2

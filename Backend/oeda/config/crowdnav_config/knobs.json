@@ -12,7 +12,7 @@
     "scale": "Metric",
     "min": 0.0,
     "max": 0.3,
-    "default": 0.0
+    "default": 0.2
   }, {
     "name": "static_info_weight",
     "description": "Controls the importance of static information (i.e. max speed, street length) on routing",
@@ -22,7 +22,7 @@
     "default": 1.0
   }, {
     "name": "dynamic_info_weight",
-    "description": "Controls the importance of static information (i.e. observed traffic) on routing",
+    "description": "Controls the importance of dynamic information (i.e. observed traffic) on routing",
     "scale": "Metric",
     "min": 1.0,
     "max": 2.5,

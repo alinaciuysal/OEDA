@@ -1,0 +1,50 @@
+{
+    "fn": "CrowdNav - 5_5000_0_overhead", 
+    "stages": [
+        {
+            "createdDate": "2018-08-09 15:47:59.483000", 
+            "experiment_id": "5deddaab-bc34-4b46-f6a1-00bd7083d85d", 
+            "knobs": {
+                "data_freshness_threshold": 100, 
+                "dynamic_info_weight": 1, 
+                "exploration_percentage": 0.2, 
+                "exploration_weight": 5, 
+                "re_routing_frequency": 60, 
+                "route_randomization": 0, 
+                "static_info_weight": 1
+            }, 
+            "number": 1, 
+            "stage_result": 2.2620836790680885
+        }, 
+        {
+            "createdDate": "2018-08-09 16:11:35.951000", 
+            "experiment_id": "5deddaab-bc34-4b46-f6a1-00bd7083d85d", 
+            "knobs": {
+                "data_freshness_threshold": 100, 
+                "dynamic_info_weight": 1, 
+                "exploration_percentage": 0.2, 
+                "exploration_weight": 5, 
+                "re_routing_frequency": 60, 
+                "route_randomization": 0, 
+                "static_info_weight": 1
+            }, 
+            "number": 2, 
+            "stage_result": 2.2637297092437745
+        }, 
+        {
+            "createdDate": "2018-08-09 16:35:41.650000", 
+            "experiment_id": "5deddaab-bc34-4b46-f6a1-00bd7083d85d", 
+            "knobs": {
+                "data_freshness_threshold": 100, 
+                "dynamic_info_weight": 1, 
+                "exploration_percentage": 0.2, 
+                "exploration_weight": 5, 
+                "re_routing_frequency": 60, 
+                "route_randomization": 0, 
+                "static_info_weight": 1
+            }, 
+            "number": 3, 
+            "stage_result": 2.2818666899204256
+        }
+    ]
+}

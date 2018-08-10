@@ -1,8 +1,8 @@
 {
     "experiment_durations": [], 
-    "numberOfPassedExperiments": 0, 
-    "best_knobs": [], 
+    "best_results": [], 
     "optimization_percentages": [], 
     "average_experiment_duration": NaN, 
-    "average_optimization_percentage": NaN
+    "average_optimization_percentage": NaN, 
+    "numberOfExperiments": 0
 }

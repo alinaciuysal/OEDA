@@ -207,6 +207,7 @@ def extract_overall_results_for_anova_and_ttest():
         with open('./results/ttest.json', 'w') as outfile2:
             json.dump(ttest_results, outfile2, sort_keys=False, indent=4, ensure_ascii=False)
 
+
 def convert_time_difference_to_mins(tstamp1, tstamp2):
     if tstamp1 > tstamp2:
         td = tstamp1 - tstamp2
@@ -215,13 +216,12 @@ def convert_time_difference_to_mins(tstamp1, tstamp2):
     td_mins = int(round(td.total_seconds() / 60))
     return td_mins
 
+
 def calculate_results_and_flush(experiments, target_system, y_key, sample_size):
     experiments = sorted(experiments, key=lambda elem: elem[1]["result"]["effect_size"], reverse=True)
     # pp(passed_experiments)
-    # optimization percentage is directly proportional to effect size
     opt_percentages = []
-    elapsed_time = []
-    best_knobs_arr = []
+    best_results_arr = []
     for exp, t_test, last_step_number in experiments:
         experiment_id = exp["id"]
         first_data_point_of_experiment = db().get_data_points(experiment_id, 1, 1)[0]
@@ -233,34 +233,37 @@ def calculate_results_and_flush(experiments, target_system, y_key, sample_size):
         last_date = datetime.strptime(last_timestamp, "%Y-%m-%d %H:%M:%S.%f")
         first_date = datetime.strptime(first_timestamp, "%Y-%m-%d %H:%M:%S.%f")
         difference = convert_time_difference_to_mins(first_date, last_date)
-        elapsed_time.append(difference)
 
         steps_and_stages = sc.get(experiment_id=experiment_id)
         last_step_number = steps_and_stages.keys()[-1]
         default_and_best_stages = steps_and_stages[last_step_number]
+        default_and_best_stages.append(difference)
+        default_and_best_stages[1]["elapsed_time"] = difference
 
         assert default_and_best_stages[0]["number"] == 1
         default_config_result = default_and_best_stages[0]["stage_result"]
         assert default_and_best_stages[1]["number"] == 2
         best_config_result = default_and_best_stages[1]["stage_result"]
         best_knobs = default_and_best_stages[1]["knobs"]
-        best_knobs_arr.append(best_knobs)
+        best_results_arr.append(default_and_best_stages[1])
         opt_percentage = -1.0 * percentage_change(best_config_result, default_config_result)
         opt_percentages.append(opt_percentage)
 
     # if len(best_knobs_arr) != 0:
+    best_results_arr = sorted(best_results_arr, key=lambda elem: elem["stage_result"])
     out_json = {}
-    out_json["numberOfExperiments"] = len(best_knobs_arr)
-    out_json["best_knobs"] = best_knobs_arr
+    out_json["numberOfExperiments"] = len(best_results_arr)
+    out_json["best_results"] = best_results_arr
 
     out_json["optimization_percentages"] = opt_percentages
     out_json["average_optimization_percentage"] = np.mean(opt_percentages)
 
-    out_json["experiment_durations"] = elapsed_time
-    out_json["average_experiment_duration"] = np.mean(elapsed_time)
+    out_json["experiment_durations"] = [elem["elapsed_time"] for elem in best_results_arr]
+    out_json["average_experiment_duration"] = np.mean(out_json["experiment_durations"])
 
     with open('./results/' + target_system + '/' + str(y_key) + "_" + str(sample_size) + '.json', 'w') as outfile:
         json.dump(out_json, outfile, sort_keys=False, indent=4, ensure_ascii=False)
+
 
 def get_best_configurations(target_system, sample_size, y_key):
     passed_experiments = []
@@ -310,39 +313,65 @@ def get_best_configurations(target_system, sample_size, y_key):
         calculate_results_and_flush(not_passed_experiments, target_system, y_key, sample_size)
     else:
         calculate_results_and_flush(passed_experiments, target_system, y_key, sample_size)
+
+
+def compare_best_results_of_3_method_process_with_best_results_of_bogp(target_system, sample_size, data_type):
+    filenames = os.listdir("./results/default/" + target_system)
+    best_results_bogp = []
+    for fn in filenames:
+        if data_type in fn:
+            with open('./results/default/' + target_system + '/' + fn) as f:
+                data = json.load(f)
+                best_results_bogp.append(data)
+
+    with open('./results/' + target_system + '/' + data_type + '_' + str(sample_size) + '.json') as f2:
+        three_method_result = json.load(f2)
+
+    pp(three_method_result)
+    # for res in best_results_bogp:
+
+
+
 if __name__ == '__main__':
     setup_experiment_database("elasticsearch", "localhost", 9200)
     # extract_overall_results_for_anova_and_ttest()
+
+
+
 
     ############### Platooning ########################
     # get_best_configurations("Platooning", 500, "overhead")
     # get_best_configurations("Platooning", 1000, "overhead")
     # get_best_configurations("Platooning", 5000, "overhead")
-    #
+    # compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 500, "overhead")
+    # compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 1000, "overhead")
+    # compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 5000, "overhead")
+
     # get_best_configurations("Platooning", 500, "fuelConsumption")
     # get_best_configurations("Platooning", 1000, "fuelConsumption")
     # get_best_configurations("Platooning", 5000, "fuelConsumption")
-    #
+    # compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 500, "fuelConsumption")
+    # compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 1000, "fuelConsumption")
+
     # get_best_configurations("Platooning", 500, "tripDuration")
     # get_best_configurations("Platooning", 1000, "tripDuration")
     # get_best_configurations("Platooning", 5000, "tripDuration")
-    #
-    # get_best_configurations("Platooning", 500, "speed")
-    # get_best_configurations("Platooning", 1000, "speed")
-    # get_best_configurations("Platooning", 5000, "speed")
+    # compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 500, "tripDuration")
+    # compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 1000, "tripDuration")
+
     ############################################################
 
     ############### CrowdNav ########################
-    get_best_configurations("CrowdNav", 500, "overhead")
-    get_best_configurations("CrowdNav", 1000, "overhead")
-    get_best_configurations("CrowdNav", 2000, "overhead")
-    get_best_configurations("CrowdNav", 5000, "overhead")
-
-    get_best_configurations("CrowdNav", 500, "complaint")
-    get_best_configurations("CrowdNav", 1000, "complaint")
-    get_best_configurations("CrowdNav", 2000, "complaint")
-    get_best_configurations("CrowdNav", 5000, "complaint")
+    # get_best_configurations("CrowdNav", 500, "overhead")
+    # get_best_configurations("CrowdNav", 1000, "overhead")
+    # get_best_configurations("CrowdNav", 2000, "overhead")
+    # get_best_configurations("CrowdNav", 5000, "overhead")
+    #
+    # compare_best_results_of_3_method_process_with_best_results_of_bogp("CrowdNav", 500, "overhead")
+    # compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 1000, "overhead")
     ############################################################
+
+
 
     # file_name += str(experiment["executionStrategy"]["sample_size"]) + "_"
     # file_name += str(experiment["executionStrategy"]["stages_count"]) + "_"

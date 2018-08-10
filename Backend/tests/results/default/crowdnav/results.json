@@ -1,12 +1,20 @@
 {
-    "ttest_passed": [
-        45, 
-        45, 
-        3
+    "different_averages": [
+        6, 
+        0, 
+        0, 
+        0
     ], 
-    "ttest_total": [
+    "exp_names": [
+        "CrowdNav - 1_500_overhead", 
+        "CrowdNav - 2_1000_overhead", 
+        "CrowdNav - 5_5000_overhead", 
+        "CrowdNav - 6_2500_overhead"
+    ], 
+    "not_different_averages": [
+        39, 
         45, 
-        45, 
-        3
+        3, 
+        45
     ]
 }

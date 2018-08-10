@@ -1,20 +1,26 @@
 {
-    "ttest_passed": [
-        45, 
-        45, 
-        45, 
-        45, 
-        45, 
-        45, 
+    "different_averages": [
+        2, 
+        1, 
+        11, 
+        7, 
+        0, 
         3
     ], 
-    "ttest_total": [
-        45, 
-        45, 
-        45, 
-        45, 
-        45, 
-        45, 
-        3
+    "exp_names": [
+        "Platooning - 1_500_overhead", 
+        "Platooning - 2_1000_overhead", 
+        "Platooning - 3_1000_fuelConsumption", 
+        "Platooning - 4_500_fuelConsumption", 
+        "Platooning - 7_5000_overhead", 
+        "Platooning - 8_2500_overhead"
+    ], 
+    "not_different_averages": [
+        43, 
+        44, 
+        34, 
+        38, 
+        3, 
+        42
     ]
 }

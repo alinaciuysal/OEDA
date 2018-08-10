@@ -3,9 +3,9 @@ from collections import defaultdict
 from oeda.analysis.factorial_tests import FactorialAnova
 from oeda.analysis.one_sample_tests import ShapiroWilk, AndersonDarling, DAgostinoPearson, KolmogorovSmirnov
 from oeda.analysis.two_sample_tests import Ttest
+import statsmodels.api as sm
 import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
-from io import BytesIO
 import json
 import os
 import shutil
@@ -147,32 +147,40 @@ def get_default_config_results(experiments):
     alpha = 0.05
     make_sure_path_exists("./results/default/crowdnav")
     make_sure_path_exists("./results/default/platooning")
-    crowdnav_passed = []
-    crowdnav_total = []
+    crowdnav_different_averages = []
+    crowdnav_not_different_averages = []
+    crowdnav_exp_names = []
 
-    platooning_passed = []
-    platooning_total = []
+    platooning_different_averages = []
+    platooning_not_different_averages = []
+    platooning_exp_names = []
+
     for experiment in experiments:
         if "Default" in experiment["name"] and experiment["executionStrategy"]["type"] == "sequential":
             if str(experiment["status"]) != "RUNNING" and str(experiment["status"]) != "ERROR":
                 data_type = experiment["analysis"]["data_type"]["name"]
-                if data_type != 'complaint':
+                sample_size = str(experiment["executionStrategy"]["sample_size"])
+                if data_type != 'complaint' and data_type != 'tripDuration':
                     file_name = str(experiment["name"]).split("Default Run with ")[1] + "_"
-                    file_name += str(experiment["executionStrategy"]["sample_size"]) + "_"
+                    file_name += sample_size + "_"
                     file_name += data_type
-                    ttest_passed = 0
-                    ttest_failed = 0
+                    different_averages = 0
+                    not_different_averages = 0
+                    inner_index = 0
 
                     out_json = {}
                     out_json["fn"] = file_name
                     out_json["experiment"] = experiment
                     out_json["ttest"] = {}
 
+                    targetSystemId = experiment["targetSystemId"]
+                    ts = db().get_target(targetSystemId)
                     stage_ids, samples, knobs = get_tuples(experiment["id"], data_type)
                     # perform two-sample-tests
                     combinations = list(itertools.combinations(stage_ids, 2))
 
                     for comb in combinations:
+                        inner_index += 1
                         stage_id_1 = comb[0]
                         stage_id_idx_1 = stage_ids.index(stage_id_1)
                         data_points_1 = samples[stage_id_idx_1]
@@ -181,37 +189,50 @@ def get_default_config_results(experiments):
                         stage_id_idx_2 = stage_ids.index(stage_id_2)
                         data_points_2 = samples[stage_id_idx_2]
 
+                        pp_x = sm.ProbPlot(np.asarray(data_points_1))
+                        pp_y = sm.ProbPlot(np.asarray(data_points_2))
+                        fig1 = sm.qqplot_2samples(pp_x, pp_y, line='r')
+
+                        if "Platooning" in ts["name"]:
+                            fig1.savefig("./results/default/platooning/" + file_name + "_" + str(inner_index) + ".png", format='png')
+                        elif "CrowdNav" in ts["name"]:
+                            fig1.savefig("./results/default/crowdnav/" + file_name + "_" + str(inner_index) + ".png", format='png')
+                        plt.close('all')
+
                         test1 = Ttest(stage_ids=[stage_id_1, stage_id_2], y_key=data_type, alpha=alpha)
                         result = test1.run(data=[data_points_1, data_points_2], knobs=knobs)
-                        if result["different_averages"] == False:
-                            ttest_passed += 1
-                        elif result["different_averages"] == True and result["effect_size"] <= effect_size:
-                            ttest_passed += 1
+                        if result["effect_size"] > 0.2 and result["different_averages"] == True:
+                            different_averages += 1
+                            print("different", file_name, str(inner_index))
                         else:
-                            ttest_failed += 1
-                    print("exp_name:", file_name, " passed:", ttest_passed, "failed", ttest_failed)
-                    targetSystemId = experiment["targetSystemId"]
-                    ts = db().get_target(targetSystemId)
+                            not_different_averages += 1
+
+
+                    # print("exp_name:", file_name, " different_averages:", different_averages, "not_different_averages", not_different_averages)
 
                     if "Platooning" in ts["name"]:
-                        platooning_passed.append(ttest_passed)
-                        platooning_total.append(len(combinations))
+                        platooning_different_averages.append(different_averages)
+                        platooning_not_different_averages.append(not_different_averages)
+                        platooning_exp_names.append(file_name)
 
                     elif "CrowdNav" in ts["name"]:
-                        crowdnav_passed.append(ttest_passed)
-                        crowdnav_total.append(len(combinations))
+                        crowdnav_different_averages.append(different_averages)
+                        crowdnav_not_different_averages.append(not_different_averages)
+                        crowdnav_exp_names.append(file_name)
 
         platooning_results = {}
-        platooning_results["ttest_passed"] = platooning_passed
-        platooning_results["ttest_total"] = platooning_total
+        platooning_results["different_averages"] = platooning_different_averages
+        platooning_results["not_different_averages"] = platooning_not_different_averages
+        platooning_results["exp_names"] = platooning_exp_names
         with open('./results/default/platooning/results.json', 'w') as outfile:
             json.dump(platooning_results, outfile, sort_keys=True, indent=4, ensure_ascii=False)
 
         crowdnav_results = {}
-        crowdnav_results["ttest_passed"] = crowdnav_passed
-        crowdnav_results["ttest_total"] = crowdnav_total
-        with open('./results/default/crowdnav/results.json', 'w') as outfile:
-            json.dump(crowdnav_results, outfile, sort_keys=True, indent=4, ensure_ascii=False)
+        crowdnav_results["different_averages"] = crowdnav_different_averages
+        crowdnav_results["not_different_averages"] = crowdnav_not_different_averages
+        crowdnav_results["exp_names"] = crowdnav_exp_names
+        with open('./results/default/crowdnav/results.json', 'w') as outfile2:
+            json.dump(crowdnav_results, outfile2, sort_keys=True, indent=4, ensure_ascii=False)
 
 
 def draw_default_config_results(experiment_ids, incoming_data_type, ts_name):
@@ -296,6 +317,7 @@ def draw_box_plot(incoming_data_type_name, x_values, y_values, ts_name):
     plt.savefig(plot_path, bbox_inches='tight', format='png')
     plt.close()
 
+
 # http://blog.bharatbhole.com/creating-boxplots-with-matplotlib/
 def format_box_plot(ax, y_values):
     bp = ax.boxplot(y_values, showmeans=True, showfliers=False)
@@ -379,9 +401,6 @@ def get_results_of_optimization(tpl):
     print(diff)
 
 
-
-
-
 def percentage_change(optimized, default):
     if default != 0:
         return float(optimized - default) / abs(default) * 100
@@ -404,69 +423,68 @@ def flush_stage_results(tpl, y_key, ts_name):
         json.dump(out_json, outfile, sort_keys=False, indent=4, ensure_ascii=False)
 
 
-
 if __name__ == '__main__':
     setup_experiment_database("elasticsearch", "localhost", 9200)
-    # experiments = db().get_experiments()[1]
+    experiments = db().get_experiments()[1]
     # get_non_default_config_results(experiments)
 
-    # get_default_config_results(experiments)
+    get_default_config_results(experiments)
     # draw_default_config_results(experiments, "overhead", "Platooning")
     # draw_default_config_results(experiments, "fuelConsumption", "Platooning")
 
     ########################
     # crowd-nav avg overhead
-    optimized_results_1 = ("6b5776ab-1d3d-5bdf-a77a-46bb40e61afc", 93)
-    optimized_results_2 = ("5743e5b2-5545-3a9a-4d27-25a3b68771d2", 27)
+    # optimized_results_1 = ("6b5776ab-1d3d-5bdf-a77a-46bb40e61afc", 93)
+    # optimized_results_2 = ("5743e5b2-5545-3a9a-4d27-25a3b68771d2", 27)
     # get_results_of_optimization(optimized_results_1)
     # flush_stage_results(optimized_results_1, "overhead", "CrowdNav")
 
-    default_results_1 = ("6a916c78-f122-bb2c-c93f-f2304c4cb8bc", 8)
-    default_results_2 = ("e731c263-a5f2-ed44-587d-cd1c98b30aae", 4)
-    default_results_3 = ("317fe993-6186-9efa-2730-aaaa50b0d490", 2)
+    # default_results_1 = ("6a916c78-f122-bb2c-c93f-f2304c4cb8bc", 8)
+    # default_results_2 = ("e731c263-a5f2-ed44-587d-cd1c98b30aae", 4)
+    # default_results_3 = ("317fe993-6186-9efa-2730-aaaa50b0d490", 2)
     # perform_t_test(optimized_results, default_results, "overhead")
-    draw_box_plots_of_three_experiments([optimized_results_1, optimized_results_2], [default_results_1, default_results_2, default_results_3], "overhead", "CrowdNav")
+    # draw_box_plots_of_three_experiments([optimized_results_1, optimized_results_2], [default_results_1, default_results_2, default_results_3], "overhead", "CrowdNav")
     ########################
 
     ########################
     # platooning avg overhead
-    optimized_results_1 = ("e01777c1-883e-97c7-b123-0cd32a1a1d85", 81)
-    optimized_results_2 = ("cb53c88d-5a47-b61e-9080-3806293b6457", 34)
+    # optimized_results_1 = ("e01777c1-883e-97c7-b123-0cd32a1a1d85", 81)
+    # optimized_results_2 = ("cb53c88d-5a47-b61e-9080-3806293b6457", 34)
     # get_results_of_optimization(optimized_results)
     # flush_stage_results(optimized_results, "overhead", "Platooning")
 
-    default_results_1 = ("a2f7025b-0899-a207-98dd-daeebaab8b6d", 1)
-    default_results_2 = ("44cc33e4-6eea-b655-82c4-967c8c08b7f5", 8)
-    default_results_3 = ("65d8866f-37e1-e627-fd59-64a661874e2c", 9)
+    # default_results_1 = ("a2f7025b-0899-a207-98dd-daeebaab8b6d", 1)
+    # default_results_2 = ("44cc33e4-6eea-b655-82c4-967c8c08b7f5", 8)
+    # default_results_3 = ("65d8866f-37e1-e627-fd59-64a661874e2c", 9)
     # perform_t_test(optimized_results, default_results, "overhead")
-    draw_box_plots_of_three_experiments([optimized_results_1, optimized_results_2], [default_results_1, default_results_2, default_results_3], "overhead", "Platooning")
+    # draw_box_plots_of_three_experiments([optimized_results_1, optimized_results_2], [default_results_1, default_results_2, default_results_3], "overhead", "Platooning")
 
     ########################
 
     ########################
     # platooning avg fuelConsumption
-    optimized_results_1 = ("a65da561-1938-eb8a-b82a-d5c8d5a8b81c", 62)
-    optimized_results_2 = ("446dd6db-99ba-3f79-7d2e-3abb452b7542", 19)
+    # optimized_results_1 = ("a65da561-1938-eb8a-b82a-d5c8d5a8b81c", 62)
+    # optimized_results_2 = ("446dd6db-99ba-3f79-7d2e-3abb452b7542", 19)
     # flush_stage_results(optimized_results, "fuelConsumption", "Platooning")
 
     # get_results_of_optimization(optimized_results)
-    default_results_1 = ("77f422b8-1ded-7d5b-9c33-5f44cbfd64e2", 6)
-    default_results_2 = ("d35c17ac-9252-ec76-a511-ed3289a1ce0a", 4)
+    # default_results_1 = ("77f422b8-1ded-7d5b-9c33-5f44cbfd64e2", 6)
+    # default_results_2 = ("d35c17ac-9252-ec76-a511-ed3289a1ce0a", 4)
     # perform_t_test(optimized_results, default_results, "fuelConsumption")
-    draw_box_plots_of_three_experiments([optimized_results_1, optimized_results_2], [default_results_1, default_results_2], "fuelConsumption", "Platooning")
+    # draw_box_plots_of_three_experiments([optimized_results_1, optimized_results_2], [default_results_1, default_results_2], "fuelConsumption", "Platooning")
     ########################
 
     ########################
     # platooning avg tripDuration
-    optimized_results_1 = ("90683eac-48be-a806-a3fd-5e344e00c8a7", 96)
-    optimized_results_2 = ("4f39aef6-d853-6575-9994-38d2f5dc1351", 37)
+    # optimized_results_1 = ("90683eac-48be-a806-a3fd-5e344e00c8a7", 96)
+    # optimized_results_2 = ("4f39aef6-d853-6575-9994-38d2f5dc1351", 37)
     # flush_stage_results(optimized_results, "tripDuration", "Platooning")
 
     # get_results_of_optimization(optimized_results)
-    default_results_1 = ("2664b55f-a824-670d-4879-764deb07b350", 1)
-    default_results_2 = ("6049776b-c391-c37a-2c64-ac6d6b354da2", 9)
+    # default_results_1 = ("2664b55f-a824-670d-4879-764deb07b350", 1)
+    # default_results_2 = ("6049776b-c391-c37a-2c64-ac6d6b354da2", 9)
     # perform_t_test(optimized_results, default_results, "tripDuration")
-    draw_box_plots_of_three_experiments([optimized_results_1, optimized_results_2], [default_results_1, default_results_2], "tripDuration", "Platooning")
+    # draw_box_plots_of_three_experiments([optimized_results_1, optimized_results_2], [default_results_1, default_results_2], "tripDuration", "Platooning")
     ########################
 
 

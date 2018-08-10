@@ -128,7 +128,9 @@
         "createdDate": "2018-08-07 20:57:16.408000", 
         "id": "4f39aef6-d853-6575-9994-38d2f5dc1351", 
         "name": "Experiment #37 with Platooning to reduce average tripDurations"
-    }, 
+    },
+    "stage_number": 37,
+    "experiment_duration": 131,
     "stage_data": [
         {
             "stage_id": "4f39aef6-d853-6575-9994-38d2f5dc1351#37", 

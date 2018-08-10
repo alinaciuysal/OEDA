@@ -150,7 +150,9 @@
         "createdDate": "2018-08-07 02:27:04.679000", 
         "id": "e01777c1-883e-97c7-b123-0cd32a1a1d85", 
         "name": "Experiment #31 with Platooning to reduce average overheads"
-    }, 
+    },
+    "stage_number": 81,
+    "experiment_duration": 410,
     "stage_data": [
         {
             "stage_id": "e01777c1-883e-97c7-b123-0cd32a1a1d85#81", 

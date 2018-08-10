@@ -188,7 +188,9 @@
         "createdDate": "2018-08-01 20:31:43.460000", 
         "id": "6b5776ab-1d3d-5bdf-a77a-46bb40e61afc", 
         "name": "Experiment #20 with CrowdNav to reduce average overheads"
-    }, 
+    },
+    "stage_number": 93,
+    "experiment_duration": 398,
     "stage_data": [
         {
             "stage_id": "6b5776ab-1d3d-5bdf-a77a-46bb40e61afc#93", 

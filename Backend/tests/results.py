@@ -1,11 +1,14 @@
-from oeda.databases import setup_experiment_database, setup_user_database, db
-from collections import defaultdict
+from oeda.databases import setup_experiment_database, db
 from oeda.controller.stages import StageController as sc
-from oeda.controller.experiment_results import get_all_stage_data
+from oeda.analysis.two_sample_tests import Ttest
+import matplotlib.patches as mpatches
+import matplotlib.lines as mlines
+import matplotlib.pyplot as plt
 import json
 import os
 import shutil
 import numpy as np
+import pandas as pd
 from pprint import pprint as pp
 from datetime import datetime
 
@@ -315,7 +318,7 @@ def get_best_configurations(target_system, sample_size, y_key):
         calculate_results_and_flush(passed_experiments, target_system, y_key, sample_size)
 
 
-def compare_best_results_of_3_method_process_with_best_results_of_bogp(target_system, sample_size, data_type):
+def compare_best_results_of_3_method_process_with_best_results_of_bogp(target_system, sample_size, data_type, alpha=0.05):
     filenames = os.listdir("./results/default/" + target_system)
     best_results_bogp = []
     for fn in filenames:
@@ -327,37 +330,124 @@ def compare_best_results_of_3_method_process_with_best_results_of_bogp(target_sy
     with open('./results/' + target_system + '/' + data_type + '_' + str(sample_size) + '.json') as f2:
         three_method_result = json.load(f2)
 
-    pp(three_method_result)
-    # for res in best_results_bogp:
+    out_obj = {}
+    results = []
+    # take same number of result from 3-method process
+    best_three_method_results = three_method_result["best_results"][:len(best_results_bogp)]
+    best_three_method_durations = three_method_result["experiment_durations"][:len(best_results_bogp)]
+    for idx, res in enumerate(best_three_method_results):
+        experiment_id = res["experiment_id"]
+        data_points = db().get_data_points(experiment_id, res["step_no"], res["number"])
+        extracted_data_points = [d["payload"][data_type] for d in data_points]
+        stage_id = str(experiment_id) + "#" + str(res["step_no"]) + "#" + str(res["number"])
 
+        for bogp_result in best_results_bogp:
+            extracted_data_points_bogp = [d["payload"][data_type] for d in bogp_result["stage_data"]]
+            bogp_stage_id = str(bogp_result["experiment"]["id"]) + '#' + str(bogp_result["stage_number"])
+            test1 = Ttest(stage_ids=[stage_id, bogp_stage_id], y_key=data_type, alpha=alpha)
+            result = test1.run(data=[extracted_data_points, extracted_data_points_bogp], knobs=None)
+            result["3_method_average"] = np.mean(extracted_data_points)
+            result["bogp_average"] = np.mean(extracted_data_points_bogp)
 
+            # assuming that bogp results are always better than 3-method process, should be checked after generating data
+            result_difference_percentage = percentage_change(result["bogp_average"], result["3_method_average"])
+            result["result_difference_percentage"] = result_difference_percentage
+
+            # assuming that 3-method process duration is less than bogp
+            duration_difference_percentage = percentage_change(best_three_method_durations[idx], bogp_result["experiment_duration"])
+            result["duration_difference_percentage"] = duration_difference_percentage
+            pp(result)
+
+            results.append(result)
+
+    if len(results) != 0:
+        sum_duration_diff = 0
+        sum_result_diff = 0
+        for r in results:
+            sum_result_diff += r["result_difference_percentage"]
+            sum_duration_diff += r["duration_difference_percentage"]
+        out_obj["average_result_difference"] = sum_result_diff / (1.0 * len(results))
+        out_obj["average_duration_difference"] = sum_duration_diff / (1.0 * len(results))
+        out_obj["results"] = results
+
+        with open('./results/3_method_bogp_comparison/' + target_system + "_" + str(data_type) + "_" + str(sample_size) + '.json', 'w') as outfile:
+            json.dump(out_obj, outfile, sort_keys=False, indent=4, ensure_ascii=False)
+
+    # prepare data for boxplot, i.e. first plot bogp results, then 3-method results
+    x_values = []
+    y_values = []
+    for bogp_result in best_results_bogp:
+        x_values.append("SM -" + str(bogp_result["experiment"]["executionStrategy"]["stages_count"]))
+        extracted_data_points_bogp = [d["payload"][data_type] for d in bogp_result["stage_data"]]
+        y_values.append(extracted_data_points_bogp)
+
+    print(len(best_three_method_results))
+    for res2 in best_three_method_results:
+        experiment_id = res2["experiment_id"]
+        experiment = db().get_experiment(experiment_id)
+        x_values.append("3M - " + str(experiment["executionStrategy"]["optimizer_iterations"]))
+        data_points = db().get_data_points(experiment_id, res2["step_no"], res2["number"])
+        extracted_data_points = [d["payload"][data_type] for d in data_points]
+        y_values.append(extracted_data_points)
+
+    draw_box_plot(data_type, x_values, y_values, target_system, "3_method_bogp_comparison", sample_size)
+
+def draw_box_plot(incoming_data_type_name, x_values, y_values, ts_name, folder_name, sample_size):
+    # Create a figure instance
+    fig = plt.figure(1, figsize=(9, 6))
+    # Create an axes instance
+    ax = fig.add_subplot(111)
+    # Create the boxplot & format it
+    format_box_plot(ax, y_values)
+    ax.set_title('Boxplots of single-method process (SM) and 3-method process (3M), ' + str(sample_size) + " sample size")
+    ax.set_ylabel(incoming_data_type_name)
+    ax.set_xlabel("Type of process and number of optimizer iterations applied")
+    # Custom x-axis labels for respective samples
+    ax.set_xticklabels(x_values)
+    # Remove top axes and right axes ticks
+    ax.get_xaxis().tick_bottom()
+    ax.get_yaxis().tick_left()
+    median_legend = mlines.Line2D([], [], color='green', marker='^', linestyle='None',
+                                  markersize=5, label='Mean')
+    mean_legend = mpatches.Patch(color='red', label='Median')
+    plt.legend(handles=[median_legend, mean_legend])
+    # plt.xticks(rotation=45)
+    plot_path = './results/' + str(folder_name) + '/' + str(ts_name).lower() + '/comparison_' + str(incoming_data_type_name) + "_" + str(sample_size) + ".png"
+    plt.savefig(plot_path, bbox_inches='tight', format='png')
+    plt.close()
+
+# http://blog.bharatbhole.com/creating-boxplots-with-matplotlib/
+def format_box_plot(ax, y_values):
+    bp = ax.boxplot(y_values, showmeans=True, showfliers=False)
+    for median in bp['medians']:
+        median.set_color('red')
+    ## change the style of means and their fill
+    for mean in bp['means']:
+        mean.set_color('green')
 
 if __name__ == '__main__':
     setup_experiment_database("elasticsearch", "localhost", 9200)
     # extract_overall_results_for_anova_and_ttest()
 
-
-
-
     ############### Platooning ########################
     # get_best_configurations("Platooning", 500, "overhead")
     # get_best_configurations("Platooning", 1000, "overhead")
     # get_best_configurations("Platooning", 5000, "overhead")
-    # compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 500, "overhead")
-    # compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 1000, "overhead")
-    # compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 5000, "overhead")
+    compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 500, "overhead")
+    compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 1000, "overhead")
+    compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 5000, "overhead")
 
     # get_best_configurations("Platooning", 500, "fuelConsumption")
     # get_best_configurations("Platooning", 1000, "fuelConsumption")
     # get_best_configurations("Platooning", 5000, "fuelConsumption")
-    # compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 500, "fuelConsumption")
-    # compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 1000, "fuelConsumption")
+    compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 500, "fuelConsumption")
+    compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 1000, "fuelConsumption")
 
     # get_best_configurations("Platooning", 500, "tripDuration")
     # get_best_configurations("Platooning", 1000, "tripDuration")
     # get_best_configurations("Platooning", 5000, "tripDuration")
-    # compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 500, "tripDuration")
-    # compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 1000, "tripDuration")
+    compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 500, "tripDuration")
+    compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 1000, "tripDuration")
 
     ############################################################
 
@@ -367,8 +457,8 @@ if __name__ == '__main__':
     # get_best_configurations("CrowdNav", 2000, "overhead")
     # get_best_configurations("CrowdNav", 5000, "overhead")
     #
-    # compare_best_results_of_3_method_process_with_best_results_of_bogp("CrowdNav", 500, "overhead")
-    # compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 1000, "overhead")
+    compare_best_results_of_3_method_process_with_best_results_of_bogp("CrowdNav", 500, "overhead")
+    compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 1000, "overhead")
     ############################################################
 
 

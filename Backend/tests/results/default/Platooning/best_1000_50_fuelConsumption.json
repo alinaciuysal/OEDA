@@ -128,7 +128,9 @@
         "createdDate": "2018-08-07 13:58:12.050000", 
         "id": "446dd6db-99ba-3f79-7d2e-3abb452b7542", 
         "name": "Experiment #34 with Platooning to reduce fuelConsumptions"
-    }, 
+    },
+    "stage_number": 19,
+    "experiment_duration": 247,
     "stage_data": [
         {
             "stage_id": "446dd6db-99ba-3f79-7d2e-3abb452b7542#19", 

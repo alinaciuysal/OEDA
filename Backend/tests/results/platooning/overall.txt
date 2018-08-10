@@ -1,0 +1,74 @@
+------overhead------
+--> results of BOGP are very similar, 1.35 can be considered as convergence value
+1) the best of BOGP - 100 iterations: Experiment #31, 1000 sample size, result: 1.3529859747886654, e01777c1-883e-97c7-b123-0cd32a1a1d85, stage number: 81, "knobs": { "catchupDistance": 932.4486065346545, "joinDistance": 5.0, "maxPlatoonGap": 3000.0, "maxVehiclesInPlatoon": 162.4533083429595, "platoonSplitTime": 350.0 }
+410 mins
+
+2) the best of BOGP - 50 iterations:  Experiment #32, 500 sample size, result: 1.3507635669708251, cb53c88d-5a47-b61e-9080-3806293b6457, stage number: 34, "knobs": { "catchupDistance": 2773.7615405336874, "joinDistance": 5.0, "maxPlatoonGap": 10.0, "maxVehiclesInPlatoon": 250.0, "platoonSplitTime": 1.0 },
+118 mins
+
+3) the best of default run - 500 sample size:  Default run - 1, result: 1.542955622434616, a2f7025b-0899-a207-98dd-daeebaab8b6d, stage number: 1
+4) the best of default run - 1000 sample size: Default run - 2, result: 1.55513743019104,  44cc33e4-6eea-b655-82c4-967c8c08b7f5, stage number: 8
+5) the best of default run - 2500 sample size: Default run - 6, result: 1.5398248354911803, 65d8866f-37e1-e627-fd59-64a661874e2c, stage number: 9
+
+T-test results:
+between 1 and 3
+{'mean_diff': -0.18996964544458628, 'opt_percentage': 12.312061543065091, 'effect_size': -1.438355364709325, 'statistic': -31.96966509912516, 'different_averages': True, 'alpha': 0.05, 'pvalue': 2.0479543613231923e-171}
+between 1 and 4
+{'mean_diff': -0.2021514565660747, 'opt_percentage': 12.998944826136999, 'effect_size': -1.4714288416114647, 'statistic': -32.88569394957426, 'different_averages': True, 'alpha': 0.05, 'pvalue': 6.108929553071075e-190}
+between 1 and 5
+{'mean_diff': -0.18683886232891256, 'opt_percentage': 12.133773785459526, 'effect_size': -1.4340148270916686, 'statistic': -32.16321628074599, 'different_averages': True, 'alpha': 0.05, 'pvalue': 4.581472005693489e-199}
+
+between 2 and 3
+{'mean_diff': -0.19219204979151083, 'opt_percentage': 12.456097075841258, 'effect_size': -1.4537321848312077, 'statistic': -22.962527031468507, 'different_averages': True, 'alpha': 0.05, 'pvalue': 5.094935258611385e-94}
+between 2 and 4
+{'mean_diff': -0.20437386091299925, 'opt_percentage': 13.141852089719325, 'effect_size': -1.4862351774625115, 'statistic': -23.553145174898034, 'different_averages': True, 'alpha': 0.05, 'pvalue': 1.3061365128842605e-104}
+between 2 and 5
+{'mean_diff': -0.18906126667583711, 'opt_percentage': 12.278102172334055, 'effect_size': -1.4495862786665947, 'statistic': -23.03313594121741, 'different_averages': True, 'alpha': 0.05, 'pvalue': 3.1802308528875713e-108}
+
+
+------fuelConsumption------
+1) the best of BOGP - 100 iterations: Experiment #39, 1000 sample size, result: 6.438916731834412, a65da561-1938-eb8a-b82a-d5c8d5a8b81c, stage number: 62, "knobs": { "catchupDistance": 10.0, "joinDistance": 3000.0, "maxPlatoonGap": 3000.0, "maxVehiclesInPlatoon": 250.0, "platoonSplitTime": 10.0},
+540 mins
+
+2) the best of BOGP - 50 iterations:  Experiment #34, 1000 sample size, result: 6.613665001869203, 446dd6db-99ba-3f79-7d2e-3abb452b7542, stage number: 19, "knobs": { "catchupDistance": 1255.3297868707361, "joinDistance": 2160.7812964829895, "maxPlatoonGap": 451.1384780662914, "maxVehiclesInPlatoon": 203.83956086196986, "platoonSplitTime": 10.0},
+247 mins
+
+3) the best of default run - 500 sample size:  Default run - 4, result: 8.871220153808594, 77f422b8-1ded-7d5b-9c33-5f44cbfd64e2, stage number: 6
+4) the best of default run - 1000 sample size: Default run - 3, result: 8.967611126899719,  d35c17ac-9252-ec76-a511-ed3289a1ce0a, stage number: 4
+
+
+
+T-test results:
+between 1 and 3
+{'mean_diff': -2.432303439963979, 'opt_percentage': 27.41791312610048, 'effect_size': -3.7956466426866653, 'statistic': -71.82287334640634, 'different_averages': True, 'alpha': 0.05, 'pvalue': 0.0}
+between 1 and 4
+{'mean_diff': -2.528694403233912, 'opt_percentage': 28.198082690150567, 'effect_size': -3.491055520789652, 'statistic': -78.02333362714862, 'different_averages': True, 'alpha': 0.05, 'pvalue': 0.0}
+
+between 2 and 3
+{'mean_diff': -2.2575551713180237, 'opt_percentage': 25.448079605352664, 'effect_size': -3.3427015559464826, 'statistic': -61.92590281545762, 'different_averages': True, 'alpha': 0.05, 'pvalue': 0.0}
+between 2 and 4
+{'mean_diff': -2.3539461345879564, 'opt_percentage': 26.249422495016866, 'effect_size': -3.1174909807976996, 'statistic': -69.6743541962882, 'different_averages': True, 'alpha': 0.05, 'pvalue': 0.0}
+
+
+
+
+-------tripDuration-------
+1) the best of BOGP - 100 iterations: Experiment #29, 1000 sample size, result: 285.238, 90683eac-48be-a806-a3fd-5e344e00c8a7, stage number: 96, "knobs": { "catchupDistance": 10.0, "joinDistance": 5.0, "maxPlatoonGap": 797.7360541627817, "maxVehiclesInPlatoon": 137.089482119106, "platoonSplitTime": 1.0 },
+419 mins
+
+2) the best of BOGP - 50 iterations:  Experiment #37, 500 sample size, result: 284.738, 4f39aef6-d853-6575-9994-38d2f5dc1351, stage number: 37, "knobs": { "catchupDistance": 3000.0, "joinDistance": 5.0, "maxPlatoonGap": 3000.0, "maxVehiclesInPlatoon": 2.0 },
+131 mins
+
+3) the best of default run - 500 sample size:  Default run - 5, result: 317.754, 2664b55f-a824-670d-4879-764deb07b350, stage number: 1
+4) the best of default run - 1000 sample size: Default run - 3, result: 321.807,  6049776b-c391-c37a-2c64-ac6d6b354da2, stage number: 9
+
+T-test results:
+between 1 and 3
+{'mean_diff': -32.51600000000002, 'opt_percentage': 10.233073383812641, 'effect_size': -0.9529149572429673, 'statistic': -19.627481825864574, 'different_averages': True, 'alpha': 0.05, 'pvalue': 1.6289977625229527e-76}
+between 1 and 4
+{'mean_diff': -36.56900000000002, 'opt_percentage': 11.36364342602865, 'effect_size': -1.1663601387351041, 'statistic': -26.06756200008874, 'different_averages': True, 'alpha': 0.05, 'pvalue': 3.4591828958554503e-129}
+
+between 2 and 3
+{'mean_diff': -33.01600000000002, 'opt_percentage': 10.390427815228138, 'effect_size': -0.973165946495261, 'statistic': -15.371709855276196, 'different_averages': True, 'alpha': 0.05, 'pvalue': 5.1107330159997233e-48}
+between 2 and 4
+{'mean_diff': -37.06900000000002, 'opt_percentage': 11.519016056207608, 'effect_size': -1.1904227828691358, 'statistic': -19.82022692426131, 'different_averages': True, 'alpha': 0.05, 'pvalue': 7.905159326423558e-78}

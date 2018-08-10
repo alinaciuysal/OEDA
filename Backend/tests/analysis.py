@@ -3,7 +3,9 @@ from collections import defaultdict
 from oeda.analysis.factorial_tests import FactorialAnova
 from oeda.analysis.one_sample_tests import ShapiroWilk, AndersonDarling, DAgostinoPearson, KolmogorovSmirnov
 from oeda.analysis.two_sample_tests import Ttest
-from oeda.analysis.n_sample_tests import Levene, Bartlett, FlignerKilleen, KruskalWallis, OneWayAnova
+import matplotlib.patches as mpatches
+import matplotlib.lines as mlines
+from io import BytesIO
 import json
 import os
 import shutil
@@ -11,8 +13,10 @@ import errno
 import itertools
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import datetime
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 
-from pprint import pprint as pp
 
 def delete_files(path):
     for root, dirs, files in os.walk(path):
@@ -20,6 +24,7 @@ def delete_files(path):
             os.unlink(os.path.join(root, f))
         for d in dirs:
             shutil.rmtree(os.path.join(root, d))
+
 
 def make_sure_path_exists(path):
     try:
@@ -50,6 +55,7 @@ def start_anova(id):
     db().save_analysis(experiment_id=id, stage_ids=stage_ids, analysis_name=test.name, anova_result=anova_result)
     return
 
+
 def get_tuples(id, key):
     stage_ids = db().get_stages(id)[0]
     data, knobs = db().get_data_for_analysis(id)
@@ -58,6 +64,7 @@ def get_tuples(id, key):
     samples = [data[stage_id] for stage_id in stage_ids]
     knobs = [knobs[stage_id] for stage_id in stage_ids]
     return stage_ids, samples, knobs
+
 
 def extract_inner_values(key, stage_ids, data):
     outer_key = "payload"
@@ -88,6 +95,7 @@ def iterate_anova_tables(aov_table, aov_table_sqr):
             if hasattr(row, col_name):
                 dd[row.Index][col_name] = getattr(row, col_name)
     return dd
+
 
 def get_non_default_config_results(experiments):
     # delete_files("./results/crowdnav")
@@ -131,6 +139,7 @@ def get_non_default_config_results(experiments):
         fn = res2["fn"]
         with open('./results/crowdnav/' + str(fn) + '_default.json', 'w') as outfile2:
             json.dump(res2, outfile2, sort_keys=True, indent=4, ensure_ascii=False)
+
 
 # assuming sequential str. is only used for default configurations
 def get_default_config_results(experiments):
@@ -257,25 +266,80 @@ def draw_default_config_results(experiment_ids, incoming_data_type, ts_name):
         # print(incoming_data_type, sample_size, stage_results)
 
 
+def draw_box_plot(incoming_data_type_name, x_values, y_values, ts_name):
+    # Create a figure instance
+    fig = plt.figure(1, figsize=(9, 6))
+    # Create an axes instance
+    ax = fig.add_subplot(111)
+
+    # Create the boxplot & format it
+    format_box_plot(ax, y_values)
+
+    ax.set_title('Boxplots of optimizer and default runs')
+    ax.set_ylabel(incoming_data_type_name)
+    ax.set_xlabel("Stage Numbers of Different Experiments")
+
+    # Custom x-axis labels for respective samples
+    ax.set_xticklabels(x_values)
+
+    # Remove top axes and right axes ticks
+    ax.get_xaxis().tick_bottom()
+    ax.get_yaxis().tick_left()
+
+    median_legend = mlines.Line2D([], [], color='green', marker='^', linestyle='None',
+                                  markersize=5, label='Mean')
+
+    mean_legend = mpatches.Patch(color='red', label='Median')
+
+    plt.legend(handles=[median_legend, mean_legend])
+    plot_path = './results/' + str(ts_name).lower() + '/best_' + str(incoming_data_type_name) + ".png"
+    plt.savefig(plot_path, bbox_inches='tight', format='png')
+    plt.close()
+
+# http://blog.bharatbhole.com/creating-boxplots-with-matplotlib/
+def format_box_plot(ax, y_values):
+    bp = ax.boxplot(y_values, showmeans=True, showfliers=False)
+    for median in bp['medians']:
+        median.set_color('red')
+    ## change the style of means and their fill
+    for mean in bp['means']:
+        mean.set_color('green')
+
+
+def draw_box_plots_of_three_experiments(optimized_results, default_results, y_key, ts_name):
+    y_values = []
+    x_values = []
+
+    for r1 in optimized_results:
+        experiment_id, stage_no = r1
+        data_points = db().get_data_points(experiment_id, stage_no)
+        only_data = [d["payload"][y_key] for d in data_points]
+        y_values.append(only_data)
+        x_values.append("(Optimizer) " + str(stage_no))
+
+    for r_default in default_results:
+        default_experiment_id, default_stage_no = r_default
+        data_points_3 = db().get_data_points(default_experiment_id, default_stage_no)
+        default_data_3 = [d["payload"][y_key] for d in data_points_3]
+        y_values.append(default_data_3)
+        x_values.append("(Default) " + str(default_stage_no))
+
+
+
+    draw_box_plot(y_key, x_values, y_values, ts_name)
+
+
 def perform_t_test(optimized_results, default_results, y_key, alpha=0.05):
     experiment_id, stage_no = optimized_results
     stage_id = str(experiment_id) + "#" + str(stage_no)
     default_experiment_id, default_stage_no = default_results
-    default_stage_id = str(experiment_id) + "#" + str(stage_no)
-
-    exp = db().get_experiment(experiment_id)
-    default_exp = db().get_experiment(default_experiment_id)
-    # pp(exp)
-    # pp(default_exp)
+    default_stage_id = str(experiment_id) + "#" + str(default_stage_no)
 
     data_points_1 = db().get_data_points(experiment_id, stage_no)
-    print(data_points_1)
     only_data_1 = [d["payload"][y_key] for d in data_points_1]
-    print(only_data_1)
 
     data_points_2 = db().get_data_points(default_experiment_id, default_stage_no)
     only_data_2 = [d["payload"][y_key] for d in data_points_2]
-    print(only_data_2)
 
     test1 = Ttest(stage_ids=[stage_id, default_stage_id], y_key=y_key, alpha=alpha)
     result = test1.run(data=[only_data_1, only_data_2], knobs=None)
@@ -287,15 +351,63 @@ def perform_t_test(optimized_results, default_results, y_key, alpha=0.05):
     result["opt_percentage"] = opt_percentage
     print(result)
 
+
+def convert_time_difference_to_mins(tstamp1, tstamp2):
+    if tstamp1 > tstamp2:
+        td = tstamp1 - tstamp2
+    else:
+        td = tstamp2 - tstamp1
+    td_mins = int(round(td.total_seconds() / 60))
+    return td_mins
+
+
+def get_results_of_optimization(tpl):
+    experiment_id, stage_number = tpl
+    experiment = db().get_experiment(experiment_id)
+    stages_count = experiment["executionStrategy"]["stages_count"]
+
+    first_stage_data = db().get_data_points(experiment_id, 1)
+    first_timestamp = first_stage_data[0]["createdDate"]
+    first_date = datetime.strptime(first_timestamp, "%Y-%m-%d %H:%M:%S.%f")
+
+    last_stage_data = db().get_data_points(experiment_id, stages_count)
+    last_timestamp = last_stage_data[len(last_stage_data) - 1]["createdDate"]
+    last_date = datetime.strptime(last_timestamp, "%Y-%m-%d %H:%M:%S.%f")
+    print(first_date, last_date)
+
+    diff = convert_time_difference_to_mins(first_date, last_date)
+    print(diff)
+
+
+
+
+
 def percentage_change(optimized, default):
     if default != 0:
         return float(optimized - default) / abs(default) * 100
     else:
         return "undefined"
 
+
+def flush_stage_results(tpl, y_key, ts_name):
+    experiment_id, stage_number = tpl
+    experiment = db().get_experiment(experiment_id)
+    pp.pprint(experiment)
+    stage_data = db().get_data_points(experiment_id, stage_number)
+    pp.pprint(stage_data)
+    stages_count = experiment["executionStrategy"]["stages_count"]
+    sample_size = experiment["executionStrategy"]["sample_size"]
+    out_json = {}
+    out_json["experiment"] = experiment
+    out_json["stage_data"] = stage_data
+    with open('./results/' + str(ts_name).lower() + '/best_' + str(sample_size) + "_" + str(stages_count) + "_" + str(y_key) + '.json', 'w') as outfile:
+        json.dump(out_json, outfile, sort_keys=False, indent=4, ensure_ascii=False)
+
+
+
 if __name__ == '__main__':
     setup_experiment_database("elasticsearch", "localhost", 9200)
-    experiments = db().get_experiments()[1]
+    # experiments = db().get_experiments()[1]
     # get_non_default_config_results(experiments)
 
     # get_default_config_results(experiments)
@@ -304,44 +416,57 @@ if __name__ == '__main__':
 
     ########################
     # crowd-nav avg overhead
-    # optimized_results = ("6b5776ab-1d3d-5bdf-a77a-46bb40e61afc", 93)
-    # optimized_results = ("5743e5b2-5545-3a9a-4d27-25a3b68771d2", 27)
+    optimized_results_1 = ("6b5776ab-1d3d-5bdf-a77a-46bb40e61afc", 93)
+    optimized_results_2 = ("5743e5b2-5545-3a9a-4d27-25a3b68771d2", 27)
+    # get_results_of_optimization(optimized_results_1)
+    # flush_stage_results(optimized_results_1, "overhead", "CrowdNav")
 
-    # default_results = ("6a916c78-f122-bb2c-c93f-f2304c4cb8bc", 8)
-    # default_results = ("e731c263-a5f2-ed44-587d-cd1c98b30aae", 4)
-    # default_results = ("317fe993-6186-9efa-2730-aaaa50b0d490", 2)
+    default_results_1 = ("6a916c78-f122-bb2c-c93f-f2304c4cb8bc", 8)
+    default_results_2 = ("e731c263-a5f2-ed44-587d-cd1c98b30aae", 4)
+    default_results_3 = ("317fe993-6186-9efa-2730-aaaa50b0d490", 2)
     # perform_t_test(optimized_results, default_results, "overhead")
+    draw_box_plots_of_three_experiments([optimized_results_1, optimized_results_2], [default_results_1, default_results_2, default_results_3], "overhead", "CrowdNav")
     ########################
 
     ########################
     # platooning avg overhead
-    # optimized_results = ("e01777c1-883e-97c7-b123-0cd32a1a1d85", 81)
-    # optimized_results = ("cb53c88d-5a47-b61e-9080-3806293b6457", 34)
+    optimized_results_1 = ("e01777c1-883e-97c7-b123-0cd32a1a1d85", 81)
+    optimized_results_2 = ("cb53c88d-5a47-b61e-9080-3806293b6457", 34)
+    # get_results_of_optimization(optimized_results)
+    # flush_stage_results(optimized_results, "overhead", "Platooning")
 
-    # default_results = ("a2f7025b-0899-a207-98dd-daeebaab8b6d", 1)
-    # default_results = ("44cc33e4-6eea-b655-82c4-967c8c08b7f5", 8)
-    # default_results = ("65d8866f-37e1-e627-fd59-64a661874e2c", 9)
+    default_results_1 = ("a2f7025b-0899-a207-98dd-daeebaab8b6d", 1)
+    default_results_2 = ("44cc33e4-6eea-b655-82c4-967c8c08b7f5", 8)
+    default_results_3 = ("65d8866f-37e1-e627-fd59-64a661874e2c", 9)
     # perform_t_test(optimized_results, default_results, "overhead")
+    draw_box_plots_of_three_experiments([optimized_results_1, optimized_results_2], [default_results_1, default_results_2, default_results_3], "overhead", "Platooning")
+
     ########################
 
     ########################
     # platooning avg fuelConsumption
-    # optimized_results = ("a65da561-1938-eb8a-b82a-d5c8d5a8b81c", 62)
-    # optimized_results = ("446dd6db-99ba-3f79-7d2e-3abb452b7542", 19)
+    optimized_results_1 = ("a65da561-1938-eb8a-b82a-d5c8d5a8b81c", 62)
+    optimized_results_2 = ("446dd6db-99ba-3f79-7d2e-3abb452b7542", 19)
+    # flush_stage_results(optimized_results, "fuelConsumption", "Platooning")
 
-    # default_results = ("77f422b8-1ded-7d5b-9c33-5f44cbfd64e2", 6)
-    # default_results = ("d35c17ac-9252-ec76-a511-ed3289a1ce0a", 4)
+    # get_results_of_optimization(optimized_results)
+    default_results_1 = ("77f422b8-1ded-7d5b-9c33-5f44cbfd64e2", 6)
+    default_results_2 = ("d35c17ac-9252-ec76-a511-ed3289a1ce0a", 4)
     # perform_t_test(optimized_results, default_results, "fuelConsumption")
+    draw_box_plots_of_three_experiments([optimized_results_1, optimized_results_2], [default_results_1, default_results_2], "fuelConsumption", "Platooning")
     ########################
 
     ########################
     # platooning avg tripDuration
-    # optimized_results = ("90683eac-48be-a806-a3fd-5e344e00c8a7", 96)
-    # optimized_results = ("4f39aef6-d853-6575-9994-38d2f5dc1351", 37)
+    optimized_results_1 = ("90683eac-48be-a806-a3fd-5e344e00c8a7", 96)
+    optimized_results_2 = ("4f39aef6-d853-6575-9994-38d2f5dc1351", 37)
+    # flush_stage_results(optimized_results, "tripDuration", "Platooning")
 
-    # default_results = ("2664b55f-a824-670d-4879-764deb07b350", 1)
-    # default_results = ("6049776b-c391-c37a-2c64-ac6d6b354da2", 9)
+    # get_results_of_optimization(optimized_results)
+    default_results_1 = ("2664b55f-a824-670d-4879-764deb07b350", 1)
+    default_results_2 = ("6049776b-c391-c37a-2c64-ac6d6b354da2", 9)
     # perform_t_test(optimized_results, default_results, "tripDuration")
+    draw_box_plots_of_three_experiments([optimized_results_1, optimized_results_2], [default_results_1, default_results_2], "tripDuration", "Platooning")
     ########################
 
 

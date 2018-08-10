@@ -1,0 +1,26 @@
+1) the best of BOGP - 100 iterations: Experiment #20, 500 sample size, result: 1.8691719977855683, 6b5776ab-1d3d-5bdf-a77a-46bb40e61afc, stage number: 93, "knobs": { "data_freshness_threshold": 458.19499680070135, "dynamic_info_weight": 1.6355789614500633, "exploration_percentage": 0.0, "exploration_weight": 5.0, "re_routing_frequency": 17.500034950324753, "route_randomization": 0.2431916773699534, "static_info_weight": 2.5 }
+398 mins
+
+2) the best of BOGP - 50 iterations:  Experiment #41, 500 sample size, result: 1.923711500287056, 5743e5b2-5545-3a9a-4d27-25a3b68771d2, stage number: 27, "knobs": { "data_freshness_threshold": 700.0, "dynamic_info_weight": 2.2190938865313172, "exploration_percentage": 0.0, "exploration_weight": 5.0, "re_routing_frequency": 60, "route_randomization": 0.21748508591715252, "static_info_weight": 2.5 },
+177 mins
+
+3) the best of default run - 500 sample size:  Default run - 1, result: 2.0759621899127962, 6a916c78-f122-bb2c-c93f-f2304c4cb8bc, stage number: 8
+4) the best of default run - 1000 sample size: Default run - 2, result: 2.199714924395084,  e731c263-a5f2-ed44-587d-cd1c98b30aae, stage number: 4
+5) the best of default run - 2500 sample size: Default run - 6, result: 2.2316476868629453, 317fe993-6186-9efa-2730-aaaa50b0d490, stage number: 2
+
+
+T-test results:
+between 1 and 3
+{'mean_diff': -0.20679019582959213, 'opt_percentage': 9.961173504271128, 'effect_size': -0.22632346203148518, 'statistic': -3.5749078605953355, 'different_averages': True, 'alpha': 0.05, 'pvalue': 0.00036712963768579734}
+between 1 and 4
+{'mean_diff': -0.3305429288335111, 'opt_percentage': 15.026625726549875, 'effect_size': -0.238279616463224, 'statistic': -3.9345264081626143, 'different_averages': True, 'alpha': 0.05, 'pvalue': 8.7176270959547e-05}
+between 1 and 5
+{'mean_diff': -0.36247569432579607, 'opt_percentage': 16.242514258283933, 'effect_size': -0.26609090425785803, 'statistic': -4.534998127634759, 'different_averages': True, 'alpha': 0.05, 'pvalue': 5.98631436145885e-06}
+
+between 2 and 3
+{'mean_diff': -0.1522506961981096, 'opt_percentage': 7.333982130493317, 'effect_size': -0.14880692791596675, 'statistic': -2.350490097415651, 'different_averages': True, 'alpha': 0.05, 'pvalue': 0.01894257364308836}
+between 2 and 4
+{'mean_diff': -0.2760034292020286, 'opt_percentage': 12.547236283345711, 'effect_size': -0.18883422133263747, 'statistic': -3.1907674654257185, 'different_averages': True, 'alpha': 0.05, 'pvalue': 0.0014483674085382908}
+between 2 and 5
+{'mean_diff': -0.30793619469431355, 'opt_percentage': 13.798602530487338, 'effect_size': -0.2141524311283235, 'statistic': -3.802472587453822, 'different_averages': True, 'alpha': 0.05, 'pvalue': 0.0001461136773194012}
+

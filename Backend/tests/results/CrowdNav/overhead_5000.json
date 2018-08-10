@@ -1,0 +1,28 @@
+{
+    "experiment_durations": [
+        400, 
+        465, 
+        413
+    ], 
+    "best_knobs": [
+        {
+            "data_freshness_threshold": 567.3915511780426, 
+            "static_info_weight": 1.697783512495778
+        }, 
+        {
+            "data_freshness_threshold": 683.8583431349681, 
+            "static_info_weight": 1.6211335373196558
+        }, 
+        {
+            "exploration_percentage": 0.1463
+        }
+    ], 
+    "optimization_percentages": [
+        16.10926593249031, 
+        8.806580230809526, 
+        -3.8278862388791817
+    ], 
+    "average_experiment_duration": 426.0, 
+    "average_optimization_percentage": 7.029319974806885, 
+    "numberOfExperiments": 3
+}

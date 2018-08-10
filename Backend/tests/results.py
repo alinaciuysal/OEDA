@@ -1,12 +1,13 @@
 from oeda.databases import setup_experiment_database, setup_user_database, db
 from collections import defaultdict
 from oeda.controller.stages import StageController as sc
-
+from oeda.controller.experiment_results import get_all_stage_data
 import json
 import os
 import shutil
 import numpy as np
 from pprint import pprint as pp
+from datetime import datetime
 
 # to calculate how much we are near/far away from default configurations of target systems in t-test
 platooning_results = []
@@ -21,17 +22,16 @@ def delete_files(path):
             shutil.rmtree(os.path.join(root, d))
 
 
-# https://stackoverflow.com/a/43034457
-def percentage_change(final, initial):
-    if initial != 0:
-        return float(final - initial) / abs(initial) * 100
+def percentage_change(optimized, default):
+    if default != 0:
+        return float(optimized - default) / abs(default) * 100
     else:
         return "undefined"
 
 
 def add_to_ttest_results(target_system_type, steps_and_stages, last_step_number, direction):
     # first stage, the stage at index 0, is the result of default configuration, in db it's number is 1
-    pp(steps_and_stages[last_step_number])
+    # pp(steps_and_stages[last_step_number])
     default_config_results = float(steps_and_stages[last_step_number][0]["stage_result"])
     # second stage, the stage at index 1, is the result of optimizer configuration, in db it's number is 2
     optimizer_results = float(steps_and_stages[last_step_number][1]["stage_result"])
@@ -46,14 +46,9 @@ def add_to_ttest_results(target_system_type, steps_and_stages, last_step_number,
     print("d: ", default_config_results, " opt: ", optimizer_results, " res: ", res)
 
 
-if __name__ == '__main__':
-    delete_files("./results")
-
-    setup_experiment_database("elasticsearch", "localhost", 9200)
+def extract_overall_results_for_anova_and_ttest():
     experiment_ids = db().get_experiments()[0]
-
     nrOfExperiments = len(experiment_ids)
-
     nrOfPlatooningExperiments = 0
     passed_anova_platooning = 0
     passed_ttest_platooning = 0
@@ -62,7 +57,6 @@ if __name__ == '__main__':
     failed_effect_size_platooning = 0
     failed_pvalue_platooning = 0
     failed_ttest_platooning = 0
-
 
     nrOfCrowdnavExperiments = 0
     passed_anova_crowdnav = 0
@@ -213,14 +207,151 @@ if __name__ == '__main__':
         with open('./results/ttest.json', 'w') as outfile2:
             json.dump(ttest_results, outfile2, sort_keys=False, indent=4, ensure_ascii=False)
 
-        # file_name += str(experiment["executionStrategy"]["sample_size"]) + "_"
-        # file_name += str(experiment["executionStrategy"]["stages_count"]) + "_"
-        # file_name += str(experiment["analysis"]["data_type"]["name"])
-        #
-        # out_json = {}
-        # out_json["experiment"] = experiment
-        # stage_ids, stages = db().get_stages(exp_id)
-        # stages = sorted(stages, key=lambda k: k['stage_result'])
-        # out_json["stages"] = stages
-        # with open('./results/' + file_name + '.json', 'w') as outfile:
-        #     json.dump(out_json, outfile, sort_keys=True, indent=4, ensure_ascii=False)
+def convert_time_difference_to_mins(tstamp1, tstamp2):
+    if tstamp1 > tstamp2:
+        td = tstamp1 - tstamp2
+    else:
+        td = tstamp2 - tstamp1
+    td_mins = int(round(td.total_seconds() / 60))
+    return td_mins
+
+def calculate_results_and_flush(experiments, target_system, y_key, sample_size):
+    experiments = sorted(experiments, key=lambda elem: elem[1]["result"]["effect_size"], reverse=True)
+    # pp(passed_experiments)
+    # optimization percentage is directly proportional to effect size
+    opt_percentages = []
+    elapsed_time = []
+    best_knobs_arr = []
+    for exp, t_test, last_step_number in experiments:
+        experiment_id = exp["id"]
+        first_data_point_of_experiment = db().get_data_points(experiment_id, 1, 1)[0]
+        first_timestamp = first_data_point_of_experiment["createdDate"]
+        last_stage_result_of_experiment = db().get_data_points(experiment_id, last_step_number, 2)
+        last_stage_length = len(last_stage_result_of_experiment)
+        last_timestamp = last_stage_result_of_experiment[last_stage_length - 1]["createdDate"]
+
+        last_date = datetime.strptime(last_timestamp, "%Y-%m-%d %H:%M:%S.%f")
+        first_date = datetime.strptime(first_timestamp, "%Y-%m-%d %H:%M:%S.%f")
+        difference = convert_time_difference_to_mins(first_date, last_date)
+        elapsed_time.append(difference)
+
+        steps_and_stages = sc.get(experiment_id=experiment_id)
+        last_step_number = steps_and_stages.keys()[-1]
+        default_and_best_stages = steps_and_stages[last_step_number]
+
+        assert default_and_best_stages[0]["number"] == 1
+        default_config_result = default_and_best_stages[0]["stage_result"]
+        assert default_and_best_stages[1]["number"] == 2
+        best_config_result = default_and_best_stages[1]["stage_result"]
+        best_knobs = default_and_best_stages[1]["knobs"]
+        best_knobs_arr.append(best_knobs)
+        opt_percentage = -1.0 * percentage_change(best_config_result, default_config_result)
+        opt_percentages.append(opt_percentage)
+
+    # if len(best_knobs_arr) != 0:
+    out_json = {}
+    out_json["numberOfExperiments"] = len(best_knobs_arr)
+    out_json["best_knobs"] = best_knobs_arr
+
+    out_json["optimization_percentages"] = opt_percentages
+    out_json["average_optimization_percentage"] = np.mean(opt_percentages)
+
+    out_json["experiment_durations"] = elapsed_time
+    out_json["average_experiment_duration"] = np.mean(elapsed_time)
+
+    with open('./results/' + target_system + '/' + str(y_key) + "_" + str(sample_size) + '.json', 'w') as outfile:
+        json.dump(out_json, outfile, sort_keys=False, indent=4, ensure_ascii=False)
+
+def get_best_configurations(target_system, sample_size, y_key):
+    passed_experiments = []
+    not_passed_experiments = []
+    anova_passed = 0
+    anova_failed = 0
+    total = 0
+    experiment_ids = db().get_experiments()[0]
+    # experiment_ids = [experiment_ids[0]]
+    for exp_id in experiment_ids:
+        experiment = db().get_experiment(exp_id)
+        steps_and_stages = sc.get(experiment_id=exp_id)
+        last_step_number = steps_and_stages.keys()[-1]
+        originalEffectSize = experiment["analysis"]["tTestEffectSize"]
+        considered_data_type = experiment["considered_data_types"][0]
+        direction = considered_data_type["criteria"]
+
+        targetSystemId = experiment["targetSystemId"]
+        ts = db().get_target(targetSystemId)
+        if str(target_system) in ts["name"] and experiment["executionStrategy"]["sample_size"] == sample_size and considered_data_type["name"] == y_key:
+            try:
+                anova = db().get_analysis(exp_id, 1, "two-way-anova")
+                anova_eligible_for_bogp = anova["eligible_for_next_step"]
+
+                if anova_eligible_for_bogp:
+                    anova_passed += 1
+                    t_test = db().get_analysis(exp_id, last_step_number, "t-test")
+                    t_test_result = t_test["result"]
+                    different_averages = t_test_result["different_averages"]
+                    effect_size = t_test_result["effect_size"]
+                    if direction == 'Maximize':
+                        # significant and effect size is enough
+                        if effect_size < -1.0 * originalEffectSize and different_averages:
+                            passed_experiments.append((experiment, t_test, last_step_number))
+                        else:
+                            not_passed_experiments.append((experiment, t_test, last_step_number))
+                    else:
+                        if effect_size > originalEffectSize and different_averages:
+                            passed_experiments.append((experiment, t_test, last_step_number))
+                        else:
+                            not_passed_experiments.append((experiment, t_test, last_step_number))
+                total += 1
+            except:
+                anova_failed += 1
+
+    if target_system == "CrowdNav":
+        calculate_results_and_flush(not_passed_experiments, target_system, y_key, sample_size)
+    else:
+        calculate_results_and_flush(passed_experiments, target_system, y_key, sample_size)
+if __name__ == '__main__':
+    setup_experiment_database("elasticsearch", "localhost", 9200)
+    # extract_overall_results_for_anova_and_ttest()
+
+    ############### Platooning ########################
+    # get_best_configurations("Platooning", 500, "overhead")
+    # get_best_configurations("Platooning", 1000, "overhead")
+    # get_best_configurations("Platooning", 5000, "overhead")
+    #
+    # get_best_configurations("Platooning", 500, "fuelConsumption")
+    # get_best_configurations("Platooning", 1000, "fuelConsumption")
+    # get_best_configurations("Platooning", 5000, "fuelConsumption")
+    #
+    # get_best_configurations("Platooning", 500, "tripDuration")
+    # get_best_configurations("Platooning", 1000, "tripDuration")
+    # get_best_configurations("Platooning", 5000, "tripDuration")
+    #
+    # get_best_configurations("Platooning", 500, "speed")
+    # get_best_configurations("Platooning", 1000, "speed")
+    # get_best_configurations("Platooning", 5000, "speed")
+    ############################################################
+
+    ############### CrowdNav ########################
+    get_best_configurations("CrowdNav", 500, "overhead")
+    get_best_configurations("CrowdNav", 1000, "overhead")
+    get_best_configurations("CrowdNav", 2000, "overhead")
+    get_best_configurations("CrowdNav", 5000, "overhead")
+
+    get_best_configurations("CrowdNav", 500, "complaint")
+    get_best_configurations("CrowdNav", 1000, "complaint")
+    get_best_configurations("CrowdNav", 2000, "complaint")
+    get_best_configurations("CrowdNav", 5000, "complaint")
+    ############################################################
+
+    # file_name += str(experiment["executionStrategy"]["sample_size"]) + "_"
+    # file_name += str(experiment["executionStrategy"]["stages_count"]) + "_"
+    # file_name += str(experiment["analysis"]["data_type"]["name"])
+    #
+    # out_json = {}
+    # out_json["experiment"] = experiment
+    # stage_ids, stages = db().get_stages(exp_id)
+    # stages = sorted(stages, key=lambda k: k['stage_result'])
+    # out_json["stages"] = stages
+    # with open('./results/' + file_name + '.json', 'w') as outfile:
+    #     json.dump(out_json, outfile, sort_keys=True, indent=4, ensure_ascii=False)

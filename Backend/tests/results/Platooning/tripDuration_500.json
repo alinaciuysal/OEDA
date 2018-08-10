@@ -1,0 +1,18 @@
+{
+    "experiment_durations": [
+        51
+    ], 
+    "numberOfPassedExperiments": 1, 
+    "best_knobs": [
+        {
+            "maxPlatoonGap": 20.502724616825873, 
+            "catchupDistance": 177.9763429740533, 
+            "joinDistance": 169.47754310685383
+        }
+    ], 
+    "optimization_percentages": [
+        7.735722147486842
+    ], 
+    "average_experiment_duration": 51.0, 
+    "average_optimization_percentage": 7.735722147486842
+}

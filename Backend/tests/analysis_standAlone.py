@@ -85,25 +85,26 @@ if __name__ == '__main__':
     nrOfImportantFactors = 3 # to be retrieved from analysis definition
     alpha = 0.05 # to be retrieved from analysis definition
     setup_experiment_database("elasticsearch", "localhost", 9200)
-    experiment_id = "d58b1b4f-f8ea-08f4-3603-f2735fef0a9f"
+    experiment_id = "076861f3-b77b-d1a3-90c4-cc34c00712aa"
     experiment = db().get_experiment(experiment_id)
+    pp.pprint(experiment)
     ttest_step_no = experiment["numberOfSteps"]
 
     anova_step_no = "1" # 1 denotes step-strategy phase for ANOVA, last one denotes T-test, intermediate ones denote Bayesian Opt
     key = "fuelConsumption"
     # test_data_points(experiment_id, step_no)
-    start_workflow_with_anova(experiment_id, anova_step_no, key, alpha, nrOfImportantFactors, 'self-optimizer', True)
+    # start_workflow_with_anova(experiment_id, anova_step_no, key, alpha, nrOfImportantFactors, 'self-optimizer', True)
     # start_workflow_with_ttest(experiment_id=experiment_id, key=key, alpha=alpha)
 
-    normality = check_normality_assumption(experiment_id, anova_step_no, key, alpha)
-    hom_var = check_homogenity_of_variance_assumption(experiment_id, anova_step_no, key, alpha)
-    print("Normality of ANOVA", normality)
-    print("Homogenity of variances ANOVA", hom_var)
-
-    normality_ttest = check_normality_assumption(experiment_id, ttest_step_no, key, alpha)
-    hom_var_ttest = check_homogenity_of_variance_assumption(experiment_id, ttest_step_no, key, alpha)
-    print("Normality of T-test", normality_ttest)
-    print("Homogenity of variances T-test", hom_var_ttest)
+    # normality = check_normality_assumption(experiment_id, anova_step_no, key, alpha)
+    # hom_var = check_homogenity_of_variance_assumption(experiment_id, anova_step_no, key, alpha)
+    # print("Normality of ANOVA", normality)
+    # print("Homogenity of variances ANOVA", hom_var)
+    #
+    # normality_ttest = check_normality_assumption(experiment_id, ttest_step_no, key, alpha)
+    # hom_var_ttest = check_homogenity_of_variance_assumption(experiment_id, ttest_step_no, key, alpha)
+    # print("Normality of T-test", normality_ttest)
+    # print("Homogenity of variances T-test", hom_var_ttest)
 
     # asd = db().get_experiment(experiment_id=experiment_id)["numberOfSteps"]
     # all_stage_data = get_all_stage_data(experiment_id=experiment_id)
@@ -111,4 +112,7 @@ if __name__ == '__main__':
     # print(all_stage_data.keys())
     # print(all_stage_data[1])
     # stage_ids, stages = db().get_stages(experiment_id=experiment_id, step_no=step_no)
+
+
+
 

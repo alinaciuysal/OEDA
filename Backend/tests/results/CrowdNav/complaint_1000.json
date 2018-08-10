@@ -1,0 +1,16 @@
+{
+    "experiment_durations": [
+        334
+    ], 
+    "best_knobs": [
+        {
+            "data_freshness_threshold": 700.0
+        }
+    ], 
+    "optimization_percentages": [
+        26.08695652173914
+    ], 
+    "average_experiment_duration": 334.0, 
+    "average_optimization_percentage": 26.08695652173914, 
+    "numberOfExperiments": 1
+}

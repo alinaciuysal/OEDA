@@ -1,31 +1,31 @@
 {
-    "nrOfExperiments": 63, 
+    "nrOfExperiments": 67, 
     "platooning": {
-        "nrOfExperiments": 39, 
+        "nrOfExperiments": 41, 
         "ttest": {
             "failed": 1, 
-            "effect_size": 13, 
+            "effect_size": 14, 
             "pvalue": 0, 
-            "passed": 25
+            "passed": 26
         }, 
         "anova": {
             "failed": 0, 
             "size_error": 0, 
-            "passed": 39
+            "passed": 41
         }
     }, 
     "crowdnav": {
-        "nrOfExperiments": 24, 
+        "nrOfExperiments": 26, 
         "ttest": {
-            "failed": 10, 
-            "effect_size": 9, 
+            "failed": 11, 
+            "effect_size": 10, 
             "pvalue": 0, 
             "passed": 0
         }, 
         "anova": {
             "failed": 4, 
             "size_error": 1, 
-            "passed": 19
+            "passed": 21
         }
     }
 }

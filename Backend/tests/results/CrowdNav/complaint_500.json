@@ -1,0 +1,16 @@
+{
+    "experiment_durations": [
+        94
+    ], 
+    "best_knobs": [
+        {
+            "exploration_percentage": 0.0858
+        }
+    ], 
+    "optimization_percentages": [
+        -1.5873015873015885
+    ], 
+    "average_experiment_duration": 94.0, 
+    "average_optimization_percentage": -1.5873015873015885, 
+    "numberOfExperiments": 1
+}

@@ -1,0 +1,33 @@
+{
+    "experiment_durations": [
+        155, 
+        208, 
+        214, 
+        279
+    ], 
+    "numberOfPassedExperiments": 4, 
+    "best_knobs": [
+        {
+            "joinDistance": 5.0
+        }, 
+        {
+            "maxVehiclesInPlatoon": 2.019069321802121
+        }, 
+        {
+            "maxVehiclesInPlatoon": 2.016051363113869
+        }, 
+        {
+            "maxPlatoonGap": 43.958370503101975, 
+            "catchupDistance": 23.816001248065177, 
+            "maxVehiclesInPlatoon": 3.6272123425964455
+        }
+    ], 
+    "optimization_percentages": [
+        14.058167946733224, 
+        11.37561061307731, 
+        8.57590025297189, 
+        8.261088822194456
+    ], 
+    "average_experiment_duration": 214.0, 
+    "average_optimization_percentage": 10.56769190874422
+}

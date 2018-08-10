@@ -1,0 +1,63 @@
+{
+    "experiment_durations": [
+        202, 
+        52, 
+        118, 
+        64, 
+        68, 
+        80, 
+        125, 
+        139, 
+        151, 
+        115
+    ], 
+    "numberOfPassedExperiments": 10, 
+    "best_knobs": [
+        {
+            "maxVehiclesInPlatoon": 230.37018196985022
+        }, 
+        {
+            "joinDistance": 5.0
+        }, 
+        {
+            "joinDistance": 41.98690306116399
+        }, 
+        {
+            "catchupDistance": 521.6552921683726, 
+            "joinDistance": 83.44756073703573
+        }, 
+        {
+            "maxVehiclesInPlatoon": 137.84879954586398
+        }, 
+        {
+            "maxVehiclesInPlatoon": 226.12156901318602
+        }, 
+        {
+            "maxVehiclesInPlatoon": 128.23522131688932
+        }, 
+        {
+            "maxVehiclesInPlatoon": 149.9959969339433
+        }, 
+        {
+            "maxVehiclesInPlatoon": 194.54907789755532, 
+            "joinDistance": 2533.3060029483463
+        }, 
+        {
+            "maxVehiclesInPlatoon": 117.8877424494574
+        }
+    ], 
+    "optimization_percentages": [
+        21.897038275925006, 
+        15.781999173359543, 
+        13.27650405243975, 
+        11.981454240228077, 
+        11.336007775750646, 
+        11.423345327820144, 
+        10.120369215474827, 
+        9.800339450205263, 
+        7.1090497585173855, 
+        9.716197957778778
+    ], 
+    "average_experiment_duration": 111.4, 
+    "average_optimization_percentage": 12.244230522749941
+}

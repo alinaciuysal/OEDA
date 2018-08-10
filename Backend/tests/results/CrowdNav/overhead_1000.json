@@ -1,0 +1,56 @@
+{
+    "experiment_durations": [
+        97, 
+        107, 
+        166, 
+        415, 
+        204, 
+        317, 
+        111, 
+        148, 
+        84
+    ], 
+    "best_knobs": [
+        {
+            "data_freshness_threshold": 607.0060596590913
+        }, 
+        {
+            "data_freshness_threshold": 634.5411804673574
+        }, 
+        {
+            "static_info_weight": 1.9710361024520322
+        }, 
+        {
+            "static_info_weight": 2.5
+        }, 
+        {
+            "dynamic_info_weight": 1.1673349478095796
+        }, 
+        {
+            "exploration_percentage": 0.20416481714974963
+        }, 
+        {
+            "exploration_percentage": 0.1533
+        }, 
+        {
+            "static_info_weight": 1.5249734628188927
+        }, 
+        {
+            "exploration_percentage": 1.3599364743654975e-05
+        }
+    ], 
+    "optimization_percentages": [
+        13.398631757849754, 
+        9.033487393393806, 
+        6.283558538498248, 
+        6.605654575128557, 
+        0.28518223707469226, 
+        -1.4313859302742078, 
+        -1.3670094052754702, 
+        -2.2751369432239827, 
+        -3.7305556597711167
+    ], 
+    "average_experiment_duration": 183.22222222222223, 
+    "average_optimization_percentage": 2.9780473959333644, 
+    "numberOfExperiments": 9
+}

@@ -1,0 +1,16 @@
+{
+    "experiment_durations": [
+        61
+    ], 
+    "numberOfPassedExperiments": 1, 
+    "best_knobs": [
+        {
+            "maxVehiclesInPlatoon": 2.0076634126048543
+        }
+    ], 
+    "optimization_percentages": [
+        12.495080090168537
+    ], 
+    "average_experiment_duration": 61.0, 
+    "average_optimization_percentage": 12.495080090168537
+}

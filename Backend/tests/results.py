@@ -347,14 +347,17 @@ def compare_best_results_of_3_method_process_with_best_results_of_bogp(target_sy
             test1 = Ttest(stage_ids=[stage_id, bogp_stage_id], y_key=data_type, alpha=alpha)
             result = test1.run(data=[extracted_data_points, extracted_data_points_bogp], knobs=None)
             result["3_method_average"] = np.mean(extracted_data_points)
-            result["bogp_average"] = np.mean(extracted_data_points_bogp)
+            result["sm_average"] = np.mean(extracted_data_points_bogp)
 
             # assuming that bogp results are always better than 3-method process, should be checked after generating data
-            result_difference_percentage = percentage_change(result["bogp_average"], result["3_method_average"])
+            result_difference_percentage = percentage_change(result["sm_average"], result["3_method_average"])
             result["result_difference_percentage"] = result_difference_percentage
 
             # assuming that 3-method process duration is less than bogp
-            duration_difference_percentage = percentage_change(best_three_method_durations[idx], bogp_result["experiment_duration"])
+            result["sm_duration"] = bogp_result["experiment_duration"]
+            result["3_method_duration"] = best_three_method_durations[idx]
+
+            duration_difference_percentage = percentage_change(result["3_method_duration"], result["sm_duration"])
             result["duration_difference_percentage"] = duration_difference_percentage
             pp(result)
 
@@ -363,11 +366,30 @@ def compare_best_results_of_3_method_process_with_best_results_of_bogp(target_sy
     if len(results) != 0:
         sum_duration_diff = 0
         sum_result_diff = 0
+        three_method_result_avg = 0
+        three_method_duration_avg = 0
+        single_method_result_avg = 0
+        single_method_duration_avg = 0
+
         for r in results:
             sum_result_diff += r["result_difference_percentage"]
             sum_duration_diff += r["duration_difference_percentage"]
+
+            three_method_result_avg += r["3_method_average"]
+            three_method_duration_avg += r["3_method_duration"]
+
+            single_method_result_avg += r["sm_average"]
+            single_method_duration_avg += r["sm_duration"]
+
         out_obj["average_result_difference"] = sum_result_diff / (1.0 * len(results))
         out_obj["average_duration_difference"] = sum_duration_diff / (1.0 * len(results))
+
+        out_obj["average_experiment_duration_3M"] =  three_method_duration_avg / (1.0 * len(results))
+        out_obj["average_result_3M"] = three_method_result_avg / (1.0 * len(results))
+
+        out_obj["average_experiment_duration_SM"] =  single_method_duration_avg / (1.0 * len(results))
+        out_obj["average_result_SM"] = single_method_result_avg / (1.0 * len(results))
+
         out_obj["results"] = results
 
         with open('./results/3_method_bogp_comparison/' + target_system + "_" + str(data_type) + "_" + str(sample_size) + '.json', 'w') as outfile:
@@ -391,6 +413,7 @@ def compare_best_results_of_3_method_process_with_best_results_of_bogp(target_sy
         y_values.append(extracted_data_points)
 
     draw_box_plot(data_type, x_values, y_values, target_system, "3_method_bogp_comparison", sample_size)
+
 
 def draw_box_plot(incoming_data_type_name, x_values, y_values, ts_name, folder_name, sample_size):
     # Create a figure instance
@@ -416,6 +439,7 @@ def draw_box_plot(incoming_data_type_name, x_values, y_values, ts_name, folder_n
     plt.savefig(plot_path, bbox_inches='tight', format='png')
     plt.close()
 
+
 # http://blog.bharatbhole.com/creating-boxplots-with-matplotlib/
 def format_box_plot(ax, y_values):
     bp = ax.boxplot(y_values, showmeans=True, showfliers=False)
@@ -435,7 +459,6 @@ if __name__ == '__main__':
     # get_best_configurations("Platooning", 5000, "overhead")
     compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 500, "overhead")
     compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 1000, "overhead")
-    compare_best_results_of_3_method_process_with_best_results_of_bogp("Platooning", 5000, "overhead")
 
     # get_best_configurations("Platooning", 500, "fuelConsumption")
     # get_best_configurations("Platooning", 1000, "fuelConsumption")

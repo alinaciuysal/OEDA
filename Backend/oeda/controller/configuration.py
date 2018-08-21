@@ -2,9 +2,11 @@ from flask import jsonify
 from flask_restful import Resource
 from oeda.config.crowdnav_config import Config as CrowdNavConfig
 from oeda.config.platooning_config import Config as PlatooningConfig
+from oeda.config.R_config import Config as mlrMBOConfig
+from oeda.log import *
 import traceback
 import json
-
+import requests
 
 class ConfigController(Resource):
     @staticmethod
@@ -55,6 +57,29 @@ class ConfigController(Resource):
             resp = jsonify(data)
             resp.status_code = 200
             return resp
+
+        except Exception as e:
+            tb = traceback.format_exc()
+            print(tb)
+            return {"error": e.message}, 404
+
+class MlrMBOConfigController(Resource):
+    @staticmethod
+    def get():
+        try:
+            host_with_port = "http://" + str(mlrMBOConfig.plumber_host) + ":" + str(mlrMBOConfig.plumber_port)
+            connection_err_msg = {"error": "Connection with mlrMBO-API is failed"}
+            try:
+                r = requests.get(host_with_port)
+                if r:
+                    resp = jsonify({"message": "mlrMBO-API works fine"})
+                    resp.status_code = 200
+                    return resp
+                else:
+                    return connection_err_msg, 404
+            except requests.ConnectionError as e:
+                error(connection_err_msg)
+                return connection_err_msg, 404
 
         except Exception as e:
             tb = traceback.format_exc()

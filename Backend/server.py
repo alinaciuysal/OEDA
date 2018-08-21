@@ -4,7 +4,7 @@ from flask import Flask
 from flask_restful import Api
 
 from oeda.controller.targets import TargetController, TargetsListController
-from oeda.controller.configuration import ConfigController
+from oeda.controller.configuration import ConfigController, MlrMBOConfigController
 from oeda.controller.experiments import ExperimentsListController, ExperimentController
 from oeda.controller.experiment_results import StageResultsWithExperimentIdController, AllStageResultsWithExperimentIdController
 from oeda.controller.running_experiment_results import RunningAllStageResultsWithExperimentIdController, OEDACallbackController
@@ -93,6 +93,7 @@ api.add_resource(BoxPlotController, '/api/boxPlot/<string:experiment_id>/<string
 api.add_resource(OEDACallbackController, '/api/running_experiment_results/oeda_callback/<string:experiment_id>')
 
 api.add_resource(ConfigController, '/api/config')
+api.add_resource(MlrMBOConfigController, '/api/config/mlrMBO')
 
 api.add_resource(ExecutionSchedulerController, '/api/execution_scheduler')
 

@@ -87,6 +87,10 @@ export class OEDAApiService extends RESTService {
     return this.doPOSTPublicRequest("/analysis/" + experiment.id + "/" + step_no + "/" + analysis_name, experiment);
   }
 
+  public getMlrMBOConfig() {
+    return this.doGETPublicRequest("/config/mlrMBO")
+  }
+
   // remove for production
   public clear_database(): Observable<any> {
     return this.doGETPublicRequest("/delete");

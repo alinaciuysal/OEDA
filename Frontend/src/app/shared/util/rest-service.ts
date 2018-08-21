@@ -94,9 +94,9 @@ export class RESTService {
       })
   }
 
-  /** does a public http get request to the given host and port for checking if db is configured properly or not */
-  public doGETPublicRequestForDatabaseConfigValidity<T>(host: string, port: string): Observable<T> {
-    return this.http.get("http://" + host + ":" + port, this.requestOptions)
+  /** does a public http get request to the given host and port to check if provided host & port is valid */
+  public doGETPublicRequestForConfigValidity<T>(host: string, port: string): Observable<T> {
+    return this.http.get("http://" + host + ":" + port)
       .map((res: Response) => res.json())
       .catch((error: any) => {
         const errorMsg = JSON.parse(error._body);

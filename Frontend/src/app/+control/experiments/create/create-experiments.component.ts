@@ -32,6 +32,7 @@ export class CreateExperimentsComponent implements OnInit {
   defaultTTestEffectSize: number;
   defaultTTestSampleSize: number;
   maxNrOfImportantFactors: number;
+  mlrMBOworking: boolean;
 
   constructor(private layout: LayoutService, private api: OEDAApiService,
               private router: Router, private notify: NotificationsService,
@@ -47,6 +48,7 @@ export class CreateExperimentsComponent implements OnInit {
     this.defaultTTestEffectSize = 0.7;
     this.defaultTTestSampleSize = 1000;
     this.is_collapsed = true;
+    this.mlrMBOworking = false;
   }
 
   ngOnInit(): void {
@@ -161,8 +163,6 @@ export class CreateExperimentsComponent implements OnInit {
         // set is_selected flag via click method
         this.changeable_variable_checkbox_clicked(i);
       }
-      console.log(this.targetSystem.changeableVariables);
-
     } else {
       this.notify.error("Error", "Cannot fetch selected target system, please try again");
       return;
@@ -173,7 +173,19 @@ export class CreateExperimentsComponent implements OnInit {
   public executionStrategyModelChanged(execution_strategy_key) {
     this.experiment.executionStrategy.type = execution_strategy_key;
     if (execution_strategy_key === 'mlr_mbo') {
-      this.acquisitionMethodChanged("ei");
+      // check if mlrMBO host & port is alive
+      this.api.getMlrMBOConfig().subscribe(
+        (data) => {
+          if (!isNullOrUndefined(data)) {
+            this.acquisitionMethodChanged("ei");
+            this.notify.success("Success", data["message"]);
+            this.mlrMBOworking = true;
+          } else {
+            this.mlrMBOworking = false;
+            this.notify.error("Error", "mlrMBO-API is not working");
+          }
+        }
+      );
     } else if (execution_strategy_key === 'self_optimizer') {
       this.acquisitionMethodChanged("gp_hedge");
     }
@@ -189,7 +201,6 @@ export class CreateExperimentsComponent implements OnInit {
    */
   public changeable_variable_checkbox_clicked(changeableVariable_index): void {
     let changeableVariable = this.targetSystem.changeableVariables[changeableVariable_index];
-    console.log("chVar after click", changeableVariable);
     if (isNullOrUndefined(changeableVariable.is_selected)) {
       changeableVariable.is_selected = true;
     }
@@ -389,6 +400,11 @@ export class CreateExperimentsComponent implements OnInit {
 
     // check if initial design of mlr mbo is large enough
     if (execution_strategy_type === "mlr_mbo") {
+      if (!this.mlrMBOworking) {
+        this.errorButtonLabelOptimization = "mlrMBO-API is not working";
+        return true;
+      }
+
       let minimum_number_of_iterations = 0;
       for (let chVar of this.targetSystem.changeableVariables) {
         if (chVar.is_selected) {

@@ -484,7 +484,7 @@
                                   {key:'ei',label:'Expected Improvement'},
                                   {key:'mr',label:'Mean Error'},
                                   {key:'se',label:'Standard Error'},
-                                  {key:'cb',label:'Confidence Bound'},
+                                  {key:'cb',label:'Upper/Lower Confidence Bound'},
                                   {key:'aei',label:'Augmented Expected Improvement'},
                                   {key:'eqi',label:'Expected Quantile Improvement'}]"
                                 (modelChanged)="acquisitionMethodChanged($event)"></labeled-input-select>
@@ -567,21 +567,45 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h3 class="modal-title" id="modalTitle">Execution Strategies</h3>
+            <h3 class="modal-title" id="modalTitle">Bayesian Optimization with Gaussian Processes</h3>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
           <div class="modal-body">
-            <p>Execution strategies define the experimentation process, i.e. specify how multiple
-              experiments are to be performed.</p>
-            <p>OEDA supports following strategies for <b><a target="_blank" href="https://en.wikipedia.org/wiki/Bayesian_optimization">Bayesian Optimization:</a></b></p>
+            <p>OEDA supports following libraries for <b><a target="_blank" href="https://en.wikipedia.org/wiki/Bayesian_optimization">Bayesian Optimization</a></b>
+              and acquisition functions of these libraries to be used as a function to be minimized over gaussian prior.
+            </p>
+
             <hr>
-            <p><b>Self Optimizer: </b>Runs multiple experiments and tries to find the best value for the knobs
+            <p>
+              <b>Self Optimizer: </b>Runs multiple experiments and tries to find the best value for the knobs
               using <a target="_blank" href="http://scikit-learn.org">scikit-learn's</a> Bayesian optimization with Gaussian Processes</p>
+
+              Supported acquisition functions:
+              <ul>
+                <li>LCB: lower confidence bound</li>
+                <li>EI: expected improvement</li>
+                <li>PI: negative probability of improvement</li>
+                <li>GP_HEDGE (default): Probabilistically choose one of the above three acquisition functions at every iteration</li>
+                <li>EIps: for negated expected improvement per second to take into account the function compute time</li>
+                <li>PIps: for negated probability of improvement per second</li>
+              </ul>
+
+
+
             <hr>
-            <p><b>mlr MBO:</b> Optimizes expensive black-box functions by model-based optimization
-              using  <a target="_blank" href="https://mlr-org.github.io/mlrMBO/articles/mlrMBO.html">mlrMBO</a> that is based on machine learning library written in R</p>
+            <p><b>mlr-MBO:</b> Optimizes expensive black-box functions by using model-based optimization
+              using  <a target="_blank" href="https://mlr-org.github.io/mlrMBO/articles/mlrMBO.html">mlrMBO</a>, which is a library written in R.</p>
+              Supported <a target="_blank" href="https://mlr-org.github.io/mlrMBO/reference/infillcrits.html">acquisition functions:</a>
+              <ul>
+                <li>Expected improvement (default)</li>
+                <li>Mean response</li>
+                <li>Standard error</li>
+                <li>Upper/Lower confidence bound (LCB, aka. statistical lower or upper bound)</li>
+                <li>Augmented expected improvement (AEI)</li>
+                <li>Expected quantile improvement (EQI)</li>
+              </ul>
             <hr>
           </div>
           <div class="modal-footer">

@@ -1,6 +1,8 @@
 ## OEDA (Online Experiment-Driven Adaptation) Tool
 ***
- 
+##### Note
+This branch is based on using a single statistical or optimization method during the experimentation process. If you would like to use our novel approach, please check [master branch](https://github.com/alinaciuysal/OEDA).
+
 ##### Required Dependencies
 - [Zookeeper & Kafka](https://kafka.apache.org/quickstart#quickstart_startserver)
 - [Python 2.7](https://www.python.org/download/releases/2.7/)

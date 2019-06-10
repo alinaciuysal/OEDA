@@ -344,9 +344,6 @@ export class CreateExperimentsComponent implements OnInit {
       return true;
     }
 
-    // TODO: some corner cases:
-    // TODO: 1) [0.3, 0.4; 0.5]
-    // TODO: re-factor if-else statements
     // validate comma separated values of selected variables
     for (let chVar of this.targetSystem.changeableVariables) {
       if (chVar.is_selected == true) {

@@ -1,15 +1,13 @@
 from oeda.databases import setup_experiment_database, db
 from oeda.controller.stages import StageController as sc
 from oeda.analysis.two_sample_tests import Ttest
-import matplotlib.patches as mpatches
-import matplotlib.lines as mlines
-import matplotlib.pyplot as plt
+from oeda.utilities.MathUtility import change_in_percentage
+from oeda.utilities.Plotting import draw_box_plot
+from oeda.utilities.MathUtility import convert_time_difference_to_mins
+
 import json
 import os
-import shutil
 import numpy as np
-import pandas as pd
-from pprint import pprint as pp
 from datetime import datetime
 
 # to calculate how much we are near/far away from default configurations of target systems in t-test
@@ -17,28 +15,12 @@ platooning_results = []
 crowdnav_results = []
 
 
-def delete_files(path):
-    for root, dirs, files in os.walk(path):
-        for f in files:
-            os.unlink(os.path.join(root, f))
-        for d in dirs:
-            shutil.rmtree(os.path.join(root, d))
-
-
-def percentage_change(optimized, default):
-    if default != 0:
-        return float(optimized - default) / abs(default) * 100
-    else:
-        return "undefined"
-
-
 def add_to_ttest_results(target_system_type, steps_and_stages, last_step_number, direction):
     # first stage, the stage at index 0, is the result of default configuration, in db it's number is 1
-    # pp(steps_and_stages[last_step_number])
     default_config_results = float(steps_and_stages[last_step_number][0]["stage_result"])
     # second stage, the stage at index 1, is the result of optimizer configuration, in db it's number is 2
     optimizer_results = float(steps_and_stages[last_step_number][1]["stage_result"])
-    res = percentage_change(optimizer_results, default_config_results)
+    res = change_in_percentage(optimizer_results, default_config_results)
     if direction == "Minimize":
         res = -1.0 * res
 
@@ -46,7 +28,6 @@ def add_to_ttest_results(target_system_type, steps_and_stages, last_step_number,
         platooning_results.append(res)
     elif target_system_type == "CrowdNav":
         crowdnav_results.append(res)
-    print("d: ", default_config_results, " opt: ", optimizer_results, " res: ", res)
 
 
 def extract_overall_results_for_anova_and_ttest():
@@ -124,7 +105,6 @@ def extract_overall_results_for_anova_and_ttest():
                 else:
                     failed_anova_platooning += 1
             except:
-                print("anova failed for Platooning Experiment # " + file_name)
                 anova_size_error_platooning += 1
 
         elif "CrowdNav" in ts["name"]:
@@ -162,7 +142,6 @@ def extract_overall_results_for_anova_and_ttest():
                 else:
                     failed_anova_crowdnav += 1
             except:
-                print("anova failed for CrowdNav Experiment # " + file_name)
                 anova_size_error_crowdnav += 1
 
         res = {}
@@ -211,18 +190,8 @@ def extract_overall_results_for_anova_and_ttest():
             json.dump(ttest_results, outfile2, sort_keys=False, indent=4, ensure_ascii=False)
 
 
-def convert_time_difference_to_mins(tstamp1, tstamp2):
-    if tstamp1 > tstamp2:
-        td = tstamp1 - tstamp2
-    else:
-        td = tstamp2 - tstamp1
-    td_mins = int(round(td.total_seconds() / 60))
-    return td_mins
-
-
 def calculate_results_and_flush(experiments, target_system, y_key, sample_size):
     experiments = sorted(experiments, key=lambda elem: elem[1]["result"]["effect_size"], reverse=True)
-    # pp(passed_experiments)
     opt_percentages = []
     best_results_arr = []
     for exp, t_test, last_step_number in experiments:
@@ -249,7 +218,7 @@ def calculate_results_and_flush(experiments, target_system, y_key, sample_size):
         best_config_result = default_and_best_stages[1]["stage_result"]
         best_knobs = default_and_best_stages[1]["knobs"]
         best_results_arr.append(default_and_best_stages[1])
-        opt_percentage = -1.0 * percentage_change(best_config_result, default_config_result)
+        opt_percentage = -1.0 * change_in_percentage(best_config_result, default_config_result)
         opt_percentages.append(opt_percentage)
 
     # if len(best_knobs_arr) != 0:
@@ -350,17 +319,15 @@ def compare_best_results_of_3_method_process_with_best_results_of_bogp(target_sy
             result["sm_average"] = np.mean(extracted_data_points_bogp)
 
             # assuming that bogp results are always better than 3-method process, should be checked after generating data
-            result_difference_percentage = percentage_change(result["sm_average"], result["3_method_average"])
+            result_difference_percentage = change_in_percentage(result["sm_average"], result["3_method_average"])
             result["result_difference_percentage"] = result_difference_percentage
 
             # assuming that 3-method process duration is less than bogp
             result["sm_duration"] = bogp_result["experiment_duration"]
             result["3_method_duration"] = best_three_method_durations[idx]
 
-            duration_difference_percentage = percentage_change(result["3_method_duration"], result["sm_duration"])
+            duration_difference_percentage = change_in_percentage(result["3_method_duration"], result["sm_duration"])
             result["duration_difference_percentage"] = duration_difference_percentage
-            pp(result)
-
             results.append(result)
 
     if len(results) != 0:
@@ -403,7 +370,6 @@ def compare_best_results_of_3_method_process_with_best_results_of_bogp(target_sy
         extracted_data_points_bogp = [d["payload"][data_type] for d in bogp_result["stage_data"]]
         y_values.append(extracted_data_points_bogp)
 
-    print(len(best_three_method_results))
     for res2 in best_three_method_results:
         experiment_id = res2["experiment_id"]
         experiment = db().get_experiment(experiment_id)
@@ -414,40 +380,6 @@ def compare_best_results_of_3_method_process_with_best_results_of_bogp(target_sy
 
     draw_box_plot(data_type, x_values, y_values, target_system, "3_method_bogp_comparison", sample_size)
 
-
-def draw_box_plot(incoming_data_type_name, x_values, y_values, ts_name, folder_name, sample_size):
-    # Create a figure instance
-    fig = plt.figure(1, figsize=(9, 6))
-    # Create an axes instance
-    ax = fig.add_subplot(111)
-    # Create the boxplot & format it
-    format_box_plot(ax, y_values)
-    ax.set_title('Boxplots of single-method process (SM) and 3-method process (3M), ' + str(sample_size) + " sample size")
-    ax.set_ylabel(incoming_data_type_name)
-    ax.set_xlabel("Type of process and number of optimizer iterations applied")
-    # Custom x-axis labels for respective samples
-    ax.set_xticklabels(x_values)
-    # Remove top axes and right axes ticks
-    ax.get_xaxis().tick_bottom()
-    ax.get_yaxis().tick_left()
-    median_legend = mlines.Line2D([], [], color='green', marker='^', linestyle='None',
-                                  markersize=5, label='Mean')
-    mean_legend = mpatches.Patch(color='red', label='Median')
-    plt.legend(handles=[median_legend, mean_legend])
-    # plt.xticks(rotation=45)
-    plot_path = './results/' + str(folder_name) + '/' + str(ts_name).lower() + '/comparison_' + str(incoming_data_type_name) + "_" + str(sample_size) + ".png"
-    plt.savefig(plot_path, bbox_inches='tight', format='png')
-    plt.close()
-
-
-# http://blog.bharatbhole.com/creating-boxplots-with-matplotlib/
-def format_box_plot(ax, y_values):
-    bp = ax.boxplot(y_values, showmeans=True, showfliers=False)
-    for median in bp['medians']:
-        median.set_color('red')
-    ## change the style of means and their fill
-    for mean in bp['means']:
-        mean.set_color('green')
 
 if __name__ == '__main__':
     setup_experiment_database("elasticsearch", "localhost", 9200)

@@ -145,7 +145,6 @@ export class EditTargetsComponent implements OnInit {
         // also push variables of pushed data provider to incoming data types
         for (let i = 0; i < dataProvider.incomingDataTypes.length; i++) {
           this.target.incomingDataTypes.push(dataProvider.incomingDataTypes[i]);
-          // mark name, description and default values of pushed variables as disabled, but Scale is not disabled (TODO?)
           let pushedDataType =  this.target.incomingDataTypes[this.target.incomingDataTypes.length - 1];
           pushedDataType["disabled"] = true;
         }

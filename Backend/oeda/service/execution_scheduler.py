@@ -68,9 +68,6 @@ def fork_and_run_experiment(experiment):
         # fork RTX execution to threadpool
         getCachedThreadPool().add_task(rtx_execution, experiment, target_system)
 
-        # example of killing experiment after 10 secs TODO remove this line after testing!
-        # Timer(10, kill_experiment, [experiment["id"]]).start()
-
 
 def kill_experiment(experiment_id):
     debug("Interrupting experiment with id " + experiment_id)

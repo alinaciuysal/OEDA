@@ -35,7 +35,7 @@ class NormalityTest(OneSampleTest):
         statistic, pvalue = self.get_statistic_and_pvalue(self.y1)
 
         if np.isnan(np.sum(statistic)):
-            statistic = None # TODO: should we initialize it to [] ?
+            statistic = None
 
         not_normal = bool(pvalue <= self.alpha)
 

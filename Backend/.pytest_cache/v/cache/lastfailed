@@ -1,0 +1,8 @@
+{
+  "tests/Test_Integration.py::Test_Integration::()::test_anova": true, 
+  "tests/Test_Integration.py::Test_Integration::()::test_anova_data_points": true, 
+  "tests/Test_Integration.py::Test_Integration::()::test_execution": true, 
+  "tests/Test_Integration.py::Test_Integration::()::test_i_execution": true, 
+  "tests/Test_Unit.py": true, 
+  "tests/integration_test.py": true
+}

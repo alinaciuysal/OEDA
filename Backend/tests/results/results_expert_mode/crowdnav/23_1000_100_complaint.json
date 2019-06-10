@@ -1,0 +1,1505 @@
+{
+    "fn": "23_1000_100_complaint", 
+    "stages": [
+        {
+            "createdDate": "2018-08-02 11:53:28.358000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 448.1683867302753, 
+                "dynamic_info_weight": 1.6685447161239624, 
+                "exploration_percentage": 0.24675082583926453, 
+                "exploration_weight": 5.5878722574354605, 
+                "re_routing_frequency": 36.50756284819491, 
+                "route_randomization": 0.05054545510425655, 
+                "static_info_weight": 2.090036687363841
+            }, 
+            "number": 23, 
+            "stage_result": 0.07
+        }, 
+        {
+            "createdDate": "2018-08-02 14:45:03.940000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 698.6358714997865, 
+                "dynamic_info_weight": 1.0185616180514843, 
+                "exploration_percentage": 0.16873030130998873, 
+                "exploration_weight": 5.91649467567508, 
+                "re_routing_frequency": 30.045561724611414, 
+                "route_randomization": 0.03471560945660986, 
+                "static_info_weight": 1.7383868206646038
+            }, 
+            "number": 51, 
+            "stage_result": 0.07
+        }, 
+        {
+            "createdDate": "2018-08-02 11:07:05.122000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 643.3877444052066, 
+                "dynamic_info_weight": 1.470507865390319, 
+                "exploration_percentage": 0.14721802116852092, 
+                "exploration_weight": 7.7712999666106475, 
+                "re_routing_frequency": 23.99280518126158, 
+                "route_randomization": 0.2125411942479152, 
+                "static_info_weight": 1.4941879461512853
+            }, 
+            "number": 15, 
+            "stage_result": 0.071
+        }, 
+        {
+            "createdDate": "2018-08-02 18:12:50.694000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 70.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 1.8111420603565787
+            }, 
+            "number": 85, 
+            "stage_result": 0.072
+        }, 
+        {
+            "createdDate": "2018-08-02 16:59:38.751000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 680.4026053118941, 
+                "dynamic_info_weight": 2.427111420536522, 
+                "exploration_percentage": 0.23826878850246958, 
+                "exploration_weight": 5.591483910737765, 
+                "re_routing_frequency": 28.290604793694765, 
+                "route_randomization": 0.23464469286204093, 
+                "static_info_weight": 2.4171049967234493
+            }, 
+            "number": 73, 
+            "stage_result": 0.075
+        }, 
+        {
+            "createdDate": "2018-08-02 19:29:56.103000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.7256730780067948, 
+                "exploration_percentage": 0.11983241691087582, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 70.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 98, 
+            "stage_result": 0.076
+        }, 
+        {
+            "createdDate": "2018-08-02 12:41:39.640000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 70.0, 
+                "route_randomization": 0.0, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 31, 
+            "stage_result": 0.077
+        }, 
+        {
+            "createdDate": "2018-08-02 12:04:52.728000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 645.828773037601, 
+                "dynamic_info_weight": 1.2166620647417825, 
+                "exploration_percentage": 0.0270088737246623, 
+                "exploration_weight": 6.7757957013971435, 
+                "re_routing_frequency": 16.261610043703065, 
+                "route_randomization": 0.17264875827864654, 
+                "static_info_weight": 1.6004072611260758
+            }, 
+            "number": 25, 
+            "stage_result": 0.08
+        }, 
+        {
+            "createdDate": "2018-08-02 14:38:55.415000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 454.546404688158, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.15834799507016264, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 21.994626181091736, 
+                "route_randomization": 0.25395057681665845, 
+                "static_info_weight": 1.8948674403334973
+            }, 
+            "number": 50, 
+            "stage_result": 0.081
+        }, 
+        {
+            "createdDate": "2018-08-02 17:12:06.316000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 2.5, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.0, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 75, 
+            "stage_result": 0.08200000000000002
+        }, 
+        {
+            "createdDate": "2018-08-02 12:46:11.925000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 32, 
+            "stage_result": 0.083
+        }, 
+        {
+            "createdDate": "2018-08-02 15:39:12.433000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 695.6836583551477, 
+                "dynamic_info_weight": 2.2209035699734434, 
+                "exploration_percentage": 0.13573130654428808, 
+                "exploration_weight": 5.140220962285162, 
+                "re_routing_frequency": 37.83499420930006, 
+                "route_randomization": 0.08420450967874037, 
+                "static_info_weight": 1.795918596559825
+            }, 
+            "number": 60, 
+            "stage_result": 0.083
+        }, 
+        {
+            "createdDate": "2018-08-02 14:56:29.904000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 435.82047558836047, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.16021366874558807, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.0, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 53, 
+            "stage_result": 0.084
+        }, 
+        {
+            "createdDate": "2018-08-02 17:05:10.252000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 2.5, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 74, 
+            "stage_result": 0.084
+        }, 
+        {
+            "createdDate": "2018-08-02 14:01:01.938000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 70.0, 
+                "route_randomization": 0.0, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 44, 
+            "stage_result": 0.085
+        }, 
+        {
+            "createdDate": "2018-08-02 19:06:33.682000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.12687680537908722, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 70.0, 
+                "route_randomization": 0.0, 
+                "static_info_weight": 1.6159818675807043
+            }, 
+            "number": 94, 
+            "stage_result": 0.085
+        }, 
+        {
+            "createdDate": "2018-08-02 10:32:44.164000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 438.4529159205234, 
+                "dynamic_info_weight": 1.5806101879981447, 
+                "exploration_percentage": 0.26993781728674704, 
+                "exploration_weight": 6.832004972283145, 
+                "re_routing_frequency": 65.96513775266234, 
+                "route_randomization": 0.2412607593721587, 
+                "static_info_weight": 2.2818935733117547
+            }, 
+            "number": 9, 
+            "stage_result": 0.086
+        }, 
+        {
+            "createdDate": "2018-08-02 19:18:11.225000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 505.9279855234016, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.3, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 57.44761546766421, 
+                "route_randomization": 0.05352657395665303, 
+                "static_info_weight": 1.0
+            }, 
+            "number": 96, 
+            "stage_result": 0.088
+        }, 
+        {
+            "createdDate": "2018-08-02 15:33:10.587000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 699.7998965577107, 
+                "dynamic_info_weight": 2.461022805798128, 
+                "exploration_percentage": 0.038176273561509454, 
+                "exploration_weight": 19.429475609073577, 
+                "re_routing_frequency": 25.72559365004484, 
+                "route_randomization": 0.19876042721892676, 
+                "static_info_weight": 1.3205075363243246
+            }, 
+            "number": 59, 
+            "stage_result": 0.08900000000000001
+        }, 
+        {
+            "createdDate": "2018-08-02 12:16:56.210000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 615.5588986778538, 
+                "dynamic_info_weight": 1.174370962270625, 
+                "exploration_percentage": 0.16561946849142395, 
+                "exploration_weight": 5.716361787827429, 
+                "re_routing_frequency": 23.558367761561534, 
+                "route_randomization": 0.26266215580838004, 
+                "static_info_weight": 1.7673820719815398
+            }, 
+            "number": 27, 
+            "stage_result": 0.09
+        }, 
+        {
+            "createdDate": "2018-08-02 13:06:55.157000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 67.7900256326045, 
+                "route_randomization": 0.2920902861160357, 
+                "static_info_weight": 1.0
+            }, 
+            "number": 35, 
+            "stage_result": 0.091
+        }, 
+        {
+            "createdDate": "2018-08-02 16:34:05.617000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.13048631989138457, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 69, 
+            "stage_result": 0.091
+        }, 
+        {
+            "createdDate": "2018-08-02 11:30:21.050000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 536.1075437101204, 
+                "dynamic_info_weight": 1.175177612820947, 
+                "exploration_percentage": 0.09560179585941785, 
+                "exploration_weight": 11.112941199037216, 
+                "re_routing_frequency": 59.85425608560961, 
+                "route_randomization": 0.22388584636345438, 
+                "static_info_weight": 1.2409662124304879
+            }, 
+            "number": 19, 
+            "stage_result": 0.092
+        }, 
+        {
+            "createdDate": "2018-08-02 11:47:23.126000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 595.2854162930662, 
+                "dynamic_info_weight": 1.187342237649811, 
+                "exploration_percentage": 0.21202971065163997, 
+                "exploration_weight": 14.93603014597139, 
+                "re_routing_frequency": 18.08180299772294, 
+                "route_randomization": 0.034372477911454376, 
+                "static_info_weight": 1.408672557818761
+            }, 
+            "number": 22, 
+            "stage_result": 0.09300000000000001
+        }, 
+        {
+            "createdDate": "2018-08-02 14:18:46.708000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.0, 
+                "static_info_weight": 1.0
+            }, 
+            "number": 47, 
+            "stage_result": 0.09300000000000001
+        }, 
+        {
+            "createdDate": "2018-08-02 15:08:31.311000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.15453206432518468, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.154078125921005, 
+                "route_randomization": 0.12069829336349558, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 55, 
+            "stage_result": 0.09300000000000001
+        }, 
+        {
+            "createdDate": "2018-08-02 16:16:19.815000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.1325118251232445, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 66, 
+            "stage_result": 0.09300000000000001
+        }, 
+        {
+            "createdDate": "2018-08-02 18:45:29.578000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.13092847832537619, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 1.6316760546993674
+            }, 
+            "number": 91, 
+            "stage_result": 0.09300000000000001
+        }, 
+        {
+            "createdDate": "2018-08-02 18:52:45.813000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.1278286149620211, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 1.6345658487665071
+            }, 
+            "number": 92, 
+            "stage_result": 0.09300000000000001
+        }, 
+        {
+            "createdDate": "2018-08-02 15:22:03.896000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.16290568837469238, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 70.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 1.0
+            }, 
+            "number": 57, 
+            "stage_result": 0.094
+        }, 
+        {
+            "createdDate": "2018-08-02 18:59:54.305000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.711566564318964, 
+                "exploration_percentage": 0.11008487397909733, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 93, 
+            "stage_result": 0.094
+        }, 
+        {
+            "createdDate": "2018-08-02 10:55:20.518000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 215.00196020196037, 
+                "dynamic_info_weight": 1.9745280466054864, 
+                "exploration_percentage": 0.05382728893890306, 
+                "exploration_weight": 15.18214196611277, 
+                "re_routing_frequency": 18.198706391007235, 
+                "route_randomization": 0.22072360058310503, 
+                "static_info_weight": 2.157503021323069
+            }, 
+            "number": 13, 
+            "stage_result": 0.095
+        }, 
+        {
+            "createdDate": "2018-08-02 16:46:55.216000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 394.4394437601256, 
+                "dynamic_info_weight": 1.2349807787610374, 
+                "exploration_percentage": 0.29643275212433656, 
+                "exploration_weight": 5.099018079009933, 
+                "re_routing_frequency": 67.00560278156655, 
+                "route_randomization": 0.1865090846775931, 
+                "static_info_weight": 2.374368024404337
+            }, 
+            "number": 71, 
+            "stage_result": 0.095
+        }, 
+        {
+            "createdDate": "2018-08-02 12:53:37.320000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.0, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 33, 
+            "stage_result": 0.096
+        }, 
+        {
+            "createdDate": "2018-08-02 14:50:48.989000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 697.1514198101821, 
+                "dynamic_info_weight": 1.0943706584195334, 
+                "exploration_percentage": 0.00022394286360398756, 
+                "exploration_weight": 8.854271352830684, 
+                "re_routing_frequency": 67.39295869949686, 
+                "route_randomization": 0.07487879601409485, 
+                "static_info_weight": 1.734456856732233
+            }, 
+            "number": 52, 
+            "stage_result": 0.096
+        }, 
+        {
+            "createdDate": "2018-08-02 15:27:34.018000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 356.76580568755617, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.18632445361018646, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 70.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 58, 
+            "stage_result": 0.096
+        }, 
+        {
+            "createdDate": "2018-08-02 17:32:38.671000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 2.5, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 78, 
+            "stage_result": 0.096
+        }, 
+        {
+            "createdDate": "2018-08-02 12:11:07.580000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 662.9637882248401, 
+                "dynamic_info_weight": 2.2540158249709656, 
+                "exploration_percentage": 0.081331217607475, 
+                "exploration_weight": 18.13093934824248, 
+                "re_routing_frequency": 65.2840949786142, 
+                "route_randomization": 0.18324521250288273, 
+                "static_info_weight": 2.253960923369726
+            }, 
+            "number": 26, 
+            "stage_result": 0.09700000000000002
+        }, 
+        {
+            "createdDate": "2018-08-02 13:12:11.761000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.7617094137919564, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.0, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 36, 
+            "stage_result": 0.09700000000000002
+        }, 
+        {
+            "createdDate": "2018-08-02 15:57:32.626000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 20.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 63, 
+            "stage_result": 0.098
+        }, 
+        {
+            "createdDate": "2018-08-02 17:55:21.763000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 2.5, 
+                "exploration_percentage": 0.1404463857265562, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 1.7961136436409197
+            }, 
+            "number": 82, 
+            "stage_result": 0.098
+        }, 
+        {
+            "createdDate": "2018-08-02 19:23:02.226000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 543.8860807254562, 
+                "dynamic_info_weight": 1.4546097744811464, 
+                "exploration_percentage": 0.14754180136884126, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 97, 
+            "stage_result": 0.098
+        }, 
+        {
+            "createdDate": "2018-08-02 10:38:25.523000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 307.5330349837345, 
+                "dynamic_info_weight": 1.2024343450435173, 
+                "exploration_percentage": 0.17290047227244362, 
+                "exploration_weight": 10.67836347509474, 
+                "re_routing_frequency": 28.482638615441, 
+                "route_randomization": 0.20150069021357667, 
+                "static_info_weight": 1.7468671852533286
+            }, 
+            "number": 10, 
+            "stage_result": 0.099
+        }, 
+        {
+            "createdDate": "2018-08-02 15:52:17.045000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.17579850018048243, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 70.0, 
+                "route_randomization": 0.0, 
+                "static_info_weight": 1.6421559083099937
+            }, 
+            "number": 62, 
+            "stage_result": 0.099
+        }, 
+        {
+            "createdDate": "2018-08-02 18:07:39.651000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 696.3671679155409, 
+                "dynamic_info_weight": 2.0704888846548, 
+                "exploration_percentage": 0.21911558259513375, 
+                "exploration_weight": 18.830402709402406, 
+                "re_routing_frequency": 58.077179907213456, 
+                "route_randomization": 0.009610493028107016, 
+                "static_info_weight": 2.485973873623806
+            }, 
+            "number": 84, 
+            "stage_result": 0.1
+        }, 
+        {
+            "createdDate": "2018-08-02 18:28:15.789000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 678.6638070368514, 
+                "dynamic_info_weight": 2.419690517184181, 
+                "exploration_percentage": 0.0409383405361797, 
+                "exploration_weight": 19.40934236541915, 
+                "re_routing_frequency": 42.55940357242675, 
+                "route_randomization": 0.18328231023132066, 
+                "static_info_weight": 2.492559528690763
+            }, 
+            "number": 88, 
+            "stage_result": 0.1
+        }, 
+        {
+            "createdDate": "2018-08-02 12:35:35.717000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 279.9469200801029, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 15.142891822968807, 
+                "route_randomization": 0.2763026982296678, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 30, 
+            "stage_result": 0.10100000000000002
+        }, 
+        {
+            "createdDate": "2018-08-02 13:19:34.120000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.0, 
+                "static_info_weight": 1.6681599376186877
+            }, 
+            "number": 37, 
+            "stage_result": 0.10100000000000002
+        }, 
+        {
+            "createdDate": "2018-08-02 13:31:39.120000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.3, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 70.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 39, 
+            "stage_result": 0.10100000000000002
+        }, 
+        {
+            "createdDate": "2018-08-02 13:47:50.782000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 679.6792807890523, 
+                "dynamic_info_weight": 2.4774266783657093, 
+                "exploration_percentage": 0.02111321896104939, 
+                "exploration_weight": 5.473670792597761, 
+                "re_routing_frequency": 34.14970321927028, 
+                "route_randomization": 0.14290710982707724, 
+                "static_info_weight": 1.2801225162959724
+            }, 
+            "number": 42, 
+            "stage_result": 0.10100000000000002
+        }, 
+        {
+            "createdDate": "2018-08-02 16:41:14.057000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.13076739089343214, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 70.0, 
+                "route_randomization": 0.0, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 70, 
+            "stage_result": 0.10100000000000002
+        }, 
+        {
+            "createdDate": "2018-08-02 13:00:52.366000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.27351199397204173, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 16.3848806071027, 
+                "route_randomization": 0.2523113790812663, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 34, 
+            "stage_result": 0.102
+        }, 
+        {
+            "createdDate": "2018-08-02 14:05:51.513000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.0, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 45, 
+            "stage_result": 0.102
+        }, 
+        {
+            "createdDate": "2018-08-02 14:13:21.207000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.06097090340374404, 
+                "exploration_weight": 20.0, 
+                "re_routing_frequency": 65.8761938687866, 
+                "route_randomization": 0.08037692660505417, 
+                "static_info_weight": 1.0
+            }, 
+            "number": 46, 
+            "stage_result": 0.102
+        }, 
+        {
+            "createdDate": "2018-08-02 16:52:37.320000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 468.76744145080966, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.20448260585138975, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.0, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 72, 
+            "stage_result": 0.102
+        }, 
+        {
+            "createdDate": "2018-08-02 18:17:47.732000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 698.0910767751338, 
+                "dynamic_info_weight": 2.0786038691011988, 
+                "exploration_percentage": 0.2873941582552102, 
+                "exploration_weight": 5.930401607507924, 
+                "re_routing_frequency": 48.65894250884393, 
+                "route_randomization": 0.13207822379423165, 
+                "static_info_weight": 1.8834326884725383
+            }, 
+            "number": 86, 
+            "stage_result": 0.102
+        }, 
+        {
+            "createdDate": "2018-08-02 18:23:02.752000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.11913421735452305, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 70.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 1.8256074041299102
+            }, 
+            "number": 87, 
+            "stage_result": 0.102
+        }, 
+        {
+            "createdDate": "2018-08-02 10:15:39.791000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 568.1022200058276, 
+                "dynamic_info_weight": 1.8583931972291146, 
+                "exploration_percentage": 0.2573659937171606, 
+                "exploration_weight": 6.167561192308007, 
+                "re_routing_frequency": 56.71188896323273, 
+                "route_randomization": 0.14531174313259287, 
+                "static_info_weight": 2.254166322503367
+            }, 
+            "number": 6, 
+            "stage_result": 0.103
+        }, 
+        {
+            "createdDate": "2018-08-02 13:53:43.881000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 100.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.287923605194219, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 12.107018602181068, 
+                "route_randomization": 0.0954954989046234, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 43, 
+            "stage_result": 0.103
+        }, 
+        {
+            "createdDate": "2018-08-02 10:49:21.093000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 429.1936364075614, 
+                "dynamic_info_weight": 2.0197678775597008, 
+                "exploration_percentage": 0.04939463662562404, 
+                "exploration_weight": 15.130319749663826, 
+                "re_routing_frequency": 28.766147914776028, 
+                "route_randomization": 0.014342658910824872, 
+                "static_info_weight": 1.4193081455644396
+            }, 
+            "number": 12, 
+            "stage_result": 0.10400000000000001
+        }, 
+        {
+            "createdDate": "2018-08-02 11:36:35.596000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 499.35089016293995, 
+                "dynamic_info_weight": 1.8746249627018037, 
+                "exploration_percentage": 0.1194646254167298, 
+                "exploration_weight": 13.757557594145052, 
+                "re_routing_frequency": 68.75187195908113, 
+                "route_randomization": 0.007145199882209099, 
+                "static_info_weight": 1.6796908354473192
+            }, 
+            "number": 20, 
+            "stage_result": 0.10400000000000001
+        }, 
+        {
+            "createdDate": "2018-08-02 11:41:40.242000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 435.39084886432056, 
+                "dynamic_info_weight": 1.5840168903781815, 
+                "exploration_percentage": 0.25879252937264036, 
+                "exploration_weight": 15.380663493368571, 
+                "re_routing_frequency": 19.021584790403935, 
+                "route_randomization": 0.05424342197999659, 
+                "static_info_weight": 2.2123234094910464
+            }, 
+            "number": 21, 
+            "stage_result": 0.10400000000000001
+        }, 
+        {
+            "createdDate": "2018-08-02 13:37:13.725000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 107.5442766470434, 
+                "dynamic_info_weight": 1.0544725540871613, 
+                "exploration_percentage": 0.03424281724199709, 
+                "exploration_weight": 5.069107585538972, 
+                "re_routing_frequency": 67.18028227492312, 
+                "route_randomization": 0.02871983595120859, 
+                "static_info_weight": 1.7107822224554388
+            }, 
+            "number": 40, 
+            "stage_result": 0.10400000000000001
+        }, 
+        {
+            "createdDate": "2018-08-02 18:02:14.422000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 662.2076229323493, 
+                "dynamic_info_weight": 2.171929032570259, 
+                "exploration_percentage": 0.005704750926066727, 
+                "exploration_weight": 19.64726140780031, 
+                "re_routing_frequency": 54.82974042699721, 
+                "route_randomization": 0.2563004498893579, 
+                "static_info_weight": 1.0585196881256058
+            }, 
+            "number": 83, 
+            "stage_result": 0.10400000000000001
+        }, 
+        {
+            "createdDate": "2018-08-02 13:26:35.668000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.3, 
+                "exploration_weight": 12.378912392637963, 
+                "re_routing_frequency": 70.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 38, 
+            "stage_result": 0.105
+        }, 
+        {
+            "createdDate": "2018-08-02 16:09:45.839000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 681.4631876208628, 
+                "dynamic_info_weight": 2.366150550645055, 
+                "exploration_percentage": 0.17016283614853814, 
+                "exploration_weight": 5.534549572883664, 
+                "re_routing_frequency": 12.616369386218212, 
+                "route_randomization": 0.048930763207738086, 
+                "static_info_weight": 2.381807645139717
+            }, 
+            "number": 65, 
+            "stage_result": 0.105
+        }, 
+        {
+            "createdDate": "2018-08-02 13:42:20.840000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 695.7515872316083, 
+                "dynamic_info_weight": 1.0452365239655483, 
+                "exploration_percentage": 0.11197518562561869, 
+                "exploration_weight": 19.401782025213006, 
+                "re_routing_frequency": 38.895492713233594, 
+                "route_randomization": 0.1488215475895597, 
+                "static_info_weight": 2.394388409058598
+            }, 
+            "number": 41, 
+            "stage_result": 0.106
+        }, 
+        {
+            "createdDate": "2018-08-02 17:18:50.320000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 76, 
+            "stage_result": 0.106
+        }, 
+        {
+            "createdDate": "2018-08-02 12:29:17.719000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 2.5, 
+                "exploration_percentage": 0.3, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 70.0, 
+                "route_randomization": 0.0, 
+                "static_info_weight": 1.0
+            }, 
+            "number": 29, 
+            "stage_result": 0.107
+        }, 
+        {
+            "createdDate": "2018-08-02 09:52:37.928000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 275.6404624036006, 
+                "dynamic_info_weight": 1.5284172206468873, 
+                "exploration_percentage": 0.2721823620628229, 
+                "exploration_weight": 15.627197843490485, 
+                "re_routing_frequency": 33.9458965129073, 
+                "route_randomization": 0.2220151608730857, 
+                "static_info_weight": 2.351146410923807
+            }, 
+            "number": 2, 
+            "stage_result": 0.10800000000000001
+        }, 
+        {
+            "createdDate": "2018-08-02 14:26:01.568000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.6104066679676794, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 70.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 1.0
+            }, 
+            "number": 48, 
+            "stage_result": 0.10800000000000001
+        }, 
+        {
+            "createdDate": "2018-08-02 19:40:54.865000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 355.79206995711644, 
+                "dynamic_info_weight": 1.1210138215214995, 
+                "exploration_percentage": 0.004559194964380665, 
+                "exploration_weight": 5.235705676686593, 
+                "re_routing_frequency": 10.993562000041376, 
+                "route_randomization": 0.26382071225551396, 
+                "static_info_weight": 1.0201261347166521
+            }, 
+            "number": 100, 
+            "stage_result": 0.10800000000000001
+        }, 
+        {
+            "createdDate": "2018-08-02 17:50:28.807000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 687.8048798483514, 
+                "dynamic_info_weight": 1.556959157973667, 
+                "exploration_percentage": 0.08931525857235932, 
+                "exploration_weight": 5.530119794845014, 
+                "re_routing_frequency": 53.85882230028567, 
+                "route_randomization": 0.16232974635754782, 
+                "static_info_weight": 1.0347826128835242
+            }, 
+            "number": 81, 
+            "stage_result": 0.109
+        }, 
+        {
+            "createdDate": "2018-08-02 11:12:32.544000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 478.79747242715047, 
+                "dynamic_info_weight": 1.0355003132285208, 
+                "exploration_percentage": 0.17777245350951007, 
+                "exploration_weight": 17.117211498912518, 
+                "re_routing_frequency": 27.24590158844298, 
+                "route_randomization": 0.2017341779319809, 
+                "static_info_weight": 1.5732826179541912
+            }, 
+            "number": 16, 
+            "stage_result": 0.111
+        }, 
+        {
+            "createdDate": "2018-08-02 11:18:39.203000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 467.29775779007406, 
+                "dynamic_info_weight": 2.3546197857596525, 
+                "exploration_percentage": 0.007677882228285728, 
+                "exploration_weight": 7.5021794772559165, 
+                "re_routing_frequency": 51.99450295748013, 
+                "route_randomization": 0.2667457340145881, 
+                "static_info_weight": 2.494853332782575
+            }, 
+            "number": 17, 
+            "stage_result": 0.114
+        }, 
+        {
+            "createdDate": "2018-08-02 10:04:09.867000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 562.8926220080072, 
+                "dynamic_info_weight": 1.2903876194196444, 
+                "exploration_percentage": 0.26639732641626207, 
+                "exploration_weight": 17.115987300180365, 
+                "re_routing_frequency": 49.651008637619924, 
+                "route_randomization": 0.2221497687057908, 
+                "static_info_weight": 2.306738376096713
+            }, 
+            "number": 4, 
+            "stage_result": 0.115
+        }, 
+        {
+            "createdDate": "2018-08-02 11:01:16.257000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 568.845784190172, 
+                "dynamic_info_weight": 1.2645453759787768, 
+                "exploration_percentage": 0.09536969355561208, 
+                "exploration_weight": 16.5246938403978, 
+                "re_routing_frequency": 43.65704879970318, 
+                "route_randomization": 0.023487101440498464, 
+                "static_info_weight": 1.7375500779430322
+            }, 
+            "number": 14, 
+            "stage_result": 0.115
+        }, 
+        {
+            "createdDate": "2018-08-02 17:25:31.745000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 2.5, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.0, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 77, 
+            "stage_result": 0.115
+        }, 
+        {
+            "createdDate": "2018-08-02 16:23:16.244000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 672.6283828961023, 
+                "dynamic_info_weight": 1.0233543256759454, 
+                "exploration_percentage": 0.007728259239448378, 
+                "exploration_weight": 19.239750178224327, 
+                "re_routing_frequency": 57.106962425129836, 
+                "route_randomization": 0.1918614990387975, 
+                "static_info_weight": 1.5446457072508457
+            }, 
+            "number": 67, 
+            "stage_result": 0.11600000000000002
+        }, 
+        {
+            "createdDate": "2018-08-02 19:35:38.261000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.7238841744917437, 
+                "exploration_percentage": 0.12504710772565752, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 70.0, 
+                "route_randomization": 0.0, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 99, 
+            "stage_result": 0.11600000000000002
+        }, 
+        {
+            "createdDate": "2018-08-02 17:39:28.604000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 642.9933711781661, 
+                "dynamic_info_weight": 2.0309856433454767, 
+                "exploration_percentage": 0.2993601889882366, 
+                "exploration_weight": 5.244106599454199, 
+                "re_routing_frequency": 17.482104555789977, 
+                "route_randomization": 0.17168171677992636, 
+                "static_info_weight": 1.1770837351022443
+            }, 
+            "number": 79, 
+            "stage_result": 0.118
+        }, 
+        {
+            "createdDate": "2018-08-02 19:12:17.112000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 127.09919147197596, 
+                "dynamic_info_weight": 1.1803342196186333, 
+                "exploration_percentage": 0.008297315079630453, 
+                "exploration_weight": 5.589578522500211, 
+                "re_routing_frequency": 46.84685451794463, 
+                "route_randomization": 0.017188229560719262, 
+                "static_info_weight": 1.046586388716313
+            }, 
+            "number": 95, 
+            "stage_result": 0.118
+        }, 
+        {
+            "createdDate": "2018-08-02 14:31:13.096000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 100.0, 
+                "dynamic_info_weight": 2.5, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.0, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 49, 
+            "stage_result": 0.124
+        }, 
+        {
+            "createdDate": "2018-08-02 18:39:25.250000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 652.0919212954627, 
+                "dynamic_info_weight": 2.436827883591473, 
+                "exploration_percentage": 0.27151569765305944, 
+                "exploration_weight": 5.140905369473241, 
+                "re_routing_frequency": 37.52243549574247, 
+                "route_randomization": 0.10171973128125444, 
+                "static_info_weight": 2.395819661197087
+            }, 
+            "number": 90, 
+            "stage_result": 0.126
+        }, 
+        {
+            "createdDate": "2018-08-02 09:47:33.699000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 142.40688565745162, 
+                "dynamic_info_weight": 1.6752295263192372, 
+                "exploration_percentage": 0.05922731158092812, 
+                "exploration_weight": 12.38996762078696, 
+                "re_routing_frequency": 63.040708164326816, 
+                "route_randomization": 0.2927611624603188, 
+                "static_info_weight": 1.8613657020033512
+            }, 
+            "number": 1, 
+            "stage_result": 0.128
+        }, 
+        {
+            "createdDate": "2018-08-02 10:20:56.228000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 340.46452868334717, 
+                "dynamic_info_weight": 1.957728235162324, 
+                "exploration_percentage": 0.28065863419927545, 
+                "exploration_weight": 12.588077592518298, 
+                "re_routing_frequency": 14.214366478056519, 
+                "route_randomization": 0.20634325208745427, 
+                "static_info_weight": 1.9952351492722502
+            }, 
+            "number": 7, 
+            "stage_result": 0.13
+        }, 
+        {
+            "createdDate": "2018-08-02 15:15:21.814000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.3, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 56, 
+            "stage_result": 0.13
+        }, 
+        {
+            "createdDate": "2018-08-02 16:04:30.591000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 100.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.16215196279522073, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 40.643989671133, 
+                "route_randomization": 0.131480266146035, 
+                "static_info_weight": 2.5
+            }, 
+            "number": 64, 
+            "stage_result": 0.13
+        }, 
+        {
+            "createdDate": "2018-08-02 15:03:27.545000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 546.7524414630162, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.0, 
+                "exploration_weight": 5.0, 
+                "re_routing_frequency": 70.0, 
+                "route_randomization": 0.0, 
+                "static_info_weight": 1.8441549249854645
+            }, 
+            "number": 54, 
+            "stage_result": 0.131
+        }, 
+        {
+            "createdDate": "2018-08-02 16:28:26.461000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 113.78168699499385, 
+                "dynamic_info_weight": 1.3369456160247637, 
+                "exploration_percentage": 0.2876101420644644, 
+                "exploration_weight": 5.118215129855557, 
+                "re_routing_frequency": 48.73225113323914, 
+                "route_randomization": 0.2672923091826657, 
+                "static_info_weight": 1.5736898700040998
+            }, 
+            "number": 68, 
+            "stage_result": 0.131
+        }, 
+        {
+            "createdDate": "2018-08-02 11:59:26.779000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 284.9472934931198, 
+                "dynamic_info_weight": 2.0821725283493695, 
+                "exploration_percentage": 0.010067571323065029, 
+                "exploration_weight": 10.153496137479848, 
+                "re_routing_frequency": 43.924304911131394, 
+                "route_randomization": 0.23632755555458032, 
+                "static_info_weight": 1.0564459286319339
+            }, 
+            "number": 24, 
+            "stage_result": 0.132
+        }, 
+        {
+            "createdDate": "2018-08-02 17:45:29.523000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 142.5181260254028, 
+                "dynamic_info_weight": 1.1595923049141588, 
+                "exploration_percentage": 0.0039277135077304135, 
+                "exploration_weight": 19.242012087739738, 
+                "re_routing_frequency": 62.61469259378898, 
+                "route_randomization": 0.22708104426604933, 
+                "static_info_weight": 2.4600929013083683
+            }, 
+            "number": 80, 
+            "stage_result": 0.132
+        }, 
+        {
+            "createdDate": "2018-08-02 10:09:39.908000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 213.528231295651, 
+                "dynamic_info_weight": 1.8268968294603432, 
+                "exploration_percentage": 0.032367015016390985, 
+                "exploration_weight": 11.590808969159415, 
+                "re_routing_frequency": 19.618524551347065, 
+                "route_randomization": 0.056470837036356185, 
+                "static_info_weight": 1.6294592917253745
+            }, 
+            "number": 5, 
+            "stage_result": 0.133
+        }, 
+        {
+            "createdDate": "2018-08-02 15:45:08.708000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 700.0, 
+                "dynamic_info_weight": 1.0, 
+                "exploration_percentage": 0.3, 
+                "exploration_weight": 20.0, 
+                "re_routing_frequency": 10.0, 
+                "route_randomization": 0.3, 
+                "static_info_weight": 1.0
+            }, 
+            "number": 61, 
+            "stage_result": 0.141
+        }, 
+        {
+            "createdDate": "2018-08-02 09:58:55.419000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 491.46965978039015, 
+                "dynamic_info_weight": 2.4762230447695694, 
+                "exploration_percentage": 0.06845860064489731, 
+                "exploration_weight": 15.934305139213235, 
+                "re_routing_frequency": 39.465054018526374, 
+                "route_randomization": 0.2823381652603487, 
+                "static_info_weight": 2.0559789739897516
+            }, 
+            "number": 3, 
+            "stage_result": 0.143
+        }, 
+        {
+            "createdDate": "2018-08-02 12:22:50.405000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 334.54984900562465, 
+                "dynamic_info_weight": 1.9712498934753597, 
+                "exploration_percentage": 0.1611862498268891, 
+                "exploration_weight": 8.71864524898072, 
+                "re_routing_frequency": 33.18305295948474, 
+                "route_randomization": 0.030780980751549555, 
+                "static_info_weight": 1.1156399129144046
+            }, 
+            "number": 28, 
+            "stage_result": 0.143
+        }, 
+        {
+            "createdDate": "2018-08-02 10:43:39.013000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 261.89677364549493, 
+                "dynamic_info_weight": 1.3509107613229459, 
+                "exploration_percentage": 0.2775695486469733, 
+                "exploration_weight": 19.094257192890893, 
+                "re_routing_frequency": 35.4359504875412, 
+                "route_randomization": 0.12420083870034727, 
+                "static_info_weight": 1.9656324245648273
+            }, 
+            "number": 11, 
+            "stage_result": 0.154
+        }, 
+        {
+            "createdDate": "2018-08-02 10:27:03.427000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 222.81661732991486, 
+                "dynamic_info_weight": 1.958927520913308, 
+                "exploration_percentage": 0.20992383530374892, 
+                "exploration_weight": 19.023003017907087, 
+                "re_routing_frequency": 52.2449058316579, 
+                "route_randomization": 0.05168778812441082, 
+                "static_info_weight": 2.106196524832016
+            }, 
+            "number": 8, 
+            "stage_result": 0.159
+        }, 
+        {
+            "createdDate": "2018-08-02 11:24:12.323000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 293.87219960553955, 
+                "dynamic_info_weight": 1.8668859999378635, 
+                "exploration_percentage": 0.2521640587305284, 
+                "exploration_weight": 15.40821323601628, 
+                "re_routing_frequency": 34.73238699432737, 
+                "route_randomization": 0.14220363585496573, 
+                "static_info_weight": 1.1929041011707562
+            }, 
+            "number": 18, 
+            "stage_result": 0.17299999999999996
+        }, 
+        {
+            "createdDate": "2018-08-02 18:33:12.674000", 
+            "experiment_id": "d5a1d685-a480-ae57-8da0-90d61834aeb4", 
+            "knobs": {
+                "data_freshness_threshold": 164.63659195047785, 
+                "dynamic_info_weight": 2.342583813820294, 
+                "exploration_percentage": 0.28788668655911503, 
+                "exploration_weight": 5.24942077381119, 
+                "re_routing_frequency": 34.87223860298059, 
+                "route_randomization": 0.05644139325869457, 
+                "static_info_weight": 1.0071561480497764
+            }, 
+            "number": 89, 
+            "stage_result": 0.193
+        }
+    ]
+}

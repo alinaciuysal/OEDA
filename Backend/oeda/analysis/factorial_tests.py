@@ -30,7 +30,6 @@ class FactorialAnova(Analysis):
         y_values = [d for i in range(self.stages_count) for d in data[i]]
         dataframe_data[self.y_key] = y_values
 
-        # NEW: alter knob_keys to fit for the previous logic
         # IMPORTANT ASSUMPTION HERE: as discussed before, we apply these analysis tests to stages of the same experiment
         # so, knobs[0].keys() == knobs[1].keys() == knobs[2].keys() == global keys
         if not self.knob_keys:
@@ -71,7 +70,7 @@ class FactorialAnova(Analysis):
         aov_table_sqr = deepcopy(aov_table)
         self.eta_squared(aov_table_sqr)
         self.omega_squared(aov_table_sqr)
-        # TODO: aov_table = aov_table[aov_table["omega_sq"] > min_effect_size] can also be integrated
+        # aov_table = aov_table[aov_table["omega_sq"] > min_effect_size] can also be integrated here
 
         # remove same cols, see: https://stackoverflow.com/questions/13411544/delete-column-from-pandas-dataframe-using-del-df-column-name
         columns = ['sum_sq', 'df', 'F', 'PR(>F)']

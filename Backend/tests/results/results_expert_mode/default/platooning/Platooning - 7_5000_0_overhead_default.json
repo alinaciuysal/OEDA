@@ -1,0 +1,44 @@
+{
+    "fn": "Platooning - 7_5000_0_overhead", 
+    "stages": [
+        {
+            "createdDate": "2018-08-09 16:29:30.141000", 
+            "experiment_id": "29b307f8-0088-dbd1-5e72-250589e07c9c", 
+            "knobs": {
+                "catchupDistance": 500, 
+                "joinDistance": 3000, 
+                "maxPlatoonGap": 500, 
+                "maxVehiclesInPlatoon": 10, 
+                "platoonSplitTime": 10
+            }, 
+            "number": 3, 
+            "stage_result": 1.5670095044136048
+        }, 
+        {
+            "createdDate": "2018-08-09 15:47:09.490000", 
+            "experiment_id": "29b307f8-0088-dbd1-5e72-250589e07c9c", 
+            "knobs": {
+                "catchupDistance": 500, 
+                "joinDistance": 3000, 
+                "maxPlatoonGap": 500, 
+                "maxVehiclesInPlatoon": 10, 
+                "platoonSplitTime": 10
+            }, 
+            "number": 1, 
+            "stage_result": 1.5680617882251737
+        }, 
+        {
+            "createdDate": "2018-08-09 16:07:27.277000", 
+            "experiment_id": "29b307f8-0088-dbd1-5e72-250589e07c9c", 
+            "knobs": {
+                "catchupDistance": 500, 
+                "joinDistance": 3000, 
+                "maxPlatoonGap": 500, 
+                "maxVehiclesInPlatoon": 10, 
+                "platoonSplitTime": 10
+            }, 
+            "number": 2, 
+            "stage_result": 1.568976697063446
+        }
+    ]
+}

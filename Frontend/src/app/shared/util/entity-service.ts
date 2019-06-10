@@ -181,96 +181,6 @@ export class EntityService {
       }
     }
     return all_data;
-
-  }
-
-  public create_experiment(execution_strategy): Experiment {
-      return {
-        "id": UUID.UUID(),
-        "name": "",
-        "description": "",
-        "status": "",
-        "targetSystemId": "",
-        "executionStrategy": execution_strategy,
-        "changeableVariables": [], // used while creating an experiment
-        "considered_data_types": [],
-        "analysis": {},
-        "numberOfSteps": 0
-      }
-  }
-
-  public create_target_system(): Target {
-    return {
-      "id": "",
-      "dataProviders": [],
-      "primaryDataProvider": {
-        "type": "",
-        "ignore_first_n_samples": null
-      },
-      "secondaryDataProviders": [],
-      "changeProvider": {
-        "type": "",
-      },
-      "name": "",
-      "status": "",
-      "description": "",
-      "incomingDataTypes": [],
-      "changeableVariables": [], // used while creating a target system
-      "defaultVariables": []
-    }
-  }
-
-  public create_execution_strategy(): ExecutionStrategy {
-    return {
-      type: "",
-      sample_size: 500,
-      knobs: [],
-      stages_count: 0,
-      acquisition_method: "",
-      optimizer_iterations: 15,
-    }
-  }
-
-  public create_oeda_callback_entity(): OedaCallbackEntity {
-    return {
-      status: "Initializing...",
-      message: "",
-      index: 0,
-      size: 0,
-      complete: 0,
-      experiment_counter: 0,
-      total_experiments: 0,
-      stage_counter: null,
-      current_knob: new Map<string, number>(),
-      remaining_time_and_stages: {},
-      step_name: "",
-      step_no: 0
-    };
-  }
-
-  public create_user_entity(): UserEntity {
-    return {
-      name: "",
-      password: "",
-      db_configuration: new Map<string, string>()
-    };
-  }
-
-  public create_stage_entity(): StageEntity {
-    return {
-      number: "",
-      values: [],
-      knobs: null,
-      stage_result: null
-    }
-  }
-
-  public create_step_entity(): StepEntity {
-    return {
-      step_no: "",
-      stages: [],
-      step_name: ""
-    }
   }
 
   /** we do not allow user to take Log of Boolean (Nominal) data */
@@ -342,8 +252,6 @@ export class EntityService {
     let json_str = JSON.stringify(selected_stage["knobs"]);
     json_str = json_str.replace(/["']/g, "");
     json_str = json_str.replace(/,/g, ", ");
-    // json_str = json_str.replace("{", "[");
-    // json_str = json_str.replace("}", "]");
     details += json_str;
     return details;
   }
@@ -432,22 +340,99 @@ export class EntityService {
   }
 
   /**
-   * converts a knob object with attributes into a Map<string, any>
-   */
-  public convert_object_into_map(object): Map<string, any> {
-    let map = new Map<string, any>();
-    object.forEach(function(attribute) {
-      let value = object[attribute];
-      map.set(attribute, value);
-    });
-    return map;
-  }
-
-  /**
    * @param obj, object whose emptiness will be tested
    * @returns {boolean}
    */
   public isEmptyObject(obj): boolean {
     return JSON.stringify(obj) === '{}';
+  }
+
+  public create_experiment(execution_strategy): Experiment {
+    return {
+      "id": UUID.UUID(),
+      "name": "",
+      "description": "",
+      "status": "",
+      "targetSystemId": "",
+      "executionStrategy": execution_strategy,
+      "changeableVariables": [], // used while creating an experiment
+      "considered_data_types": [],
+      "analysis": {},
+      "numberOfSteps": 0
+    }
+  }
+
+  public create_target_system(): Target {
+    return {
+      "id": "",
+      "dataProviders": [],
+      "primaryDataProvider": {
+        "type": "",
+        "ignore_first_n_samples": null
+      },
+      "secondaryDataProviders": [],
+      "changeProvider": {
+        "type": "",
+      },
+      "name": "",
+      "status": "",
+      "description": "",
+      "incomingDataTypes": [],
+      "changeableVariables": [], // used while creating a target system
+      "defaultVariables": []
+    }
+  }
+
+  public create_execution_strategy(): ExecutionStrategy {
+    return {
+      type: "",
+      sample_size: 500,
+      knobs: [],
+      stages_count: 0,
+      acquisition_method: "",
+      optimizer_iterations: 15,
+    }
+  }
+
+  public create_oeda_callback_entity(): OedaCallbackEntity {
+    return {
+      status: "Initializing...",
+      message: "",
+      index: 0,
+      size: 0,
+      complete: 0,
+      experiment_counter: 0,
+      total_experiments: 0,
+      stage_counter: null,
+      current_knob: new Map<string, number>(),
+      remaining_time_and_stages: {},
+      step_name: "",
+      step_no: 0
+    };
+  }
+
+  public create_user_entity(): UserEntity {
+    return {
+      name: "",
+      password: "",
+      db_configuration: new Map<string, string>()
+    };
+  }
+
+  public create_stage_entity(): StageEntity {
+    return {
+      number: "",
+      values: [],
+      knobs: null,
+      stage_result: null
+    }
+  }
+
+  public create_step_entity(): StepEntity {
+    return {
+      step_no: "",
+      stages: [],
+      step_name: ""
+    }
   }
 }

@@ -15,7 +15,6 @@ app.use(bodyParser.urlencoded({extended: true}));
  *
  *  Additional random variance can be enabled
  *
- *  TODO: integrate more functions and allow selection?
  *  see: https://en.wikipedia.org/wiki/Test_functions_for_optimization
  */
 

@@ -97,7 +97,6 @@ api.add_resource(MlrMBOConfigController, '/api/config/mlrMBO')
 
 api.add_resource(ExecutionSchedulerController, '/api/execution_scheduler')
 
-# TODO: following is for easy deletion of db tuples, remove upon production
 api.add_resource(DeleteDBController, '/api/delete')
 
 if __name__ == '__main__':

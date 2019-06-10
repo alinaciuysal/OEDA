@@ -12,6 +12,7 @@ setup(
         'Tempita', # MIT license
         'colorama', # BSD license (BSD)
         'tornado', # Apache license
+        'flask',
         'flask_restful', # BSD License (BSD)
         'flask_cors', # MIT License (MIT)
         'elasticsearch>=6.0.0,<7.0.0', # Apache Software License (Apache License, Version 2.0)
@@ -28,6 +29,7 @@ setup(
         'paho-mqtt', # MQTT version 3.1.1 client class, OSI Approved (Eclipse Public License v1.0 / Eclipse Distribution License v1.0)
         'pandas', # Powerful data structures for data analysis, time series, and statistics, BSD
         'seaborn', # statistical data visualization, BSD License (BSD (3-clause))
-        'scipy' # Scientific Library for Python, BSD License (BSD)
+        'scipy', # Scientific Library for Python, BSD License (BSD)
+        'pytest' # Testing framework for applications, MIT License (MIT)
     ]
 )

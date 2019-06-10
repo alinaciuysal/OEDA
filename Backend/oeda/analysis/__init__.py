@@ -5,10 +5,8 @@ class Analysis(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, stage_ids, y_key):
-        self.stage_ids = stage_ids
+    def __init__(self, y_key):
         self.y_key = y_key
-        self.stages_count = len(stage_ids)
 
     def start(self, data, knobs):
         if not data:
@@ -19,6 +17,6 @@ class Analysis(object):
         return self.run(data, knobs)
 
     @abstractmethod
-    def run(self, data, knobs):
+    def run(self, data, knobs, stage_ids=None):
         """ analysis-specific logic """
         pass

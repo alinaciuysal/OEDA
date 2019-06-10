@@ -1,0 +1,140 @@
+{
+    "fn": "8_500_15_overhead", 
+    "stages": [
+        {
+            "createdDate": "2018-07-25 22:02:20.955000", 
+            "experiment_id": "7d7124d1-5ae9-30dd-979c-63b60378b3e9", 
+            "knobs": {
+                "joinDistance": 5.0
+            }, 
+            "number": 15, 
+            "stage_result": 1.3604114429950713
+        }, 
+        {
+            "createdDate": "2018-07-25 22:00:16.734000", 
+            "experiment_id": "7d7124d1-5ae9-30dd-979c-63b60378b3e9", 
+            "knobs": {
+                "joinDistance": 5.0
+            }, 
+            "number": 14, 
+            "stage_result": 1.3605972545146943
+        }, 
+        {
+            "createdDate": "2018-07-25 21:44:16.622000", 
+            "experiment_id": "7d7124d1-5ae9-30dd-979c-63b60378b3e9", 
+            "knobs": {
+                "joinDistance": 330.65027630388533
+            }, 
+            "number": 6, 
+            "stage_result": 1.4188549070358278
+        }, 
+        {
+            "createdDate": "2018-07-25 21:38:06.588000", 
+            "experiment_id": "7d7124d1-5ae9-30dd-979c-63b60378b3e9", 
+            "knobs": {
+                "joinDistance": 252.10032414891262
+            }, 
+            "number": 3, 
+            "stage_result": 1.4305565481185913
+        }, 
+        {
+            "createdDate": "2018-07-25 21:52:02.406000", 
+            "experiment_id": "7d7124d1-5ae9-30dd-979c-63b60378b3e9", 
+            "knobs": {
+                "joinDistance": 323.285554788702
+            }, 
+            "number": 10, 
+            "stage_result": 1.4365187604427339
+        }, 
+        {
+            "createdDate": "2018-07-25 21:46:18.528000", 
+            "experiment_id": "7d7124d1-5ae9-30dd-979c-63b60378b3e9", 
+            "knobs": {
+                "joinDistance": 457.2047182871943
+            }, 
+            "number": 7, 
+            "stage_result": 1.4613496985435486
+        }, 
+        {
+            "createdDate": "2018-07-25 21:56:04.708000", 
+            "experiment_id": "7d7124d1-5ae9-30dd-979c-63b60378b3e9", 
+            "knobs": {
+                "joinDistance": 305.72494802692853
+            }, 
+            "number": 12, 
+            "stage_result": 1.4661646192073823
+        }, 
+        {
+            "createdDate": "2018-07-25 21:58:09.634000", 
+            "experiment_id": "7d7124d1-5ae9-30dd-979c-63b60378b3e9", 
+            "knobs": {
+                "joinDistance": 381.30452195066385
+            }, 
+            "number": 13, 
+            "stage_result": 1.4803004350662232
+        }, 
+        {
+            "createdDate": "2018-07-25 21:42:06.576000", 
+            "experiment_id": "7d7124d1-5ae9-30dd-979c-63b60378b3e9", 
+            "knobs": {
+                "joinDistance": 80.76301303563795
+            }, 
+            "number": 5, 
+            "stage_result": 1.5027752549648286
+        }, 
+        {
+            "createdDate": "2018-07-25 21:54:05.204000", 
+            "experiment_id": "7d7124d1-5ae9-30dd-979c-63b60378b3e9", 
+            "knobs": {
+                "joinDistance": 751.7946883659386
+            }, 
+            "number": 11, 
+            "stage_result": 1.5246306583881377
+        }, 
+        {
+            "createdDate": "2018-07-25 21:50:14.169000", 
+            "experiment_id": "7d7124d1-5ae9-30dd-979c-63b60378b3e9", 
+            "knobs": {
+                "joinDistance": 1936.235615568736
+            }, 
+            "number": 9, 
+            "stage_result": 1.5276556122303009
+        }, 
+        {
+            "createdDate": "2018-07-25 21:48:19.274000", 
+            "experiment_id": "7d7124d1-5ae9-30dd-979c-63b60378b3e9", 
+            "knobs": {
+                "joinDistance": 3000.0
+            }, 
+            "number": 8, 
+            "stage_result": 1.5575569491386414
+        }, 
+        {
+            "createdDate": "2018-07-25 21:34:04.936000", 
+            "experiment_id": "7d7124d1-5ae9-30dd-979c-63b60378b3e9", 
+            "knobs": {
+                "joinDistance": 1471.7998992847315
+            }, 
+            "number": 1, 
+            "stage_result": 1.5689458949565886
+        }, 
+        {
+            "createdDate": "2018-07-25 21:40:10.342000", 
+            "experiment_id": "7d7124d1-5ae9-30dd-979c-63b60378b3e9", 
+            "knobs": {
+                "joinDistance": 2435.3678541808704
+            }, 
+            "number": 4, 
+            "stage_result": 1.5809687619209292
+        }, 
+        {
+            "createdDate": "2018-07-25 21:36:08.954000", 
+            "experiment_id": "7d7124d1-5ae9-30dd-979c-63b60378b3e9", 
+            "knobs": {
+                "joinDistance": 1174.6699324337203
+            }, 
+            "number": 2, 
+            "stage_result": 1.6021225702762605
+        }
+    ]
+}

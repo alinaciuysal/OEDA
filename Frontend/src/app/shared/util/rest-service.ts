@@ -39,7 +39,6 @@ export class RESTService {
     return this.authHttp.get(this.baseURL + url, this.requestOptions)
       .map((res: Response) => res.json())
       .catch((error: any) => {
-        // @todo add reroute if login failed
         this.notify.error("Server Error", "Action did not work");
         this.log.error("GET@" + url, error);
         return Observable.throw(error || 'Server error')

@@ -1,0 +1,415 @@
+-------- EVALUATION with OEDA master ------------
+
+	******************* platooning ******** ttest_passed / anova_passed = 26 / 41
+	t-test and anova results together:
+		overhead:							
+			sample size 500 for BOGP  -> 	ttest_passed / anova_passed = 5 / 6
+			sample size 1000 for BOGP ->	ttest_passed / anova_passed = 4 / 7
+			sample size 5000 for BOGP ->	ttest_passed / anova_passed = 0  / 1
+			
+		fuelConsumption: 					
+			sample size 500 for BOGP  -> 	ttest_passed / anova_passed = 5 / 6
+			sample size 1000 for BOGP ->	ttest_passed / anova_passed = 10 / 11
+			sample size 5000 for BOGP ->	ttest_passed / anova_passed = 0  / 0
+		
+		tripDuration: 					
+			sample size 500 for BOGP  -> 	ttest_passed / anova_passed = 1 / 3
+			sample size 1000 for BOGP ->	ttest_passed / anova_passed = 1 / 6
+			sample size 5000 for BOGP ->	ttest_passed / anova_passed = 0 / 0
+		
+		speed
+			sample size 500 for BOGP  -> 	ttest_passed / anova_passed = 0 / 1
+			
+			
+	!!!!!!!!!!!! maxPlatoonGap & platoonSplitTime should not be changed at the same time.
+	--> valid experiments: 4, 5, 6, 7, 8, 10, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 29, 31, 35, 37,
+	--> invalid experiments: 33, 38, 40, 43, 45,
+	
+	4^4 = 256 * 1000 = 256000 points --> infeasible for python anova
+	2^7 = 128 * 500 = 64000 points --> infeasible for python anova
+	
+	1) Reduce average fuelConsumption
+	- maxPlatoonGap -> 10, 1000, 2000, 3000
+	- maxVehiclesInPlatoon -> 2, 50, 150, 250 ---------> is significant for all the runs
+	- ANOVA: 1000 ticks, Maximum number of significant ANOVA interactions = 2
+	- BOGP: 1000 ticks, 10 iterations for each run, Scikit --> 5 + 8 = 13 iterations performed sometimes
+	- T-test: 1000 ticks
+	
+	Experiment #17:
+		- Result: default configuration -> 9.2015 &&& best configuration -> 8.2997
+		- total time elapsed (since first point in anova until last point in t-test): 20:37:01 - 22:55:32
+	
+	Experiment #19:
+		- Result: default configuration -> 9.0538 &&& best configuration -> 8.1741
+		- total time elapsed (since first point in anova until last point in t-test): 17:32:51 - 19:27:39
+		
+	Experiment #20: 300 ticks for ANOVA, rest is same
+		- Result: default configuration -> 9.1469 &&& best configuration -> 8.7335, p-value < 0.05 but failed due to effect size
+		- total time elapsed (since first point in anova until last point in t-test): 21:58:26 - 23:27:42
+		
+	Experiment #21: 300 ticks for ANOVA, rest is same
+		- Result: default configuration -> 9.0328 &&& best configuration -> 8.1186
+		- total time elapsed (since first point in anova until last point in t-test): 23:58:26 - 02:02:57
+
+	2) Reduce average fuelConsumption
+	
+	- catchupDistance -> 10, 3000
+	- joinDistance -> 5, 3000 ------> is significant for all the runs
+	- ANOVA: 500 ticks, Maximum number of significant ANOVA interactions = 3
+	- BOGP: 500 ticks, 10 iterations in total, Scikit --> 5 + 8 = 13 iterations performed sometimes
+	- T-test: 500 ticks
+	
+	Experiment #5:
+		- Result: default configuration -> 9.0735 &&& best configuration -> 8.4116
+		- total time elapsed (since first point in anova until last point in t-test): 17:40:46 - 18:18:22
+	
+	Experiment #22:
+		- Result: default configuration -> 9.1157 &&& best configuration -> 8.2309
+		- total time elapsed (since first point in anova until last point in t-test): 09:48:33 - 10:21:19
+		
+	Experiment #23:
+		- Result: default configuration -> 9.2677 &&& best configuration -> 7.8343
+		- total time elapsed (since first point in anova until last point in t-test): 10:26:46 - 10:58:10
+	
+	
+	3) Reduce average fuelConsumption
+	
+	- platoonSplitTime -> 1, 350
+	- maxVehiclesInPlatoon -> 2, 250
+	- joinDistance -> 5, 3000
+	- ANOVA: 1000 ticks, Maximum number of significant ANOVA interactions = 2
+	- BOGP: 1000 ticks, 10 iterations in total, Scikit
+	- T-test: 1000 ticks
+	
+	Experiment #24:
+		- ANOVA result: all 7 are significant, and joinDistance and joinDistance & maxVehiclesInPlatoon are selected
+		- Result: default configuration -> 9.1271 &&& best configuration -> 8.0925
+		- total time elapsed (since first point in anova until last point in t-test): 13:14:35 - 14:22:08
+	
+	Experiment #25:
+		- ANOVA result: all 7 are significant, and joinDistance and joinDistance & maxVehiclesInPlatoon are selected
+		- Result: default configuration -> 9.2184 &&& best configuration -> 7.9945
+		- total time elapsed (since first point in anova until last point in t-test): 14:44:06 - 16:42:12
+		
+	Experiment #26:
+		- ANOVA result: all except platoonSplitTime
+		- Result: default configuration ->  9.109 &&& best configuration -> 8.0684
+		- total time elapsed (since first point in anova until last point in t-test): 16:48:46 - 18:08:58
+		
+		
+	4) Reduce average tripDurations
+	- maxVehiclesInPlatoon & joinDistance (2 factors each), scikit, 1000 ticks
+	- ANOVA: Maximum number of significant interactions = 2
+	
+	Experiment #35:
+		- ANOVA result: joinDistance and maxVehiclesInPlatoon are selected separately
+		- Result: default configuration -> 335.372  &&& best configuration -> 293.467
+		- total time elapsed (since first point in anova until last point in t-test): 09:46:41 - 10:48:09
+		
+	Experiment #37:
+		- ANOVA result: joinDistance, maxVehiclesInPlatoon & joinDistance ----> p-value < 0.05 but failed due to effect size
+		- Result: default configuration -> 330.8405 &&& best configuration -> 318.3204
+		- total time elapsed (since first point in anova until last point in t-test):  - 
+	
+	
+	5) Reduce average overhead
+	
+	- platoonSplitTime -> 3, 5, 10, 20
+	- joinDistance -> 50, 250, 1250
+	- ANOVA: 500 ticks, Maximum number of significant ANOVA interactions = 3
+	- BOGP: 500 ticks, 10 iterations in total, Scikit
+	- T-test: 1000 ticks
+	
+	Experiment #10:
+		- ANOVA result: all selected
+		- Result: default configuration ->  1.5767 &&& best configuration -> 1.4
+		- total time elapsed (since first point in anova until last point in t-test): 14:38:22 - 15:51:00
+		
+	Experiment #31:
+		- ANOVA result: all selected
+		- Result: default configuration ->  1.6019 &&& best configuration -> 1.4207
+		- total time elapsed (since first point in anova until last point in t-test): 22:30:47 - 23:42:34
+	
+	Experiment #67: all parameters (except platoonSplitTime), scikit (15 iterations) & anova (3 sig. factors, alpha 0.0005), 2000 ticks for T-test, 1000 for others
+		--> successful
+	Experiment #69: maxVehiclesInPlatoon & joinDistance, 2000 ticks for t-test, 1000 ticks for others
+		
+	6) Reduce average overhead *******************
+	all parameters (except platoonSplitTime), scikit (15 iterations) & anova (3 sig. factors, alpha 0.0005), 1000 ticks for T-test, 500 for others
+	Experiment #47, successful.
+	Experiment #57, successful.
+	
+	7) Reduce average overhead *******************
+	all parameters (except platoonSplitTime), scikit (15 iterations) & anova (3 sig. factors, alpha 0.0005), 2000 ticks for T-test, 1000 for others
+	Experiment #48, successful.
+	Experiment #58, opt. is not successful.
+	
+	
+	
+	8) Reduce average tripDurations ****************
+	all parameters (except platoonSplitTime), scikit (15 iterations) & anova (3 sig. factors, alpha 0.0005), 1000 ticks for T-test, 500 for others
+	Experiment #49, failed due to effect size
+	Experiment #60, failed due to effect size
+	
+	
+	9) Reduce average tripDurations ****************
+	all parameters (except platoonSplitTime), scikit (15 iterations) & anova (3 sig. factors, alpha 0.0005), 2000 ticks for T-test, 1000 for others
+	Experiment #51, optimization failed
+	Experiment #62, failed due to effect size
+	
+	10) Reduce average fuelConsumption
+	all parameters (except platoonSplitTime), scikit (15 iterations) & anova (3 sig. factors, alpha 0.0005), 1000 ticks for T-test, 500 for others
+	Experiment #52, successful
+	Experiment #64, successful
+	
+	11) Reduce average fuelConsumption
+	all parameters (except platoonSplitTime), scikit (15 iterations) & anova (3 sig. factors, alpha 0.0005), 2000 ticks for T-test, 1000 for others
+	Experiment #54, successful
+	Experiment #66, successful
+	
+
+	
+	
+	
+	
+		
+	******************* CrowdNav ******** ttest_passed / anova_passed = 0 / 21
+	t-test and anova results together:
+		overhead:							
+			sample size 500 for BOGP  -> 	ttest_passed / anova_passed = 0 / 1
+			sample size 1000 for BOGP ->	ttest_passed / anova_passed = 0 / 9 / 1 failed
+			sample size 2000 for BOGP ->	ttest_passed / anova_passed = 0  / 4
+			sample size 5000 for BOGP ->	ttest_passed / anova_passed = 0  / 3
+				
+			
+	1) reduce average overhead 
+
+	#41: all parameters, 500 ticks & 4 significant factors for anova, 1000 for BOGP, 2000 for t-test, 30 total iterations, scikit -- ANOVA cannot be performed for this ---
+	
+	following three experiments done with [0 - 0.6]
+	#13: same with #11 --> t-test failed
+	#11: exploration_percentage & route_randomization, scikit, 2000 ticks --> t-test and opt. failed
+	#27: exploration_percentage & route_randomization, scikit, 1000 ticks --> t-test and opt. failed
+	
+	CrowdNav-updated target_system
+	#42: exploration_percentage & route_randomization, mlrMBO, 1000 ticks --> t-test failed
+
+		
+	#12: static_info_weight & data_freshness_threshold & exploration_percentage, scikit, 5000 ticks	--> effect size failed
+	#30: static_info_weight & data_freshness_threshold & exploration_weight, scikit, 1000 ticks --> effect size failed
+	#44: same with Experiment #30 --> t-test failed
+	#46: same with Experiment #12 --> t-test failed
+	
+	#50: all parameters (except re_routing_frequency), scikit (15 iterations) & anova (3 sig. factors, alpha 0.0005), 250 ticks for anova, 1000 for BOGP, 2000 ticks for T-test
+		--> t-test failed
+	#53: static_info_weight & data_freshness_threshold & exploration_weight, scikit (15 iterations) & anova (3 sig. factors, alpha 0.0005), 1000 ticks for anova, 2000 for others
+		--> anova failed
+	#55: exploration_percentage & route_randomization, scikit (15 iterations) & anova (2 sig. factors, alpha 0.0005), 1000 ticks for anova, 2000 for others
+		--> anova failed
+	#56: dynamic_info_weight & re_routing_frequency, scikit (15 iterations) & anova (2 sig. factors, alpha 0.0005), 1000 ticks for anova, 2000 for others
+		--> t-test failed
+	#59: all parameters (except exploration_percentage & route_randomization & re_routing_frequency), scikit (15 iterations) & anova (3 sig. factors, alpha 0.0005), 1000 ticks for anova, 1000 for BOGP, 2000 ticks for T-test
+		--> t-test failed due to both effect size and p-value
+	#61: data_freshness_threshold & dynamic_info_weight, scikit (15 iterations), anova (2 sig. factors, alpha 0.0005), 500 ticks
+		--> t-test failed due to effect size
+	#63: static_info_weight & dynamic_info_weight & exploration_weight, scikit (15 iterations), anova (3 sig. factors, alpha 0.0005), 1000 ticks
+		--> t-test failed due to effect size
+	#65: static_info_weight & dynamic_info_weight & data_freshness_threshold, anova (3 sig. factors, alpha 0.0005), 2000 ticks
+		--> optimization and t-test failed
+	#68: route_randomization & static_info_weight & dynamic_info_weight & exploration_weight, anova (3 sig. factors, alpha 0.0005), 5000 ticks for t-test, 1000 for others
+	
+		
+		
+		
+		
+		
+-------- EVALUATION with OEDA expert-mode ------------
+
+-----Platooning----- ignore sample = 350
+50 iterations, 500 sample --> 2.5 hours
+50 iterations, 1000 sample --> 4.5 hours
+
+1) Reduce average overheads 
+	100 iterations, 20 for design, 500 sample per stage, scikit
+	Experiment #10 
+	Experiment #19 
+	Experiment #25 
+	
+	100 iterations, 20 for design, 1000 sample per stage, scikit
+	Experiment #31
+	
+	50 iterations, 20 for design, 500 sample per stage, scikit
+	Experiment #32
+	
+	all parameters (except platoonSplitTime), 100 iterations, 16 for design, 1000 sample per stage, scikit
+	Experiment #48
+	
+	all parameters (except platoonSplitTime), 50 iterations, 16 for design, 1000 sample per stage, scikit
+	Experiment #43
+	
+	all parameters (except platoonSplitTime), 50 iterations, 16 for design, 500 sample per stage, scikit
+	Experiment #36
+	
+--> results of BOGP are very similar, 1.35 can be considered as convergence value
+1) the best of BOGP - 50 iterations:  Experiment #32, 500 sample size, result: 1.3507635669708251, cb53c88d-5a47-b61e-9080-3806293b6457, stage number: 34, "knobs": { "catchupDistance": 2773.7615405336874, "joinDistance": 5.0, "maxPlatoonGap": 10.0, "maxVehiclesInPlatoon": 250.0, "platoonSplitTime": 1.0 },
+118 mins
+
+2) the best of BOGP - 100 iterations: Experiment #31, 1000 sample size, result: 1.3529859747886654, e01777c1-883e-97c7-b123-0cd32a1a1d85, stage number: 81, "knobs": { "catchupDistance": 932.4486065346545, "joinDistance": 5.0, "maxPlatoonGap": 3000.0, "maxVehiclesInPlatoon": 162.4533083429595, "platoonSplitTime": 350.0 }
+410 mins
+
+
+
+3) the best of default run - 500 sample size:  Default run - 1, result: 1.542955622434616, a2f7025b-0899-a207-98dd-daeebaab8b6d, stage number: 1
+4) the best of default run - 1000 sample size: Default run - 2, result: 1.55513743019104,  44cc33e4-6eea-b655-82c4-967c8c08b7f5, stage number: 8
+5) the best of default run - 2500 sample size: Default run - 6, result: 1.5398248354911803, 65d8866f-37e1-e627-fd59-64a661874e2c, stage number: 9
+
+between 1 and 3
+{'mean_diff': -0.19219204979151083, 'opt_percentage': 12.456097075841258, 'effect_size': -1.4537321848312077, 'statistic': -22.962527031468507, 'different_averages': True, 'alpha': 0.05, 'pvalue': 5.094935258611385e-94}
+between 1 and 4
+{'mean_diff': -0.20437386091299925, 'opt_percentage': 13.141852089719325, 'effect_size': -1.4862351774625115, 'statistic': -23.553145174898034, 'different_averages': True, 'alpha': 0.05, 'pvalue': 1.3061365128842605e-104}
+between 1 and 5
+{'mean_diff': -0.18906126667583711, 'opt_percentage': 12.278102172334055, 'effect_size': -1.4495862786665947, 'statistic': -23.03313594121741, 'different_averages': True, 'alpha': 0.05, 'pvalue': 3.1802308528875713e-108}
+
+	
+T-test results:
+between 2 and 3
+{'mean_diff': -0.18996964544458628, 'opt_percentage': 12.312061543065091, 'effect_size': -1.438355364709325, 'statistic': -31.96966509912516, 'different_averages': True, 'alpha': 0.05, 'pvalue': 2.0479543613231923e-171}
+between 2 and 4
+{'mean_diff': -0.2021514565660747, 'opt_percentage': 12.998944826136999, 'effect_size': -1.4714288416114647, 'statistic': -32.88569394957426, 'different_averages': True, 'alpha': 0.05, 'pvalue': 6.108929553071075e-190}
+between 2 and 5
+{'mean_diff': -0.18683886232891256, 'opt_percentage': 12.133773785459526, 'effect_size': -1.4340148270916686, 'statistic': -32.16321628074599, 'different_averages': True, 'alpha': 0.05, 'pvalue': 4.581472005693489e-199}
+
+
+	
+
+	
+	
+2) Reduce average fuelConsumption
+	all parameters, 100 iterations, 20 for design, 1000 sample per stage, scikit
+	Experiment #16
+	Experiment #17  
+	Experiment #22 
+	
+	all parameters (except platoonSplitTime), 100 iterations, 16 for design, 1000 sample per stage, scikit
+	Experiment #39
+	
+	all parameters (except platoonSplitTime), 50 iterations, 16 for design, 1000 sample per stage, scikit 
+	Experiment #34
+		
+	all parameters (except platoonSplitTime), 50 iterations, 16 for design, 500 sample per stage, scikit
+	Experiment #42,
+	Experiment #47
+	
+1) the best of BOGP - 100 iterations: Experiment #39, 1000 sample size, result: 6.438916731834412, a65da561-1938-eb8a-b82a-d5c8d5a8b81c, stage number: 62, "knobs": { "catchupDistance": 10.0, "joinDistance": 3000.0, "maxPlatoonGap": 3000.0, "maxVehiclesInPlatoon": 250.0, "platoonSplitTime": 10.0},
+540 mins
+
+2) the best of BOGP - 50 iterations:  Experiment #34, 1000 sample size, result: 6.613665001869203, 446dd6db-99ba-3f79-7d2e-3abb452b7542, stage number: 19, "knobs": { "catchupDistance": 1255.3297868707361, "joinDistance": 2160.7812964829895, "maxPlatoonGap": 451.1384780662914, "maxVehiclesInPlatoon": 203.83956086196986, "platoonSplitTime": 10.0},
+247 mins
+
+3) the best of default run - 500 sample size:  Default run - 4, result: 8.871220153808594, 77f422b8-1ded-7d5b-9c33-5f44cbfd64e2, stage number: 6
+4) the best of default run - 1000 sample size: Default run - 3, result: 8.967611126899719,  d35c17ac-9252-ec76-a511-ed3289a1ce0a, stage number: 4
+
+
+
+T-test results:
+between 1 and 3
+{'mean_diff': -2.432303439963979, 'opt_percentage': 27.41791312610048, 'effect_size': -3.7956466426866653, 'statistic': -71.82287334640634, 'different_averages': True, 'alpha': 0.05, 'pvalue': 0.0}
+between 1 and 4
+{'mean_diff': -2.528694403233912, 'opt_percentage': 28.198082690150567, 'effect_size': -3.491055520789652, 'statistic': -78.02333362714862, 'different_averages': True, 'alpha': 0.05, 'pvalue': 0.0}
+
+between 2 and 3
+{'mean_diff': -2.2575551713180237, 'opt_percentage': 25.448079605352664, 'effect_size': -3.3427015559464826, 'statistic': -61.92590281545762, 'different_averages': True, 'alpha': 0.05, 'pvalue': 0.0}
+between 2 and 4
+{'mean_diff': -2.3539461345879564, 'opt_percentage': 26.249422495016866, 'effect_size': -3.1174909807976996, 'statistic': -69.6743541962882, 'different_averages': True, 'alpha': 0.05, 'pvalue': 0.0}
+
+
+	
+
+3) Reduce average tripDurations
+	100 iterations, 20 for design, 1000 sample per stage, scikit
+	Experiment #24
+	Experiment #26
+	Experiment #29
+	
+	all parameters (except platoonSplitTime), 50 iterations, 16 for design, 1000 sample per stage, scikit
+	Experiment #45
+	
+	all parameters (except platoonSplitTime), 50 iterations, 16 for design, 500 sample per stage, scikit
+	Experiment #37
+	
+1) the best of BOGP - 100 iterations: Experiment #29, 1000 sample size, result: 285.238, 90683eac-48be-a806-a3fd-5e344e00c8a7, stage number: 96, "knobs": { "catchupDistance": 10.0, "joinDistance": 5.0, "maxPlatoonGap": 797.7360541627817, "maxVehiclesInPlatoon": 137.089482119106, "platoonSplitTime": 1.0 },
+419 mins
+
+2) the best of BOGP - 50 iterations:  Experiment #37, 500 sample size, result: 284.738, 4f39aef6-d853-6575-9994-38d2f5dc1351, stage number: 37, "knobs": { "catchupDistance": 3000.0, "joinDistance": 5.0, "maxPlatoonGap": 3000.0, "maxVehiclesInPlatoon": 2.0 },
+131 mins
+
+3) the best of default run - 500 sample size:  Default run - 5, result: 317.754, 2664b55f-a824-670d-4879-764deb07b350, stage number: 1
+4) the best of default run - 1000 sample size: Default run - 3, result: 321.807,  6049776b-c391-c37a-2c64-ac6d6b354da2, stage number: 9
+
+T-test results:
+between 1 and 3
+{'mean_diff': -32.51600000000002, 'opt_percentage': 10.233073383812641, 'effect_size': -0.9529149572429673, 'statistic': -19.627481825864574, 'different_averages': True, 'alpha': 0.05, 'pvalue': 1.6289977625229527e-76}
+between 1 and 4
+{'mean_diff': -36.56900000000002, 'opt_percentage': 11.36364342602865, 'effect_size': -1.1663601387351041, 'statistic': -26.06756200008874, 'different_averages': True, 'alpha': 0.05, 'pvalue': 3.4591828958554503e-129}
+
+between 2 and 3
+{'mean_diff': -33.01600000000002, 'opt_percentage': 10.390427815228138, 'effect_size': -0.973165946495261, 'statistic': -15.371709855276196, 'different_averages': True, 'alpha': 0.05, 'pvalue': 5.1107330159997233e-48}
+between 2 and 4
+{'mean_diff': -37.06900000000002, 'opt_percentage': 11.519016056207608, 'effect_size': -1.1904227828691358, 'statistic': -19.82022692426131, 'different_averages': True, 'alpha': 0.05, 'pvalue': 7.905159326423558e-78}
+
+
+-----CrowdNav----- ignore sample = 1000, avg overhead
+50 iterations, 1000 sample --> around 5 hours
+50 iterations, 500 sample --> around 3 hours
+
+4) Reduce average overheads
+	100 iterations, 28 for design, 500 sample per stage, scikit
+	Experiment #20
+	Experiment #28
+	
+5) 100 iterations, 28 for design, 1000 sample per stage, scikit
+	Experiment #15  
+	Experiment #18
+	Experiment #40
+	Experiment #49: 
+	
+6)  50 iterations, 28 for design, 1000 sample per stage, scikit
+	Experiment #30
+	Experiment #35
+
+7)  50 iterations, 28 for design, 500 sample per stage, scikit
+	Experiment #33
+	Experiment #38, 35 iterations	
+
+9)  all parameters (except re_routing_frequency), 50 iterations, 24 for design, 500 sample per stage
+	Experiment #41, #46
+
+10) all parameters (except re_routing_frequency), 50 iterations, 24 for design, 1000 sample per stage
+	Experiment #44
+		
+
+1) the best of BOGP - 100 iterations: Experiment #20, 500 sample size, result: 1.8691719977855683, 6b5776ab-1d3d-5bdf-a77a-46bb40e61afc, stage number: 93, "knobs": { "data_freshness_threshold": 458.19499680070135, "dynamic_info_weight": 1.6355789614500633, "exploration_percentage": 0.0, "exploration_weight": 5.0, "re_routing_frequency": 17.500034950324753, "route_randomization": 0.2431916773699534, "static_info_weight": 2.5 }
+398 mins
+
+2) the best of BOGP - 50 iterations:  Experiment #41, 500 sample size, result: 1.923711500287056, 5743e5b2-5545-3a9a-4d27-25a3b68771d2, stage number: 27, "knobs": { "data_freshness_threshold": 700.0, "dynamic_info_weight": 2.2190938865313172, "exploration_percentage": 0.0, "exploration_weight": 5.0, "re_routing_frequency": 60, "route_randomization": 0.21748508591715252, "static_info_weight": 2.5 },
+177 mins
+
+3) the best of default run - 500 sample size:  Default run - 1, result: 2.0759621899127962, 6a916c78-f122-bb2c-c93f-f2304c4cb8bc, stage number: 8
+4) the best of default run - 1000 sample size: Default run - 2, result: 2.199714924395084,  e731c263-a5f2-ed44-587d-cd1c98b30aae, stage number: 4
+5) the best of default run - 2500 sample size: Default run - 6, result: 2.2316476868629453, 317fe993-6186-9efa-2730-aaaa50b0d490, stage number: 2
+
+
+T-test results:
+between 1 and 3
+{'mean_diff': -0.20679019582959213, 'opt_percentage': 9.961173504271128, 'effect_size': -0.22632346203148518, 'statistic': -3.5749078605953355, 'different_averages': True, 'alpha': 0.05, 'pvalue': 0.00036712963768579734}
+between 1 and 4
+{'mean_diff': -0.3305429288335111, 'opt_percentage': 15.026625726549875, 'effect_size': -0.238279616463224, 'statistic': -3.9345264081626143, 'different_averages': True, 'alpha': 0.05, 'pvalue': 8.7176270959547e-05}
+between 1 and 5
+{'mean_diff': -0.36247569432579607, 'opt_percentage': 16.242514258283933, 'effect_size': -0.26609090425785803, 'statistic': -4.534998127634759, 'different_averages': True, 'alpha': 0.05, 'pvalue': 5.98631436145885e-06}
+
+between 2 and 3
+{'mean_diff': -0.1522506961981096, 'opt_percentage': 7.333982130493317, 'effect_size': -0.14880692791596675, 'statistic': -2.350490097415651, 'different_averages': True, 'alpha': 0.05, 'pvalue': 0.01894257364308836}
+between 2 and 4
+{'mean_diff': -0.2760034292020286, 'opt_percentage': 12.547236283345711, 'effect_size': -0.18883422133263747, 'statistic': -3.1907674654257185, 'different_averages': True, 'alpha': 0.05, 'pvalue': 0.0014483674085382908}
+between 2 and 5
+{'mean_diff': -0.30793619469431355, 'opt_percentage': 13.798602530487338, 'effect_size': -0.2141524311283235, 'statistic': -3.802472587453822, 'different_averages': True, 'alpha': 0.05, 'pvalue': 0.0001461136773194012}

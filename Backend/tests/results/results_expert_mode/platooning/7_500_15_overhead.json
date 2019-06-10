@@ -1,0 +1,140 @@
+{
+    "fn": "7_500_15_overhead", 
+    "stages": [
+        {
+            "createdDate": "2018-07-25 20:58:54.097000", 
+            "experiment_id": "ca3584a3-3eac-66b3-b44c-b4cff1daeca6", 
+            "knobs": {
+                "platoonSplitTime": 302.64612275854387
+            }, 
+            "number": 12, 
+            "stage_result": 1.4930598044395447
+        }, 
+        {
+            "createdDate": "2018-07-25 20:46:52.126000", 
+            "experiment_id": "ca3584a3-3eac-66b3-b44c-b4cff1daeca6", 
+            "knobs": {
+                "platoonSplitTime": 264.62762763324565
+            }, 
+            "number": 6, 
+            "stage_result": 1.5188148047924042
+        }, 
+        {
+            "createdDate": "2018-07-25 20:44:58.153000", 
+            "experiment_id": "ca3584a3-3eac-66b3-b44c-b4cff1daeca6", 
+            "knobs": {
+                "platoonSplitTime": 124.84976031940504
+            }, 
+            "number": 5, 
+            "stage_result": 1.5232270123958584
+        }, 
+        {
+            "createdDate": "2018-07-25 20:43:02.905000", 
+            "experiment_id": "ca3584a3-3eac-66b3-b44c-b4cff1daeca6", 
+            "knobs": {
+                "platoonSplitTime": 248.46780600663956
+            }, 
+            "number": 4, 
+            "stage_result": 1.5322375206947327
+        }, 
+        {
+            "createdDate": "2018-07-25 21:02:55.688000", 
+            "experiment_id": "ca3584a3-3eac-66b3-b44c-b4cff1daeca6", 
+            "knobs": {
+                "platoonSplitTime": 1.0094058554577392
+            }, 
+            "number": 14, 
+            "stage_result": 1.5543093197345734
+        }, 
+        {
+            "createdDate": "2018-07-25 20:55:03.202000", 
+            "experiment_id": "ca3584a3-3eac-66b3-b44c-b4cff1daeca6", 
+            "knobs": {
+                "platoonSplitTime": 1.003926656408471
+            }, 
+            "number": 10, 
+            "stage_result": 1.567682746887207
+        }, 
+        {
+            "createdDate": "2018-07-25 21:00:58.981000", 
+            "experiment_id": "ca3584a3-3eac-66b3-b44c-b4cff1daeca6", 
+            "knobs": {
+                "platoonSplitTime": 290.43759658886165
+            }, 
+            "number": 13, 
+            "stage_result": 1.5691841373443602
+        }, 
+        {
+            "createdDate": "2018-07-25 20:41:08.845000", 
+            "experiment_id": "ca3584a3-3eac-66b3-b44c-b4cff1daeca6", 
+            "knobs": {
+                "platoonSplitTime": 234.7648445889175
+            }, 
+            "number": 3, 
+            "stage_result": 1.5784124319553374
+        }, 
+        {
+            "createdDate": "2018-07-25 21:04:49.383000", 
+            "experiment_id": "ca3584a3-3eac-66b3-b44c-b4cff1daeca6", 
+            "knobs": {
+                "platoonSplitTime": 1.0166392107809463
+            }, 
+            "number": 15, 
+            "stage_result": 1.5803754234313965
+        }, 
+        {
+            "createdDate": "2018-07-25 20:48:57.827000", 
+            "experiment_id": "ca3584a3-3eac-66b3-b44c-b4cff1daeca6", 
+            "knobs": {
+                "platoonSplitTime": 98.81370169459241
+            }, 
+            "number": 7, 
+            "stage_result": 1.5828821353912355
+        }, 
+        {
+            "createdDate": "2018-07-25 20:37:11.752000", 
+            "experiment_id": "ca3584a3-3eac-66b3-b44c-b4cff1daeca6", 
+            "knobs": {
+                "platoonSplitTime": 8.604818856228736
+            }, 
+            "number": 1, 
+            "stage_result": 1.5839797813892362
+        }, 
+        {
+            "createdDate": "2018-07-25 20:39:15.236000", 
+            "experiment_id": "ca3584a3-3eac-66b3-b44c-b4cff1daeca6", 
+            "knobs": {
+                "platoonSplitTime": 224.91585186399038
+            }, 
+            "number": 2, 
+            "stage_result": 1.5971366951465606
+        }, 
+        {
+            "createdDate": "2018-07-25 20:53:02.952000", 
+            "experiment_id": "ca3584a3-3eac-66b3-b44c-b4cff1daeca6", 
+            "knobs": {
+                "platoonSplitTime": 162.1870204937128
+            }, 
+            "number": 9, 
+            "stage_result": 1.598468335390091
+        }, 
+        {
+            "createdDate": "2018-07-25 20:56:56.262000", 
+            "experiment_id": "ca3584a3-3eac-66b3-b44c-b4cff1daeca6", 
+            "knobs": {
+                "platoonSplitTime": 349.95978052035815
+            }, 
+            "number": 11, 
+            "stage_result": 1.6053298351764682
+        }, 
+        {
+            "createdDate": "2018-07-25 20:50:52.481000", 
+            "experiment_id": "ca3584a3-3eac-66b3-b44c-b4cff1daeca6", 
+            "knobs": {
+                "platoonSplitTime": 350.0
+            }, 
+            "number": 8, 
+            "stage_result": 1.606381232738495
+        }
+    ]
+}

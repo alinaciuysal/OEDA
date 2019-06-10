@@ -118,9 +118,6 @@ def experimentFunction(wf, exp):
     if wf.totalExperiments > 0:
         info("> Statistics     | " + str(wf.experimentCounter) + "/" + str(wf.totalExperiments)
              + " took " + str(duration) + "ms" + " - remaining ~" + wf.remaining_time_and_stages['remaining_time'] + "sec")
-    # info("> FullState      | " + str(exp["state"]))
     info("> ResultValue    | " + str(result))
-    # log the result values into a csv file
-    # @todo disabled (!) log_results(wf.folder, exp["knobs"].values() + [result])
     # return the result value of the evaluator
     return result

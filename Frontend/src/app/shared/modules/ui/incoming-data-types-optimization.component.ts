@@ -98,7 +98,6 @@ export class IncomingDataTypesComponent implements OnInit {
   }
 
   ngOnInit() {
-    // TODO: check if there are any corner cases: e.g. a data type from secondaryDataType is retrieved first
     this.data_type_checkbox_clicked(0); // select first data type as selected
     this.targetSystem.incomingDataTypes[0]["aggregateFunction"] = "avg"; // also set its agg. fcn.
   }

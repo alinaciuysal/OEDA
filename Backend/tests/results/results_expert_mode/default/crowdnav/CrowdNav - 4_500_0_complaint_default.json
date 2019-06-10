@@ -1,0 +1,155 @@
+{
+    "fn": "CrowdNav - 4_500_0_complaint", 
+    "stages": [
+        {
+            "createdDate": "2018-08-09 15:01:12.672000", 
+            "experiment_id": "c483cf88-e848-1e0e-0640-618b003098b7", 
+            "knobs": {
+                "data_freshness_threshold": 100, 
+                "dynamic_info_weight": 1, 
+                "exploration_percentage": 0.2, 
+                "exploration_weight": 5, 
+                "re_routing_frequency": 60, 
+                "route_randomization": 0, 
+                "static_info_weight": 1
+            }, 
+            "number": 1, 
+            "stage_result": 0.094
+        }, 
+        {
+            "createdDate": "2018-08-09 15:34:28.914000", 
+            "experiment_id": "c483cf88-e848-1e0e-0640-618b003098b7", 
+            "knobs": {
+                "data_freshness_threshold": 100, 
+                "dynamic_info_weight": 1, 
+                "exploration_percentage": 0.2, 
+                "exploration_weight": 5, 
+                "re_routing_frequency": 60, 
+                "route_randomization": 0, 
+                "static_info_weight": 1
+            }, 
+            "number": 9, 
+            "stage_result": 0.11
+        }, 
+        {
+            "createdDate": "2018-08-09 15:13:22.849000", 
+            "experiment_id": "c483cf88-e848-1e0e-0640-618b003098b7", 
+            "knobs": {
+                "data_freshness_threshold": 100, 
+                "dynamic_info_weight": 1, 
+                "exploration_percentage": 0.2, 
+                "exploration_weight": 5, 
+                "re_routing_frequency": 60, 
+                "route_randomization": 0, 
+                "static_info_weight": 1
+            }, 
+            "number": 4, 
+            "stage_result": 0.118
+        }, 
+        {
+            "createdDate": "2018-08-09 15:09:30.980000", 
+            "experiment_id": "c483cf88-e848-1e0e-0640-618b003098b7", 
+            "knobs": {
+                "data_freshness_threshold": 100, 
+                "dynamic_info_weight": 1, 
+                "exploration_percentage": 0.2, 
+                "exploration_weight": 5, 
+                "re_routing_frequency": 60, 
+                "route_randomization": 0, 
+                "static_info_weight": 1
+            }, 
+            "number": 3, 
+            "stage_result": 0.122
+        }, 
+        {
+            "createdDate": "2018-08-09 15:17:38.936000", 
+            "experiment_id": "c483cf88-e848-1e0e-0640-618b003098b7", 
+            "knobs": {
+                "data_freshness_threshold": 100, 
+                "dynamic_info_weight": 1, 
+                "exploration_percentage": 0.2, 
+                "exploration_weight": 5, 
+                "re_routing_frequency": 60, 
+                "route_randomization": 0, 
+                "static_info_weight": 1
+            }, 
+            "number": 5, 
+            "stage_result": 0.122
+        }, 
+        {
+            "createdDate": "2018-08-09 15:05:02.996000", 
+            "experiment_id": "c483cf88-e848-1e0e-0640-618b003098b7", 
+            "knobs": {
+                "data_freshness_threshold": 100, 
+                "dynamic_info_weight": 1, 
+                "exploration_percentage": 0.2, 
+                "exploration_weight": 5, 
+                "re_routing_frequency": 60, 
+                "route_randomization": 0, 
+                "static_info_weight": 1
+            }, 
+            "number": 2, 
+            "stage_result": 0.126
+        }, 
+        {
+            "createdDate": "2018-08-09 15:30:15.437000", 
+            "experiment_id": "c483cf88-e848-1e0e-0640-618b003098b7", 
+            "knobs": {
+                "data_freshness_threshold": 100, 
+                "dynamic_info_weight": 1, 
+                "exploration_percentage": 0.2, 
+                "exploration_weight": 5, 
+                "re_routing_frequency": 60, 
+                "route_randomization": 0, 
+                "static_info_weight": 1
+            }, 
+            "number": 8, 
+            "stage_result": 0.134
+        }, 
+        {
+            "createdDate": "2018-08-09 15:38:12.505000", 
+            "experiment_id": "c483cf88-e848-1e0e-0640-618b003098b7", 
+            "knobs": {
+                "data_freshness_threshold": 100, 
+                "dynamic_info_weight": 1, 
+                "exploration_percentage": 0.2, 
+                "exploration_weight": 5, 
+                "re_routing_frequency": 60, 
+                "route_randomization": 0, 
+                "static_info_weight": 1
+            }, 
+            "number": 10, 
+            "stage_result": 0.134
+        }, 
+        {
+            "createdDate": "2018-08-09 15:26:02.089000", 
+            "experiment_id": "c483cf88-e848-1e0e-0640-618b003098b7", 
+            "knobs": {
+                "data_freshness_threshold": 100, 
+                "dynamic_info_weight": 1, 
+                "exploration_percentage": 0.2, 
+                "exploration_weight": 5, 
+                "re_routing_frequency": 60, 
+                "route_randomization": 0, 
+                "static_info_weight": 1
+            }, 
+            "number": 7, 
+            "stage_result": 0.138
+        }, 
+        {
+            "createdDate": "2018-08-09 15:21:49.017000", 
+            "experiment_id": "c483cf88-e848-1e0e-0640-618b003098b7", 
+            "knobs": {
+                "data_freshness_threshold": 100, 
+                "dynamic_info_weight": 1, 
+                "exploration_percentage": 0.2, 
+                "exploration_weight": 5, 
+                "re_routing_frequency": 60, 
+                "route_randomization": 0, 
+                "static_info_weight": 1
+            }, 
+            "number": 6, 
+            "stage_result": 0.148
+        }
+    ]
+}

@@ -8,6 +8,7 @@ import pprint
 import json
 pp = pprint.PrettyPrinter(indent=4)
 
+
 def start_workflow_with_anova(experiment_id, step_no, key, alpha, nrOfImportantFactors, executionStrategyType, performAnova=False):
     stage_ids, samples, knobs = get_tuples(experiment_id, step_no, key)
     if performAnova:
@@ -34,6 +35,7 @@ def perform_anova(experiment_id, step_no, stage_ids, samples, knobs, key):
     print(json.dumps(dd, indent=4))
     # db().save_analysis(experiment_id=experiment_id, step_no=step_no, analysis_name=test.name, anova_result=dd)
 
+
 def start_workflow_with_ttest(experiment_id, key, alpha):
     experiment = db().get_experiment(experiment_id)
     pp.pprint(experiment)
@@ -49,19 +51,6 @@ def start_workflow_with_ttest(experiment_id, key, alpha):
     # print(json.dumps(result, indent=4))
     # db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test1.name, result=result)
 
-def sort():
-    tuples = []
-    tuple_1 = ({"ep": 0.2, "rrs": 0.4}, 0.5555)
-    tuple_2 = ({"ep": 0.5, "rrs": 0.3}, 0.4444)
-    tuple_3 = ({"ep": 0.2222, "rrs": 0.222}, 0.8888)
-    tuple_4 = ({"ep": 0.3333, "rrs": 0.333}, 0.6666)
-    tuples.append(tuple_1)
-    tuples.append(tuple_2)
-    tuples.append(tuple_3)
-    tuples.append(tuple_4)
-    sorted_tuples = sorted(tuples, key=lambda x: x[1])
-    print("sorted_tuples", sorted_tuples)
-    print("best_knob", sorted_tuples[0][0], " best_value", sorted_tuples[0][1])
 
 def check_normality_assumption(experiment_id, step_no, key, alpha):
     stage_ids, samples, knobs = get_tuples(experiment_id, step_no, key)
@@ -73,6 +62,7 @@ def check_normality_assumption(experiment_id, step_no, key, alpha):
             return False
     return True
 
+
 def check_homogenity_of_variance_assumption(experiment_id, step_no, key, alpha):
     stage_ids, samples, knobs = get_tuples(experiment_id, step_no, key)
     statistic, pvalue = stats.levene(*samples)
@@ -80,6 +70,7 @@ def check_homogenity_of_variance_assumption(experiment_id, step_no, key, alpha):
     if pvalue < alpha:
         return False
     return True
+
 
 if __name__ == '__main__':
     nrOfImportantFactors = 3 # to be retrieved from analysis definition

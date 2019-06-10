@@ -57,8 +57,9 @@ def setup_experiment_database(db_type, host, port, for_tests=False):
         try:
             config_data = load(json_data_file)
             if for_tests:
-                # change the index
-                config_data["index"]["name"] += str("_test")
+                # change the indices
+                for index in config_data["index_definitions"].keys():
+                    config_data["index_definitions"][index]["index_name"] += str("_test")
                 TestDatabase.db = create_db_instance_for_experiments(db_type, host, port, config_data)
             else:
                 ExperimentDatabase.db = create_db_instance_for_experiments(db_type, host, port, config_data)
@@ -88,6 +89,6 @@ def db():
 
 def test_db():
     if not TestDatabase.db:
-        error("You can configure experiment database for tests by calling for_tests=True flag in setup_experiment_database")
+        error("You can configure experiment database for tests by calling for_tests=True flag in setup_experiment_database method")
         return None
     return TestDatabase.db

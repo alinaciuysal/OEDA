@@ -320,7 +320,6 @@ export class PlotService {
     if (data.length !== 0) {
       const sortedData = data.sort(this.entityService.sort_by(data_field, true, parseFloat));
       const index = Math.floor(sortedData.length * percentile / 100 - 1);
-      // TODO how can this index be -1? this is just a work-around for now
       if (index === -1) {
         return 0;
       }

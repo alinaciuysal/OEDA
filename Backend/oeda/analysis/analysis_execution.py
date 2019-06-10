@@ -37,7 +37,7 @@ def start_two_sample_tests(wf):
     experiment_id = wf.id
     alpha = wf.analysis["tTestAlpha"]
     key = wf.analysis["data_type"]
-    mean_diff = 0.1 # as in crowdnav-elastic-ttest-sample-size/definition.py # TODO: get it from user ??
+    mean_diff = 0.1 # as in crowdnav-elastic-ttest-sample-size/definition.py
 
     # this part will test this way of t-test: Default --> Best configuration
     stage_ids, samples, knobs = get_tuples(experiment_id=experiment_id, step_no=wf.step_no, key=key)
@@ -52,20 +52,6 @@ def start_two_sample_tests(wf):
         stage_no += 1
 
     db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test1.name, result=result, knobs=knobs)
-
-    # if we want to integrate following tests, they should be saved as another step_no, just increment it before saving
-    # x1 = samples[0]
-    # x2 = samples[1]
-    # pooled_std = sqrt((np.var(x1) + np.var(x2)) / 2)
-    # effect_size = mean_diff / pooled_std
-    # effect_size = wf.analysis["tTestEffectSize"]
-    # test2 = TtestPower(stage_ids=stage_ids, y_key=key, effect_size=effect_size)
-    # result2 = test2.run(data=samples, knobs=knobs)
-    # db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test2.name, result=result2)
-    #
-    # test3 = TtestSampleSizeEstimation(stage_ids=stage_ids, y_key=key, effect_size=None, mean_diff=mean_diff)
-    # result3 = test3.run(data=samples, knobs=knobs)
-    # db().save_analysis(experiment_id=experiment_id, step_no=wf.step_no, analysis_name=test3.name, result=result3)
     return result
 
 
